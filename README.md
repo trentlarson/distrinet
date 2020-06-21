@@ -1,3 +1,15 @@
+# Distributed Project Management
+
+See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lists)
+
+To run:
+
+- Copy this file to your home directory as `.dist-task-list-settings.yml`: [settings](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml)
+- `yarn`
+- `yarn dev`
+
+Here's how this project was initially created:
+
 <img src="internals/img/erb-banner.png" width="100%" />
 
 <br>

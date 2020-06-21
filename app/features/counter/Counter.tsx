@@ -3,17 +3,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
-import {
-  increment,
-  decrement,
-  incrementIfOdd,
-  incrementAsync,
-  selectCount,
-} from './counterSlice';
+import { reloadSettings, selectSettings } from '../settings/settingsSlice';
 
 export default function Counter() {
   const dispatch = useDispatch();
-  const value = useSelector(selectCount);
+  const settings = useSelector(selectSettings);
+  const settingsNum = settings.sources ? settings.sources.length : 0;
+  const settingsText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -22,48 +18,18 @@ export default function Counter() {
         </Link>
       </div>
       <div className={`counter ${styles.counter}`} data-tid="counter">
-        {value}
+        {settingsText}
       </div>
       <div className={styles.btnGroup}>
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(increment());
+            dispatch(reloadSettings());
           }}
           data-tclass="btn"
           type="button"
         >
-          <i className="fa fa-plus" />
-        </button>
-        <button
-          className={styles.btn}
-          onClick={() => {
-            dispatch(decrement());
-          }}
-          data-tclass="btn"
-          type="button"
-        >
-          <i className="fa fa-minus" />
-        </button>
-        <button
-          className={styles.btn}
-          onClick={() => {
-            dispatch(incrementIfOdd());
-          }}
-          data-tclass="btn"
-          type="button"
-        >
-          odd
-        </button>
-        <button
-          className={styles.btn}
-          onClick={() => {
-            dispatch(incrementAsync());
-          }}
-          data-tclass="btn"
-          type="button"
-        >
-          async
+          reload
         </button>
       </div>
     </div>
