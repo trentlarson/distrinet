@@ -1,0 +1,6 @@
+---
+- 75 1 show multiple task lists on the main page
+- 70 1 handle timeout failures (tried node-fetch with abort-controller)
+- 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
+- 65 0 add spinner for the remote file loading (both cache refresh & local config)
+- 50 0 note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice

@@ -4,7 +4,7 @@
 
 .counter {
   position: absolute;
-  top: 30%;
+  top: 10%;
   left: 35%;
   font-size: 5rem;
   letter-spacing: -0.025em;
@@ -12,7 +12,7 @@
 
 .btnGroup {
   position: relative;
-  top: 500px;
+  top: 200px;
   width: 480px;
   margin: 0 auto;
 }
