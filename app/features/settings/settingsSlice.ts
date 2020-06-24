@@ -6,18 +6,33 @@ import path from 'path';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState } from '../../store';
+import { Cache, Sources } from './distnetClasses';
 
 const SETTINGS_FILE = path.join(os.homedir(), '.dist-task-list-settings.yml');
 
 const fsPromises = fs.promises;
 
+interface SettingsContents {
+  type: string;
+  payload: Sources;
+}
+
+interface DistnetState {
+  settings: Sources;
+  cache: Cache;
+}
+
+function newDistnetState(): DistnetState {
+  return { settings: {}, cache: {} };
+}
+
 const settingsSlice = createSlice({
-  name: 'settings',
-  initialState: { value: {} },
+  name: 'distnet',
+  initialState: newDistnetState(),
   reducers: {
-    setSettings: (state, contents) => {
-      console.log('Retrieved settings:', contents.payload);
-      state.value = contents.payload;
+    setSettings: (state, contents: SettingsContents) => {
+      console.log('New distnet settings:', contents.payload);
+      state.settings = contents.payload;
     },
   },
 });
@@ -40,4 +55,4 @@ export const reloadSettings = (): AppThunk => (dispatch) => {
 
 export default settingsSlice.reducer;
 
-export const selectSettings = (state: RootState) => state.settings.value;
+export const selectSettings = (state: RootState) => state.distnet.settings;

@@ -1,4 +1,5 @@
 ---
+- 90 1 show the up-to-date state of each repo
 - 80 1 save file: find next cache name
 - 75 1 show multiple task lists on the main page
 - 70 1 handle timeout failures (tried node-fetch with abort-controller)

@@ -7,18 +7,11 @@ import url from 'url';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
+import { Cache } from './distnetClasses';
 
 const DEFAULT_CACHE_DIR = path.join(os.homedir(), '.dist-task-list-cache');
 
 const fsPromises = fs.promises;
-
-interface CacheData {
-  localFile: string;
-  date: string;
-}
-interface Cache {
-  [sourceId: string]: CacheData;
-}
 
 const cacheSlice = createSlice({
   name: 'cache',
@@ -54,16 +47,20 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
   getState
 ) => {
   const source = _.find(
-    getState().settings.value.sources,
+    getState().distnet.settings.sources,
     (src) => src.id === sourceId
   );
   if (source && source.urls) {
     let cacheInfo = null;
     let index = 0;
-    console.log('Trying URLs', source.urls, '...');
+    console.log(
+      'Trying URLs',
+      source.urls.map((u) => u.url),
+      '...'
+    );
     while (!cacheInfo && index < source.urls.length) {
       const sourceUrl = new url.URL(source.urls[index].url);
-      console.log('... trying URL', sourceUrl, '...');
+      console.log('... trying URL', sourceUrl.toString(), '...');
       if (sourceUrl.protocol === 'file:') {
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fsPromises
@@ -74,7 +71,12 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
           })
           // eslint-disable-next-line no-loop-func
           .catch((err) => {
-            console.log('... failed to read file', sourceUrl, 'because', err);
+            console.log(
+              '... failed to read file',
+              sourceUrl.toString(),
+              'because',
+              err
+            );
             index += 1;
             return null;
           });
@@ -84,13 +86,13 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
           // eslint-disable-next-line no-loop-func
           .then((response: Response) => {
             const cacheDir =
-              (getState().settings.value.fileSystem &&
-                getState().settings.value.fileSystem.cacheDir) ||
+              (getState().distnet.settings.fileSystem &&
+                getState().distnet.settings.fileSystem.cacheDir) ||
               DEFAULT_CACHE_DIR;
             const cacheFile = path.join(cacheDir, sourceIdToFilename(sourceId));
             console.log(
               '... successfully fetched URL',
-              sourceUrl,
+              sourceUrl.toString(),
               'response, so will write that to a local cache file',
               cacheFile
             );
@@ -110,14 +112,24 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
                 return { localFile: cacheFile };
               })
               .catch((err) => {
-                console.log('... failed to cache URL', sourceUrl, err);
+                console.log(
+                  '... failed to cache URL',
+                  sourceUrl.toString(),
+                  'because',
+                  err
+                );
                 index += 1;
                 return null;
               });
           })
           // eslint-disable-next-line no-loop-func
           .catch((err) => {
-            console.log('... failed to fetch URL', sourceUrl, 'because', err);
+            console.log(
+              '... failed to fetch URL',
+              sourceUrl.toString(),
+              'because',
+              err
+            );
             index += 1;
             return null;
           });

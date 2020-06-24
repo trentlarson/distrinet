@@ -13,6 +13,6 @@ export default function createRootReducer(history: History) {
     router: connectRouter(history),
     cache: cacheReducer,
     counter: counterReducer,
-    settings: settingsReducer,
+    distnet: settingsReducer,
   });
 }
