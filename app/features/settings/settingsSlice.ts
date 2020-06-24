@@ -1,14 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
+import envPaths from 'env-paths';
 import fs from 'fs';
 import yaml from 'js-yaml';
-import os from 'os';
 import path from 'path';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState } from '../../store';
 import { Cache, Sources } from './distnetClasses';
 
-const SETTINGS_FILE = path.join(os.homedir(), '.dist-task-list-settings.yml');
+const paths = envPaths('dist-task-list');
+const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
 
 const fsPromises = fs.promises;
 

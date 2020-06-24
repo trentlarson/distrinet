@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
+import envPaths from 'env-paths';
 import fs from 'fs';
 import _ from 'lodash';
-import os from 'os';
 import path from 'path';
 import url from 'url';
 
@@ -9,7 +9,8 @@ import url from 'url';
 import { AppThunk } from '../../store';
 import { Cache } from './distnetClasses';
 
-const DEFAULT_CACHE_DIR = path.join(os.homedir(), '.dist-task-list-cache');
+const paths = envPaths('dist-task-list');
+const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
 
 const fsPromises = fs.promises;
 
