@@ -6,9 +6,9 @@ import path from 'path';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState } from '../../store';
-import { Cache, Sources } from './distnetClasses';
+import { APP_NAME, Cache, Sources } from './distnetClasses';
 
-const paths = envPaths('dist-task-list');
+const paths = envPaths(APP_NAME);
 const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
 
 const fsPromises = fs.promises;

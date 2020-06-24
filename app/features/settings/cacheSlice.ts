@@ -7,9 +7,9 @@ import url from 'url';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { Cache } from './distnetClasses';
+import { APP_NAME, Cache } from './distnetClasses';
 
-const paths = envPaths('dist-task-list');
+const paths = envPaths(APP_NAME);
 const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
 
 const fsPromises = fs.promises;
