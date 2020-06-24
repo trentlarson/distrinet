@@ -8,6 +8,8 @@ To run:
 - `yarn`
 - `yarn dev`
 
+Note that this will run some pre-commit hooks, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json. Just be a good citizen and don't do it when merging to master.
+
 Here's how this project was initially created:
 
 <img src="internals/img/erb-banner.png" width="100%" />

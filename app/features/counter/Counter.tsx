@@ -3,11 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
-import {
-  reloadSettings,
-  reloadSource,
-  selectSettings,
-} from '../settings/settingsSlice';
+import { reloadSettings, selectSettings } from '../settings/settingsSlice';
+import { reloadSourceIntoCache } from '../settings/cacheSlice';
 
 export default function Counter() {
   const dispatch = useDispatch();
@@ -45,7 +42,7 @@ export default function Counter() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(reloadSource('did:peer:1z...'));
+            dispatch(reloadSourceIntoCache('did:peer:1z...'));
           }}
           data-tclass="btn"
           type="button"
