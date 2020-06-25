@@ -34,7 +34,6 @@ const distnetSlice = createSlice({
 });
 
 export const { setCachedState, setSettingsState } = distnetSlice.actions;
-export const selectSettings = (state: RootState) => state.distnet.settings;
 
 export const dispatchSettings = (): AppThunk => async (dispatch) => {
   const result: string = await reloadSettings();

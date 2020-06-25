@@ -3,16 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
-import {
-  dispatchCache,
-  dispatchSettings,
-  selectSettings,
-} from '../settings/distnet';
+import { dispatchCache, dispatchSettings } from '../settings/distnet';
 
 export default function Counter() {
   const dispatch = useDispatch();
-  const settings = useSelector(selectSettings);
-  const settingsNum = settings.sources ? settings.sources.length : 0;
+  const distnet = useSelector((state: RootState) => state.distnet);
+  const settingsNum = distnet.settings.sources
+    ? distnet.settings.sources.length
+    : 0;
   const settingsText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
   return (
     <div>
@@ -36,9 +34,18 @@ export default function Counter() {
           reload
         </button>
         <ul>
-          {settings.sources &&
-            settings.sources.map((uriSource) => (
-              <li key={uriSource.id}>{uriSource.name}</li>
+          {distnet.settings.sources &&
+            distnet.settings.sources.map((uriSource) => (
+              <li key={uriSource.id}>
+                {uriSource.name}
+                <ul>
+                  <li>
+                    {distnet.cache[uriSource.id]
+                      ? distnet.cache[uriSource.id].date
+                      : '(no local copy yet)'}
+                  </li>
+                </ul>
+              </li>
             ))}
         </ul>
 
