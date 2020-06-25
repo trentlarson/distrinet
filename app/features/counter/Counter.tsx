@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
-import { reloadSettings, selectSettings } from '../settings/settingsSlice';
+import { dispatchSettings, selectSettings } from '../settings/distnet';
 import { reloadSourceIntoCache } from '../settings/cacheSlice';
 
 export default function Counter() {
@@ -25,7 +25,7 @@ export default function Counter() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(reloadSettings());
+            dispatch(dispatchSettings());
           }}
           data-tclass="btn"
           type="button"

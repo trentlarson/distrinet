@@ -1,5 +1,6 @@
 ---
 - 90 0 handle when no config dir or settings file or cache dir exists
+- 90 0 at startup, load files to show the current state of the cache
 - 90 1 show the up-to-date state of each repo
 - 80 1 save file: find next cache name
 - 75 1 show multiple task lists on the main page

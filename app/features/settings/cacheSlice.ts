@@ -16,7 +16,7 @@ const fsPromises = fs.promises;
 
 const cacheSlice = createSlice({
   name: 'cache',
-  initialState: {} as Cache, // items are { <sourceId> : { localFile:'', date:'' } }
+  initialState: {} as Cache,
   reducers: {
     setCached: (state, result) => {
       const { sourceId, localFile } = result.payload;
@@ -26,8 +26,6 @@ const cacheSlice = createSlice({
 });
 
 export const { setCached } = cacheSlice.actions;
-
-export default cacheSlice.reducer;
 
 /**
  * Convert the ID into a valid file name
@@ -149,3 +147,5 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
   }
   return null;
 };
+
+export default cacheSlice.reducer;
