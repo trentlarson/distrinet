@@ -29,7 +29,10 @@ interface CacheInfo {
   localFile: string;
 }
 
-async function reloadSourceIntoCache(sourceId: string, getState): CacheResult {
+export const reloadOneSourceIntoCache: CacheResult = async (
+  sourceId: string,
+  getState
+) => {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
@@ -131,6 +134,14 @@ async function reloadSourceIntoCache(sourceId: string, getState): CacheResult {
     console.log('Failed to retrieve file for', source);
   }
   return null;
-}
+};
 
-export default reloadSourceIntoCache;
+export const reloadAllSourcesIntoCache: Array<CacheResult> = async (
+  getState
+) => {
+  const { sources } = getState().distnet.settings;
+  const sourceReloads = sources.map((s) =>
+    reloadOneSourceIntoCache(s.id, getState)
+  );
+  return Promise.all(sourceReloads);
+};
