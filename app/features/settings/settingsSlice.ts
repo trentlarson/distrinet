@@ -4,22 +4,17 @@ import yaml from 'js-yaml';
 import path from 'path';
 
 // eslint-disable-next-line import/no-cycle
-import { APP_NAME, Sources } from './distnetClasses';
+import { APP_NAME } from './distnetClasses';
 
 const paths = envPaths(APP_NAME);
 const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
 
 const fsPromises = fs.promises;
 
-interface SettingsContents {
-  type: string;
-  payload: Sources;
-}
-
 /**
  * return a Promise with the YAML settings file contents
  * */
-function reloadSettings() {
+function reloadSettings(): Promise<string> {
   return fsPromises
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())

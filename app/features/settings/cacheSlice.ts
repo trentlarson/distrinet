@@ -1,31 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit';
 import envPaths from 'env-paths';
 import fs from 'fs';
 import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-// eslint-disable-next-line import/no-cycle
-import { AppThunk } from '../../store';
-import { APP_NAME, Cache } from './distnetClasses';
+import { APP_NAME, CacheResult } from './distnetClasses';
 
 const paths = envPaths(APP_NAME);
 const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
 
 const fsPromises = fs.promises;
-
-const cacheSlice = createSlice({
-  name: 'cache',
-  initialState: {} as Cache,
-  reducers: {
-    setCached: (state, result) => {
-      const { sourceId, localFile } = result.payload;
-      state[sourceId] = { localFile, date: new Date().toISOString() };
-    },
-  },
-});
-
-export const { setCached } = cacheSlice.actions;
 
 /**
  * Convert the ID into a valid file name
@@ -41,16 +25,17 @@ function sourceIdToFilename(sourceId: string) {
   ).join('');
 }
 
-export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
-  dispatch,
-  getState
-) => {
+interface CacheInfo {
+  localFile: string;
+}
+
+async function reloadSourceIntoCache(sourceId: string, getState): CacheResult {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
   );
   if (source && source.urls) {
-    let cacheInfo = null;
+    let cacheInfo: CacheInfo = null;
     let index = 0;
     console.log(
       'Trying URLs',
@@ -141,11 +126,11 @@ export const reloadSourceIntoCache = (sourceId: string): AppThunk => async (
         'and cached at',
         cacheInfo
       );
-      return dispatch(setCached({ sourceId, ...cacheInfo }));
+      return { sourceId, localFile: cacheInfo.localFile };
     }
     console.log('Failed to retrieve file for', source);
   }
   return null;
-};
+}
 
-export default cacheSlice.reducer;
+export default reloadSourceIntoCache;
