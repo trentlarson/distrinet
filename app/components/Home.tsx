@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -17,6 +18,13 @@ export default function Home(): JSX.Element {
         <ul>
           {distnet.settings.sources &&
             distnet.settings.sources.map((s) => <li key={s.id}>{s.name}</li>)}
+        </ul>
+
+        <ul>
+          {distnet.cache &&
+            _.map(distnet.cache, (value) => (
+              <li key={value}>{`${value.sourceId} -> ${value.localFile}`}</li>
+            ))}
         </ul>
 
         <TaskListTable />
