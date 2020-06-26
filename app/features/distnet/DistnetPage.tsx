@@ -1,5 +1,5 @@
 import React from 'react';
-import Distnet from '../features/distnet/Distnet';
+import Distnet from './Distnet';
 
 export default function DistnetPage() {
   return <Distnet />;

@@ -17,7 +17,7 @@ const CounterPage = (props: Record<string, any>) => (
 );
 
 const LazyDistnetPage = React.lazy(() =>
-  import(/* webpackChunkName: "DistnetPage" */ './containers/DistnetPage')
+  import(/* webpackChunkName: "DistnetPage" */ './features/distnet/DistnetPage')
 );
 
 const DistnetPage = (props: Record<string, any>) => (
