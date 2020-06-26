@@ -8,10 +8,11 @@
 - 80 1 save file: find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
 - 75 0 use logger instead of console.log
-- 70 1 handle timeout failures (tried node-fetch with abort-controller)
+- 75 0 handle more task YAML variations (eg. blocked & child issues)
 - 70 1 test: missing settings file, missing cache dir, missing URLs, multiple OK files
 - 70 0 show if cached file already exists, and allow redownload
 - 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
+- 70 1 handle timeout failures (tried node-fetch with abort-controller)
 - 60 1 read large files, ie. stream into the cache file
 - 50 0 note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
 - 40 0 stop requiring semicolons
