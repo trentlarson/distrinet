@@ -1,6 +1,7 @@
 ---
 - 95 1 show multiple task lists on the main page
 - 95 0 load properly at startup
+- 95 0 move taskListSlice reference out of Distnet.tsx
 - 90 0 handle when no config dir or settings file or cache dir exists
 - 90 0 at startup, load files to show the current state of the cache
 - 90 0 move date of cache refresh into cacheSlice method

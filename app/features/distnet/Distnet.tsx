@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styles from './Counter.css';
+import styles from './Distnet.css';
 import routes from '../../constants/routes.json';
-import { dispatchCacheForAll, dispatchSettings } from '../distnet/distnetSlice';
+import { dispatchCacheForAll, dispatchSettings } from './distnetSlice';
 import { dispatchLoadAllTasks } from '../task-lists/taskListsSlice';
 
-export default function Counter() {
+export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
   const settingsNum = distnet.settings.sources
@@ -20,7 +20,7 @@ export default function Counter() {
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
       </div>
-      <div className={`counter ${styles.counter}`} data-tid="counter">
+      <div className={`distnet ${styles.distnet}`} data-tid="distnet">
         {settingsText}
       </div>
       <div className={styles.btnGroup}>
@@ -49,6 +49,21 @@ export default function Counter() {
               </li>
             ))}
         </ul>
+
+        <button
+          className={styles.btn}
+          onClick={() => {
+            dispatch(dispatchCacheForAll())
+              .then(() => dispatch(dispatchLoadAllTasks()))
+              .catch((error) => {
+                console.log('Failed to load tasks because', error);
+              });
+          }}
+          data-tclass="btn"
+          type="button"
+        >
+          reload source
+        </button>
       </div>
     </div>
   );

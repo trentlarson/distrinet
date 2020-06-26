@@ -5,7 +5,7 @@ import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
 
-// Lazily load routes and code split with webpacck
+// Lazily load routes and code split with webpack
 const LazyCounterPage = React.lazy(() =>
   import(/* webpackChunkName: "CounterPage" */ './containers/CounterPage')
 );
@@ -16,11 +16,22 @@ const CounterPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+const LazyDistnetPage = React.lazy(() =>
+  import(/* webpackChunkName: "DistnetPage" */ './containers/DistnetPage')
+);
+
+const DistnetPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyDistnetPage {...props} />
+  </React.Suspense>
+);
+
 export default function Routes() {
   return (
     <App>
       <Switch>
         <Route path={routes.COUNTER} component={CounterPage} />
+        <Route path={routes.DISTNET} component={DistnetPage} />
         <Route path={routes.HOME} component={HomePage} />
       </Switch>
     </App>
