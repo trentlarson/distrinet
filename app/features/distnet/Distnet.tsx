@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import styles from './Distnet.css';
 import routes from '../../constants/routes.json';
 import { dispatchCacheForAll, dispatchSettings } from './distnetSlice';
-import { dispatchLoadAllTasks } from '../task-lists/taskListsSlice';
 
 export default function Distnet() {
   const dispatch = useDispatch();
@@ -52,13 +51,7 @@ export default function Distnet() {
 
         <button
           className={styles.btn}
-          onClick={() => {
-            dispatch(dispatchCacheForAll())
-              .then(() => dispatch(dispatchLoadAllTasks()))
-              .catch((error) => {
-                console.log('Failed to load tasks because', error);
-              });
-          }}
+          onClick={() => dispatch(dispatchCacheForAll())}
           data-tclass="btn"
           type="button"
         >

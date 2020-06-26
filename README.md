@@ -4,10 +4,25 @@ See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lis
 
 To run:
 
-- Copy this file to your config directory as `.dist-task-list-settings.yml`: [settings](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml)
+- Copy this file to your config directory as `settings.yml`: [settings](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml)
   - The config directory is defined by `env-paths`, eg. Library/Preferences/dist-task-lists/ on a Mac. If you're not sure of the location on your system, [look here](https://github.com/sindresorhus/env-paths/blob/master/index.js).
 - `yarn`
 - `yarn dev`
+
+To start in a whole new repo, do the following in the same directory where you have dist-task-lists cloned:
+
+- `git clone --depth 1 --single-branch https://github.com/electron-react-boilerplate/electron-react-boilerplate.git your-project-name`
+- `cd your-project-name`
+- `rm -rf .git`
+- Now if you want to save this as the baseline in git, `git init` and `git add .` and `git commit`
+- `git apply ../dist-task-lists/patch.diff`
+- `cp -r ../dist-task-lists/app/features/distnet app/features`
+- ... then continue with above.
+
+To create that patch file:
+
+- `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json > patch.diff`
+- ... then look through patch.diff and remove the references to "task" stuff.
 
 Note that this will run some pre-commit hooks, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json. Just be a good citizen and don't do it when merging to master.
 

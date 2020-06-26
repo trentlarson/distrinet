@@ -1,13 +1,16 @@
 import _ from 'lodash';
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import styles from './Home.css';
 import { TaskListTable } from '../features/task-lists/taskLists';
+import { dispatchLoadAllTasks } from '../features/task-lists/taskListsSlice';
 
 export default function Home(): JSX.Element {
   const distnet = useSelector((state: RootState) => state.distnet);
+  const dispatch = useDispatch();
+  dispatch(dispatchLoadAllTasks());
   return (
     <div className={styles.container} data-tid="container">
       <h2>Home</h2>
