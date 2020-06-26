@@ -1,9 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import reloadSettings from './settingsSlice';
-import {
-  reloadAllSourcesIntoCache,
-  reloadOneSourceIntoCache,
-} from './cacheSlice';
+import reloadSettings from './settings';
+import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
 
 /**
  * This is the main object stored into the state with the name 'distnet'.

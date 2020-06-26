@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
-import { dispatchCacheForAll, dispatchSettings } from '../settings/distnet';
-import { TaskListTable } from '../task-lists/taskLists';
+import { dispatchCacheForAll, dispatchSettings } from '../distnet/distnetSlice';
 import { dispatchLoadAllTasks } from '../task-lists/taskListsSlice';
 
 export default function Counter() {
@@ -65,8 +64,6 @@ export default function Counter() {
         >
           reload source
         </button>
-
-        <TaskListTable />
       </div>
     </div>
   );

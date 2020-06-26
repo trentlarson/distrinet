@@ -4,7 +4,7 @@ import { History } from 'history';
 // eslint-disable-next-line import/no-cycle
 import counterReducer from './features/counter/counterSlice';
 // eslint-disable-next-line import/no-cycle
-import distnetReducer from './features/settings/distnet';
+import distnetReducer from './features/distnet/distnetSlice';
 // eslint-disable-next-line import/no-cycle
 import taskListsReducer from './features/task-lists/taskListsSlice';
 
