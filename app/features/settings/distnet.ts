@@ -5,6 +5,9 @@ import {
   reloadOneSourceIntoCache,
 } from './cacheSlice';
 
+/**
+ * This is the main object stored into the state with the name 'distnet'.
+ * */
 interface DistnetState {
   settings: Sources;
   cache: Cache;
@@ -40,6 +43,7 @@ const distnetSlice = createSlice({
         const data = newData[i];
         if (data) {
           state.cache[data.sourceId] = {
+            sourceId: data.sourceId,
             localFile: data.localFile,
             date: new Date().toISOString(),
           };

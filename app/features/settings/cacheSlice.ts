@@ -6,10 +6,10 @@ import url from 'url';
 
 import { APP_NAME, CacheResult } from './distnetClasses';
 
+const fsPromises = fs.promises;
+
 const paths = envPaths(APP_NAME);
 const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
-
-const fsPromises = fs.promises;
 
 /**
  * Convert the ID into a valid file name

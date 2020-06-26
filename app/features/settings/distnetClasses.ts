@@ -39,6 +39,7 @@ interface CacheResult {
   sourceId: string;
 }
 interface CacheData {
+  sourceId: string;
   localFile: string;
   date: string;
 }

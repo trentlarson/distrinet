@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 import routes from '../../constants/routes.json';
 import { dispatchCacheForAll, dispatchSettings } from '../settings/distnet';
+import { TaskListTable } from '../task-lists/taskLists';
+import { dispatchLoadAllTasks } from '../task-lists/taskListsSlice';
 
 export default function Counter() {
   const dispatch = useDispatch();
@@ -52,13 +54,19 @@ export default function Counter() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchCacheForAll());
+            dispatch(dispatchCacheForAll())
+              .then(() => dispatch(dispatchLoadAllTasks()))
+              .catch((error) => {
+                console.log('Failed to load tasks because', error);
+              });
           }}
           data-tclass="btn"
           type="button"
         >
           reload source
         </button>
+
+        <TaskListTable />
       </div>
     </div>
   );
