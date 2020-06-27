@@ -47,7 +47,7 @@ interface Cache {
   [sourceId: string]: CacheData;
 }
 
-const APP_NAME = 'dist-task-list';
+const APP_NAME = 'dist-task-lists';
 
 // Why does linting complain if I don't "export default"?
 // eslint-disable-next-line import/prefer-default-export
