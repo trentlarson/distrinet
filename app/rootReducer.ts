@@ -5,14 +5,11 @@ import { History } from 'history';
 import counterReducer from './features/counter/counterSlice';
 // eslint-disable-next-line import/no-cycle
 import distnetReducer from './features/distnet/distnetSlice';
-// eslint-disable-next-line import/no-cycle
-import taskListsReducer from './features/task-lists/taskListsSlice';
 
 export default function createRootReducer(history: History) {
   return combineReducers({
     router: connectRouter(history),
     counter: counterReducer,
     distnet: distnetReducer,
-    taskLists: taskListsReducer,
   });
 }
