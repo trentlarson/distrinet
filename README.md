@@ -5,7 +5,7 @@ See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lis
 To run:
 
 - Copy this file to your config directory as `settings.yml`: [settings](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml)
-  - The config directory is defined by `env-paths`, eg. Library/Preferences/dist-task-lists/ on a Mac. If you're not sure of the location on your system, [look here](https://github.com/sindresorhus/env-paths/blob/master/index.js).
+  - The config directory is defined by `env-paths`, eg. Library/Preferences/dist-task-lists/ on a Mac. If you're not sure of the location on your system, [look for the "config" directories here](https://github.com/sindresorhus/env-paths/blob/master/index.js).
 - `yarn`
 - `yarn dev`
 

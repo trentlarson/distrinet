@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
 import reloadSettings from './settings';
 import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
@@ -71,7 +72,10 @@ export const dispatchCacheForAll = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: Array<CacheResult> = await reloadAllSourcesIntoCache(getState);
+  const allCaches: Array<CacheResult> = await reloadAllSourcesIntoCache(
+    getState
+  );
+  const result = _.filter(allCaches, (c) => c != null);
   return dispatch(setCachedStateForAll(result));
 };
 
