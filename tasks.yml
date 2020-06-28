@@ -13,7 +13,7 @@
 - 70 0 show if cached file already exists, and allow redownload
 - 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
 - 70 1 handle timeout failures (tried node-fetch with abort-controller)
-- 60 1 read large files, ie. stream into the cache file
+- 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
 - 50 0 note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
 - 40 0 stop requiring semicolons
 - 20 0 read binary files id:read-binary

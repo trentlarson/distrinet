@@ -18,12 +18,12 @@ interface SettingsPayload {
 
 interface CachePayload {
   type: string;
-  payload: CacheResult;
+  payload: CacheData;
 }
 
 interface AllCachePayload {
   type: string;
-  payload: Array<CacheResult>;
+  payload: Array<CacheData>;
 }
 
 const distnetSlice = createSlice({
@@ -35,24 +35,16 @@ const distnetSlice = createSlice({
       state.settings = contents.payload;
     },
     setCachedStateForAll: (state: RootState, result: AllCachePayload) => {
-      const newData: Array<CacheResult> = result.payload;
+      const newData: Array<CacheData> = result.payload;
       console.log('Refreshing from', newData);
       for (let i = 0; i < newData.length; i += 1) {
-        const data = newData[i];
-        if (data) {
-          state.cache[data.sourceId] = {
-            sourceId: data.sourceId,
-            localFile: data.localFile,
-            date: new Date().toISOString(),
-          };
-        }
+        state.cache[newData[i].sourceId] = newData[i];
       }
       console.log('Finished refreshing cache results for all sources.');
     },
     setCachedStateForOne: (state: RootState, result: CachePayload) => {
-      const { sourceId, localFile } = result.payload;
-      state.cache[sourceId] = { localFile, date: new Date().toISOString() };
-      console.log('Cached new local file for', sourceId);
+      state.cache[result.payload.sourceId] = result.payload;
+      console.log('Cached new local file for', result.payload.sourceId);
     },
   },
 });
@@ -72,9 +64,7 @@ export const dispatchCacheForAll = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const allCaches: Array<CacheResult> = await reloadAllSourcesIntoCache(
-    getState
-  );
+  const allCaches: Array<CacheData> = await reloadAllSourcesIntoCache(getState);
   const result = _.filter(allCaches, (c) => c != null);
   return dispatch(setCachedStateForAll(result));
 };
@@ -83,10 +73,7 @@ export const dispatchCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: CacheResult = await reloadOneSourceIntoCache(
-    sourceId,
-    getState
-  );
+  const result: CacheData = await reloadOneSourceIntoCache(sourceId, getState);
   return dispatch(setCachedStateForOne(result));
 };
 

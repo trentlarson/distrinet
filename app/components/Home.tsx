@@ -5,12 +5,15 @@ import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import styles from './Home.css';
 import { TaskListTable } from '../features/task-lists/taskLists';
-import { dispatchLoadAllTasks } from '../features/task-lists/taskListsSlice';
+import { dispatchLoadAllSourcesIntoTasks } from '../features/task-lists/taskListsSlice';
 
 export default function Home(): JSX.Element {
   const distnet = useSelector((state: RootState) => state.distnet);
+
   const dispatch = useDispatch();
-  dispatch(dispatchLoadAllTasks());
+  // This loads from all files into a store for TaskListTable
+  dispatch(dispatchLoadAllSourcesIntoTasks());
+
   return (
     <div className={styles.container} data-tid="container">
       <h2>Home</h2>
@@ -28,6 +31,12 @@ export default function Home(): JSX.Element {
             _.map(distnet.cache, (value) => (
               <li key={value}>{`${value.sourceId} -> ${value.localFile}`}</li>
             ))}
+        </ul>
+
+        <ul>
+          {distnet.cache &&
+            _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+          &nbsp;characters of data
         </ul>
 
         <TaskListTable />

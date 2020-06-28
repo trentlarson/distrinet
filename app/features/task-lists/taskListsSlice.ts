@@ -61,7 +61,7 @@ async function retrieveAllTasks(
   return Promise.all(result);
 }
 
-export const dispatchLoadAllTasks = (): AppThunk => async (
+export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   dispatch,
   getState
 ) => {

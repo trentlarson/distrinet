@@ -34,13 +34,10 @@ interface Sources {
 
 /** Cached-file info * */
 
-interface CacheResult {
-  localFile: string;
-  sourceId: string;
-}
 interface CacheData {
   sourceId: string;
   localFile: string;
+  contents: string;
   date: string;
 }
 interface Cache {
