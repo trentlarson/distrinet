@@ -4,7 +4,7 @@ import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-import { APP_NAME, CacheResult } from './distnetClasses';
+import { APP_NAME, CacheData } from './distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -29,7 +29,7 @@ interface CacheInfo {
   localFile: string;
 }
 
-export const reloadOneSourceIntoCache: CacheResult = async (
+export const reloadOneSourceIntoCache: CacheData = async (
   sourceId: string,
   getState
 ) => {
@@ -52,9 +52,13 @@ export const reloadOneSourceIntoCache: CacheResult = async (
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fsPromises
           .readFile(sourceUrl)
-          .then(() => {
-            // don't need the result; we were just checking that the file's there
-            return { localFile: url.fileURLToPath(sourceUrl) };
+          .then((contents) => {
+            return {
+              sourceId,
+              localFile: url.fileURLToPath(sourceUrl),
+              contents,
+              date: new Date().toISOString(),
+            };
           })
           // eslint-disable-next-line no-loop-func
           .catch((err) => {
@@ -84,6 +88,7 @@ export const reloadOneSourceIntoCache: CacheResult = async (
               cacheFile
             );
 
+            let contents = null;
             return fsPromises
               .unlink(cacheFile)
               .catch(() => {
@@ -92,11 +97,17 @@ export const reloadOneSourceIntoCache: CacheResult = async (
               .then(() => {
                 return response.text(); // we're assuming the file is not binary (see task read-binary)
               })
-              .then((contents) => {
+              .then((data) => {
+                contents = data;
                 return fsPromises.writeFile(cacheFile, contents);
               })
               .then(() => {
-                return { localFile: cacheFile };
+                return {
+                  sourceId,
+                  localFile: cacheFile,
+                  contents,
+                  date: new Date().toISOString(),
+                };
               })
               .catch((err) => {
                 console.log(
@@ -129,16 +140,14 @@ export const reloadOneSourceIntoCache: CacheResult = async (
         'and cached at',
         cacheInfo
       );
-      return { sourceId, localFile: cacheInfo.localFile };
+      return { sourceId, ...cacheInfo };
     }
     console.log('Failed to retrieve file for', source);
   }
   return null;
 };
 
-export const reloadAllSourcesIntoCache: Array<CacheResult> = async (
-  getState
-) => {
+export const reloadAllSourcesIntoCache: Array<CacheData> = async (getState) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = sources.map((s) =>
     reloadOneSourceIntoCache(s.id, getState)

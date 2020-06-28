@@ -7,7 +7,6 @@ import styles from './Home.css';
 
 export default function Home(): JSX.Element {
   const distnet = useSelector((state: RootState) => state.distnet);
-  const dispatch = useDispatch();
   return (
     <div className={styles.container} data-tid="container">
       <h2>Home</h2>
@@ -25,6 +24,12 @@ export default function Home(): JSX.Element {
             _.map(distnet.cache, (value) => (
               <li key={value}>{`${value.sourceId} -> ${value.localFile}`}</li>
             ))}
+        </ul>
+
+        <ul>
+          {distnet.cache &&
+            _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+          &nbsp;characters of data
         </ul>
       </div>
     </div>

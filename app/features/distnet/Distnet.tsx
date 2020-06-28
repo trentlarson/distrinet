@@ -31,7 +31,7 @@ export default function Distnet() {
           data-tclass="btn"
           type="button"
         >
-          reload
+          reload config
         </button>
         <ul>
           {distnet.settings.sources &&
