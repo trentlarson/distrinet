@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
 import yaml from 'js-yaml';
 
-import reloadSettings from './settings';
+import { loadSettings, saveSettings } from './settings';
 import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
 
 /**
@@ -12,6 +12,7 @@ interface DistnetState {
   settings: Sources;
   settingsErrorMessage: string;
   settingsText: string;
+  settingsSaveErrorMessage: string;
   cache: Cache;
 }
 
@@ -30,17 +31,22 @@ interface AllCachePayload {
   payload: Array<CacheData>;
 }
 
+interface Payload<T> {
+  type: string;
+  payload: T;
+}
+
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
     settings: {},
     settingsErrorMessage: null,
     settingsText: null,
+    settingsSaveErrorMessage: null,
     cache: {},
   } as DistnetState,
   reducers: {
     setSettingsState: (state: RootState, contents: SettingsPayload) => {
-      console.log('New distnet settings text:\n', contents.payload);
       state.settingsText = contents.payload;
       try {
         state.settings = yaml.safeLoad(contents.payload);
@@ -54,6 +60,12 @@ const distnetSlice = createSlice({
           state.settingsErrorMessage
         );
       }
+    },
+    setSettingsSaveErrorMessage: (
+      state: RootState,
+      contents: Payload<string>
+    ) => {
+      state.settingsSaveErrorMessage = contents.payload;
     },
     setCachedStateForAll: (state: RootState, result: AllCachePayload) => {
       const newData: Array<CacheData> = result.payload;
@@ -73,12 +85,43 @@ const distnetSlice = createSlice({
 export const {
   setCachedStateForAll,
   setCachedStateForOne,
+  setSettingsErrorMessage,
+  setSettingsSaveErrorMessage,
   setSettingsState,
 } = distnetSlice.actions;
 
-export const dispatchSettings = (): AppThunk => async (dispatch) => {
-  const result: string = await reloadSettings();
-  return dispatch(setSettingsState(result));
+export const textIntoState = (text): AppThunk => (dispatch) => {
+  dispatch(setSettingsState(text));
+};
+
+export const dispatchLoadSettings = (): AppThunk => async (dispatch) => {
+  const result: string = await loadSettings();
+  console.log('New distnet settings text loaded:\n', result);
+  dispatch(setSettingsState(result));
+};
+
+export const dispatchSaveSettings = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  if (
+    _.isNil(getState().distnet.settingsText) ||
+    getState().distnet.settingsText === ''
+  ) {
+    dispatch(
+      setSettingsSaveErrorMessage(
+        "Sorry, but I won't save an empty config file."
+      )
+    );
+  } else {
+    const result = await saveSettings(getState().distnet.settingsText);
+    if (result && result.error) {
+      dispatch(setSettingsSaveErrorMessage(result.error));
+    } else {
+      dispatch(setSettingsState(getState().distnet.settingsText));
+      dispatch(setSettingsSaveErrorMessage(null));
+    }
+  }
 };
 
 export const dispatchCacheForAll = (): AppThunk => async (

@@ -1,10 +1,10 @@
 ---
 - 95 1 show multiple task lists on the main page
-- 95 0 load properly at startup
-- 95 0 move taskListSlice reference out of Distnet.tsx
-- 90 0 handle when no config dir or settings file or cache dir exists
-- 90 0 at startup, load files to show the current state of the cache
+- 90 1 show indicator if settings file has been changed
+- 90 0 analyze YAML and show error on every change
+- 90 1 handle when no config dir or settings file or cache dir exists or load success after save failure or vice versa
 - 90 0 move date of cache refresh into cacheSlice method
+- 80 0 load properly at startup
 - 80 1 save file: find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
 - 75 0 use logger instead of console.log

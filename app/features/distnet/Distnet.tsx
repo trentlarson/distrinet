@@ -1,9 +1,16 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import url from 'url';
 import styles from './Distnet.css';
 import routes from '../../constants/routes.json';
-import { dispatchCacheForAll, dispatchSettings } from './distnetSlice';
+import { SETTINGS_FILE } from './settings';
+import {
+  dispatchCacheForAll,
+  dispatchLoadSettings,
+  dispatchSaveSettings,
+  textIntoState,
+} from './distnetSlice';
 
 export default function Distnet() {
   const dispatch = useDispatch();
@@ -23,6 +30,16 @@ export default function Distnet() {
     <div />
   );
 
+  const settingsFullSaveErrorMessage = distnet.settingsSaveErrorMessage ? (
+    <div>
+      There was an error saving the settings. (Previous settings are still in
+      effect.)
+      <pre>{distnet.settingsSaveErrorMessage}</pre>
+    </div>
+  ) : (
+    <div />
+  );
+
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -34,17 +51,39 @@ export default function Distnet() {
         {settingsCountText}
       </div>
       <div className={styles.btnGroup}>
-        <textarea rows="10" cols="80" defaultValue={distnet.settingsText} />
+        Config file is located here:
+        <a href={url.pathToFileURL(SETTINGS_FILE)}>{SETTINGS_FILE}</a>
+        <br />
+        Config contents:
+        <textarea
+          rows="10"
+          cols="80"
+          value={distnet.settingsText || ''}
+          onChange={(event) => {
+            dispatch(textIntoState(event.target.value));
+          }}
+        />
         <div>{settingsFullErrorMessage}</div>
+        <div>{settingsFullSaveErrorMessage}</div>
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchSettings());
+            dispatch(dispatchLoadSettings());
           }}
           data-tclass="btn"
           type="button"
         >
-          reload config
+          load config
+        </button>
+        <button
+          className={styles.btn}
+          onClick={() => {
+            dispatch(dispatchSaveSettings());
+          }}
+          data-tclass="btn"
+          type="button"
+        >
+          save config
         </button>
         <ul>
           {distnet.settings.sources &&
@@ -61,14 +100,13 @@ export default function Distnet() {
               </li>
             ))}
         </ul>
-
         <button
           className={styles.btn}
           onClick={() => dispatch(dispatchCacheForAll())}
           data-tclass="btn"
           type="button"
         >
-          reload source
+          load source
         </button>
       </div>
     </div>
