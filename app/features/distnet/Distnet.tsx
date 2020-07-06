@@ -11,7 +11,18 @@ export default function Distnet() {
   const settingsNum = distnet.settings.sources
     ? distnet.settings.sources.length
     : 0;
-  const settingsText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
+  const settingsCountText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
+
+  const settingsFullErrorMessage = distnet.settingsErrorMessage ? (
+    <div>
+      There was an error parsing the settings. (Previous settings are still in
+      effect.)
+      <pre>{distnet.settingsErrorMessage}</pre>
+    </div>
+  ) : (
+    <div />
+  );
+
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -20,9 +31,11 @@ export default function Distnet() {
         </Link>
       </div>
       <div className={`distnet ${styles.distnet}`} data-tid="distnet">
-        {settingsText}
+        {settingsCountText}
       </div>
       <div className={styles.btnGroup}>
+        <textarea rows="10" cols="80" defaultValue={distnet.settingsText} />
+        <div>{settingsFullErrorMessage}</div>
         <button
           className={styles.btn}
           onClick={() => {

@@ -149,8 +149,8 @@ export const reloadOneSourceIntoCache: CacheData = async (
 
 export const reloadAllSourcesIntoCache: Array<CacheData> = async (getState) => {
   const { sources } = getState().distnet.settings;
-  const sourceReloads = sources.map((s) =>
-    reloadOneSourceIntoCache(s.id, getState)
-  );
+  const sourceReloads = _.isEmpty(sources)
+    ? []
+    : sources.map((s) => reloadOneSourceIntoCache(s.id, getState));
   return Promise.all(sourceReloads);
 };

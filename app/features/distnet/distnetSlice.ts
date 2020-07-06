@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
+import yaml from 'js-yaml';
+
 import reloadSettings from './settings';
 import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
 
@@ -8,12 +10,14 @@ import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
  * */
 interface DistnetState {
   settings: Sources;
+  settingsErrorMessage: string;
+  settingsText: string;
   cache: Cache;
 }
 
 interface SettingsPayload {
   type: string;
-  payload: Sources;
+  payload: string;
 }
 
 interface CachePayload {
@@ -28,11 +32,28 @@ interface AllCachePayload {
 
 const distnetSlice = createSlice({
   name: 'distnet',
-  initialState: { settings: {}, cache: {} } as DistnetState,
+  initialState: {
+    settings: {},
+    settingsErrorMessage: null,
+    settingsText: null,
+    cache: {},
+  } as DistnetState,
   reducers: {
     setSettingsState: (state: RootState, contents: SettingsPayload) => {
-      console.log('New distnet settings:', contents.payload);
-      state.settings = contents.payload;
+      console.log('New distnet settings text:\n', contents.payload);
+      state.settingsText = contents.payload;
+      try {
+        state.settings = yaml.safeLoad(contents.payload);
+        console.log('New distnet settings object:\n', state.settings);
+        state.settingsErrorMessage = null;
+      } catch (error) {
+        // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
+        state.settingsErrorMessage = error.message;
+        console.log(
+          'New distnet settings failed YAML parse:\n',
+          state.settingsErrorMessage
+        );
+      }
     },
     setCachedStateForAll: (state: RootState, result: AllCachePayload) => {
       const newData: Array<CacheData> = result.payload;

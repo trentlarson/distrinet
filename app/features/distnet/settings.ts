@@ -1,6 +1,5 @@
 import envPaths from 'env-paths';
 import fs from 'fs';
-import yaml from 'js-yaml';
 import path from 'path';
 
 // eslint-disable-next-line import/no-cycle
@@ -18,10 +17,6 @@ function reloadSettings(): Promise<string> {
   return fsPromises
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())
-    .then((contents) => {
-      const result = yaml.safeLoad(contents);
-      return result;
-    })
     .catch((err) => {
       console.log('Error retrieving settings:', err);
       return { error: `Error retrieving settings${err}` };
