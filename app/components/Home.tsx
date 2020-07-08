@@ -10,8 +10,11 @@ export default function Home(): JSX.Element {
   return (
     <div className={styles.container} data-tid="container">
       <h2>Home</h2>
-      <Link to={routes.COUNTER}> -&gt; to Counter</Link>
-      <Link to={routes.DISTNET}> -&gt; to distnet settings</Link>
+      <Link to={routes.COUNTER}> -&gt; Counter</Link>
+      <br />
+      <Link to={routes.DISTNET}> -&gt; distnet settings</Link>
+      <br />
+      <Link to={routes.GENEALOGY}> -&gt; genealogy</Link>
 
       <div>
         <ul>

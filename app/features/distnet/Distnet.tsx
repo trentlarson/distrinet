@@ -18,7 +18,9 @@ export default function Distnet() {
   const settingsNum = distnet.settings.sources
     ? distnet.settings.sources.length
     : 0;
-  const settingsCountText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
+  const settingsCountText = `${settingsNum} source${
+    settingsNum === 1 ? '' : 's'
+  }`;
 
   const settingsFullErrorMessage = distnet.settingsErrorMessage ? (
     <div>
