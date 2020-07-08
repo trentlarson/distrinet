@@ -15,6 +15,10 @@ export default function Home(): JSX.Element {
       <Link to={routes.DISTNET}> -&gt; distnet settings</Link>
       <br />
       <Link to={routes.GENEALOGY}> -&gt; genealogy</Link>
+      <br />
+      <Link to={routes.HISTORIES}> -&gt; histories</Link>
+      <br />
+      <Link to={routes.TASK_LISTS}> -&gt; task lists</Link>
 
       <div>
         <ul>

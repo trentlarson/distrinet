@@ -2,5 +2,7 @@
   "HOME": "/",
   "COUNTER": "/counter",
   "DISTNET": "/distnet",
-  "GENEALOGY": "/genealogy"
+  "GENEALOGY": "/genealogy",
+  "HISTORIES": "/histories",
+  "TASK_LISTS": "/task-lists"
 }

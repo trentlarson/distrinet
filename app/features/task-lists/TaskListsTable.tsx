@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-export const TaskListTable = () => {
+export const TaskListsTable = () => {
   const taskLists = useSelector((state: RootState) => state.taskLists);
   return (
     <table>
