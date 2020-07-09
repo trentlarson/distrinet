@@ -11,19 +11,19 @@ interface Task {
   estimate: number;
   description: string;
 }
-interface TaskPayload {
+interface Payload<T> {
   type: string;
-  payload: Array<Task>;
+  payload: T;
 }
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: { bigList: [] } as Array<Task>,
   reducers: {
-    setTaskList: (state: RootState, tasks: TaskPayload) => {
+    setTaskList: (state: RootState, tasks: Payload<Array<Task>>) => {
       state.bigList = tasks.payload;
     },
-    addTaskList: (state: RootState, tasks: TaskPayload) => {
+    addTaskList: (state: RootState, tasks: Payload<Array<Task>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
   },

@@ -28,15 +28,8 @@ export default function Home(): JSX.Element {
 
         <ul>
           {distnet.cache &&
-            _.map(distnet.cache, (value) => (
-              <li key={value}>{`${value.sourceId} -> ${value.localFile}`}</li>
-            ))}
-        </ul>
-
-        <ul>
-          {distnet.cache &&
             _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-          &nbsp;characters of data
+          &nbsp;characters of cached data
         </ul>
       </div>
     </div>

@@ -1,15 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './style.css';
 import routes from '../../constants/routes.json';
+import TaskListsTable from './TaskListsTable';
+import { dispatchLoadAllSourcesIntoTasks } from './taskListsSlice';
 
 export default function TaskLists() {
-  const distnet = useSelector((state: RootState) => state.distnet);
-  const sourcesNum = distnet.settings.sources
-    ? distnet.settings.sources.length
-    : 0;
-  const sourcesCountText = `${sourcesNum} source${sourcesNum === 1 ? '' : 's'}`;
+  const dispatch = useDispatch();
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -17,8 +15,18 @@ export default function TaskLists() {
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
       </div>
-      <div className={`sign ${styles.sign}`} data-tid="sign">
-        {sourcesCountText}
+      <button
+        className={styles.btn}
+        onClick={() => {
+          dispatch(dispatchLoadAllSourcesIntoTasks());
+        }}
+        data-tclass="btn"
+        type="button"
+      >
+        load tasks
+      </button>
+      <div>
+        <TaskListsTable />
       </div>
     </div>
   );
