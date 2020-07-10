@@ -1,20 +1,19 @@
 ---
-- 95 1 show multiple task lists on the main page
-- 90 1 show indicator if settings file has been changed
-- 90 0 analyze YAML and show error on every change
+- 95 1 show multiple task lists on the page
 - 90 1 handle when no config dir or settings file or cache dir exists or load success after save failure or vice versa
 - 90 0 move date of cache refresh into cacheSlice method
+- 85 0 UI - allow scrolling down on the page
 - 80 0 load properly at startup
-- 80 1 save file: find next cache name
+- 80 1 save file - find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
-- 80 0 UI - allow scrolling down on the page
 - 75 0 use logger instead of console.log
 - 75 0 handle more task YAML variations (eg. blocked & child issues)
 - 70 1 tests - missing settings file, missing cache dir, missing URLs, multiple OK files
 - 70 0 show if cached file already exists, and allow redownload
 - 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
 - 70 1 handle timeout failures (tried node-fetch with abort-controller)
+- 70 1 show indicator if settings file has been changed
 - 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
 - 50 0 note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
-- 40 0 stop requiring semicolons
+- 40 0 stop requiring semicolons in the code
 - 20 0 read binary files id:read-binary

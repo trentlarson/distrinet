@@ -3,6 +3,7 @@
  *
  * Spec: https://w3c.github.io/did-core
  * */
+
 enum DidDocContext {
   V1 = 'https://www.w3.org/ns/did/v1',
 }
@@ -42,6 +43,13 @@ interface CacheData {
 }
 interface Cache {
   [sourceId: string]: CacheData;
+}
+
+/** Utilities * */
+
+interface Payload<T> {
+  type: string;
+  payload: T;
 }
 
 const APP_NAME = 'dist-task-lists';
