@@ -2,11 +2,13 @@ import { createSlice } from '@reduxjs/toolkit';
 import fs from 'fs';
 import _ from 'lodash';
 import yaml from 'js-yaml';
-import { CacheData, Payload } from '../distnet/distnetClasses';
+// eslint-disable-next-line import/no-cycle
+import { AppThunk, RootState } from '../../store';
+import { CacheData, Payload, Source } from '../distnet/distnetClasses';
 
 const fsPromises = fs.promises;
 
-interface Task {
+export interface Task {
   sourceId: string;
   priority: number;
   estimate: number;
@@ -15,7 +17,7 @@ interface Task {
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
-  initialState: { bigList: [] } as Array<Task>,
+  initialState: { bigList: [] as Array<Task> },
   reducers: {
     setTaskList: (state: RootState, tasks: Payload<Array<Task>>) => {
       state.bigList = tasks.payload;
@@ -28,7 +30,10 @@ const taskListsSlice = createSlice({
 
 export const { setTaskList, addTaskList } = taskListsSlice.actions;
 
-function sourceFromId(id: string, settingsSources: Array<Source>) {
+function sourceFromId(
+  id: string,
+  settingsSources: Array<Source>
+): Array<Source> {
   return _.find(settingsSources, (source) => source.id === id);
 }
 
@@ -38,7 +43,7 @@ function sourceFromId(id: string, settingsSources: Array<Source>) {
 async function retrieveAllTasks(
   cacheSources: Array<CacheData>,
   settingsSources: Array<Source>
-): Array<Promise<Task>> {
+): Promise<Array<Array<Task>>> {
   let result: Array<Promise<Array<Task>>> = [];
   const cacheValues = _.values(cacheSources);
   if (cacheValues) {
@@ -50,7 +55,7 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            return contentTasks.map((line) => ({
+            return contentTasks.map((line: string) => ({
               sourceId: entry.sourceId,
               priority: Number(line.toString().substring(0, 2)),
               estimate: Number(line.toString().substring(3, 4)),
@@ -72,7 +77,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: Array<Array<CacheData>> = await retrieveAllTasks(
+  const result: Array<Array<Task>> = await retrieveAllTasks(
     getState().distnet.cache,
     getState().distnet.settings.sources
   );

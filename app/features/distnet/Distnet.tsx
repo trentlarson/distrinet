@@ -1,9 +1,14 @@
+import _ from 'lodash';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import url from 'url';
-import styles from './Distnet.css';
+
 import routes from '../../constants/routes.json';
+import { RootState } from '../../store';
+
+import { Source } from './distnetClasses';
+import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
   dispatchCacheForAll,
@@ -54,12 +59,14 @@ export default function Distnet() {
       </div>
       <div className={styles.btnGroup}>
         Config file is located here:
-        <a href={url.pathToFileURL(SETTINGS_FILE)}>{SETTINGS_FILE}</a>
+        <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
+          {SETTINGS_FILE}
+        </a>
         <br />
         Config contents:
         <textarea
-          rows="10"
-          cols="80"
+          rows={10}
+          cols={80}
           value={distnet.settingsText || ''}
           onChange={(event) => {
             dispatch(textIntoState(event.target.value));
@@ -89,7 +96,7 @@ export default function Distnet() {
         </button>
         <ul>
           {distnet.settings.sources &&
-            distnet.settings.sources.map((uriSource) => (
+            distnet.settings.sources.map((uriSource: Source) => (
               <li key={uriSource.id}>
                 {uriSource.name}
                 <ul>
@@ -110,6 +117,11 @@ export default function Distnet() {
         >
           load source
         </button>
+        <ul>
+          {distnet.cache &&
+            _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+          &nbsp;characters of cached data
+        </ul>
       </div>
     </div>
   );

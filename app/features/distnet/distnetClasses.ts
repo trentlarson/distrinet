@@ -19,35 +19,37 @@ interface Credential {
   value: string;
   privateKeyFile: string;
 }
-interface UrlData {
+export interface UrlData {
   url: string;
   credentials: Credential;
 }
-interface Source {
+export interface Source {
   name: string;
   id: string;
   didDoc?: DidDoc;
-  urls?: Array<urlData>;
-}
-interface Sources {
-  sources: Array<Source>;
+  urls?: Array<UrlData>;
 }
 
 /** Cached-file info * */
 
-interface CacheData {
+export interface CacheData {
   sourceId: string;
   localFile: string;
   contents: string;
   date: string;
 }
-interface Cache {
-  [sourceId: string]: CacheData;
-}
+// // The type of the keys is string
+// interface Cache {
+//   [sourceId: string]: CacheData;
+// }
 
 /** Utilities * */
 
-interface Payload<T> {
+export interface Error {
+  error: string;
+}
+
+export interface Payload<T> {
   type: string;
   payload: T;
 }

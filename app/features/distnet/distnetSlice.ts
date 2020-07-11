@@ -2,6 +2,9 @@ import _ from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
 import yaml from 'js-yaml';
 
+// eslint-disable-next-line import/no-cycle
+import { AppThunk, RootState } from '../../store';
+import { CacheData, Payload, Source } from './distnetClasses';
 import { loadSettings, saveSettings } from './settings';
 import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
 
@@ -9,44 +12,24 @@ import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
  * This is the main object stored into the state with the name 'distnet'.
  * */
 interface DistnetState {
-  settings: Sources;
+  settings: Array<Source>;
   settingsErrorMessage: string;
   settingsText: string;
   settingsSaveErrorMessage: string;
   cache: Cache;
 }
 
-interface SettingsPayload {
-  type: string;
-  payload: string;
-}
-
-interface CachePayload {
-  type: string;
-  payload: CacheData;
-}
-
-interface AllCachePayload {
-  type: string;
-  payload: Array<CacheData>;
-}
-
-interface Payload<T> {
-  type: string;
-  payload: T;
-}
-
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
     settings: {},
-    settingsErrorMessage: null,
-    settingsText: null,
-    settingsSaveErrorMessage: null,
+    settingsErrorMessage: null as string | null,
+    settingsText: null as string | null,
+    settingsSaveErrorMessage: null as string | null,
     cache: {},
   } as DistnetState,
   reducers: {
-    setSettingsState: (state: RootState, contents: SettingsPayload) => {
+    setSettingsState: (state: RootState, contents: Payload<string>) => {
       state.settingsText = contents.payload;
       try {
         state.settings = yaml.safeLoad(contents.payload);
@@ -63,11 +46,14 @@ const distnetSlice = createSlice({
     },
     setSettingsSaveErrorMessage: (
       state: RootState,
-      contents: Payload<string>
+      contents: Payload<string | null>
     ) => {
       state.settingsSaveErrorMessage = contents.payload;
     },
-    setCachedStateForAll: (state: RootState, result: AllCachePayload) => {
+    setCachedStateForAll: (
+      state: RootState,
+      result: Payload<Array<CacheData>>
+    ) => {
       const newData: Array<CacheData> = result.payload;
       console.log('Refreshing from', newData);
       for (let i = 0; i < newData.length; i += 1) {
@@ -75,7 +61,7 @@ const distnetSlice = createSlice({
       }
       console.log('Finished refreshing cache results for all sources.');
     },
-    setCachedStateForOne: (state: RootState, result: CachePayload) => {
+    setCachedStateForOne: (state: RootState, result: Payload<CacheData>) => {
       state.cache[result.payload.sourceId] = result.payload;
       console.log('Cached new local file for', result.payload.sourceId);
     },
@@ -90,12 +76,12 @@ export const {
   setSettingsState,
 } = distnetSlice.actions;
 
-export const textIntoState = (text): AppThunk => (dispatch) => {
+export const textIntoState = (text: string): AppThunk => (dispatch) => {
   dispatch(setSettingsState(text));
 };
 
 export const dispatchLoadSettings = (): AppThunk => async (dispatch) => {
-  const result: string = await loadSettings();
+  const result = await loadSettings();
   console.log('New distnet settings text loaded:\n', result);
   dispatch(setSettingsState(result));
 };

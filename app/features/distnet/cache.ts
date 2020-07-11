@@ -4,7 +4,7 @@ import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-import { APP_NAME, CacheData } from './distnetClasses';
+import { APP_NAME, CacheData, Source, UrlData } from './distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -19,9 +19,9 @@ function sourceIdToFilename(sourceId: string) {
   return _.filter(
     Array.from(sourceId),
     (c) =>
-      (c.codePointAt() >= 48 && c.codePointAt() <= 57) ||
-      (c.codePointAt() >= 65 && c.codePointAt() <= 90) ||
-      (c.codePointAt() >= 97 && c.codePointAt() <= 122)
+      (c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57) ||
+      (c.charCodeAt(0) >= 65 && c.charCodeAt(0) <= 90) ||
+      (c.charCodeAt(0) >= 97 && c.charCodeAt(0) <= 122)
   ).join('');
 }
 
@@ -29,7 +29,7 @@ interface CacheInfo {
   localFile: string;
 }
 
-export const reloadOneSourceIntoCache: CacheData = async (
+export const reloadOneSourceIntoCache: Promise<CacheData | null> = async (
   sourceId: string,
   getState
 ) => {
@@ -38,11 +38,11 @@ export const reloadOneSourceIntoCache: CacheData = async (
     (src) => src.id === sourceId
   );
   if (source && source.urls) {
-    let cacheInfo: CacheInfo = null;
+    let cacheInfo: CacheInfo | null = null;
     let index = 0;
     console.log(
       'Trying URLs',
-      source.urls.map((u) => u.url),
+      source.urls.map((u: UrlData) => u.url),
       '...'
     );
     while (!cacheInfo && index < source.urls.length) {
@@ -51,7 +51,8 @@ export const reloadOneSourceIntoCache: CacheData = async (
       if (sourceUrl.protocol === 'file:') {
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fsPromises
-          .readFile(sourceUrl)
+          // without the encoding, readFile returns a Buffer
+          .readFile(sourceUrl, { encoding: 'utf8' })
           .then((contents) => {
             return {
               sourceId,
@@ -88,7 +89,7 @@ export const reloadOneSourceIntoCache: CacheData = async (
               cacheFile
             );
 
-            let contents = null;
+            let contents: string | null = null;
             return fsPromises
               .unlink(cacheFile)
               .catch(() => {
@@ -97,7 +98,7 @@ export const reloadOneSourceIntoCache: CacheData = async (
               .then(() => {
                 return response.text(); // we're assuming the file is not binary (see task read-binary)
               })
-              .then((data) => {
+              .then((data: string) => {
                 contents = data;
                 return fsPromises.writeFile(cacheFile, contents);
               })
@@ -147,10 +148,12 @@ export const reloadOneSourceIntoCache: CacheData = async (
   return null;
 };
 
-export const reloadAllSourcesIntoCache: Array<CacheData> = async (getState) => {
+export const reloadAllSourcesIntoCache: Promise<Array<CacheData>> = async (
+  getState
+) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
     ? []
-    : sources.map((s) => reloadOneSourceIntoCache(s.id, getState));
+    : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, getState));
   return Promise.all(sourceReloads);
 };

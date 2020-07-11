@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styles from './style.css';
 import routes from '../../constants/routes.json';
+import { RootState } from '../../store';
+import styles from './style.css';
 
 export default function Genealogy() {
   const distnet = useSelector((state: RootState) => state.distnet);
