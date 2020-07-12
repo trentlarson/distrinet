@@ -1,3 +1,4 @@
+- 95 1 fix remaining type errors
 - 90 1 handle when no config dir or settings file or cache dir exists or load success after save failure or vice versa
 - 90 0 use paths.cache instead of paths.config in settings.ts, and you'll have to create that dir
 - 85 0 UI - allow scrolling down on the page

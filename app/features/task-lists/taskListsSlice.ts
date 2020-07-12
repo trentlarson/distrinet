@@ -33,7 +33,7 @@ export const { setTaskList, addTaskList } = taskListsSlice.actions;
 function sourceFromId(
   id: string,
   settingsSources: Array<Source>
-): Array<Source> {
+): Source | undefined {
   return _.find(settingsSources, (source) => source.id === id);
 }
 
@@ -49,7 +49,8 @@ async function retrieveAllTasks(
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      if (sourceFromId(entry.sourceId, settingsSources).type === 'taskyaml') {
+      const source = sourceFromId(entry.sourceId, settingsSources);
+      if (source && source.type === 'taskyaml') {
         const next = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())

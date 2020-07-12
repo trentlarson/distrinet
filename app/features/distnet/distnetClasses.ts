@@ -26,8 +26,9 @@ export interface UrlData {
 export interface Source {
   name: string;
   id: string;
-  didDoc?: DidDoc;
-  urls?: Array<UrlData>;
+  type: string | undefined;
+  didDoc: DidDoc | undefined;
+  urls: Array<UrlData> | undefined;
 }
 
 /** Cached-file info * */
@@ -44,10 +45,6 @@ export interface CacheData {
 // }
 
 /** Utilities * */
-
-export interface Error {
-  error: string;
-}
 
 export interface Payload<T> {
   type: string;

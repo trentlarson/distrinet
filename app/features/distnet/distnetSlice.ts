@@ -44,6 +44,12 @@ const distnetSlice = createSlice({
         );
       }
     },
+    setSettingsErrorMessage: (
+      state: RootState,
+      contents: Payload<string | null>
+    ) => {
+      state.settingsErrorMessage = contents.payload;
+    },
     setSettingsSaveErrorMessage: (
       state: RootState,
       contents: Payload<string | null>
@@ -80,10 +86,21 @@ export const textIntoState = (text: string): AppThunk => (dispatch) => {
   dispatch(setSettingsState(text));
 };
 
+// let's transform these results into explicit Left|Right convention
+function isError(
+  value: string | { error: string }
+): value is { error: string } {
+  return (value as { error: string }).error !== undefined;
+}
+
 export const dispatchLoadSettings = (): AppThunk => async (dispatch) => {
   const result = await loadSettings();
   console.log('New distnet settings text loaded:\n', result);
-  dispatch(setSettingsState(result));
+  if (isError(result)) {
+    dispatch(setSettingsErrorMessage(result.error));
+  } else {
+    dispatch(setSettingsState(result));
+  }
 };
 
 export const dispatchSaveSettings = (): AppThunk => async (
@@ -110,12 +127,26 @@ export const dispatchSaveSettings = (): AppThunk => async (
   }
 };
 
+function removeNulls<T>(array: Array<T | null>): Array<T> {
+  // Lodash _.filter failed me with a Typescript error.
+  const result: Array<T> = [];
+  for (let i = 0; i < array.length; i += 1) {
+    const value = array[i];
+    if (value !== null) {
+      result.push(value);
+    }
+  }
+  return result;
+}
+
 export const dispatchCacheForAll = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const allCaches: Array<CacheData> = await reloadAllSourcesIntoCache(getState);
-  const result = _.filter(allCaches, (c) => c != null);
+  const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
+    getState
+  );
+  const result: Array<CacheData> = removeNulls(allCaches);
   return dispatch(setCachedStateForAll(result));
 };
 
@@ -123,8 +154,17 @@ export const dispatchCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: CacheData = await reloadOneSourceIntoCache(sourceId, getState);
-  return dispatch(setCachedStateForOne(result));
+  const result: CacheData | null = await reloadOneSourceIntoCache(
+    sourceId,
+    getState
+  );
+  if (result) {
+    return dispatch(setCachedStateForOne(result));
+  }
+  console.log(
+    `Failed to load source ${sourceId} into cache because it was not found in sources.`
+  );
+  return dispatch(() => {});
 };
 
 export default distnetSlice.reducer;

@@ -25,20 +25,19 @@ function sourceIdToFilename(sourceId: string) {
   ).join('');
 }
 
-interface CacheInfo {
-  localFile: string;
-}
-
-export const reloadOneSourceIntoCache: Promise<CacheData | null> = async (
+export const reloadOneSourceIntoCache: (
   sourceId: string,
-  getState
+  getState: () => any
+) => Promise<CacheData | null> = async (
+  sourceId: string,
+  getState: () => any
 ) => {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
   );
+  let cacheInfo: CacheData | null = null;
   if (source && source.urls) {
-    let cacheInfo: CacheInfo | null = null;
     let index = 0;
     console.log(
       'Trying URLs',
@@ -74,7 +73,7 @@ export const reloadOneSourceIntoCache: Promise<CacheData | null> = async (
           });
       } else {
         // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fetch(sourceUrl)
+        cacheInfo = await fetch(sourceUrl.toString())
           // eslint-disable-next-line no-loop-func
           .then((response: Response) => {
             const cacheDir =
@@ -89,7 +88,7 @@ export const reloadOneSourceIntoCache: Promise<CacheData | null> = async (
               cacheFile
             );
 
-            let contents: string | null = null;
+            let contents: string;
             return fsPromises
               .unlink(cacheFile)
               .catch(() => {
@@ -136,24 +135,23 @@ export const reloadOneSourceIntoCache: Promise<CacheData | null> = async (
     }
     if (cacheInfo) {
       console.log(
-        'Successfully retrieved file for',
-        source,
-        'and cached at',
-        cacheInfo
+        `Successfully retrieved file for ${source} and cached at ${cacheInfo}`
       );
-      return { sourceId, ...cacheInfo };
+      return cacheInfo;
     }
     console.log('Failed to retrieve file for', source);
+    return null;
   }
+  console.log('Failed to retrieve any sources for', sourceId);
   return null;
 };
 
-export const reloadAllSourcesIntoCache: Promise<Array<CacheData>> = async (
-  getState
-) => {
+export const reloadAllSourcesIntoCache: (
+  getState: () => any
+) => Promise<Array<CacheData | null>> = async (getState: () => any) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
-    ? []
+    ? new Promise(() => Promise.resolve([] as Array<CacheData>))
     : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, getState));
   return Promise.all(sourceReloads);
 };
