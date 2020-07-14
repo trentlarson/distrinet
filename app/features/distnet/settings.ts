@@ -28,7 +28,9 @@ export function loadSettings(): Promise<string | { error: string }> {
  * return a Promise saving the config text
  * In case of error, the result is: { error: '...' }
  * */
-export function saveSettings(text: string): Promise<void | { error: string }> {
+export function saveSettingsToFile(
+  text: string
+): Promise<void | { error: string }> {
   return fsPromises.writeFile(SETTINGS_FILE, text).catch((err) => {
     console.log('Error saving settings:', err);
     return { error: `Error saving settings: ${err}` };

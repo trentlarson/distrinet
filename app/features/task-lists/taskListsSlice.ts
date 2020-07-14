@@ -3,8 +3,8 @@ import fs from 'fs';
 import _ from 'lodash';
 import yaml from 'js-yaml';
 // eslint-disable-next-line import/no-cycle
-import { AppThunk, RootState } from '../../store';
-import { CacheData, Payload, Source } from '../distnet/distnetClasses';
+import { AppThunk } from '../../store';
+import { Cache, CacheData, Payload, Source } from '../distnet/distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -19,10 +19,10 @@ const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: { bigList: [] as Array<Task> },
   reducers: {
-    setTaskList: (state: RootState, tasks: Payload<Array<Task>>) => {
+    setTaskList: (state, tasks: Payload<Array<Task>>) => {
       state.bigList = tasks.payload;
     },
-    addTaskList: (state: RootState, tasks: Payload<Array<Task>>) => {
+    addTaskList: (state, tasks: Payload<Array<Task>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
   },
@@ -41,31 +41,38 @@ function sourceFromId(
  * @return a promise that resolves to Task Promises
  */
 async function retrieveAllTasks(
-  cacheSources: Array<CacheData>,
+  cacheSources: Cache,
   settingsSources: Array<Source>
 ): Promise<Array<Array<Task>>> {
   let result: Array<Promise<Array<Task>>> = [];
-  const cacheValues = _.values(cacheSources);
+  const cacheValues: Array<CacheData> = _.values(cacheSources);
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
       const source = sourceFromId(entry.sourceId, settingsSources);
       if (source && source.type === 'taskyaml') {
-        const next = fsPromises
+        const next: Promise<Array<Task>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            return contentTasks.map((line: string) => ({
-              sourceId: entry.sourceId,
-              priority: Number(line.toString().substring(0, 2)),
-              estimate: Number(line.toString().substring(3, 4)),
-              description: line.toString().substring(5),
-            }));
+            if (Array.isArray(contentTasks)) {
+              return contentTasks.map((line: string) => ({
+                sourceId: entry.sourceId,
+                priority: Number(line.toString().substring(0, 2)),
+                estimate: Number(line.toString().substring(3, 4)),
+                description: line.toString().substring(5),
+              }));
+            }
+            console.log(
+              'Loaded tasks YAML but got non-array result:\n',
+              contentTasks
+            );
+            return [];
           })
           .catch((error) => {
             console.log('Failure loading a YAML task list:', error);
-            return null;
+            return [];
           });
         result = _.concat(result, next);
       }

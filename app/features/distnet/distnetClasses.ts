@@ -4,6 +4,17 @@
  * Spec: https://w3c.github.io/did-core
  * */
 
+/**
+ * This is the main object stored into the state with the name 'distnet'.
+ * */
+export interface DistnetState {
+  settings: { sources: Array<Source> };
+  settingsErrorMessage: string | null;
+  settingsText: string | null;
+  settingsSaveErrorMessage: string | null;
+  cache: Cache;
+}
+
 enum DidDocContext {
   V1 = 'https://www.w3.org/ns/did/v1',
 }
@@ -39,10 +50,11 @@ export interface CacheData {
   contents: string;
   date: string;
 }
-// // The type of the keys is string
-// interface Cache {
-//   [sourceId: string]: CacheData;
-// }
+
+// The type of the keys is string
+export interface Cache {
+  [sourceId: string]: CacheData;
+}
 
 /** Utilities * */
 
