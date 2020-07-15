@@ -3,6 +3,18 @@
  *
  * Spec: https://w3c.github.io/did-core
  * */
+
+/**
+ * This is the main object stored into the state with the name 'distnet'.
+ * */
+export interface DistnetState {
+  settings: { sources: Array<Source> };
+  settingsErrorMessage: string | null;
+  settingsText: string | null;
+  settingsSaveErrorMessage: string | null;
+  cache: Cache;
+}
+
 enum DidDocContext {
   V1 = 'https://www.w3.org/ns/did/v1',
 }
@@ -18,30 +30,37 @@ interface Credential {
   value: string;
   privateKeyFile: string;
 }
-interface UrlData {
+export interface UrlData {
   url: string;
   credentials: Credential;
 }
-interface Source {
+export interface Source {
   name: string;
   id: string;
-  didDoc?: DidDoc;
-  urls?: Array<urlData>;
-}
-interface Sources {
-  sources: Array<Source>;
+  type: string | undefined;
+  didDoc: DidDoc | undefined;
+  urls: Array<UrlData> | undefined;
 }
 
 /** Cached-file info * */
 
-interface CacheData {
+export interface CacheData {
   sourceId: string;
   localFile: string;
   contents: string;
   date: string;
 }
-interface Cache {
+
+// The type of the keys is string
+export interface Cache {
   [sourceId: string]: CacheData;
+}
+
+/** Utilities * */
+
+export interface Payload<T> {
+  type: string;
+  payload: T;
 }
 
 const APP_NAME = 'dist-task-lists';

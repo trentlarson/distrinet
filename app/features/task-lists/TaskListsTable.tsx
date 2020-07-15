@@ -1,13 +1,16 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { Task } from './taskListsSlice';
 
-export const TaskListTable = () => {
+export default function TaskListsTable() {
   const taskLists = useSelector((state: RootState) => state.taskLists);
   return (
     <table>
       <tbody>
-        {taskLists.bigList &&
-          taskLists.bigList.map((task) => (
+        {taskLists &&
+          taskLists.bigList &&
+          taskLists.bigList.map((task: Task) => (
             // Note that you must change this "random" to a real index if you modify this list.
             <tr key={`${task.sourceId}/${Math.random()}`}>
               <td>{task.sourceId}</td>
@@ -19,6 +22,4 @@ export const TaskListTable = () => {
       </tbody>
     </table>
   );
-};
-
-export default { TaskListTable };
+}

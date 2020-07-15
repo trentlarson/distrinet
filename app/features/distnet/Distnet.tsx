@@ -1,9 +1,21 @@
+import _ from 'lodash';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styles from './Distnet.css';
+import url from 'url';
+
 import routes from '../../constants/routes.json';
-import { dispatchCacheForAll, dispatchSettings } from './distnetSlice';
+import { RootState } from '../../store';
+
+import { Source } from './distnetClasses';
+import styles from './Distnet.css';
+import { SETTINGS_FILE } from './settings';
+import {
+  dispatchCacheForAll,
+  dispatchLoadSettings,
+  dispatchSaveSettings,
+  dispatchSaveSettingsTextAndYaml,
+} from './distnetSlice';
 
 export default function Distnet() {
   const dispatch = useDispatch();
@@ -11,7 +23,30 @@ export default function Distnet() {
   const settingsNum = distnet.settings.sources
     ? distnet.settings.sources.length
     : 0;
-  const settingsText = `${settingsNum} URI${settingsNum === 1 ? '' : 's'}`;
+  const settingsCountText = `${settingsNum} source${
+    settingsNum === 1 ? '' : 's'
+  }`;
+
+  const settingsFullErrorMessage = distnet.settingsErrorMessage ? (
+    <div>
+      There was an error parsing the settings. (Previous settings are still in
+      effect.)
+      <pre>{distnet.settingsErrorMessage}</pre>
+    </div>
+  ) : (
+    <div />
+  );
+
+  const settingsFullSaveErrorMessage = distnet.settingsSaveErrorMessage ? (
+    <div>
+      There was an error saving the settings. (Previous settings are still in
+      effect.)
+      <pre>{distnet.settingsSaveErrorMessage}</pre>
+    </div>
+  ) : (
+    <div />
+  );
+
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -20,22 +55,48 @@ export default function Distnet() {
         </Link>
       </div>
       <div className={`distnet ${styles.distnet}`} data-tid="distnet">
-        {settingsText}
+        {settingsCountText}
       </div>
       <div className={styles.btnGroup}>
+        Config file is located here:
+        <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
+          {SETTINGS_FILE}
+        </a>
+        <br />
+        Config contents:
+        <textarea
+          rows={10}
+          cols={80}
+          value={distnet.settingsText || ''}
+          onChange={(event) => {
+            dispatch(dispatchSaveSettingsTextAndYaml(event.target.value));
+          }}
+        />
+        <div>{settingsFullErrorMessage}</div>
+        <div>{settingsFullSaveErrorMessage}</div>
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchSettings());
+            dispatch(dispatchLoadSettings());
           }}
           data-tclass="btn"
           type="button"
         >
-          reload config
+          load config
+        </button>
+        <button
+          className={styles.btn}
+          onClick={() => {
+            dispatch(dispatchSaveSettings());
+          }}
+          data-tclass="btn"
+          type="button"
+        >
+          save config
         </button>
         <ul>
           {distnet.settings.sources &&
-            distnet.settings.sources.map((uriSource) => (
+            distnet.settings.sources.map((uriSource: Source) => (
               <li key={uriSource.id}>
                 {uriSource.name}
                 <ul>
@@ -48,15 +109,19 @@ export default function Distnet() {
               </li>
             ))}
         </ul>
-
         <button
           className={styles.btn}
           onClick={() => dispatch(dispatchCacheForAll())}
           data-tclass="btn"
           type="button"
         >
-          reload source
+          load source
         </button>
+        <ul>
+          {distnet.cache &&
+            _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+          &nbsp;characters of cached data
+        </ul>
       </div>
     </div>
   );

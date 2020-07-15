@@ -4,7 +4,7 @@ import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-import { APP_NAME, CacheData } from './distnetClasses';
+import { APP_NAME, CacheData, Source, UrlData } from './distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -19,30 +19,29 @@ function sourceIdToFilename(sourceId: string) {
   return _.filter(
     Array.from(sourceId),
     (c) =>
-      (c.codePointAt() >= 48 && c.codePointAt() <= 57) ||
-      (c.codePointAt() >= 65 && c.codePointAt() <= 90) ||
-      (c.codePointAt() >= 97 && c.codePointAt() <= 122)
+      (c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57) ||
+      (c.charCodeAt(0) >= 65 && c.charCodeAt(0) <= 90) ||
+      (c.charCodeAt(0) >= 97 && c.charCodeAt(0) <= 122)
   ).join('');
 }
 
-interface CacheInfo {
-  localFile: string;
-}
-
-export const reloadOneSourceIntoCache: CacheData = async (
+export const reloadOneSourceIntoCache: (
   sourceId: string,
-  getState
+  getState: () => any
+) => Promise<CacheData | null> = async (
+  sourceId: string,
+  getState: () => any
 ) => {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
   );
+  let cacheInfo: CacheData | null = null;
   if (source && source.urls) {
-    let cacheInfo: CacheInfo = null;
     let index = 0;
     console.log(
       'Trying URLs',
-      source.urls.map((u) => u.url),
+      source.urls.map((u: UrlData) => u.url),
       '...'
     );
     while (!cacheInfo && index < source.urls.length) {
@@ -51,7 +50,8 @@ export const reloadOneSourceIntoCache: CacheData = async (
       if (sourceUrl.protocol === 'file:') {
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fsPromises
-          .readFile(sourceUrl)
+          // without the encoding, readFile returns a Buffer
+          .readFile(sourceUrl, { encoding: 'utf8' })
           .then((contents) => {
             return {
               sourceId,
@@ -73,7 +73,7 @@ export const reloadOneSourceIntoCache: CacheData = async (
           });
       } else {
         // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fetch(sourceUrl)
+        cacheInfo = await fetch(sourceUrl.toString())
           // eslint-disable-next-line no-loop-func
           .then((response: Response) => {
             const cacheDir =
@@ -88,7 +88,7 @@ export const reloadOneSourceIntoCache: CacheData = async (
               cacheFile
             );
 
-            let contents = null;
+            let contents: string;
             return fsPromises
               .unlink(cacheFile)
               .catch(() => {
@@ -97,7 +97,7 @@ export const reloadOneSourceIntoCache: CacheData = async (
               .then(() => {
                 return response.text(); // we're assuming the file is not binary (see task read-binary)
               })
-              .then((data) => {
+              .then((data: string) => {
                 contents = data;
                 return fsPromises.writeFile(cacheFile, contents);
               })
@@ -135,22 +135,23 @@ export const reloadOneSourceIntoCache: CacheData = async (
     }
     if (cacheInfo) {
       console.log(
-        'Successfully retrieved file for',
-        source,
-        'and cached at',
-        cacheInfo
+        `Successfully retrieved file for ${source} and cached at ${cacheInfo}`
       );
-      return { sourceId, ...cacheInfo };
+      return cacheInfo;
     }
     console.log('Failed to retrieve file for', source);
+    return null;
   }
+  console.log('Failed to retrieve any sources for', sourceId);
   return null;
 };
 
-export const reloadAllSourcesIntoCache: Array<CacheData> = async (getState) => {
+export const reloadAllSourcesIntoCache: (
+  getState: () => any
+) => Promise<Array<CacheData | null>> = async (getState: () => any) => {
   const { sources } = getState().distnet.settings;
-  const sourceReloads = sources.map((s) =>
-    reloadOneSourceIntoCache(s.id, getState)
-  );
+  const sourceReloads = _.isEmpty(sources)
+    ? new Promise(() => Promise.resolve([] as Array<CacheData>))
+    : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, getState));
   return Promise.all(sourceReloads);
 };

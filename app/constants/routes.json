@@ -1,5 +1,8 @@
 {
   "HOME": "/",
   "COUNTER": "/counter",
-  "DISTNET": "/distnet"
+  "DISTNET": "/distnet",
+  "GENEALOGY": "/genealogy",
+  "HISTORIES": "/histories",
+  "TASK_LISTS": "/task-lists"
 }
