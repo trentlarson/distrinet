@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import _ from 'lodash';
 import yaml from 'js-yaml';
 
 // eslint-disable-next-line import/no-cycle
@@ -17,20 +18,11 @@ const distnetSlice = createSlice({
     cache: {},
   } as DistnetState,
   reducers: {
-    setSettingsState: (state, contents: Payload<string>) => {
+    setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
-      try {
-        state.settings = yaml.safeLoad(contents.payload);
-        console.log('New distnet settings object:\n', state.settings);
-        state.settingsErrorMessage = null;
-      } catch (error) {
-        // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
-        state.settingsErrorMessage = error.message;
-        console.log(
-          'New distnet settings failed YAML parse:\n',
-          state.settingsErrorMessage
-        );
-      }
+    },
+    setSettingsStateObject: (state, contents) => {
+      state.settings = contents.payload;
     },
     setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
       state.settingsErrorMessage = contents.payload;
@@ -58,11 +50,24 @@ export const {
   setCachedStateForOne,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
-  setSettingsState,
+  setSettingsStateObject,
+  setSettingsStateText,
 } = distnetSlice.actions;
 
-export const textIntoState = (text: string): AppThunk => (dispatch) => {
-  dispatch(setSettingsState(text));
+export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
+  dispatch
+) => {
+  dispatch(setSettingsStateText(contents));
+  try {
+    const loaded = yaml.safeLoad(contents);
+    dispatch(setSettingsStateObject(loaded));
+    console.log('New distnet settings object:\n', loaded);
+    dispatch(setSettingsErrorMessage(null));
+  } catch (error) {
+    // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
+    console.log('New distnet settings failed YAML parse:\n', error.message);
+    dispatch(setSettingsErrorMessage(error.message));
+  }
 };
 
 // let's transform these results into explicit Left|Right convention
@@ -78,36 +83,34 @@ export const dispatchLoadSettings = (): AppThunk => async (dispatch) => {
   if (isError(result)) {
     dispatch(setSettingsErrorMessage(result.error));
   } else {
-    dispatch(setSettingsState(result));
+    dispatch(dispatchSaveSettingsTextAndYaml(result));
   }
 };
-
-function isNull(text: string | null): text is null {
-  return (text as null) === null;
-}
 
 export const dispatchSaveSettings = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  if (isNull(getState().distnet.settingsText)) {
+  const { settingsText } = getState().distnet;
+  if (_.isNil(settingsText)) {
     dispatch(
       setSettingsSaveErrorMessage(
         "Sorry, but I won't save an empty config file."
       )
     );
-  } else if (getState().distnet.settingsText === '') {
+  } else if (settingsText === '') {
     dispatch(
       setSettingsSaveErrorMessage(
         "Sorry, but I won't save an empty config file."
       )
     );
   } else {
-    const result = await saveSettingsToFile(getState().distnet.settingsText);
+    // settingsText is a non-empty string
+    const result = await saveSettingsToFile(settingsText);
     if (result && result.error) {
       dispatch(setSettingsSaveErrorMessage(result.error));
     } else {
-      dispatch(setSettingsState(getState().distnet.settingsText));
+      dispatch(dispatchSaveSettingsTextAndYaml(settingsText));
       dispatch(setSettingsSaveErrorMessage(null));
     }
   }

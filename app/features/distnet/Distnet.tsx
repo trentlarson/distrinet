@@ -14,7 +14,7 @@ import {
   dispatchCacheForAll,
   dispatchLoadSettings,
   dispatchSaveSettings,
-  textIntoState,
+  dispatchSaveSettingsTextAndYaml,
 } from './distnetSlice';
 
 export default function Distnet() {
@@ -69,7 +69,7 @@ export default function Distnet() {
           cols={80}
           value={distnet.settingsText || ''}
           onChange={(event) => {
-            dispatch(textIntoState(event.target.value));
+            dispatch(dispatchSaveSettingsTextAndYaml(event.target.value));
           }}
         />
         <div>{settingsFullErrorMessage}</div>
