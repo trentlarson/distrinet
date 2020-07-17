@@ -47,6 +47,15 @@ export default function Distnet() {
     <div />
   );
 
+  const cacheErrorMessage = distnet.cacheErrorMessage ? (
+    <div>
+      There was an error loading the cache.
+      <pre>{distnet.cacheErrorMessage}</pre>
+    </div>
+  ) : (
+    <div />
+  );
+
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -117,6 +126,7 @@ export default function Distnet() {
         >
           load source
         </button>
+        <div>{cacheErrorMessage}</div>
         <ul>
           {distnet.cache &&
             _.sum(_.map(distnet.cache, (value) => value.contents.length))}

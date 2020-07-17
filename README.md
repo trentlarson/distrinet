@@ -4,11 +4,14 @@ See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lis
 
 To run:
 
-- Copy this file to your config `dist-task-lists-nodejs` directory as `settings.yml`: [settings](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml)
-  - The config directory is defined by `env-paths`, eg. ~/Library/Preferences/dist-task-lists-nodejs/ on a Mac. If you're not sure of the location on your system, [look for the "config" directories here](https://github.com/sindresorhus/env-paths/blob/master/index.js).
-- Create a `cache` folder inside that config `dist-task-lists-nodejs` directory
+- Go to the "distnet settings" on the first page and copy settings into the text field, eg. [this one](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml).
 - `yarn`
 - `yarn dev`
+
+When developing:
+
+- Note that it will run some tests before allowing merging to master, eg. `node_modules/bin/tsc`. Make sure those work because we enforce TypeScript.
+- Note that it will also run some pre-commit hooks, eg. `yarn lint`, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json.
 
 To start in a whole new repo, do the following in the same directory where you have dist-task-lists cloned:
 
@@ -22,10 +25,8 @@ To start in a whole new repo, do the following in the same directory where you h
 
 To create that patch file:
 
-- `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json > patch.diff`
+- `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/app.global.css app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json yarn.lock > patch.diff`
 - ... then look through patch.diff and remove the references to "task" stuff.
-
-Note that this will run some pre-commit hooks, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json. Just be a good citizen and don't do it when merging to master.
 
 Here's how this project was initially created:
 

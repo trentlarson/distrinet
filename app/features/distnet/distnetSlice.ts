@@ -6,7 +6,11 @@ import yaml from 'js-yaml';
 import { AppThunk } from '../../store';
 import { CacheData, DistnetState, Payload } from './distnetClasses';
 import { loadSettings, saveSettingsToFile } from './settings';
-import { reloadAllSourcesIntoCache, reloadOneSourceIntoCache } from './cache';
+import {
+  createCacheDir,
+  reloadAllSourcesIntoCache,
+  reloadOneSourceIntoCache,
+} from './cache';
 
 const distnetSlice = createSlice({
   name: 'distnet',
@@ -16,6 +20,7 @@ const distnetSlice = createSlice({
     settingsText: null,
     settingsSaveErrorMessage: null,
     cache: {},
+    cacheErrorMessage: null,
   } as DistnetState,
   reducers: {
     setSettingsStateText: (state, contents: Payload<string>) => {
@@ -42,12 +47,16 @@ const distnetSlice = createSlice({
       state.cache[result.payload.sourceId] = result.payload;
       console.log('Cached new local file for', result.payload.sourceId);
     },
+    setCacheErrorMessage: (state, result: Payload<string>) => {
+      state.cacheErrorMessage = result.payload;
+    },
   },
 });
 
 export const {
   setCachedStateForAll,
   setCachedStateForOne,
+  setCacheErrorMessage,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
   setSettingsStateObject,
@@ -132,6 +141,9 @@ export const dispatchCacheForAll = (): AppThunk => async (
   dispatch,
   getState
 ) => {
+  await createCacheDir().catch((error) => {
+    dispatch(setCacheErrorMessage(error.toString()));
+  });
   const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
     getState
   );
@@ -143,6 +155,9 @@ export const dispatchCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
 ) => {
+  await createCacheDir().catch((error) => {
+    dispatch(setCacheErrorMessage(error.toString()));
+  });
   const result: CacheData | null = await reloadOneSourceIntoCache(
     sourceId,
     getState

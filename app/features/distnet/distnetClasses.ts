@@ -13,6 +13,7 @@ export interface DistnetState {
   settingsText: string | null;
   settingsSaveErrorMessage: string | null;
   cache: Cache;
+  cacheErrorMessage: string | null;
 }
 
 enum DidDocContext {

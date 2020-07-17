@@ -7,15 +7,15 @@ export default function Home(): JSX.Element {
   return (
     <div className={styles.container} data-tid="container">
       <h2>Home</h2>
-      <Link to={routes.COUNTER}> -&gt; Counter</Link>
+      <Link to={routes.COUNTER}>to Counter</Link>
       <br />
-      <Link to={routes.DISTNET}> -&gt; distnet settings</Link>
+      <Link to={routes.DISTNET}>to distnet settings</Link>
       <br />
-      <Link to={routes.GENEALOGY}> -&gt; genealogy</Link>
+      <Link to={routes.GENEALOGY}>to genealogy</Link>
       <br />
-      <Link to={routes.HISTORIES}> -&gt; histories</Link>
+      <Link to={routes.HISTORIES}>to histories</Link>
       <br />
-      <Link to={routes.TASK_LISTS}> -&gt; task lists</Link>
+      <Link to={routes.TASK_LISTS}>to task lists</Link>
     </div>
   );
 }

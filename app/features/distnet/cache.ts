@@ -25,6 +25,13 @@ function sourceIdToFilename(sourceId: string) {
   ).join('');
 }
 
+/**
+ * return a Promise that creates the cache folder
+ * */
+export const createCacheDir: () => Promise<void> = async () => {
+  return fsPromises.mkdir(DEFAULT_CACHE_DIR, { recursive: true });
+};
+
 export const reloadOneSourceIntoCache: (
   sourceId: string,
   getState: () => any
@@ -151,7 +158,7 @@ export const reloadAllSourcesIntoCache: (
 ) => Promise<Array<CacheData | null>> = async (getState: () => any) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
-    ? new Promise(() => Promise.resolve([] as Array<CacheData>))
+    ? [new Promise(() => Promise.resolve([] as Array<CacheData>))]
     : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, getState));
   return Promise.all(sourceReloads);
 };
