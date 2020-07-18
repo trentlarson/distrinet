@@ -2,6 +2,12 @@
 
 See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lists)
 
+The purpose of this service is 3-fold:
+
+- Given a URI, it'll provide the content (and/or a URL).
+- When offline, provide a copy of that content.
+- Give an easy-to-use interface to sharing content via file syncing, git, Matrix, Keybase.io, etc. (This is an ever-expanding set of features to grow the use of diffs, cryptographic signatures, and permissions management.)
+
 To run:
 
 - Go to the "distnet settings" on the first page and copy settings into the text field, eg. [this one](https://raw.githubusercontent.com/trentlarson/distributed-task-lists/master/sample-sources.yml).

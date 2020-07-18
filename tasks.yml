@@ -1,6 +1,5 @@
 - 90 1 handle when load success after save failure or vice versa
 - 90 0 use paths.cache instead of paths.config in settings.ts
-- 85 0 UI - allow scrolling down on the page
 - 80 0 load properly at startup
 - 80 1 save file - find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
