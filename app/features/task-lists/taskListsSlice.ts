@@ -49,8 +49,7 @@ async function retrieveAllTasks(
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      const source = sourceFromId(entry.sourceId, settingsSources);
-      if (source && source.type === 'taskyaml') {
+      if (entry.sourceId.startsWith('taskyaml:')) {
         const next: Promise<Array<Task>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())
