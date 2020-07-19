@@ -4,11 +4,24 @@
  * Spec: https://w3c.github.io/did-core
  * */
 
+export interface Executable {
+  executablePath: string;
+}
+
+export interface ResourceTypes {
+  [sourceProtocol: string]: Executable;
+}
+
+export interface Settings {
+  sources: Array<Source>;
+  resourceTypes: ResourceTypes;
+}
+
 /**
  * This is the main object stored into the state with the name 'distnet'.
  * */
 export interface DistnetState {
-  settings: { sources: Array<Source> };
+  settings: Settings;
   settingsErrorMessage: string | null;
   settingsText: string | null;
   settingsSaveErrorMessage: string | null;

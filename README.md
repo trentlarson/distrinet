@@ -2,11 +2,15 @@
 
 See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lists)
 
-The purpose of this service is 3-fold:
+Here are the purposes of this service:
 
-- Given a URI, it'll provide the content (and/or a URL).
-- When offline, provide a copy of that content.
-- Give an easy-to-use interface to sharing content via file syncing, git, Matrix, Keybase.io, etc. (This is an ever-expanding set of features to grow the use of diffs, cryptographic signatures, and permissions management.)
+- Given a URI, provide the content (and/or a URL).
+  - This is currently code inside the app; we could also make this a local HTTP server that gives up the content (and/or a URL).
+  - This may eventually be replaced by DID Resolvers.
+- When offline, provide a cached copy of that content.
+- Ease the management of personal data, including backups.
+- Give an easy-to-use interface to sharing & vetting content via file syncing, git, Matrix, Keybase.io, maybe even Yjs & CRDTs, etc. (This is an ever-expanding set of features to grow the use of diffs, verifiable data, and permissions management.)
+  - Much of this will work it's way into wallets or agents or git as the project grows and/or the tools mature.
 
 To run:
 

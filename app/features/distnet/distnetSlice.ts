@@ -15,7 +15,7 @@ import {
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
-    settings: { sources: [] },
+    settings: { sources: [], resourceTypes: {} },
     settingsErrorMessage: null,
     settingsText: null,
     settingsSaveErrorMessage: null,

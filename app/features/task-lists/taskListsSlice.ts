@@ -4,7 +4,7 @@ import _ from 'lodash';
 import yaml from 'js-yaml';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { Cache, CacheData, Payload, Source } from '../distnet/distnetClasses';
+import { Cache, CacheData, Payload } from '../distnet/distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -30,19 +30,20 @@ const taskListsSlice = createSlice({
 
 export const { setTaskList, addTaskList } = taskListsSlice.actions;
 
+/** potentially useful
 function sourceFromId(
   id: string,
   settingsSources: Array<Source>
 ): Source | undefined {
   return _.find(settingsSources, (source) => source.id === id);
 }
+* */
 
 /**
  * @return a promise that resolves to Task Promises
  */
 async function retrieveAllTasks(
-  cacheSources: Cache,
-  settingsSources: Array<Source>
+  cacheSources: Cache
 ): Promise<Array<Array<Task>>> {
   let result: Array<Promise<Array<Task>>> = [];
   const cacheValues: Array<CacheData> = _.values(cacheSources);
@@ -85,8 +86,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   getState
 ) => {
   const result: Array<Array<Task>> = await retrieveAllTasks(
-    getState().distnet.cache,
-    getState().distnet.settings.sources
+    getState().distnet.cache
   );
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
 };
