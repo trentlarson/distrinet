@@ -67,12 +67,12 @@ export default function Distnet() {
         {settingsCountText}
       </div>
       <div className={styles.btnGroup}>
-        Config file is located here:
+        Config file is located here:&nbsp;
         <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
           {SETTINGS_FILE}
         </a>
         <br />
-        Config contents:
+        Config file contents:
         <textarea
           rows={10}
           cols={80}

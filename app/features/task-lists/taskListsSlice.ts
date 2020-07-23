@@ -4,7 +4,7 @@ import _ from 'lodash';
 import yaml from 'js-yaml';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { Cache, CacheData, Payload, Source } from '../distnet/distnetClasses';
+import { Cache, CacheData, Payload } from '../distnet/distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -30,26 +30,31 @@ const taskListsSlice = createSlice({
 
 export const { setTaskList, addTaskList } = taskListsSlice.actions;
 
+/** potentially useful
 function sourceFromId(
   id: string,
   settingsSources: Array<Source>
 ): Source | undefined {
   return _.find(settingsSources, (source) => source.id === id);
 }
+* */
+
+export function isTaskyamlSource(sourceId: string) {
+  return sourceId.startsWith('taskyaml:');
+}
 
 /**
  * @return a promise that resolves to Task Promises
  */
 async function retrieveAllTasks(
-  cacheSources: Cache,
-  settingsSources: Array<Source>
+  cacheSources: Cache
 ): Promise<Array<Array<Task>>> {
   let result: Array<Promise<Array<Task>>> = [];
   const cacheValues: Array<CacheData> = _.values(cacheSources);
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      if (entry.sourceId.startsWith('taskyaml:')) {
+      if (isTaskyamlSource(entry.sourceId)) {
         const next: Promise<Array<Task>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())
@@ -85,8 +90,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   getState
 ) => {
   const result: Array<Array<Task>> = await retrieveAllTasks(
-    getState().distnet.cache,
-    getState().distnet.settings.sources
+    getState().distnet.cache
   );
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
 };

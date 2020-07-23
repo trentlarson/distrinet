@@ -10,6 +10,7 @@ const LazyCounterPage = React.lazy(() =>
   import(/* webpackChunkName: "CounterPage" */ './containers/CounterPage')
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CounterPage = (props: Record<string, any>) => (
   <React.Suspense fallback={<h1>Loading...</h1>}>
     <LazyCounterPage {...props} />
@@ -20,6 +21,7 @@ const LazyDistnetPage = React.lazy(() =>
   import(/* webpackChunkName: "DistnetPage" */ './features/distnet/DistnetPage')
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DistnetPage = (props: Record<string, any>) => (
   <React.Suspense fallback={<h1>Loading...</h1>}>
     <LazyDistnetPage {...props} />
@@ -32,6 +34,7 @@ const LazyGenealogyPage = React.lazy(() =>
   )
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GenealogyPage = (props: Record<string, any>) => (
   <React.Suspense fallback={<h1>Loading...</h1>}>
     <LazyGenealogyPage {...props} />
@@ -44,6 +47,7 @@ const LazyHistoriesPage = React.lazy(() =>
   )
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const HistoriesPage = (props: Record<string, any>) => (
   <React.Suspense fallback={<h1>Loading...</h1>}>
     <LazyHistoriesPage {...props} />
@@ -56,6 +60,7 @@ const LazyTaskListsPage = React.lazy(() =>
   )
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TaskListsPage = (props: Record<string, any>) => (
   <React.Suspense fallback={<h1>Loading...</h1>}>
     <LazyTaskListsPage {...props} />

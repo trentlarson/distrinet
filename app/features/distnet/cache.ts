@@ -34,11 +34,9 @@ export const createCacheDir: () => Promise<void> = async () => {
 
 export const reloadOneSourceIntoCache: (
   sourceId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getState: () => any
-) => Promise<CacheData | null> = async (
-  sourceId: string,
-  getState: () => any
-) => {
+) => Promise<CacheData | null> = async (sourceId: string, getState) => {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
@@ -62,6 +60,7 @@ export const reloadOneSourceIntoCache: (
           .then((contents) => {
             return {
               sourceId,
+              sourceUrl: sourceUrl.toString(),
               localFile: url.fileURLToPath(sourceUrl),
               contents,
               date: new Date().toISOString(),
@@ -111,6 +110,7 @@ export const reloadOneSourceIntoCache: (
               .then(() => {
                 return {
                   sourceId,
+                  sourceUrl: sourceUrl.toString(),
                   localFile: cacheFile,
                   contents,
                   date: new Date().toISOString(),
@@ -142,7 +142,7 @@ export const reloadOneSourceIntoCache: (
     }
     if (cacheInfo) {
       console.log(
-        `Successfully retrieved file for ${source} and cached at ${cacheInfo}`
+        `Successfully retrieved file for ${source.sourceUrl} and cached at ${cacheInfo.localFile}`
       );
       return cacheInfo;
     }
@@ -154,8 +154,9 @@ export const reloadOneSourceIntoCache: (
 };
 
 export const reloadAllSourcesIntoCache: (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getState: () => any
-) => Promise<Array<CacheData | null>> = async (getState: () => any) => {
+) => Promise<Array<CacheData | null>> = async (getState) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
     ? [new Promise(() => Promise.resolve([] as Array<CacheData>))]
