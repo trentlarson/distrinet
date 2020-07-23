@@ -34,7 +34,8 @@ export const createCacheDir: () => Promise<void> = async () => {
 
 export const reloadOneSourceIntoCache: (
   sourceId: string,
-  getState
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getState: () => any
 ) => Promise<CacheData | null> = async (sourceId: string, getState) => {
   const source = _.find(
     getState().distnet.settings.sources,
@@ -153,7 +154,8 @@ export const reloadOneSourceIntoCache: (
 };
 
 export const reloadAllSourcesIntoCache: (
-  getState
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getState: () => any
 ) => Promise<Array<CacheData | null>> = async (getState) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
