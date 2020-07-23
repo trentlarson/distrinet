@@ -34,11 +34,8 @@ export const createCacheDir: () => Promise<void> = async () => {
 
 export const reloadOneSourceIntoCache: (
   sourceId: string,
-  getState: () => any
-) => Promise<CacheData | null> = async (
-  sourceId: string,
-  getState: () => any
-) => {
+  getState
+) => Promise<CacheData | null> = async (sourceId: string, getState) => {
   const source = _.find(
     getState().distnet.settings.sources,
     (src) => src.id === sourceId
@@ -156,8 +153,8 @@ export const reloadOneSourceIntoCache: (
 };
 
 export const reloadAllSourcesIntoCache: (
-  getState: () => any
-) => Promise<Array<CacheData | null>> = async (getState: () => any) => {
+  getState
+) => Promise<Array<CacheData | null>> = async (getState) => {
   const { sources } = getState().distnet.settings;
   const sourceReloads = _.isEmpty(sources)
     ? [new Promise(() => Promise.resolve([] as Array<CacheData>))]

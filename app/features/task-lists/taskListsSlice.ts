@@ -39,6 +39,10 @@ function sourceFromId(
 }
 * */
 
+export function isTaskyamlSource(sourceId: string) {
+  return sourceId.startsWith('taskyaml:');
+}
+
 /**
  * @return a promise that resolves to Task Promises
  */
@@ -50,7 +54,7 @@ async function retrieveAllTasks(
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      if (entry.sourceId.startsWith('taskyaml:')) {
+      if (isTaskyamlSource(entry.sourceId)) {
         const next: Promise<Array<Task>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())

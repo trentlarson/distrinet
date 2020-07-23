@@ -4,19 +4,6 @@
  * Spec: https://w3c.github.io/did-core
  * */
 
-export interface Executable {
-  executablePath: string;
-}
-
-export interface ResourceTypes {
-  [sourceProtocol: string]: Executable;
-}
-
-export interface Settings {
-  sources: Array<Source>;
-  resourceTypes: ResourceTypes;
-}
-
 /**
  * This is the main object stored into the state with the name 'distnet'.
  * */
@@ -29,25 +16,11 @@ export interface DistnetState {
   cacheErrorMessage: string | null;
 }
 
-enum DidDocContext {
-  V1 = 'https://www.w3.org/ns/did/v1',
+export interface Settings {
+  sources: Array<Source>;
+  resourceTypes: ResourceTypes;
 }
-interface DidDoc {
-  // This is for the '@context'
-  didDocContext: DidDocContext;
-  id: string;
-  // authentication: array
-  // service: array
-}
-interface Credential {
-  type: string;
-  value: string;
-  privateKeyFile: string;
-}
-export interface UrlData {
-  url: string;
-  credentials: Credential;
-}
+
 export interface Source {
   name: string;
   id: string;
@@ -56,7 +29,43 @@ export interface Source {
   urls: Array<UrlData> | undefined;
 }
 
+interface DidDoc {
+  // This is for the '@context'
+  didDocContext: DidDocContext;
+  id: string;
+  // authentication: array
+  // service: array
+}
+
+enum DidDocContext {
+  V1 = 'https://www.w3.org/ns/did/v1',
+}
+
+export interface UrlData {
+  url: string;
+  credentials: Credential;
+}
+
+interface Credential {
+  type: string;
+  value: string;
+  privateKeyFile: string;
+}
+
+export interface ResourceTypes {
+  [sourceProtocol: string]: Executable;
+}
+
+export interface Executable {
+  executablePath: string;
+}
+
 /** Cached-file info * */
+
+// The type of the keys is string
+export interface Cache {
+  [sourceId: string]: CacheData;
+}
 
 export interface CacheData {
   sourceId: string;
@@ -64,11 +73,6 @@ export interface CacheData {
   localFile: string; // local path, without "file:"
   contents: string;
   date: string;
-}
-
-// The type of the keys is string
-export interface Cache {
-  [sourceId: string]: CacheData;
 }
 
 /** Utilities * */
@@ -80,6 +84,4 @@ export interface Payload<T> {
 
 const APP_NAME = 'dist-task-lists';
 
-// Why does linting complain if I don't "export default"?
-// eslint-disable-next-line import/prefer-default-export
 export { APP_NAME };
