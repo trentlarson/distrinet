@@ -1,5 +1,6 @@
 var params = getQueryParams();
-var treeObj = null;
+//var treeObj = null;
+var $ = require("./jquery-2.2.4.min.js");
 
 // Walk tree for ancestors and descendants
 getTree(params.id, {id: params.id, name: null, _parents: [], _children: []});
@@ -18,7 +19,7 @@ function getTree(url = params.id, node) {
     // Root name info
 		if (node.name == null) {
 			node.name = person.persons[0].display.name;
-			$('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Provile</a>');
+			$('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Profile</a>');
 		}
 
 
