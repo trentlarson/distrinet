@@ -62,6 +62,7 @@ export const reloadOneSourceIntoCache: (
           .then((contents) => {
             return {
               sourceId,
+              sourceUrl: sourceUrl.toString(),
               localFile: url.fileURLToPath(sourceUrl),
               contents,
               date: new Date().toISOString(),
@@ -111,6 +112,7 @@ export const reloadOneSourceIntoCache: (
               .then(() => {
                 return {
                   sourceId,
+                  sourceUrl: sourceUrl.toString(),
                   localFile: cacheFile,
                   contents,
                   date: new Date().toISOString(),
@@ -142,7 +144,7 @@ export const reloadOneSourceIntoCache: (
     }
     if (cacheInfo) {
       console.log(
-        `Successfully retrieved file for ${source} and cached at ${cacheInfo}`
+        `Successfully retrieved file for ${source.sourceUrl} and cached at ${cacheInfo.localFile}`
       );
       return cacheInfo;
     }

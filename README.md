@@ -11,6 +11,17 @@ Here are the purposes of this service:
 - Ease the management of personal data, including backups.
 - Give an easy-to-use interface to sharing & vetting content via file syncing, git, Matrix, Keybase.io, maybe even Yjs & CRDTs, etc. (This is an ever-expanding set of features to grow the use of diffs, verifiable data, and permissions management.)
   - Much of this will work it's way into wallets or agents or git as the project grows and/or the tools mature.
+  - Types of edits:
+    - file
+      - directly (potentially followed by a publication)
+      - into my copy with a diff
+    - git
+      - directly into repo
+      - into a repo with a merge request (or with a `git diff` patch someday)
+    - CRDTs: directly
+    - DB
+      - shared via file sync (eg. SQLite)
+      - extract a patch (either via diff or changeset-since-version)
 
 To run:
 

@@ -60,7 +60,8 @@ export interface Source {
 
 export interface CacheData {
   sourceId: string;
-  localFile: string;
+  sourceUrl: string;
+  localFile: string; // local path, without "file:"
   contents: string;
   date: string;
 }
