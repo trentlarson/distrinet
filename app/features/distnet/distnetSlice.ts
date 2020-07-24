@@ -71,10 +71,21 @@ export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
     const loaded = yaml.safeLoad(contents);
     dispatch(setSettingsStateObject(loaded));
     console.log('New distnet settings object:\n', loaded);
+    // do some basic sanity checks
+    loaded.sources.forEach((s, index) => {
+      if (!s || !s.id) {
+        throw Error(`Source #${index} or its ID is null or undefined.`);
+      } else if (!s.url && (!s.urls || s.urls.length === 0)) {
+        throw Error(`Source #${index} has no URL.`);
+      }
+    });
     dispatch(setSettingsErrorMessage(null));
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
-    console.log('New distnet settings failed YAML parse:\n', error.message);
+    console.log(
+      'New distnet settings failed YAML parse or sanity check:\n',
+      error.message
+    );
     dispatch(setSettingsErrorMessage(error.message));
   }
 };

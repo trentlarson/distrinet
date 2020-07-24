@@ -104,10 +104,11 @@ export default function Distnet() {
           save config
         </button>
         <ul>
-          {distnet.settings.sources &&
+          {!distnet.settingsErrorMessage &&
+            distnet.settings.sources &&
             distnet.settings.sources.map((uriSource: Source) => (
               <li key={uriSource.id}>
-                {uriSource.name}
+                {uriSource.name ? uriSource.name : 'UNNAMED'}
                 <ul>
                   <li>
                     {distnet.cache[uriSource.id]
