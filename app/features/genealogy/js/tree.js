@@ -1,20 +1,9 @@
-var params = getQueryParams();
-//var treeObj = null;
+(function(exports){
+
 var $ = require("./jquery-2.2.4.min.js");
 
-// Walk tree for ancestors and descendants
-getTree(params.id, {id: params.id, name: null, _parents: [], _children: []});
 
-// Walk tree
-var generationCount = 0;
-var asyncCount = 0;
-function getTree(url = params.id, node) {
-	generationCount++;
-	asyncCount ++;
-
-	$.get(url)
-  .done(function(rsp) {
-    person = JSON.parse(rsp);
+  function walkTree(url, rsp, node) {
 
     // Root name info
 		if (node.name == null) {
@@ -47,14 +36,28 @@ function getTree(url = params.id, node) {
 	    getTree(parents.father.url, node);
 	    getTree(parents.mother.url, node);
     }
-  }).always(function(rsp) {
+  }
+
+
+// Walk tree
+var generationCount = 0;
+var asyncCount = 0;
+function getTree(url = params.id, node) {
+	generationCount++;
+	asyncCount ++;
+
+	$.get(url)
+  .done(function(rsp) {
+    person = JSON.parse(rsp);
+    walkTree(url, rsp, node)
+  }).always(function() {
     // Detect when finished
-    if (asyncCount-- == 0 ) {
+    if (--asyncCount == 0 ) {
     	treeObj = node;
     	console.log(treeObj);
     	// Notify D3 to render the tree
     	document.dispatchEvent(new Event('treeComplete'));
-    }  		
+    }
   });
 }
 
@@ -116,16 +119,6 @@ function getParents(family, persons) {
 	return parents;
 }
 
-// Get Query parameters
-function getQueryParams() {
-  var vars = [], hash;
-  var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-  for(var i = 0; i < hashes.length; i++) {
-      hash = hashes[i].split('=');
-      vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
-  }
-  // Set a default location just for fun
-  if (vars.id == undefined) vars.id = "https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json";
-  return vars;
-}
+exports.getTree = getTree;
+
+}(typeof exports === 'undefined' ? this.tree = {} : exports));
