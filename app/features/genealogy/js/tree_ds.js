@@ -1,3 +1,13 @@
+(function(exports){
+
+  function addListener(options) {
+
+    if (!options) {
+      options = {}
+    }
+    const treeUrlPrefix = options.treeUrlPrefix || "tree.html";
+    const personUrlPrefix = options.personUrlPrefix || "person.html";
+
 document.addEventListener('treeComplete', function (e) {
 
 var boxWidth = 200,
@@ -273,7 +283,7 @@ Tree.prototype.drawNodes = function(nodes, source) {
 
   // Navigate Tree Link
   nodeEnter.append("a")
-    .attr("xlink:href", function(d) {return "tree.html?id=" + d.id})
+    .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
     .append("svg:image")
       .attr("xlink:href", "features/genealogy/images/tree.svg")
       .attr("width", 16)
@@ -284,7 +294,7 @@ Tree.prototype.drawNodes = function(nodes, source) {
   
   // Go to profile view
   nodeEnter.append("a")
-    .attr("xlink:href", function(d) {return "person.html?id=" + d.id})
+    .attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + d.id})
     .append("svg:image")
       .attr("xlink:href", "features/genealogy/images/profile.svg")
       .attr("width", 16)
@@ -419,3 +429,9 @@ function transitionElbow(d) {
 setup();
 
 }, false);
+
+  }
+
+  exports.addListener = addListener;
+
+}(typeof exports === 'undefined' ? this.treeDs = {} : exports));

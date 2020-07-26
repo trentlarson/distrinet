@@ -1,8 +1,9 @@
 - 95 0 figure out why the genealogy doesn't load until there's a file change
-- 90 0 load properly at startup (especially for task list & genealogy updates)
-- 90 1 handle when load success after save failure or vice versa
-- 90 0 use paths.cache instead of paths.config in settings.ts
+- 90 1 click on a 4th-gen person and force further expansion
+- 90 0 use paths.cache instead of paths.config in settings.ts (including path check)
 - 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
+  - 90 1 handle when load success after save failure or vice versa
+- 80 0 load cached files into memory (eg. all < 5 MB)
 - 80 1 save file - find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
 - 75 2 start an HTTP server for file access (rather than direct library access)

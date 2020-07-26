@@ -29,6 +29,10 @@ To run:
 - `yarn`
 - `yarn dev`
 
+To test UI:
+
+- On genealogy: Ensure a treen shows. Click on the boxes to expand up to 4 levels, and reclick to collapse.
+
 When developing:
 
 - Note that it will run some tests before allowing merging to master, eg. `node_modules/bin/tsc`. Make sure those work because we enforce TypeScript.

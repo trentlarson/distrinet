@@ -5,16 +5,18 @@ import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 
 require('features/genealogy/js/d3.min.js');
-require('features/genealogy/js/tree_ds.js');
+const treeDs = require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
   const cache = useSelector((state: RootState) => state.distnet.cache);
 
+  treeDs.addListener({ treeUrlPrefix: '#/genealogy' });
+
   // Walk tree for ancestors and descendants
   tree.setCache(cache);
-  // tree.getTree(tree.getQueryParams().id);
-  tree.getTree('gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3');
+  tree.getTree(tree.getQueryParams().id);
+  // tree.getTree('gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3');
 
   return (
     <div>
