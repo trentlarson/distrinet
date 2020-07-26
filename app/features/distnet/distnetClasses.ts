@@ -69,7 +69,7 @@ export interface Cache {
 
 export interface CacheData {
   sourceId: string;
-  sourceUrl: string;
+  sourceUrl: string; // whichever URL was used as the source
   localFile: string; // local path, without "file:"
   contents: string;
   date: string;

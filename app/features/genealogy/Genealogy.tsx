@@ -1,5 +1,7 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 
 require('features/genealogy/js/d3.min.js');
@@ -7,34 +9,12 @@ require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
-  // Get Query parameters
-  function getQueryParams() {
-    const vars = [];
-    let hash;
-    const hashes = window.location.href
-      .slice(window.location.href.indexOf('?') + 1)
-      .split('&');
-    for (let i = 0; i < hashes.length; i++) {
-      hash = hashes[i].split('=');
-      vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
-    }
-    // Set a default location just for fun
-    if (vars.id == undefined)
-      vars.id =
-        'https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json';
-    // if (vars.id == undefined) vars.id = "file:///Users/tlarson/backed-martin-rigby-default/Martin/KWCC-9SJ/KWCC-9SJ.json";
-    return vars;
-  }
-  const params = getQueryParams();
+  const cache = useSelector((state: RootState) => state.distnet.cache);
 
   // Walk tree for ancestors and descendants
-  tree.getTree(params.id, {
-    id: params.id,
-    name: null,
-    _parents: [],
-    _children: [],
-  });
+  tree.setCache(cache);
+  // tree.getTree(tree.getQueryParams().id);
+  tree.getTree('gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3');
 
   return (
     <div>
@@ -50,7 +30,7 @@ export default function Genealogy() {
           Decentralized Distributed Tree
         </h2>
         <hr className="hr" />
-        <h3 className="person_name">Sample Name</h3>
+        <h3 className="person_name">Name Placeholder</h3>
         <div className="viewer" />
       </div>
     </div>

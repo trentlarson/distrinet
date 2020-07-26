@@ -1,9 +1,56 @@
 (function(exports){
 
-var $ = require("./jquery-2.2.4.min.js");
+  var $ = require("./jquery-2.2.4.min.js");
 
 
-  function walkTree(url, rsp, node) {
+  var cache = null;
+  function setCache(_cache) {
+    cache = _cache;
+  }
+
+  // Walk tree with getTree & walkTree
+
+  // let's remove these globals and pass around explicitly for thread safety (& more clarity)
+  // (treeObj is an app global... can we fix that?)
+  //var person = null;
+  var generationCount = 0;
+  var asyncCount = 0;
+  /**
+   * @param uri URI of the individual
+   * @param node container for the derived info to display
+   */
+  function getTree(uri, node) {
+    if (!node) {
+      node = { id: uri, name: null, _parents: [], _children: [], portrait: null }
+    }
+
+    generationCount++;
+    asyncCount ++;
+
+    if (uri.toLowerCase().startsWith("http:")
+        || uri.toLowerCase().startsWith("https:")) {
+      // HTTP is just a special case of a URI so we can eliminate this separation someday
+      $.get(uri)
+        .done(function(rsp) {
+          person = JSON.parse(rsp);
+          walkTree(uri, node, person)
+        });
+    } else {
+      if (cache[uri]) {
+        if (cache[uri].contents) {
+          person = JSON.parse(cache[uri].contents)
+          walkTree(uri, node, person)
+        } else {
+          console.log("Found no contents in cache for source URI", uri)
+        }
+      } else {
+        console.log("Found no cached data for source URI", uri)
+      }
+    }
+
+  }
+
+  function walkTree(url, node, person) {
 
     // Root name info
 		if (node.name == null) {
@@ -11,6 +58,11 @@ var $ = require("./jquery-2.2.4.min.js");
 			$('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Profile</a>');
 		}
 
+    if (node.portrait === null
+        && person.persons[0].links.portrait
+        && person.persons[0].links.portrait.href) {
+      node.portrait = person.persons[0].links.portrait.href;
+    }
 
     // Get Parents
     if (person.persons[0].display.familiesAsChild) {
@@ -36,30 +88,15 @@ var $ = require("./jquery-2.2.4.min.js");
 	    getTree(parents.father.url, node);
 	    getTree(parents.mother.url, node);
     }
-  }
 
-
-// Walk tree
-var generationCount = 0;
-var asyncCount = 0;
-function getTree(url = params.id, node) {
-	generationCount++;
-	asyncCount ++;
-
-	$.get(url)
-  .done(function(rsp) {
-    person = JSON.parse(rsp);
-    walkTree(url, rsp, node)
-  }).always(function() {
     // Detect when finished
     if (--asyncCount == 0 ) {
     	treeObj = node;
-    	console.log(treeObj);
+    	console.log("treeObj", treeObj);
     	// Notify D3 to render the tree
     	document.dispatchEvent(new Event('treeComplete'));
     }
-  });
-}
+  }
 
 // Find person by ID in json object tree
 function find(obj, id) {
@@ -119,6 +156,30 @@ function getParents(family, persons) {
 	return parents;
 }
 
-exports.getTree = getTree;
+// Get Query parameters
+function getQueryParams() {
+  const vars = [];
+  let hash;
+  const hashes = window.location.href
+        .slice(window.location.href.indexOf('?') + 1)
+        .split('&');
+  for (let i = 0; i < hashes.length; i++) {
+    hash = hashes[i].split('=');
+    vars.push(hash[0]);
+    vars[hash[0]] = hash[1];
+  }
+  // Set a default location just for fun
+  if (vars.id == undefined) {
+    vars.id = 'https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json';
+  }
+
+  // if (vars.id == undefined) vars.id = "file:///Users/tlarson/backed-martin-rigby-default/Martin/KWCC-9SJ/KWCC-9SJ.json";
+  return vars;
+}
+
+
+  exports.setCache = setCache;
+  exports.getTree = getTree;
+  exports.getQueryParams = getQueryParams;
 
 }(typeof exports === 'undefined' ? this.tree = {} : exports));

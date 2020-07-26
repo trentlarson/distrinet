@@ -90,6 +90,7 @@ function rootProxy(root){
     birthPlace: root.birthPlace,
     x0: 0,
     y0: 0,
+    portrait: root.portrait,
     _children: root._children,
     _parents: root._parents,
     collapsed: false
@@ -240,7 +241,7 @@ Tree.prototype.drawNodes = function(nodes, source) {
   // Add Portrait
   node.append("image")
     .attr("xlink:href", function (d) {
-      var portrait = d.id.replace("json", "jpg");
+      var portrait = d.portrait || d.id.replace("json", "jpg");
       return portrait;
     })
     .attr("x", -99)

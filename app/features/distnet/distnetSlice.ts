@@ -4,7 +4,13 @@ import yaml from 'js-yaml';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { CacheData, DistnetState, Payload } from './distnetClasses';
+import {
+  CacheData,
+  DistnetState,
+  Payload,
+  Settings,
+  Source,
+} from './distnetClasses';
 import { loadSettings, saveSettingsToFile } from './settings';
 import {
   createCacheDir,
@@ -63,6 +69,17 @@ export const {
   setSettingsStateText,
 } = distnetSlice.actions;
 
+function isSettings(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  contents: string | object | undefined
+): contents is Settings {
+  return (
+    typeof contents !== 'undefined' &&
+    typeof contents !== 'string' &&
+    (contents as Settings).sources !== undefined
+  );
+}
+
 export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
   dispatch
 ) => {
@@ -72,13 +89,19 @@ export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
     dispatch(setSettingsStateObject(loaded));
     console.log('New distnet settings object:\n', loaded);
     // do some basic sanity checks
-    loaded.sources.forEach((s, index) => {
-      if (!s || !s.id) {
-        throw Error(`Source #${index} or its ID is null or undefined.`);
-      } else if (!s.url && (!s.urls || s.urls.length === 0)) {
-        throw Error(`Source #${index} has no URL.`);
-      }
-    });
+    if (isSettings(loaded)) {
+      loaded.sources.forEach((s: Source, index: number) => {
+        if (!s || !s.id) {
+          throw Error(`Source #${index} or its ID is null or undefined.`);
+        } else if (!s.urls || s.urls.length === 0) {
+          throw Error(`Source #${index} has no URL.`);
+        }
+      });
+    } else {
+      throw Error(
+        'That settings object does not have a Settings object format.'
+      );
+    }
     dispatch(setSettingsErrorMessage(null));
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
