@@ -3,10 +3,14 @@
   function addListener(options) {
 
     if (!options) {
-      options = {}
+      options = {};
+    }
+    if (!options.refreshWindow) {
+      options.refreshWindow = ()=>{};
     }
     const treeUrlPrefix = options.treeUrlPrefix || "tree.html";
     const personUrlPrefix = options.personUrlPrefix || "person.html";
+    const refreshWindow = options.refreshWindow;
 
     document.addEventListener('treeComplete', function (e) {
 
@@ -214,6 +218,14 @@
 
       /**
        * Draw/redraw the person boxes.
+       *
+       *
+       * // Example: loop through all nodes & collapse all except the root.
+       * nodes.forEach(person => {
+       *   collapse(person);
+       *   self.togglePerson(person);
+       * })
+       *
        */
       Tree.prototype.drawNodes = function(nodes, source) {
         var self = this;
@@ -290,7 +302,10 @@
             .attr("height", 16)
             .attr("x", -80)
             .attr("y", 40)
-            .attr("fill-opacity", .5);
+            .attr("fill-opacity", .5)
+            .on("click", function(person) {
+              refreshWindow(treeUrlPrefix + "?id=" + person.id);
+            });
 
         // Go to profile view
         nodeEnter.append("a")
