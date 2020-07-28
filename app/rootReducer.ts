@@ -6,6 +6,8 @@ import counterReducer from './features/counter/counterSlice';
 // eslint-disable-next-line import/no-cycle
 import distnetReducer from './features/distnet/distnetSlice';
 // eslint-disable-next-line import/no-cycle
+import genealogyReducer from './features/genealogy/genealogySlice';
+// eslint-disable-next-line import/no-cycle
 import taskListsReducer from './features/task-lists/taskListsSlice';
 
 export default function createRootReducer(history: History) {
@@ -13,6 +15,7 @@ export default function createRootReducer(history: History) {
     router: connectRouter(history),
     counter: counterReducer,
     distnet: distnetReducer,
+    genealogy: genealogyReducer,
     taskLists: taskListsReducer,
   });
 }

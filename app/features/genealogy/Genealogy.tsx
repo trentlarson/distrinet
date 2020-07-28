@@ -1,8 +1,9 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
+import { setRootUri } from './genealogySlice';
 
 require('features/genealogy/js/d3.min.js');
 const treeDs = require('features/genealogy/js/tree_ds.js');
@@ -10,6 +11,10 @@ const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
   const cache = useSelector((state: RootState) => state.distnet.cache);
+  tree.setCache(cache);
+
+  const rootUri = useSelector((state: RootState) => state.genealogy.rootUri);
+  const dispatch = useDispatch();
 
   treeDs.addListener({
     treeUrlPrefix: '#/genealogy',
@@ -21,9 +26,17 @@ export default function Genealogy() {
   });
 
   // Walk tree for ancestors and descendants
-  tree.setCache(cache);
-  tree.getTree(tree.getQueryParams().id);
-  // tree.getTree('gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3');
+  let personUri = '';
+  if (tree.getQueryParams().id) {
+    console.log('personUri from params', tree.getQueryParams().id);
+    personUri = tree.getQueryParams().id;
+  } else if (rootUri) {
+    console.log('personUri from rootUri', rootUri);
+    personUri = rootUri;
+  } else {
+    console.log('personUri is', personUri);
+  }
+  tree.getTree(personUri);
 
   return (
     <div>
@@ -39,6 +52,19 @@ export default function Genealogy() {
           Decentralized Distributed Tree
         </h2>
         <hr className="hr" />
+
+        <div>
+          URI
+          <input
+            type="text"
+            size={100}
+            defaultValue={personUri}
+            onChange={(event) => {
+              dispatch(setRootUri(event.target.value));
+            }}
+          />
+        </div>
+
         <h3 className="person_name">Name Placeholder</h3>
         <div className="viewer" />
       </div>

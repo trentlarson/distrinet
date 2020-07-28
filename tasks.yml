@@ -1,6 +1,8 @@
-- 95 0 figure out why the genealogy doesn't load until there's a file change
-- 90 1 click on a 4th-gen person and force further expansion
-- 90 0 use paths.cache instead of paths.config in settings.ts (including path check)
+- 95 1 click on a 4th-gen person and force further expansion
+- 95 0 bug: figure out why the name (& sometimes tree) doesn't load until there's a file change (for URI scheme)
+- 95 0 bug: why are there repeated d3 canvases?
+- 95 1 allow loading of the new person in the same screen in Electron, or don't change current screen name
+- 95 0 show how the same code can be used in browser & in node
 - 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
   - 90 1 handle when load success after save failure or vice versa
 - 80 0 load cached files into memory (eg. all < 5 MB)
@@ -9,11 +11,12 @@
 - 75 2 start an HTTP server for file access (rather than direct library access)
 - 75 0 use logger instead of console.log
 - 75 0 handle more task YAML variations (eg. blocked & child issues)
+- 70 0 use paths.cache instead of paths.config in settings.ts (including path check)
 - 70 0 show if cached file already exists, and allow redownload
 - 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
 - 70 1 handle timeout failures (tried node-fetch with abort-controller)
 - 70 1 show indicator if settings file has been changed
 - 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
-- 50 0 note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
+- 50 0 bug: note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
 - 40 0 stop requiring semicolons in the code
 - 20 0 read binary files id:read-binary

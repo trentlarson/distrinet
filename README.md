@@ -32,6 +32,9 @@ To run:
 To test UI:
 
 - On genealogy: Ensure a treen shows. Click on the boxes to expand up to 4 levels, and reclick to collapse.
+- Samples:
+  - https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
+  - gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3
 
 When developing:
 

@@ -13,44 +13,88 @@
   // let's remove these globals and pass around explicitly for thread safety (& more clarity)
   // (treeObj is an app global... can we fix that?)
   //var person = null;
-  var generationCount = 0;
   var asyncCount = 0;
   /**
-   * @param uri URI of the individual
+   * @param uri URI of the individual (null and '' will be ignored)
+   */
+  function getTree(uri) {
+    if (!uri) {
+      return;
+    }
+    asyncCount = 0;
+    getTree2(uri, 0, null);
+  }
+
+  /**
+   * @param uri URI of the individual, non-null
    * @param node container for the derived info to display
    */
-  function getTree(uri, node) {
+  function getTree2(uri, generationCount, node) {
+    if (!uri) {
+      return;
+    }
+
     if (!node) {
       node = { id: uri, name: null, _parents: [], _children: [], portrait: null }
     }
 
-    generationCount++;
-    asyncCount ++;
+    markStart();
 
     if (uri.toLowerCase().startsWith("http:")
         || uri.toLowerCase().startsWith("https:")) {
       // HTTP is just a special case of a URI so we can eliminate this separation someday
       $.get(uri)
         .done(function(rsp) {
-          person = JSON.parse(rsp);
-          walkTree(uri, node, person)
+          try {
+            person = JSON.parse(rsp);
+            walkTree(uri, person, generationCount, node)
+          } catch (e) {
+            // An error from walkTree stops ".always" from working.
+            // Marking finished inside a 'finally' doesn't always work.
+            // Duplicate with https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
+            console.log("Error in walkTree for URL", uri, e)
+          }
+        })
+        .always(() => {
+          markFinished(node);
         });
+
     } else {
       if (cache[uri]) {
         if (cache[uri].contents) {
-          person = JSON.parse(cache[uri].contents)
-          walkTree(uri, node, person)
+          try {
+            person = JSON.parse(cache[uri].contents)
+            walkTree(uri, person, generationCount, node)
+          } catch (e) {
+            console.log("Error in cached walkTree for URI", uri, e);
+          }
         } else {
           console.log("Found no contents in cache for source URI", uri)
         }
       } else {
         console.log("Found no cached data for source URI", uri)
       }
+      markFinished(node);
     }
 
   }
 
-  function walkTree(url, node, person) {
+  function markStart() {
+    asyncCount++;
+  }
+
+  function markFinished(node) {
+    asyncCount--;
+    // Detect when finished
+    if (asyncCount == 0 ) {
+      treeObj = node;
+      console.log("treeObj", treeObj);
+      // Notify D3 to render the tree
+      document.dispatchEvent(new Event('treeComplete'));
+    }
+  }
+
+  function walkTree(url, person, generationCount, node) {
 
     // Root name info
 		if (node.name == null) {
@@ -58,18 +102,17 @@
 			$('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Profile</a>');
 		}
 
-    if (node.portrait === null
-        && person.persons[0].links.portrait
+		// Find current person in json tree (node)
+		var tmpNode = find(node, url);
+    if (person.persons[0].links.portrait
         && person.persons[0].links.portrait.href) {
-      node.portrait = person.persons[0].links.portrait.href;
+      tmpNode.portrait = person.persons[0].links.portrait.href;
     }
 
     // Get Parents
     if (person.persons[0].display.familiesAsChild) {
 	    var parents = getParents(person.persons[0].display.familiesAsChild[0], person.persons);
 
-			// Find current person in json tree (node)
-			var tmpNode = find(node, url);
 	    tmpNode._parents.push({id: parents.father.url, name: parents.father.name, _parents: []});
 	    tmpNode._parents.push({id: parents.mother.url, name: parents.mother.name, _parents: []});
 			tmpNode.lifespan = person.persons[0].display.lifespan;
@@ -84,17 +127,9 @@
 		}
 
     // Stop after 4 generations
-    if (generationCount < 6) {
-	    getTree(parents.father.url, node);
-	    getTree(parents.mother.url, node);
-    }
-
-    // Detect when finished
-    if (--asyncCount == 0 ) {
-    	treeObj = node;
-    	console.log("treeObj", treeObj);
-    	// Notify D3 to render the tree
-    	document.dispatchEvent(new Event('treeComplete'));
+    if (generationCount < 5) {
+	    getTree2(parents.father.url, generationCount + 1, node);
+	    getTree2(parents.mother.url, generationCount + 1, node);
     }
   }
 
@@ -168,12 +203,7 @@
       vars.push(hash[0]);
       vars[hash[0]] = hash[1];
     }
-    // Set a default location just for fun
-    if (vars.id == undefined) {
-      vars.id = 'https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json';
-    }
-
-    // if (vars.id == undefined) vars.id = "file:///Users/tlarson/backed-martin-rigby-default/Martin/KWCC-9SJ/KWCC-9SJ.json";
+    // removed the default location because we now want to know when it's not supplied
     return vars;
   }
 
