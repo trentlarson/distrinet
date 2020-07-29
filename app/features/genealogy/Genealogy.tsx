@@ -10,30 +10,20 @@ const treeDs = require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
-  const cache = useSelector((state: RootState) => state.distnet.cache);
-  tree.setCache(cache);
-
-  const rootUri = useSelector((state: RootState) => state.genealogy.rootUri);
-  const dispatch = useDispatch();
-
   treeDs.addListener({
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
     svgHeight: 600,
   });
 
-  // Walk tree for ancestors and descendants
-  let personUri = '';
-  if (tree.getQueryParams().id) {
-    console.log('personUri from params', tree.getQueryParams().id);
-    personUri = tree.getQueryParams().id;
-  } else if (rootUri) {
-    console.log('personUri from rootUri', rootUri);
-    personUri = rootUri;
-  } else {
-    console.log('personUri is', personUri);
+  const pageUri = tree.getQueryParams().id || '';
+  const dispatch = useDispatch();
+  if (pageUri) {
+    // This causes the following error:
+    // "Cannot update a component from inside the function body of a different component."
+    // ... but it seems to do everything right.  What's the correct way?
+    dispatch(setRootUri(pageUri));
   }
-  tree.getTree(personUri);
 
   return (
     <div>
@@ -50,21 +40,41 @@ export default function Genealogy() {
         </h2>
         <hr className="hr" />
 
-        <div>
-          URI
-          <input
-            type="text"
-            size={100}
-            defaultValue={personUri}
-            onChange={(event) => {
-              dispatch(setRootUri(event.target.value));
-            }}
-          />
-        </div>
-
-        <h3 className="person_name">Name Placeholder</h3>
-        <div className="viewer" />
+        <GenealogyView />
       </div>
+    </div>
+  );
+}
+
+function GenealogyView() {
+  const dispatch = useDispatch();
+
+  const cache = useSelector((state: RootState) => state.distnet.cache);
+  tree.setCache(cache);
+
+  const rootUri: string = useSelector(
+    (state: RootState) => state.genealogy.rootUri
+  );
+  // Walk tree for ancestors and descendants
+  tree.getTree(rootUri);
+
+  return (
+    <div>
+      <div>
+        URI
+        {rootUri}
+        <br />
+        <input
+          type="text"
+          size={100}
+          onChange={(event) => {
+            dispatch(setRootUri(event.target.value));
+          }}
+        />
+      </div>
+
+      <h3 className="person_name">Name Placeholder</h3>
+      <div className="viewer" />
     </div>
   );
 }
