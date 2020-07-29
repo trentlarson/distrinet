@@ -18,11 +18,8 @@ export default function Genealogy() {
 
   treeDs.addListener({
     treeUrlPrefix: '#/genealogy',
-    refreshWindow: (url: string) => {
-      // switch the display to the new URL
-      window.open(url); // opens a new window because I can't figure anything better yet
-      // Other things are available if you import 'electron', eg webFrame.context.location.getURL(), but I couldn't get anything to actually set the page to the new URL.
-    },
+    svgWidth: 1200,
+    svgHeight: 600,
   });
 
   // Walk tree for ancestors and descendants

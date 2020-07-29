@@ -10,6 +10,8 @@
     }
     const treeUrlPrefix = options.treeUrlPrefix || "tree.html";
     const personUrlPrefix = options.personUrlPrefix || "person.html";
+    const svgWidth = options.svgWidth || 1000;
+    const svgHeight = options.svgHeight || 800;
     const refreshWindow = options.refreshWindow;
 
     document.addEventListener('treeComplete', function (e) {
@@ -32,6 +34,9 @@
        * separate file and include it before this script tag.
        */
       function setup() {
+        // for React apps, don't keep adding SVGs
+        d3.selectAll("svg").remove();
+
         // Setup zoom and pan
         var zoom = d3.behavior.zoom()
           .scaleExtent([.1,1])
@@ -41,14 +46,16 @@
           // Offset so that first pan and zoom does not jump back to the origin
           .translate([300, 400]);
 
+        const xformX = svgWidth / 4;
+        const xformY = svgHeight / 2;
         var svg = d3.select(".viewer").append("svg")
-          .attr('width', 1000)
-          .attr('height', 800)
+          .attr('width', svgWidth)
+          .attr('height', svgHeight)
           .call(zoom)
           .append('g')
           // Left padding of tree so that the whole root node is on the screen.
           // TODO: find a better way
-          .attr("transform", "translate(300,400)");
+          .attr("transform", "translate(" + xformX + "," + xformY + ")");
 
         // One tree to display the ancestors
         var ancestorTree = new Tree(svg, 'ancestor', 1);
@@ -443,7 +450,7 @@
 
       setup();
 
-    }, false);
+    });
 
   }
 
