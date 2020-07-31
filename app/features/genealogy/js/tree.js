@@ -97,9 +97,10 @@
   function walkTree(url, person, generationCount, node) {
 
     // Root name info
-		if (node.name == null) {
+		if (!node.name) {
 			node.name = person.persons[0].display.name;
-			$('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Profile</a>');
+			// timeout is for React-type frameworks where this runs before the HTML has rendered (ugly)
+			setTimeout(() => $('.person_name').html(person.persons[0].display.name+' - <a href="person.html?id='+url+'">View Profile</a>'), 500);
 		}
 
 		// Find current person in json tree (node)

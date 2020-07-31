@@ -61,7 +61,7 @@ function GenealogyView() {
   return (
     <div>
       <div>
-        URI
+        URI &nbsp;
         {rootUri}
         <br />
         <input
@@ -73,7 +73,7 @@ function GenealogyView() {
         />
       </div>
 
-      <h3 className="person_name">Name Placeholder</h3>
+      <h3 className="person_name">&nbsp;</h3>
       <div className="viewer" />
     </div>
   );

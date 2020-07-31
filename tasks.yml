@@ -1,9 +1,6 @@
 - 95 1 click on a 4th-gen person and force further expansion
-- 95 0 bug: figure out why the name (& sometimes tree) doesn't load until there's a file change (for URI scheme)
-- 95 0 bug: why are there repeated d3 canvases?
-- 95 1 allow loading of the new person in the same screen in Electron, or don't change current screen name
-- 95 0 bug: enter a local URI, go to the main page, back to genealogy and see the name placeholder doesn't populate correctly
 - 95 0 show how the same code can be used in browser & in node
+- 90 1 add spinner when loading a new tree
 - 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
   - 90 1 handle when load success after save failure or vice versa
 - 80 0 load cached files into memory (eg. all < 5 MB)
