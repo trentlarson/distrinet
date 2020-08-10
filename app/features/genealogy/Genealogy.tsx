@@ -5,7 +5,7 @@ import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 import { setRootUri } from './genealogySlice';
 
-require('features/genealogy/js/d3.min.js');
+require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
 
@@ -13,7 +13,12 @@ export default function Genealogy() {
   treeDs.addListener({
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
-    svgHeight: 600,
+    svgHeight: 400,
+    newWindow: (url: string) => {
+      // open a new window
+      window.open(url);
+    },
+    // refreshWindow: Couldn't figure it out. Other things are available if you import 'electron', eg webFrame.context.location.getURL(), but I couldn't get anything to actually set the existingpage to the new URL.
   });
 
   const pageUri = tree.getQueryParams().id || '';

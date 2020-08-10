@@ -31,10 +31,14 @@ To run:
 
 To test UI:
 
-- On genealogy: Ensure a treen shows. Click on the boxes to expand up to 4 levels, and reclick to collapse.
-- Samples:
+- Samples in genealogy:
   - https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
-  - gedcomx-indi:04bf12b0-cecd-11ea-8dda-f73921453c09-LH8M-TX3
+    - Shows images, expands up to 4 levels of expansion, collapses, and clicking network icon recenters on someone. (Profile links don't work yet.)
+  - Will gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#KGY4-8D5
+  - Hann gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#LZK2-LD4
+  - Norm gedcomx:6d5042a0-d647-11ea-bd04-dbbafdf08067#KWHH-HSW
+  - Norm gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
+    - See the external links.
 
 When developing:
 
@@ -55,6 +59,17 @@ To create that patch file:
 
 - `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/app.global.css app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json yarn.lock > patch.diff`
 - ... then look through patch.diff and remove the references to "task" stuff.
+
+Design
+
+- Options for IDs within resource: /person/ABCD-EFG or /person?id=ABCD-EFG or #ABCD-EFG
+  Let's use fragments, since that's [used by GedcomX as well](https://github.com/FamilySearch/gedcomx/blob/master/specifications/json-format-specification.md#fragment-ids).
+
+Thanks to:
+
+- [Electron React Boilerplate](https://electron-react-boilerplate.js.org/)
+- [Matt Misbach's Decentralized Distributed Genealogical Tree graphics & parsing](https://github.com/DecentralizedGenealogy/webclient)
+- [arrow image](https://svgsilh.com/9e9e9e/image/29170.html)
 
 Here's how this project was initially created:
 

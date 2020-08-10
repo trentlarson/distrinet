@@ -1,9 +1,14 @@
 (function(exports){
 
+  const MAX_EXTERNAL_REFS = 8; // see usage, and get rid of this ASAP
+
   function addListener(options) {
 
     if (!options) {
       options = {};
+    }
+    if (!options.newWindow) {
+      options.newWindow = ()=>{};
     }
     if (!options.refreshWindow) {
       options.refreshWindow = ()=>{};
@@ -12,6 +17,7 @@
     const personUrlPrefix = options.personUrlPrefix || "person.html";
     const svgWidth = options.svgWidth || 1000;
     const svgHeight = options.svgHeight || 800;
+    const newWindow = options.newWindow;
     const refreshWindow = options.refreshWindow;
 
     document.addEventListener('treeComplete', function (e) {
@@ -34,6 +40,12 @@
        * separate file and include it before this script tag.
        */
       function setup() {
+
+        if (treeObj.otherLocationResources
+            && treeObj.otherLocationResources.length > MAX_EXTERNAL_REFS) {
+          alert("There are " + treeObj.otherLocationResources.length + " external links for the main person, but we're only showing links to the first " + MAX_EXTERNAL_REFS + ".");
+        }
+
         // for React apps, don't keep adding SVGs
         d3.selectAll("svg").remove();
 
@@ -112,6 +124,7 @@
           x0: 0,
           y0: 0,
           portrait: root.portrait,
+          otherLocationResources: root.otherLocationResources,
           _children: root._children,
           _parents: root._parents,
           collapsed: false
@@ -167,7 +180,7 @@
       Tree.prototype.draw = function(source) {
         if(this.root){
           var nodes = this.tree.nodes(this.root),
-              links = this.tree.links(nodes);    
+              links = this.tree.links(nodes);
           this.drawLinks(links, source);
           this.drawNodes(nodes, source);
         } else {
@@ -191,7 +204,7 @@
           // as in the basic example.
           .data(links, function(d){ return d.target.id; });
 
-        // Add new links   
+        // Add new links
         // Transition new links from the source's
         // old position to the links final position
         link.enter().append("path")
@@ -237,7 +250,7 @@
       Tree.prototype.drawNodes = function(nodes, source) {
         var self = this;
 
-        // Update nodes    
+        // Update nodes
         var node = self.svg.selectAll("g.person." + self.selector)
           // The function we are passing provides d3 with an id
           // so that it can track when data is being added and removed.
@@ -270,7 +283,7 @@
         // Add Portrait
         node.append("image")
           .attr("xlink:href", function (d) {
-            var portrait = d.portrait || d.id.replace("json", "jpg");
+            var portrait = d.portrait || d.id.replace(new RegExp(".json$", "i"), ".jpg");
             return portrait;
           })
           .attr("x", -99)
@@ -316,7 +329,7 @@
 
         // Go to profile view
         nodeEnter.append("a")
-          .attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + d.id})
+          //.attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + d.id})
           .append("svg:image")
             .attr("xlink:href", "features/genealogy/images/profile.svg")
             .attr("width", 16)
@@ -325,12 +338,50 @@
             .attr("y", 40)
             .attr("fill-opacity", .5);
 
+        /**
+         * Create Links to Other Locations
+         *
+         * I cannot figure out how to add a variable number of link in d3 v 3.5.5
+         * So I'm going to create a bunch of them and hide the ones I don't need.
+         * We've got to figure out a way to do this better... maybe a d3 upgrade.
+         */
+        for (let i = 0; i < MAX_EXTERNAL_REFS; i++) {
+          let image =
+            nodeEnter
+              .append("a")
+              .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
+              .append("svg:image")
+              .attr("xlink:href", "features/genealogy/images/arrow-swoop.svg")
+              .attr("width", 16)
+              .attr("height", 16)
+              .attr("x", -60 + (i * 20))
+              .attr("y", 40)
+              .attr("fill-opacity", .5)
+              .attr("visibility", (person) =>
+                    person.otherLocationResources
+                    && i < person.otherLocationResources.length
+                    ? "visible"
+                    : "hidden"
+                   )
+              .on("click", function(person) {
+                if (person.otherLocationResources
+                    && i < person.otherLocationResources.length) {
+                  let link = person.otherLocationResources[i].resource
+                  if (link.startsWith("gedcomx:")) {
+                    newWindow(treeUrlPrefix + "?id=" + link);
+                  } else {
+                    newWindow(link);
+                  }
+                }
+              });
+        }
+
         // Update the position of both old and new nodes
         var nodeUpdate = node.transition()
           .duration(duration)
           .attr("transform", function(d) { return "translate(" + (self.direction * d.y) + "," + d.x + ")"; });
 
-        // Grow boxes to their proper size    
+        // Grow boxes to their proper size
         nodeUpdate.select('rect')
           .attr({
             x: -(boxWidth/2),
@@ -353,7 +404,7 @@
           .attr("transform", function(d) { return "translate(" + (self.direction * (source.y + boxWidth/2)) + "," + source.x + ")"; })
           .remove();
 
-        // Shrink boxes as we remove them    
+        // Shrink boxes as we remove them
         nodeExit.select('rect')
           .attr({
             x: 0,

@@ -63,6 +63,7 @@ export default function Distnet() {
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
       </div>
+
       <div className={`distnet ${styles.distnet}`} data-tid="distnet">
         {settingsCountText}
       </div>
@@ -133,6 +134,24 @@ export default function Distnet() {
             _.sum(_.map(distnet.cache, (value) => value.contents.length))}
           &nbsp;characters of cached data
         </ul>
+      </div>
+
+      <br />
+      {/** Push the "back" button down.  I don't know why it isn't down there already. * */}
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+
+      <div className={styles.backButton} data-tid="backButton">
+        <Link to={routes.HOME}>
+          <i className="fa fa-arrow-left fa-3x" />
+        </Link>
       </div>
     </div>
   );
