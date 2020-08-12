@@ -45,23 +45,24 @@ export default function Genealogy() {
         </h2>
         <hr className="hr" />
 
-        <GenealogyView />
+        <GenealogyView tree={tree} />
       </div>
     </div>
   );
 }
 
-function GenealogyView() {
+function GenealogyView(options) {
   const dispatch = useDispatch();
 
   const cache = useSelector((state: RootState) => state.distnet.cache);
-  tree.setCache(cache);
+
+  options.tree.setCache(cache);
 
   const rootUri: string = useSelector(
     (state: RootState) => state.genealogy.rootUri
   );
   // Walk tree for ancestors and descendants
-  tree.getTree(rootUri);
+  options.tree.getTree(rootUri);
 
   return (
     <div>

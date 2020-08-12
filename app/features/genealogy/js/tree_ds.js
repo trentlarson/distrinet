@@ -119,6 +119,7 @@
         return {
           name: root.name,
           id: root.id,
+          fullUri: root.fullUri,
           lifespan: root.lifespan,
           birthPlace: root.birthPlace,
           x0: 0,
@@ -349,7 +350,6 @@
           let image =
             nodeEnter
               .append("a")
-              .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
               .append("svg:image")
               .attr("xlink:href", "features/genealogy/images/arrow-swoop.svg")
               .attr("width", 16)
@@ -367,8 +367,9 @@
                 if (person.otherLocationResources
                     && i < person.otherLocationResources.length) {
                   let link = person.otherLocationResources[i].resource
-                  if (link.startsWith("gedcomx:")) {
-                    newWindow(treeUrlPrefix + "?id=" + link);
+                  if (person.otherLocationResources[i].format === "gedcomx"
+                      || link.startsWith("gedcomx:")) {
+                    location.assign(treeUrlPrefix + "?id=" + link);
                   } else {
                     newWindow(link);
                   }
