@@ -6,19 +6,17 @@ import routes from '../../constants/routes.json';
 import { Cache } from '../distnet/distnetClasses';
 import { setRootUri } from './genealogySlice';
 
+interface TreeOption {
+  tree: {
+    setCache(cache: Cache): void;
+    getTree(rootUri: string): void;
+    getQueryParams(): Record<string, string>;
+  };
+}
+
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
-
-interface Tree {
-  setCache(cache: Cache): void;
-  getTree(rootUri: string): void;
-  getQueryParams(): Record<string, string>;
-}
-
-interface TreeOption {
-  tree: Tree;
-}
 
 export default function Genealogy() {
   treeDs.addListener({
