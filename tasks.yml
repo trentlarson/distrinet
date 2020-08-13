@@ -1,3 +1,5 @@
+- 99 0 determine problem with parsing JSON on private, eg. gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
+- 99 0 add links into display for all IDs with other location resources
 - 90 1 add spinner when loading a new tree
 - 90 1 add tests: find, globalUriForResource, globalUriForId
 - 90 1 bug: sometimes the graph doesn't show after pasting the URL (after cache reload?)
@@ -23,6 +25,8 @@
 - 70 1 show indicator if settings file has been changed
 - 70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to find documentation)
 - 70 2 save a preference for loading cache on app start
+- 65 0 add format/type info to the sources (for a more accurate indicator than just the URI "scheme:")
+  - add to samePerson
 - 60 0 show how the same code can be used in browser & in node
 - 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
 - 60 1 store correlations of local and remote URIs

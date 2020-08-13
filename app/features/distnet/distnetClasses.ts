@@ -72,7 +72,24 @@ export interface CacheData {
   sourceUrl: string; // whichever URL was used as the source
   localFile: string; // local path, without "file:"
   contents: string;
+  // this is a string so that it can be serialized, eg. into the Redux state
   date: string;
+}
+
+export class CacheWrapper {
+  private cache: Cache;
+
+  constructor(_cache: Cache) {
+    this.cache = _cache;
+  }
+
+  getKeys(): Array<string> {
+    return Object.keys(this.cache);
+  }
+
+  valueFor(key: string): CacheData {
+    return this.cache[key];
+  }
 }
 
 /** Utilities * */

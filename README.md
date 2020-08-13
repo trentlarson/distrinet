@@ -29,16 +29,18 @@ To run:
 - `yarn`
 - `yarn dev`
 
-To test UI:
+To test:
 
-- Samples in genealogy:
+- `yarn test-all`
+- UI Genealogy Samples:
   - https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
     - Shows images, expands up to 4 levels of expansion, collapses, and clicking network icon recenters on someone. (Profile links don't work yet.)
   - Will gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#KGY4-8D5
   - Hann gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#LZK2-LD4
   - Norm gedcomx:6d5042a0-d647-11ea-bd04-dbbafdf08067#KWHH-HSW
+    - See two parents.
   - Norm gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
-    - See the external links.
+    - See the external links: first goes to two parents.
 
 When developing:
 

@@ -1,11 +1,7 @@
-import R from 'ramda';
+import { Cache, CacheWrapper } from '../distnet/distnetClasses';
+import uriTools from './js/uriTools';
 
-/**
-interface SameIdentitiesMap {
-  sameIdentities: Record<string, string>;
-  date: string; // date this data was refreshed
-}
- */
+const R = require('ramda');
 
 const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
 
@@ -14,8 +10,72 @@ const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
  *
  */
 export default class MapperBetweenSets {
-  public static refresh(cache: Cache): void {
-    throw new Error(`Not finished ${cache}`);
+  public static refreshIfNewer(updateMillis: number, cacheMap: Cache): void {
+    const allMillis = R.map(
+      R.compose((d: string) => new Date(d).valueOf(), R.prop('date')),
+      R.values(cacheMap)
+    );
+    const maxMillis = R.last(R.sort(R.subtract, allMillis));
+    if (updateMillis && updateMillis >= maxMillis) {
+      // we're already up-to-date
+      return;
+    }
+    console.log('Map of IDs-spanning-data-sets is out-of-date.  Refreshing...');
+    const cache = new CacheWrapper(cacheMap);
+    const keys = cache.getKeys();
+    for (let ki = 0; ki < keys.length; ki += 1) {
+      const key = keys[ki];
+      if (key.startsWith('gedcomx:')) {
+        const content = JSON.parse(cache.valueFor(key).contents);
+        if (content.persons) {
+          for (
+            let pi = 0;
+            content.persons && pi < content.persons.length;
+            pi += 1
+          ) {
+            if (
+              content.persons[pi].links &&
+              content.persons[pi].links.otherLocations
+            ) {
+              for (
+                let li = 0;
+                li < content.persons[pi].links.otherLocations.resources.length;
+                li += 1
+              ) {
+                const otherRes =
+                  content.persons[pi].links.otherLocations.resources[li];
+                if (
+                  otherRes.format === 'gedcomx' ||
+                  otherRes.resource.startsWith('gedcomx:')
+                ) {
+                  const thisId = uriTools.globalUriForId(
+                    content.persons[pi].id,
+                    key
+                  );
+                  const otherId = uriTools.globalUriForResource(
+                    otherRes.resource,
+                    key
+                  );
+                  this.addPair(thisId, otherId);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
+  }
+
+  public static addPair(id1: string, id2: string): void {
+    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
+    const idMap = idMapStr ? JSON.parse(idMapStr) : {};
+    const allSameIds = this.findAllIdentities([id1, id2], idMap);
+    for (let i = 0; i < allSameIds.length; i += 1) {
+      const otherIds = R.without([allSameIds[i]], allSameIds);
+      idMap[allSameIds[i]] = otherIds;
+    }
+    localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
   }
 
   private static findAllIdentities(
@@ -32,15 +92,5 @@ export default class MapperBetweenSets {
       remainingIds = R.union(remainingIds, newIds);
     }
     return collectedIds;
-  }
-
-  public static addPair(id1: string, id2: string): void {
-    const idMap = JSON.parse(localStorage[SAME_IDENTITIES_KEY]) || {};
-    const allSameIds = this.findAllIdentities([id1, id2], idMap);
-    for (let i = 0; i < allSameIds.length; i += 1) {
-      const otherIds = R.without([allSameIds[i]], allSameIds);
-      idMap[allSameIds[i]] = otherIds;
-    }
-    localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
   }
 }

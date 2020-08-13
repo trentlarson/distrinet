@@ -1,6 +1,7 @@
 (function(exports){
 
   const $ = require("./jquery-2.2.4.min.js");
+  const uriTools = require("./uriTools.js");
 
   var cache = null;
   function setCache(_cache) {
@@ -89,7 +90,7 @@
             // find the person record
             let personIndex = -1;
             for (let i = 0; i < gedcomx.persons.length && personIndex === -1; i++) {
-              if (globalUriForId(gedcomx.persons[i].id, prefixUri) === uri) {
+              if (uriTools.globalUriForId(gedcomx.persons[i].id, prefixUri) === uri) {
                 personIndex = i;
                 break;
               }
@@ -197,8 +198,8 @@
 
   // Find person by ID in json object tree
   function find(obj, id, uriContext) {
-    if (globalUriForId(id, uriContext) === globalUriForId(obj.id, uriContext)
-        || globalUriForId(id, uriContext) === obj.fullUri) return obj;
+    if (uriTools.globalUriForId(id, uriContext) === uriTools.globalUriForId(obj.id, uriContext)
+        || uriTools.globalUriForId(id, uriContext) === obj.fullUri) return obj;
     for (let i = 0; i < obj._parents.length; i ++) {
       var result = find(obj._parents[i], id, uriContext);
       if (result) return result;
@@ -213,11 +214,11 @@
     for (let j=0; j < childResources.length; j++) {
       // Get name of child: Assume living if person not found in persons array
       for (let i=1; i<persons.length; i++) {
-        if (globalUriForResource(childResources[j].resource, uriContext)
-            === globalUriForId(persons[i].id, uriContext)) {
+        if (uriTools.globalUriForResource(childResources[j].resource, uriContext)
+            === uriTools.globalUriForId(persons[i].id, uriContext)) {
           children.push({ id: childResources[j].resource, name: persons[i].display.name });
-        } else if (globalUriForId(childResources[j].resourceId, uriContext)
-                   === globalUriForId(persons[i].id, uriContext)) {
+        } else if (uriTools.globalUriForId(childResources[j].resourceId, uriContext)
+                   === uriTools.globalUriForId(persons[i].id, uriContext)) {
           children.push({ id: childResources[j].resourceId, name: persons[i].display.name });
         }
       }
@@ -232,82 +233,38 @@
 
     // Iterate all persons
     for (let i=1; i<persons.length; i++) {
-      let uriForNextPerson = globalUriForId(persons[i].id, uriContext);
+      let uriForNextPerson = uriTools.globalUriForId(persons[i].id, uriContext);
 
       // Look for first parent
-      const parent1ResourceUri = globalUriForResource(family.parent1.resource, uriContext);
+      const parent1ResourceUri = uriTools.globalUriForResource(family.parent1.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-      const parent1IdUri = globalUriForId(family.parent1.resourceId, uriContext);
+      const parent1IdUri = uriTools.globalUriForId(family.parent1.resourceId, uriContext);
       if (uriForNextPerson == parent1ResourceUri
           || uriForNextPerson == parent1IdUri) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          parents.father = {id: persons[i].id, name: persons[i].display.name, url: globalUriForResource(family.parent1.resource, uriContext)};
+          parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent1.resource, uriContext)};
         } else {
-          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: globalUriForResource(family.parent1.resource, uriContext)};
+          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent1.resource, uriContext)};
         }
       }
 
       // Look for second parent
-      const parent2ResourceUri = globalUriForResource(family.parent2.resource, uriContext);
+      const parent2ResourceUri = uriTools.globalUriForResource(family.parent2.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-      const parent2IdUri = globalUriForId(family.parent2.resourceId, uriContext);
+      const parent2IdUri = uriTools.globalUriForId(family.parent2.resourceId, uriContext);
       if (uriForNextPerson == parent2ResourceUri
           || uriForNextPerson == parent2IdUri) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          parents.father = {id: persons[i].id, name: persons[i].display.name, url: globalUriForResource(family.parent2.resource, uriContext)};
+          parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent2.resource, uriContext)};
         } else {
-          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: globalUriForResource(family.parent2.resource, uriContext)};
+          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent2.resource, uriContext)};
         }
       }
 
     }
     return parents;
-  }
-
-  /**
-    // Hypothetical URI resolver object for results (and maybe for inputs)
-
-    // The URI for a file currently being referenced
-    contextUri
-    // The smaller URI (ie. a fragment) when inside the contextUri
-    localUri
-    // The full, global URI
-    globalUri
-  **/
-
-  /**
-   * @param someUri should be a URI or some portion, starting with "/" or "?" or "#"
-   * @param uriContext is the current document URI
-   **/
-  function globalUriForResource(someUri, uriContext) {
-    if (someUri
-        && (someUri.startsWith("#")
-            || someUri.startsWith("/")
-            || someUri.startsWith("?"))) {
-      return uriContext + someUri;
-    } else {
-      return someUri;
-    }
-  }
-
-  /**
-   * Given an ID within some context, return the URI for it (ie. including the fragment)
-   **/
-  function globalUriForId(id, uriContext) {
-    if (isGlobalUri(id)) {
-      return id
-    } else {
-      return uriContext + "#" + id;
-    }
-  }
-
-  /**
-   * from https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
-   **/
-  function isGlobalUri(string) {
-    return string && string.match(new RegExp(/^[A-Za-z][A-Za-z0-9\+\.\-]*:/))
   }
 
   // Get Query parameters

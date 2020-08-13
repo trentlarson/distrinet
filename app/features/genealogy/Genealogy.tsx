@@ -5,6 +5,7 @@ import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 import { Cache } from '../distnet/distnetClasses';
 import { setRootUri } from './genealogySlice';
+import MapperBetweenSets from './samePerson';
 
 interface TreeOption {
   tree: {
@@ -63,7 +64,13 @@ export default function Genealogy() {
 function GenealogyView(options: TreeOption) {
   const dispatch = useDispatch();
 
-  const cache = useSelector((state: RootState) => state.distnet.cache);
+  const cache: Cache = useSelector((state: RootState) => state.distnet.cache);
+
+  const correlatedIdsRefreshedMillis: number = useSelector(
+    (state: RootState) => state.genealogy.correlatedIdsRefreshedMillis
+  );
+  // update DB if there are newer cache items
+  MapperBetweenSets.refreshIfNewer(correlatedIdsRefreshedMillis, cache);
 
   options.tree.setCache(cache);
 
@@ -73,10 +80,22 @@ function GenealogyView(options: TreeOption) {
   // Walk tree for ancestors and descendants
   options.tree.getTree(rootUri);
 
+  const help = `
+    Sample URIs:
+      https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
+      gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#KGY4-8D5
+  `;
+
+  /* Can't wait to remove the alert and make a good UI! */
+  /* eslint-disable no-alert */
   return (
     <div>
       <div>
-        URI &nbsp;
+        URI
+        <button type="button" onClick={() => alert(help)}>
+          (?)
+        </button>
+        &nbsp;
         {rootUri}
         <br />
         <input

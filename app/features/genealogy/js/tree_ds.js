@@ -366,10 +366,10 @@
               .on("click", function(person) {
                 if (person.otherLocationResources
                     && i < person.otherLocationResources.length) {
-                  let link = person.otherLocationResources[i].resource
-                  if (person.otherLocationResources[i].format === "gedcomx"
-                      || link.startsWith("gedcomx:")) {
-                    location.assign(treeUrlPrefix + "?id=" + link);
+                  let link = person.otherLocationResources[i];
+                  if (link.format === "gedcomx"
+                      || link.resource.startsWith("gedcomx:")) {
+                    location.assign(treeUrlPrefix + "?id=" + link.resource);
                   } else {
                     newWindow(link);
                   }
