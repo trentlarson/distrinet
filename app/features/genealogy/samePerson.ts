@@ -1,7 +1,7 @@
 import { Cache, CacheWrapper } from '../distnet/distnetClasses';
 import uriTools from './js/uriTools';
 
-const R = require('ramda');
+const R = require('./js/ramda-0.25.0.min.js');
 
 const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
 
@@ -10,6 +10,18 @@ const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
  *
  */
 export default class MapperBetweenSets {
+  /**
+   * return list of all other IDs correlated with this one
+   */
+  public static retrieveFor(key: string): Array<string> {
+    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
+    const idMap = idMapStr ? JSON.parse(idMapStr) : {};
+    return idMap[key] || [];
+  }
+
+  /**
+   * If there are items in the cache that are are newer, update the mappings in localStorage.
+   */
   public static refreshIfNewer(updateMillis: number, cacheMap: Cache): void {
     const allMillis = R.map(
       R.compose((d: string) => new Date(d).valueOf(), R.prop('date')),
@@ -67,10 +79,13 @@ export default class MapperBetweenSets {
     console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
   }
 
+  /**
+   * Add these two ids one another's mappings in localStorage.
+   */
   public static addPair(id1: string, id2: string): void {
     const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
-    const allSameIds = this.findAllIdentities([id1, id2], idMap);
+    const allSameIds = this.combineAllIdentities([id1, id2], idMap);
     for (let i = 0; i < allSameIds.length; i += 1) {
       const otherIds = R.without([allSameIds[i]], allSameIds);
       idMap[allSameIds[i]] = otherIds;
@@ -78,7 +93,10 @@ export default class MapperBetweenSets {
     localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
   }
 
-  private static findAllIdentities(
+  /**
+   * Add initialIds to the allIdMappings
+   */
+  private static combineAllIdentities(
     initialIds: Array<string>,
     allIdMappings: Record<string, Array<string>>
   ): Array<string> {

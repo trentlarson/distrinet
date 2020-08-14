@@ -1,7 +1,10 @@
 (function(exports){
 
   const $ = require("./jquery-2.2.4.min.js");
+  const R = require('./ramda-0.25.0.min.js');
   const uriTools = require("./uriTools.js");
+  const mapperModule = require('../samePerson');
+  const MapperBetweenSets = mapperModule.default;
 
   var cache = null;
   function setCache(_cache) {
@@ -178,11 +181,19 @@
     }
 
     tmpNode.otherLocationResources = []
+    // first add explicit ones (which may include non-gedcomx records)
     if (gedcomx.persons[personIndex].links
         && gedcomx.persons[personIndex].links.otherLocations
         && gedcomx.persons[personIndex].links.otherLocations.resources) {
       tmpNode.otherLocationResources = gedcomx.persons[personIndex].links.otherLocations.resources;
     }
+    // now include any other gedcomx, possibly from reverse pointers
+    let otherIds = MapperBetweenSets.retrieveFor(uriTools.globalUriForId(id, uriContext));
+    let otherIdResources = otherIds ? R.map(uri => ({resource: uri}), otherIds) : [];
+    tmpNode.otherLocationResources =
+      R.unionWith((a,b) => a.resource === b.resource,
+                  tmpNode.otherLocationResources,
+                  otherIdResources);
 
     // Stop after 4 generations
     if (generationCount < 5

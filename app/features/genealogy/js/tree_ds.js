@@ -371,9 +371,19 @@
                       || link.resource.startsWith("gedcomx:")) {
                     location.assign(treeUrlPrefix + "?id=" + link.resource);
                   } else {
-                    newWindow(link);
+                    newWindow(link.resource);
                   }
                 }
+              })
+              .append("svg:title")
+              .text(function(person) {
+                let result = ""
+                if (person.otherLocationResources
+                    && i < person.otherLocationResources.length) {
+                  let link = person.otherLocationResources[i];
+                  result = link.description || link.resource;
+                }
+                return result;
               });
         }
 
