@@ -180,20 +180,33 @@
       node._children = getChildren(gedcomx.persons[personIndex].display.familiesAsParent[0].children, gedcomx.persons, uriContext);
     }
 
-    tmpNode.otherLocationResources = []
-    // first add explicit ones (which may include non-gedcomx records)
+    // gather explicit person link
+    var personIdResources = []
+    if (gedcomx.persons[personIndex].links
+        && gedcomx.persons[personIndex].links.person
+        && gedcomx.persons[personIndex].links.person.href) {
+      personIdResources = [{
+        resource: gedcomx.persons[personIndex].links.person.href,
+        description: 'Link to FamilySearch GedcomX',
+        format: 'gedcomx'
+      }]
+    }
+    // add other explicit ones (which may include non-gedcomx records)
+    let otherIdResources = [];
     if (gedcomx.persons[personIndex].links
         && gedcomx.persons[personIndex].links.otherLocations
         && gedcomx.persons[personIndex].links.otherLocations.resources) {
-      tmpNode.otherLocationResources = gedcomx.persons[personIndex].links.otherLocations.resources;
+      otherIdResources = gedcomx.persons[personIndex].links.otherLocations.resources;
     }
-    // now include any other gedcomx, possibly from reverse pointers
-    let otherIds = MapperBetweenSets.retrieveFor(uriTools.globalUriForId(id, uriContext));
-    let otherIdResources = otherIds ? R.map(uri => ({resource: uri}), otherIds) : [];
-    tmpNode.otherLocationResources =
+    // now include any other gedcomx IDs already known, possibly from reverse pointers
+    let knownIds = MapperBetweenSets.retrieveFor(uriTools.globalUriForId(id, uriContext));
+    let knownIdResources = knownIds
+        ? R.map(uri => ({resource: uri, description: 'Known (maybe private) GedcomX', format: 'gedcomx'}), knownIds)
+        : [];
+    tmpNode.otherLocations =
       R.unionWith((a,b) => a.resource === b.resource,
-                  tmpNode.otherLocationResources,
-                  otherIdResources);
+                  personIdResources,
+                  R.concat(otherIdResources, knownIdResources));
 
     // Stop after 4 generations
     if (generationCount < 5

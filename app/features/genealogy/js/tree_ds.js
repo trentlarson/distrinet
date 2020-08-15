@@ -41,9 +41,9 @@
        */
       function setup() {
 
-        if (treeObj.otherLocationResources
-            && treeObj.otherLocationResources.length > MAX_EXTERNAL_REFS) {
-          alert("There are " + treeObj.otherLocationResources.length + " external links for the main person, but we're only showing links to the first " + MAX_EXTERNAL_REFS + ".");
+        if (treeObj.otherLocations
+            && treeObj.otherLocations.length > MAX_EXTERNAL_REFS) {
+          alert("There are " + treeObj.otherLocations.length + " external links for the main person, but we're only showing links to the first " + MAX_EXTERNAL_REFS + ".");
         }
 
         // for React apps, don't keep adding SVGs
@@ -125,7 +125,7 @@
           x0: 0,
           y0: 0,
           portrait: root.portrait,
-          otherLocationResources: root.otherLocationResources,
+          otherLocations: root.otherLocations,
           _children: root._children,
           _parents: root._parents,
           collapsed: false
@@ -358,15 +358,15 @@
               .attr("y", 40)
               .attr("fill-opacity", .5)
               .attr("visibility", (person) =>
-                    person.otherLocationResources
-                    && i < person.otherLocationResources.length
+                    person.otherLocations
+                    && i < person.otherLocations.length
                     ? "visible"
                     : "hidden"
                    )
               .on("click", function(person) {
-                if (person.otherLocationResources
-                    && i < person.otherLocationResources.length) {
-                  let link = person.otherLocationResources[i];
+                if (person.otherLocations
+                    && i < person.otherLocations.length) {
+                  let link = person.otherLocations[i];
                   if (link.format === "gedcomx"
                       || link.resource.startsWith("gedcomx:")) {
                     location.assign(treeUrlPrefix + "?id=" + link.resource);
@@ -378,10 +378,11 @@
               .append("svg:title")
               .text(function(person) {
                 let result = ""
-                if (person.otherLocationResources
-                    && i < person.otherLocationResources.length) {
-                  let link = person.otherLocationResources[i];
-                  result = link.description || link.resource;
+                if (person.otherLocations
+                    && i < person.otherLocations.length) {
+                  let link = person.otherLocations[i];
+                  result = link.description;
+                  result = (!result ? "" : result + " - ") + link.resource;
                 }
                 return result;
               });
