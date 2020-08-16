@@ -45,22 +45,21 @@
     if (uri.toLowerCase().startsWith("http:")
         || uri.toLowerCase().startsWith("https:")) {
       // HTTP is just a special case of a URI so we can eliminate this separation someday
-      $.get(uri)
-        .done(function(rsp) {
+      fetch(uri, {headers: {Accept: 'application/x-gedcomx-v1+json'}})
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(gedcomx) {
           try {
-            let gedcomx = rsp;
-            if (typeof rsp === "string") {
-              gedcomx = JSON.parse(rsp);
-            } // else we hope it's an application/json type, already an object
             walkTree(uri, gedcomx, generationCount, node, 0, uri)
           } catch (e) {
             // An error from walkTree stops ".always" from working.
             // Marking finished inside a 'finally' doesn't always work.
             // Reproduce with https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
-            console.log("Error in walkTree for URL", uri, e)
+            console.error("Error in walkTree for URL", uri, e)
           }
         })
-        .always(() => {
+        .finally(() => {
           markFinished(node);
         });
 
@@ -72,11 +71,12 @@
             let gedcomx = JSON.parse(cache[uri].contents)
             walkTree(uri, gedcomx, generationCount, node, 0, uri)
           } catch (e) {
-            console.log("Error in cached walkTree for URI", uri, e);
+            console.error("Error in cached walkTree for URI", uri, e);
           }
         } else {
-          console.log("Found no contents in cache for source URI", uri)
+          console.error("Found no contents in cache for source URI", uri)
         }
+
       } else {
         // check if any of the cache URIs are the prefix of the given URI
         let keys = Object.keys(cache);
@@ -103,10 +103,10 @@
               walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
             }
           } catch (e) {
-            console.log("Error in cached walkTree for URI", uri, e);
+            console.error("Error in cached walkTree for URI", uri, e);
           }
         } else {
-          console.log("Found no cached data for source URI", uri)
+          console.error("Found no cached data for source URI", uri)
         }
       }
       markFinished(node);
@@ -128,7 +128,7 @@
       if (treeObj.id) {
         document.dispatchEvent(new Event('treeComplete'));
       } else {
-        console.log("Found no valid treeObj data so will not draw on canvas.");
+        console.error("Found no valid treeObj data so will not draw on canvas.");
         // Should dispatch an event that shows a "not found" message.
       }
     }
@@ -185,8 +185,14 @@
     if (gedcomx.persons[personIndex].links
         && gedcomx.persons[personIndex].links.person
         && gedcomx.persons[personIndex].links.person.href) {
+      let href = gedcomx.persons[personIndex].links.person.href;
+      // ... and, since FamilySearch adds an annoying inconsequential "?flag=fsh", remove it
+      const suffix = "?flag=fsh";
+      if (href.endsWith(suffix)) {
+        href = href.substring(0, href.length - suffix.length);
+      }
       personIdResources = [{
-        resource: gedcomx.persons[personIndex].links.person.href,
+        resource: href,
         description: 'Link to FamilySearch GedcomX',
         format: 'gedcomx'
       }]
@@ -203,10 +209,15 @@
     let knownIdResources = knownIds
         ? R.map(uri => ({resource: uri, description: 'Known (maybe private) GedcomX', format: 'gedcomx'}), knownIds)
         : [];
-    tmpNode.otherLocations =
+    let allLocations =
       R.unionWith((a,b) => a.resource === b.resource,
                   personIdResources,
                   R.concat(otherIdResources, knownIdResources));
+    // now remove one the one we're already on (which can happen for the links.person.href)
+    let allLocationsButThis =
+        R.reject(a => a.resource == uriTools.globalUriForId(id, uriContext),
+                 allLocations);
+    tmpNode.otherLocations = allLocationsButThis;
 
     // Stop after 4 generations
     if (generationCount < 5

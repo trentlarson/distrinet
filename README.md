@@ -40,7 +40,7 @@ To test:
   - Norm gedcomx:6d5042a0-d647-11ea-bd04-dbbafdf08067#KWHH-HSW
     - See two parents.
   - Norm gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
-    - See the external links: first goes to two parents.
+    - See the external links: second goes to two parents.
 
 When developing:
 

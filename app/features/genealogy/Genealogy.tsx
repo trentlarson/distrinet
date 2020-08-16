@@ -1,3 +1,4 @@
+import electron from 'electron';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,26 @@ import routes from '../../constants/routes.json';
 import { Cache } from '../distnet/distnetClasses';
 import { setRootUri } from './genealogySlice';
 import MapperBetweenSets from './samePerson';
+
+if (electron.remote.session) {
+  const fsSessionId = '461459cc-2d07-4297-bb29-97acdd1d879c-prod';
+  const cookie = {
+    url: 'https://api.familysearch.org',
+    name: 'fssessionid',
+    value: fsSessionId,
+  };
+  electron.remote.session.defaultSession.cookies
+    .set(cookie)
+    /**
+    .then(() => {
+      // success
+      console.error("Set fssession cookie:", fsSessionId)
+    })
+    */
+    .catch((error) => {
+      console.error('Error setting fssession cookie:', error);
+    });
+}
 
 interface TreeOption {
   tree: {

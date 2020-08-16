@@ -19,7 +19,7 @@ export function loadSettings(): Promise<string | { error: string }> {
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())
     .catch((err) => {
-      console.log('Error retrieving settings:', err);
+      console.error('Error retrieving settings:', err);
       return { error: `Error retrieving settings: ${err}` };
     });
 }
@@ -32,7 +32,7 @@ export function saveSettingsToFile(
   text: string
 ): Promise<void | { error: string }> {
   return fsPromises.writeFile(SETTINGS_FILE, text).catch((err) => {
-    console.log('Error saving settings:', err);
+    console.error('Error saving settings:', err);
     return { error: `Error saving settings: ${err}` };
   });
 }
