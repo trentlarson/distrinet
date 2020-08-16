@@ -3,6 +3,7 @@ module.exports = {
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
+    'max-len': ['error', { code: 120 }], // Want 100. How do I make a different length for comments?
   },
   parserOptions: {
     ecmaVersion: 2020,

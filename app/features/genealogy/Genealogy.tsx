@@ -49,7 +49,9 @@ export default function Genealogy() {
       // open a new window
       window.open(url);
     },
-    // refreshWindow: Couldn't figure it out. Other things are available if you import 'electron', eg webFrame.context.location.getURL(), but I couldn't get anything to actually set the existingpage to the new URL.
+    // refreshWindow: Couldn't figure it out.
+    // Other things are available if you import 'electron', eg webFrame.context.location.getURL(),
+    // but I couldn't get anything to actually set the existingpage to the new URL.
   });
 
   const pageUri = tree.getQueryParams().id || '';
