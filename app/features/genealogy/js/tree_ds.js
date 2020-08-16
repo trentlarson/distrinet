@@ -326,7 +326,9 @@
             .attr("fill-opacity", .5)
             .on("click", function(person) {
               refreshWindow(treeUrlPrefix + "?id=" + person.id);
-            });
+            })
+            .append("svg:title")
+            .text(function(person) { return person.id });
 
         // Go to profile view
         nodeEnter.append("a")

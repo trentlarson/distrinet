@@ -171,7 +171,7 @@
 
     // Get Parents
     tmpNode._parents = [];
-    // first look for a "relationship" link
+    // first look for "relationship" links
     if (gedcomx.relationships) {
       let personsParents =
         R.filter(r =>
@@ -207,12 +207,31 @@
 
     // Get children of root person only
     // TODO Get multiple generations of descendants
-    if (generationCount == 0
-        && gedcomx.persons[personIndex].display
-        && gedcomx.persons[personIndex].display.familiesAsParent
-        && gedcomx.persons[personIndex].display.familiesAsParent[0].children
-        && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
-      node._children = getChildren(gedcomx.persons[personIndex].display.familiesAsParent[0].children, gedcomx.persons, uriContext);
+    if (generationCount == 0) {
+      node._children = []
+      // first look for "relationship" links
+      if (gedcomx.relationships) {
+        let personsChildren =
+            R.filter(r =>
+                     r.type === 'http://gedcomx.org/ParentChild'
+                     && r.person1
+                     && r.person2
+                     && r.person1.resource
+                     && uriTools.equal(uriTools.globalUriForId(r.person1.resource, uriContext),
+                                       personGlobalId),
+                     gedcomx.relationships);
+        for (let i = 0; i < personsChildren.length; i += 1) {
+          tmpNode._children.push({id: personsChildren[i].person2.resource});
+        }
+      }
+      // if that didn't work, try the familiesAsParent
+      if (node._children.length === 0
+          && gedcomx.persons[personIndex].display
+          && gedcomx.persons[personIndex].display.familiesAsParent
+          && gedcomx.persons[personIndex].display.familiesAsParent[0].children
+          && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
+        node._children = getChildren(gedcomx.persons[personIndex].display.familiesAsParent[0].children, gedcomx.persons, uriContext);
+      }
     }
 
     // gather explicit person link
