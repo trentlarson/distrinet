@@ -96,7 +96,7 @@ export default class MapperBetweenSets {
   /**
    * Add initialIds to the allIdMappings
    */
-  private static combineAllIdentities(
+  public static combineAllIdentities(
     initialIds: Array<string>,
     allIdMappings: Record<string, Array<string>>
   ): Array<string> {
