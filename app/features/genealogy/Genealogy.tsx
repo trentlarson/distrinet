@@ -9,11 +9,10 @@ import { setRootUri } from './genealogySlice';
 import MapperBetweenSets from './samePerson';
 
 if (electron.remote.session) {
-  const fsSessionId = '461459cc-2d07-4297-bb29-97acdd1d879c-prod';
   const cookie = {
     url: 'https://api.familysearch.org',
     name: 'fssessionid',
-    value: fsSessionId,
+    value: process.env.FSSESSIONID,
   };
   electron.remote.session.defaultSession.cookies
     .set(cookie)
@@ -105,6 +104,7 @@ function GenealogyView(options: TreeOption) {
 
   const help = `
     Sample URIs:
+      https://api.familysearch.org/platform/tree/persons/KWHH-HSW
       https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
       gedcomx:04bf12b0-cecd-11ea-8dda-f73921453c09#KGY4-8D5
   `;

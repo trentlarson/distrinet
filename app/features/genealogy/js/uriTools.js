@@ -42,9 +42,47 @@
     if (isGlobalUri(id)) {
       return id;
     }
-    return `${uriContext}#${id}`;
+    let finalId = id;
+    if (id.startsWith('#')) {
+      finalId = id.substring(1);
+    }
+    return `${uriContext}#${finalId}`;
   }
 
+  /**
+   * Return an equivalent FamilySearch URI, eg for persons/ABC-DEF and persons/ABC-DEF#ABC-DEF
+   */
+  function equivFSUri(uri) {
+    const PREFIX = '/platform/tree/persons/';
+    const parsedUri = new URL(uri);
+    if (
+      parsedUri.host === 'api.familysearch.org' &&
+      parsedUri.pathname.startsWith(PREFIX) &&
+      parsedUri.hash &&
+      parsedUri.pathname.split('/').pop() === parsedUri.hash.substring(1)
+    ) {
+      parsedUri.hash = '';
+      return [parsedUri.toString()];
+    }
+    return [];
+  }
+
+  /**
+   * Some contexts allow multiple representations, eg. see equivFSUri
+   */
+  function equal(uri1, uri2) {
+    const equivUri1 = [uri1].concat(equivFSUri(uri1));
+    const equivUri2 = [uri2].concat(equivFSUri(uri2));
+    // now see if there's any overlap
+    for (let i = 0; i < equivUri2.length; i += 1) {
+      if (equivUri1.includes(equivUri2[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  exports.equal = equal;
   exports.globalUriForResource = globalUriForResource;
   exports.globalUriForId = globalUriForId;
   exports.isGlobalUri = isGlobalUri;

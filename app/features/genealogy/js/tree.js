@@ -47,7 +47,15 @@
       // HTTP is just a special case of a URI so we can eliminate this separation someday
       fetch(uri, {headers: {Accept: 'application/x-gedcomx-v1+json'}})
         .then(function(response) {
-          return response.json();
+          if (response.ok) {
+            return response.json();
+          } else if (response.status === 401) {
+            let errorMessage = "Authorization failed retrieving URL" + uri;
+            throw Error(errorMessage);
+          } else {
+            let errorMessage = "Got error status" + response.status + "retrieving URL" + uri;
+            throw Error(errorMessage);
+          }
         })
         .then(function(gedcomx) {
           try {
@@ -58,6 +66,9 @@
             // Reproduce with https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
             console.error("Error in walkTree for URL", uri, e)
           }
+        })
+        .catch((error) => {
+          console.error("Error retrieving or parsing results from URL:", uri, error);
         })
         .finally(() => {
           markFinished(node);
@@ -156,9 +167,32 @@
       tmpNode.portrait = gedcomx.persons[personIndex].links.portrait.href;
     }
 
+    let personGlobalId = uriTools.globalUriForId(id, uriContext)
+
     // Get Parents
-    if (gedcomx.persons[personIndex].display.familiesAsChild) {
-      var parents = getParents(gedcomx.persons[personIndex].display.familiesAsChild[0], gedcomx.persons, uriContext);
+    tmpNode._parents = [];
+    // first look for a "relationship" link
+    if (gedcomx.relationships) {
+      let personsParents =
+        R.filter(r =>
+                 r.type === 'http://gedcomx.org/ParentChild'
+                 && r.person1
+                 && r.person2
+                 && r.person2.resource
+                 && uriTools.equal(uriTools.globalUriForId(r.person2.resource, uriContext),
+                                   personGlobalId),
+                 gedcomx.relationships);
+      for (let i = 0; i < personsParents.length; i += 1) {
+        tmpNode._parents.push({id: personsParents[i].person1.resource, _parents: []});
+      }
+    }
+    // if that doesn't exist, try the display info
+    if (tmpNode._parents.length === 0
+        && gedcomx.persons[personIndex].display.familiesAsChild) {
+      let parents =
+          getParentsFromFamiliesAsChild(gedcomx.persons[personIndex].display.familiesAsChild[0],
+                                        gedcomx.persons,
+                                        uriContext);
 
       if (parents.father) {
         tmpNode._parents.push({id: parents.father.url, name: parents.father.name, _parents: []});
@@ -166,9 +200,10 @@
       if (parents.mother) {
         tmpNode._parents.push({id: parents.mother.url, name: parents.mother.name, _parents: []});
       }
-      tmpNode.lifespan = gedcomx.persons[personIndex].display.lifespan;
-      tmpNode.birthPlace = gedcomx.persons[personIndex].display.birthPlace;
     }
+
+    tmpNode.lifespan = gedcomx.persons[personIndex].display.lifespan;
+    tmpNode.birthPlace = gedcomx.persons[personIndex].display.birthPlace;
 
     // Get children of root person only
     // TODO Get multiple generations of descendants
@@ -205,7 +240,7 @@
       otherIdResources = gedcomx.persons[personIndex].links.otherLocations.resources;
     }
     // now include any other gedcomx IDs already known, possibly from reverse pointers
-    let knownIds = MapperBetweenSets.retrieveFor(uriTools.globalUriForId(id, uriContext));
+    let knownIds = MapperBetweenSets.retrieveFor(personGlobalId);
     let knownIdResources = knownIds
         ? R.map(uri => ({resource: uri, description: 'Known (maybe private) GedcomX', format: 'gedcomx'}), knownIds)
         : [];
@@ -214,19 +249,13 @@
                   personIdResources,
                   R.concat(otherIdResources, knownIdResources));
     // now remove one the one we're already on (which can happen for the links.person.href)
-    let allLocationsButThis =
-        R.reject(a => a.resource == uriTools.globalUriForId(id, uriContext),
-                 allLocations);
+    let allLocationsButThis = R.reject(a => a.resource == personGlobalId, allLocations);
     tmpNode.otherLocations = allLocationsButThis;
 
     // Stop after 4 generations
-    if (generationCount < 5
-        && parents) {
-      if (parents.father) {
-        getTree2(parents.father.url, generationCount + 1, node);
-      }
-      if (parents.mother) {
-        getTree2(parents.mother.url, generationCount + 1, node);
+    if (generationCount < 5) {
+      for (let i = 0; i < tmpNode._parents.length; i += 1) {
+        getTree2(tmpNode._parents[i].id, generationCount + 1, node);
       }
     }
   }
@@ -262,7 +291,7 @@
   }
 
   // Get the parents: Get their IDs from the display->familiesAsChild object. Get their names from the persons array.
-  function getParents(family, persons, uriContext) {
+  function getParentsFromFamiliesAsChild(family, persons, uriContext) {
 
     var parents = {father: null, mother: null};
 
@@ -273,9 +302,12 @@
       // Look for first parent
       const parent1ResourceUri = uriTools.globalUriForResource(family.parent1.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-      const parent1IdUri = uriTools.globalUriForId(family.parent1.resourceId, uriContext);
+
       if (uriForNextPerson == parent1ResourceUri
-          || uriForNextPerson == parent1IdUri) {
+          || (family.parent1
+              && family.parent1.resourceId
+              && uriForNextPerson
+                 == uriTools.globalUriForId(family.parent1.resourceId, uriContext))) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
           parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent1.resource, uriContext)};
@@ -287,9 +319,11 @@
       // Look for second parent
       const parent2ResourceUri = uriTools.globalUriForResource(family.parent2.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-      const parent2IdUri = uriTools.globalUriForId(family.parent2.resourceId, uriContext);
       if (uriForNextPerson == parent2ResourceUri
-          || uriForNextPerson == parent2IdUri) {
+          || (family.parent2
+              && family.parent2.resourceId
+              && uriForNextPerson
+                 == uriTools.globalUriForId(family.parent2.resourceId, uriContext))) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
           parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent2.resource, uriContext)};

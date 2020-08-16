@@ -5,6 +5,7 @@
 - 90 1 add tests: find, globalUriForResource, globalUriForId
 - 90 1 bug: sometimes the graph doesn't show after pasting the URL (after cache reload?)
 - 90 1 bug: clicking on otherLocationResource in the same page (repeatedly?) fails
+- 80 0 bug: Matt's example from raw.githubusercontent renders external links that don't work
 - 80 0 try resourceId as an index into the current URI (since the resource URIs are now permissioned)
 - 80 1 click on a 4th-gen person and force further expansion
 - 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files

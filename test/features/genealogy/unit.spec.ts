@@ -1,4 +1,40 @@
 import * as MapperModule from '../../../app/features/genealogy/samePerson';
+import * as uriTools from '../../../app/features/genealogy/js/uriTools';
+
+describe('uriTools', () => {
+  it('should match FamilySearch URIs', () => {
+    expect(
+      uriTools.equal(
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW',
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW'
+      )
+    ).toBe(true);
+    expect(
+      uriTools.equal(
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW',
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW#KWHH-HSW'
+      )
+    ).toBe(true);
+    expect(
+      uriTools.equal(
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW#KWHH-HSW',
+        'https://api.familysearch.org/platform/tree/persons/KWHH-HSW'
+      )
+    ).toBe(true);
+    expect(
+      uriTools.equal(
+        'https://api.familysearch.org/platform/tree/persons/KWHH-A',
+        'https://api.familysearch.org/platform/tree/persons/KWHH-B'
+      )
+    ).toBe(false);
+    expect(
+      uriTools.equal(
+        'https://api.familysearch.org/platform/tree/persons/KWHH-A',
+        'https://api.familysearch.org/platform/tree/persons/KWHH-A#B'
+      )
+    ).toBe(false);
+  });
+});
 
 describe('MapperModule', () => {
   it('should handle empties', () => {
