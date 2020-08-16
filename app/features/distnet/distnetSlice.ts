@@ -105,7 +105,7 @@ export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
     dispatch(setSettingsErrorMessage(null));
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
-    console.log(
+    console.error(
       'New distnet settings failed YAML parse or sanity check:\n',
       error.message
     );
@@ -199,7 +199,7 @@ export const dispatchCacheForId = (sourceId: string): AppThunk => async (
   if (result) {
     return dispatch(setCachedStateForOne(result));
   }
-  console.log(
+  console.error(
     `Failed to load source ${sourceId} into cache because it was not found in sources.`
   );
   return dispatch(() => {});

@@ -68,14 +68,14 @@ async function retrieveAllTasks(
                 description: line.toString().substring(5),
               }));
             }
-            console.log(
+            console.error(
               'Loaded tasks YAML but got non-array result:\n',
               contentTasks
             );
             return [];
           })
           .catch((error) => {
-            console.log('Failure loading a YAML task list:', error);
+            console.error('Failure loading a YAML task list:', error);
             return [];
           });
         result = _.concat(result, next);

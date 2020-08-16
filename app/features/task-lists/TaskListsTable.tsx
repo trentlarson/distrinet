@@ -11,7 +11,7 @@ function execProtocolApp(execPath: string, args: Array<string>) {
   child(execPath, args, (err, data) => {
     // This runs after the app is closed.
     console.log('Executable data:', data);
-    console.log('Executable error:', err);
+    console.error('Executable error:', err);
   });
 }
 
