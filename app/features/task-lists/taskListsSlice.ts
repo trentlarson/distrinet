@@ -10,9 +10,10 @@ const fsPromises = fs.promises;
 
 export interface Task {
   sourceId: string;
-  priority: number;
-  estimate: number;
+  priority: number | null;
+  estimate: number | null;
   description: string;
+  children: Array<Task>;
 }
 
 const taskListsSlice = createSlice({
@@ -43,9 +44,11 @@ export function isTaskyamlSource(sourceId: string) {
   return sourceId.startsWith('taskyaml:');
 }
 
-const parseIssues = (sourceId, issueList) => {
+const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
   if (Array.isArray(issueList)) {
-    return issueList.map((issue) => parseIssues(sourceId, issue));
+    // I don't expect to see arrays of arrays (outside blockers or subtasks).
+    // This helps with typechecks... hope it doesn't do anything unexpected.
+    return issueList.map((issue) => parseIssues(sourceId, issue)).flat();
   }
   if (typeof issueList === 'string') {
     return {
@@ -53,22 +56,36 @@ const parseIssues = (sourceId, issueList) => {
       priority: Number(issueList.toString().substring(0, 2)),
       estimate: Number(issueList.toString().substring(3, 4)),
       description: issueList.toString().substring(5),
+      children: [],
     };
   }
   if (typeof issueList === 'object') {
     // expecting a key of the issue with value the children issues
     const key = Object.keys(issueList)[0].toString();
+    const subChildren = parseIssues(sourceId, issueList[key]);
+    let children = [];
+    if (Array.isArray(subChildren)) {
+      children = subChildren;
+    } else {
+      children = [subChildren];
+    }
     return {
       sourceId,
       priority: Number(key.substring(0, 2)),
       estimate: Number(key.substring(3, 4)),
       description: key.substring(5),
-      children: parseIssues(sourceId, issueList[key]),
+      children,
     };
   }
-  return `Unknown Task Structure: ${typeof issueList} ${
-    issueList ? issueList.toString() : ''
-  }`;
+  return {
+    sourceId,
+    priority: null,
+    estimate: null,
+    description: `Unknown Task Structure: ${typeof issueList} ${
+      issueList ? issueList.toString() : ''
+    }`,
+    children: [],
+  };
 };
 
 /**
@@ -88,7 +105,11 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            return parseIssues(entry.sourceId, contentTasks);
+            const issues = parseIssues(entry.sourceId, contentTasks);
+            if (Array.isArray(issues)) {
+              return issues;
+            }
+            return [issues];
           })
           .catch((error) => {
             console.error('Failure loading a YAML task list:', error);

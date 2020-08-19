@@ -72,11 +72,11 @@ export default function TaskListsTable() {
               // eslint-disable-next-line react/no-array-index-key
               <tr key={`${task.sourceId}/${index}`}>
                 <td>{task.sourceId}</td>
-                <td>{task.priority.toString()}</td>
-                <td>{task.estimate.toString()}</td>
+                <td>{task.priority && task.priority.toString()}</td>
+                <td>{task.estimate && task.estimate.toString()}</td>
                 <td>{task.description}</td>
                 <td>
-                  {task.children ? (
+                  {task.children.length > 0 ? (
                     <button
                       type="button"
                       onClick={() => {
