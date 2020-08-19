@@ -75,6 +75,21 @@ export default function TaskListsTable() {
                 <td>{task.priority.toString()}</td>
                 <td>{task.estimate.toString()}</td>
                 <td>{task.description}</td>
+                <td>
+                  {task.children ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log('Child tasks', task.children);
+                        return '';
+                      }}
+                    >
+                      children
+                    </button>
+                  ) : (
+                    ''
+                  )}
+                </td>
               </tr>
             ))}
         </tbody>

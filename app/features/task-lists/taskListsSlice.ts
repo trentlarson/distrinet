@@ -43,6 +43,34 @@ export function isTaskyamlSource(sourceId: string) {
   return sourceId.startsWith('taskyaml:');
 }
 
+const parseIssues = (sourceId, issueList) => {
+  if (Array.isArray(issueList)) {
+    return issueList.map((issue) => parseIssues(sourceId, issue));
+  }
+  if (typeof issueList === 'string') {
+    return {
+      sourceId,
+      priority: Number(issueList.toString().substring(0, 2)),
+      estimate: Number(issueList.toString().substring(3, 4)),
+      description: issueList.toString().substring(5),
+    };
+  }
+  if (typeof issueList === 'object') {
+    // expecting a key of the issue with value the children issues
+    const key = Object.keys(issueList)[0].toString();
+    return {
+      sourceId,
+      priority: Number(key.substring(0, 2)),
+      estimate: Number(key.substring(3, 4)),
+      description: key.substring(5),
+      children: parseIssues(sourceId, issueList[key]),
+    };
+  }
+  return `Unknown Task Structure: ${typeof issueList} ${
+    issueList ? issueList.toString() : ''
+  }`;
+};
+
 /**
  * @return a promise that resolves to Task Promises
  */
@@ -60,19 +88,7 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            if (Array.isArray(contentTasks)) {
-              return contentTasks.map((line: string) => ({
-                sourceId: entry.sourceId,
-                priority: Number(line.toString().substring(0, 2)),
-                estimate: Number(line.toString().substring(3, 4)),
-                description: line.toString().substring(5),
-              }));
-            }
-            console.error(
-              'Loaded tasks YAML but got non-array result:\n',
-              contentTasks
-            );
-            return [];
+            return parseIssues(entry.sourceId, contentTasks);
           })
           .catch((error) => {
             console.error('Failure loading a YAML task list:', error);
