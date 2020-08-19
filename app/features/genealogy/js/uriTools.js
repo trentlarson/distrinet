@@ -68,6 +68,18 @@
   }
 
   /**
+   * Clean up those stupid FamilySearch URIs with ""?flag=fsh" on the end.
+   */
+  function removeQuery(uri) {
+    if (isGlobalUri(uri)) {
+      const url = new URL(uri);
+      url.search = '';
+      return url.toString();
+    }
+    return uri;
+  }
+
+  /**
    * Some contexts allow multiple representations, eg. see equivFSUri
    */
   function equal(uri1, uri2) {
@@ -86,4 +98,5 @@
   exports.globalUriForResource = globalUriForResource;
   exports.globalUriForId = globalUriForId;
   exports.isGlobalUri = isGlobalUri;
+  exports.removeQuery = removeQuery;
 })(typeof exports === 'undefined' ? (this.uriTools = {}) : exports);

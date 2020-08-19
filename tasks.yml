@@ -1,21 +1,24 @@
-- 99 0 add session ID in settings
-- 99 0 determine problem with parsing JSON on private, eg. gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
+---
+- 95 0 determine problem with parsing JSON on private, eg. gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
 - 95 0 optimize mapping in localStorage by only beginning & end of refreshIfNewer, and by caching in memory
 - 90 1 add spinner when loading a new tree
-- 90 1 add tests: find, globalUriForResource, globalUriForId
-- 90 1 bug: sometimes the graph doesn't show after pasting the URL (after cache reload?)
-- 90 1 bug: clicking on otherLocationResource in the same page (repeatedly?) fails
-- 80 0 bug: Matt's example from raw.githubusercontent renders external links that don't work
+- 90 1 add tests - find, globalUriForResource, globalUriForId
+- 90 1 bug - sometimes the graph doesn't show after pasting the URL (after cache reload?)
+- 90 1 bug - clicking on otherLocationResource in the same page (repeatedly?) fails
+- 80 0 bug - Matt's example from raw.githubusercontent renders external links that don't work
+- 80 2 mark myself & save my URIs and build functions to relate-to-me
+- 80 0 add the otherLocations to children (so they can show links in the UI)
 - 80 0 try resourceId as an index into the current URI (since the resource URIs are now permissioned)
 - 80 1 click on a 4th-gen person and force further expansion
-- 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
-  - 90 1 handle when load success after save failure or vice versa
+- ? 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
+  : - 90 1 handle when load success after save failure or vice versa
 - 80 1 give example of gedcomx protocol
-- 80 0 load cached files into memory (eg. all < 5 MB)
+- 80 0 load only smaller (eg. < 5 MB) local files into cache
 - 80 1 save file - find next cache name
 - 80 0 add spinner for the remote file loading (both cache refresh & local config)
 - 80 1 allow drag-and-drop to pull a new gedcomx file into distnet settings
 - 80 1 move feature-specific styling out of app/app.global.css
+- 75 0 add FamilySearch session ID in the UI somewhere
 - 75 2 start an HTTP server for file access (rather than direct library access)
 - 75 0 use logger instead of console.log
 - 75 0 handle more task YAML variations (eg. blocked & child issues)
@@ -32,6 +35,6 @@
 - 60 0 show how the same code can be used in browser & in node
 - 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
 - 60 1 store correlations of local and remote URIs
-- 50 0 bug: note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
-- 40 0 stop requiring semicolons in the code
+- 50 0 bug - note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
 - 20 0 read binary files id:read-binary
+- 20 0 stop requiring semicolons in the code

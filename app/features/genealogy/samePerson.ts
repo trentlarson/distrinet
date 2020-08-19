@@ -45,31 +45,41 @@ export default class MapperBetweenSets {
             content.persons && pi < content.persons.length;
             pi += 1
           ) {
-            if (
-              content.persons[pi].links &&
-              content.persons[pi].links.otherLocations
-            ) {
-              for (
-                let li = 0;
-                li < content.persons[pi].links.otherLocations.resources.length;
-                li += 1
-              ) {
-                const otherRes =
-                  content.persons[pi].links.otherLocations.resources[li];
-                if (
-                  otherRes.format === 'gedcomx' ||
-                  otherRes.resource.startsWith('gedcomx:')
+            if (content.persons[pi].links) {
+              if (content.persons[pi].links.otherLocations) {
+                for (
+                  let li = 0;
+                  li <
+                  content.persons[pi].links.otherLocations.resources.length;
+                  li += 1
                 ) {
-                  const thisId = uriTools.globalUriForId(
-                    content.persons[pi].id,
-                    key
-                  );
-                  const otherId = uriTools.globalUriForResource(
-                    otherRes.resource,
-                    key
-                  );
-                  this.addPair(thisId, otherId);
+                  const otherRes =
+                    content.persons[pi].links.otherLocations.resources[li];
+                  if (
+                    otherRes.format === 'gedcomx' ||
+                    otherRes.resource.startsWith('gedcomx:')
+                  ) {
+                    const thisId = uriTools.globalUriForId(
+                      content.persons[pi].id,
+                      key
+                    );
+                    const otherId = uriTools.globalUriForResource(
+                      otherRes.resource,
+                      key
+                    );
+                    this.addPair(thisId, otherId);
+                  }
                 }
+              } else if (content.persons[pi].links.person) {
+                const thisId = uriTools.globalUriForId(
+                  content.persons[pi].id,
+                  key
+                );
+                const otherId = uriTools.globalUriForResource(
+                  uriTools.removeQuery(content.persons[pi].links.person.href),
+                  key
+                );
+                this.addPair(thisId, otherId);
               }
             }
           }

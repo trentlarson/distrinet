@@ -1,4 +1,5 @@
-Distributed Genealogy
+# Distributed Genealogy
+
 Keep your own private trees, and point to public trees and browse seamlessly between the two.
 
 To test:

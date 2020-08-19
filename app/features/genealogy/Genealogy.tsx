@@ -59,6 +59,7 @@ export default function Genealogy() {
     // This causes the following error:
     // "Cannot update a component from inside the function body of a different component."
     // ... but it seems to do everything right.  What's the correct way?
+    // Look here for answers: http://stackoverflow.com/questions/36596996/ddg#36657751
     dispatch(setRootUri(pageUri));
   }
 

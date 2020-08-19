@@ -50,10 +50,10 @@
           if (response.ok) {
             return response.json();
           } else if (response.status === 401) {
-            let errorMessage = "Authorization failed retrieving URL" + uri;
+            let errorMessage = "Authorization failed retrieving URL " + uri;
             throw Error(errorMessage);
           } else {
-            let errorMessage = "Got error status" + response.status + "retrieving URL" + uri;
+            let errorMessage = "Got error status " + response.status + " retrieving URL " + uri;
             throw Error(errorMessage);
           }
         })
@@ -152,13 +152,18 @@
       node.id = gedcomx.persons[personIndex].id;
     }
     if (!node.name) {
-      node.name = gedcomx.persons[personIndex].display.name;
       // timeout is for React-type frameworks where this runs before the HTML has rendered (ugly)
       setTimeout(() => $('.person_name').html(gedcomx.persons[personIndex].display.name+' - <a href="person.html?id='+id+'">View Profile</a>'), 500);
+
+      // will set the tmpNode name below (because it's the same for all nodes)
     }
 
     // Find current person in json tree (node)
     var tmpNode = find(node, id, uriContext);
+
+    if (!tmpNode.name) {
+      tmpNode.name = gedcomx.persons[personIndex].display.name;
+    }
 
     // Set the portrait picture
     if (gedcomx.persons[personIndex].links
@@ -183,7 +188,8 @@
                                    personGlobalId),
                  gedcomx.relationships);
       for (let i = 0; i < personsParents.length; i += 1) {
-        tmpNode._parents.push({id: personsParents[i].person1.resource, _parents: []});
+        let nextId = uriTools.globalUriForResource(personsParents[i].person1.resource, uriContext);
+        tmpNode._parents.push({id: nextId, _parents: []});
       }
     }
     // if that doesn't exist, try the display info
@@ -221,7 +227,9 @@
                                        personGlobalId),
                      gedcomx.relationships);
         for (let i = 0; i < personsChildren.length; i += 1) {
-          tmpNode._children.push({id: personsChildren[i].person2.resource});
+          let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, uriContext);
+          let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
+          node._children.push({id: personsChildren[i].person2.resource, name: name});
         }
       }
       // if that didn't work, try the familiesAsParent
@@ -230,46 +238,17 @@
           && gedcomx.persons[personIndex].display.familiesAsParent
           && gedcomx.persons[personIndex].display.familiesAsParent[0].children
           && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
-        node._children = getChildren(gedcomx.persons[personIndex].display.familiesAsParent[0].children, gedcomx.persons, uriContext);
+        node._children =
+          getChildrenFromFamiliesAsParent(
+            gedcomx.persons[personIndex].display.familiesAsParent[0].children,
+            gedcomx.persons,
+            uriContext
+          );
       }
     }
 
-    // gather explicit person link
-    var personIdResources = []
-    if (gedcomx.persons[personIndex].links
-        && gedcomx.persons[personIndex].links.person
-        && gedcomx.persons[personIndex].links.person.href) {
-      let href = gedcomx.persons[personIndex].links.person.href;
-      // ... and, since FamilySearch adds an annoying inconsequential "?flag=fsh", remove it
-      const suffix = "?flag=fsh";
-      if (href.endsWith(suffix)) {
-        href = href.substring(0, href.length - suffix.length);
-      }
-      personIdResources = [{
-        resource: href,
-        description: 'Link to FamilySearch GedcomX',
-        format: 'gedcomx'
-      }]
-    }
-    // add other explicit ones (which may include non-gedcomx records)
-    let otherIdResources = [];
-    if (gedcomx.persons[personIndex].links
-        && gedcomx.persons[personIndex].links.otherLocations
-        && gedcomx.persons[personIndex].links.otherLocations.resources) {
-      otherIdResources = gedcomx.persons[personIndex].links.otherLocations.resources;
-    }
-    // now include any other gedcomx IDs already known, possibly from reverse pointers
-    let knownIds = MapperBetweenSets.retrieveFor(personGlobalId);
-    let knownIdResources = knownIds
-        ? R.map(uri => ({resource: uri, description: 'Known (maybe private) GedcomX', format: 'gedcomx'}), knownIds)
-        : [];
-    let allLocations =
-      R.unionWith((a,b) => a.resource === b.resource,
-                  personIdResources,
-                  R.concat(otherIdResources, knownIdResources));
-    // now remove one the one we're already on (which can happen for the links.person.href)
-    let allLocationsButThis = R.reject(a => a.resource == personGlobalId, allLocations);
-    tmpNode.otherLocations = allLocationsButThis;
+    tmpNode.otherLocations =
+      gatherOtherLocations(gedcomx, gedcomx.persons[personIndex].links, personGlobalId);
 
     // Stop after 4 generations
     if (generationCount < 5) {
@@ -291,7 +270,7 @@
   }
 
   // Get children: Get their IDs from the display->familiesAsParent object. Get their names from the persons array.
-  function getChildren(childResources, persons, uriContext) {
+  function getChildrenFromFamiliesAsParent(childResources, persons, uriContext) {
     var children = [];
     // Iterate all children
     for (let j=0; j < childResources.length; j++) {
@@ -299,10 +278,12 @@
       for (let i=1; i<persons.length; i++) {
         if (uriTools.globalUriForResource(childResources[j].resource, uriContext)
             === uriTools.globalUriForId(persons[i].id, uriContext)) {
-          children.push({ id: childResources[j].resource, name: persons[i].display.name });
+          let id = uriTools.globalUriForResource(childResources[j].resource, uriContext)
+          children.push({ id: id, name: persons[i].display.name });
         } else if (uriTools.globalUriForId(childResources[j].resourceId, uriContext)
                    === uriTools.globalUriForId(persons[i].id, uriContext)) {
-          children.push({ id: childResources[j].resourceId, name: persons[i].display.name });
+          let id = uriTools.globalUriForResource(childResources[j].resource, uriContext)
+          children.push({ id: id, name: persons[i].display.name });
         }
       }
     }
@@ -329,9 +310,19 @@
                  == uriTools.globalUriForId(family.parent1.resourceId, uriContext))) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent1.resource, uriContext)};
+          let id = uriTools.globalUriForId(persons[i].id, uriContext)
+          parents.father = {
+            id: id,
+            name: persons[i].display.name,
+            url: uriTools.globalUriForResource(family.parent1.resource, uriContext)
+          };
         } else {
-          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent1.resource, uriContext)};
+          let id = uriTools.globalUriForId(persons[i].id, uriContext)
+          parents.mother = {
+            id: id,
+            name: persons[i].display.name,
+            url: uriTools.globalUriForResource(family.parent1.resource, uriContext)
+          };
         }
       }
 
@@ -345,14 +336,61 @@
                  == uriTools.globalUriForId(family.parent2.resourceId, uriContext))) {
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          parents.father = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent2.resource, uriContext)};
+          let id = uriTools.globalUriForId(persons[i].id, uriContext)
+          parents.father = {
+            id: id,
+            name: persons[i].display.name,
+            url: uriTools.globalUriForResource(family.parent2.resource, uriContext)
+          };
         } else {
-          parents.mother = {id: persons[i].id, name: persons[i].display.name, url: uriTools.globalUriForResource(family.parent2.resource, uriContext)};
+          let id = uriTools.globalUriForId(persons[i].id, uriContext)
+          parents.mother = {
+            id: id,
+            name: persons[i].display.name,
+            url: uriTools.globalUriForResource(family.parent2.resource, uriContext)
+          };
         }
       }
 
     }
     return parents;
+  }
+
+  function gatherOtherLocations(gedcomx, personLinks, personGlobalId) {
+    // gather explicit person link
+    var personIdResources = []
+    if (personLinks
+        && personLinks.person
+        && personLinks.person.href) {
+      let href = uriTools.removeQuery(personLinks.person.href);
+      personIdResources = [{
+        resource: href,
+        description: 'Link to FamilySearch GedcomX',
+        format: 'gedcomx'
+      }]
+    }
+    // add other explicit ones (which may include non-gedcomx records)
+    let otherIdResources = [];
+    if (personLinks
+        && personLinks.otherLocations
+        && personLinks.otherLocations.resources) {
+      otherIdResources = personLinks.otherLocations.resources;
+    }
+    // now include any other gedcomx IDs already known, possibly from reverse pointers
+    let knownIds = MapperBetweenSets.retrieveFor(personGlobalId);
+    let knownIdResources = knownIds
+        ? R.map(uri => ({resource: uri,
+                         description: 'Known (maybe private) GedcomX',
+                         format: 'gedcomx'}),
+                knownIds)
+        : [];
+    let allLocations =
+      R.unionWith((a,b) => a.resource === b.resource,
+                  personIdResources,
+                  R.concat(otherIdResources, knownIdResources));
+    // now remove one the one we're already on (which can happen for the links.person.href)
+    let allLocationsButThis = R.reject(a => a.resource == personGlobalId, allLocations);
+    return allLocationsButThis;
   }
 
   // Get Query parameters
