@@ -1,9 +1,10 @@
 import child_process from 'child_process';
-import _ from 'lodash';
+import * as R from 'ramda';
 import React from 'react';
-import { useSelector } from 'react-redux';
+import ReactHtmlParser from 'react-html-parser';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { Task, isTaskyamlSource } from './taskListsSlice';
+import { Task, isTaskyamlSource, retrieveForecast } from './taskListsSlice';
 
 const child = child_process.execFile;
 
@@ -16,6 +17,7 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 }
 
 export default function TaskListsTable() {
+  const dispatch = useDispatch();
   const taskLists = useSelector((state: RootState) => state.taskLists);
   const distnet = useSelector((state: RootState) => state.distnet);
   const resourceTypes = useSelector(
@@ -24,14 +26,17 @@ export default function TaskListsTable() {
 
   let bigList: Array<Task> = [];
   let execSources = <span />;
+  let sourceMap = {};
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
       bigList = taskLists.bigList;
     }
 
-    const taskSources = _.filter(distnet.settings.sources, (s) =>
-      isTaskyamlSource(s.id)
+    const taskSources = R.filter(
+      (s) => isTaskyamlSource(s.id),
+      distnet.settings.sources
     );
+    sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
 
     execSources = (
       <ul>
@@ -50,11 +55,18 @@ export default function TaskListsTable() {
                   type="button"
                   onClick={() => execProtocolApp(execPath, [file])}
                 >
-                  Open
+                  Open Copy
                 </button>
               ) : (
                 <span />
               )}
+              &nbsp;
+              <button
+                type="button"
+                onClick={() => dispatch(retrieveForecast(source.id))}
+              >
+                Forecast
+              </button>
             </li>
           );
         })}
@@ -64,14 +76,16 @@ export default function TaskListsTable() {
 
   return (
     <div>
-      {execSources}
+      <div>{execSources}</div>
+      <div>{ReactHtmlParser(taskLists.forecastHtml)}</div>
+      <h4>All Tasks</h4>
       <table>
         <tbody>
           {bigList &&
             bigList.map((task: Task, index: number) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={`${task.sourceId}/${index}`}>
-                <td>{task.sourceId}</td>
+                <td>{sourceMap[task.sourceId].name}</td>
                 <td>{task.priority && task.priority.toString()}</td>
                 <td>{task.estimate && task.estimate.toString()}</td>
                 <td>{task.description}</td>

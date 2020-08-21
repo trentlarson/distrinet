@@ -18,7 +18,7 @@ export interface Task {
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
-  initialState: { bigList: [] as Array<Task> },
+  initialState: { bigList: [] as Array<Task>, forecastHtml: '' as string },
   reducers: {
     setTaskList: (state, tasks: Payload<Array<Task>>) => {
       state.bigList = tasks.payload;
@@ -26,10 +26,17 @@ const taskListsSlice = createSlice({
     addTaskList: (state, tasks: Payload<Array<Task>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
+    setForecastHtml: (state, html: Payload<string>) => {
+      state.forecastHtml = html.payload;
+    },
   },
 });
 
-export const { setTaskList, addTaskList } = taskListsSlice.actions;
+export const {
+  setTaskList,
+  addTaskList,
+  setForecastHtml,
+} = taskListsSlice.actions;
 
 /** potentially useful
 function sourceFromId(
@@ -89,7 +96,7 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
 };
 
 /**
- * @return a promise that resolves to Task Promises
+ * @return a Promise that resolves to arrays of arrays of Tasks
  */
 async function retrieveAllTasks(
   cacheSources: Cache
@@ -121,6 +128,29 @@ async function retrieveAllTasks(
   }
   return Promise.all(result);
 }
+
+export const retrieveForecast = (sourceId: string): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  const tasks = _.filter(
+    getState().taskLists.bigList,
+    (task) => task.sourceId === sourceId
+  );
+  const forecastTasks = tasks.map((t, i) => ({
+    key: i,
+    summary: t.description,
+  }));
+  const forecastResponse = await fetch('http://localhost:8090/display', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(forecastTasks),
+  });
+  const forecastString = await forecastResponse.text();
+  return dispatch(
+    setForecastHtml(`<div><h4>Forecast</h4>${forecastString}</div>`)
+  );
+};
 
 export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   dispatch,
