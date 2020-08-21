@@ -4,6 +4,7 @@ import React from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { Source } from '../distnet/distnetClasses';
 import { Task, isTaskyamlSource, retrieveForecast } from './taskListsSlice';
 
 const child = child_process.execFile;
@@ -26,7 +27,7 @@ export default function TaskListsTable() {
 
   let bigList: Array<Task> = [];
   let execSources = <span />;
-  let sourceMap = {};
+  let sourceMap: Record<string, Source> = {};
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
       bigList = taskLists.bigList;
