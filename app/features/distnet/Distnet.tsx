@@ -28,7 +28,7 @@ export default function Distnet() {
   }`;
 
   const settingsFullErrorMessage = distnet.settingsErrorMessage ? (
-    <div>
+    <div style={{ color: 'orange' }}>
       There was an error parsing the settings. (Previous settings are still in
       effect.)
       <pre>{distnet.settingsErrorMessage}</pre>
@@ -38,7 +38,7 @@ export default function Distnet() {
   );
 
   const settingsFullSaveErrorMessage = distnet.settingsSaveErrorMessage ? (
-    <div>
+    <div style={{ color: 'orange' }}>
       There was an error saving the settings. (Previous settings are still in
       effect.)
       <pre>{distnet.settingsSaveErrorMessage}</pre>
@@ -48,7 +48,7 @@ export default function Distnet() {
   );
 
   const cacheErrorMessage = distnet.cacheErrorMessage ? (
-    <div>
+    <div style={{ color: 'orange' }}>
       There was an error loading the cache.
       <pre>{distnet.cacheErrorMessage}</pre>
     </div>

@@ -5,6 +5,7 @@
 - 90 1 add tests - find, globalUriForResource, globalUriForId
 - 90 1 bug - sometimes the graph doesn't show after pasting the URL (after cache reload?)
 - 90 1 bug - clicking on otherLocationResource in the same page (repeatedly?) fails
+- 80 1 make it so that directory URIs work
 - 80 0 bug - Matt's example from raw.githubusercontent renders external links that don't work
 - 80 2 mark myself & save my URIs and build functions to relate-to-me
 - 80 0 add the otherLocations to children (so they can show links in the UI)
