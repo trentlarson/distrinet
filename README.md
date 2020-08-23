@@ -23,7 +23,7 @@ Here are the purposes of this service:
       - shared via file sync (eg. SQLite)
       - extract a patch (either via diff or changeset-since-version)
 
-This also comtains these sample applications:
+This also contains these sample applications:
 
 - [Distributed Genealogy](app/features/genealogy/README.md)
 
@@ -69,6 +69,7 @@ Thanks to:
 
 - [Electron React Boilerplate](https://electron-react-boilerplate.js.org/)
 - [Matt Misbach's Decentralized Distributed Genealogical Tree graphics & parsing](https://github.com/DecentralizedGenealogy/webclient)
+- [Justin York's D3 Pedigree Examples](https://github.com/justincy/d3-pedigree-examples)
 - [arrow image](https://svgsilh.com/9e9e9e/image/29170.html)
 
 Here's how this project was initially created:

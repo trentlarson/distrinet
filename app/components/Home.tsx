@@ -13,7 +13,7 @@ export default function Home(): JSX.Element {
       <h2>Home</h2>
       <Link to={routes.COUNTER}>to Counter</Link>
       <br />
-      <Link to={routes.DISTNET}>to distnet settings</Link>
+      <Link to={routes.DISTNET}>to distrinet settings</Link>
       <br />
       <Link to={routes.GENEALOGY}>to genealogy</Link>
       <br />

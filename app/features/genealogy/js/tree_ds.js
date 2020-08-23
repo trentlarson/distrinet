@@ -1,3 +1,5 @@
+// originally from https://github.com/justincy/d3-pedigree-examples
+
 (function(exports){
 
   const MAX_EXTERNAL_REFS = 8; // see usage, and get rid of this ASAP

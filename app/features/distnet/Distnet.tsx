@@ -68,11 +68,6 @@ export default function Distnet() {
         {settingsCountText}
       </div>
       <div className={styles.btnGroup}>
-        Config file is located here:&nbsp;
-        <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
-          {SETTINGS_FILE}
-        </a>
-        <br />
         Config file contents:
         <textarea
           rows={10}
@@ -82,6 +77,11 @@ export default function Distnet() {
             dispatch(dispatchSaveSettingsTextAndYaml(event.target.value));
           }}
         />
+        Config file is located here:&nbsp;
+        <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
+          {SETTINGS_FILE}
+        </a>
+        <br />
         <div>{settingsFullErrorMessage}</div>
         <div>{settingsFullSaveErrorMessage}</div>
         <button
@@ -104,22 +104,35 @@ export default function Distnet() {
         >
           save config
         </button>
-        <ul>
-          {!distnet.settingsErrorMessage &&
-            distnet.settings.sources &&
-            distnet.settings.sources.map((uriSource: Source) => (
-              <li key={uriSource.id}>
-                {uriSource.name ? uriSource.name : 'UNNAMED'}
-                <ul>
-                  <li>
+        {!distnet.settingsErrorMessage &&
+        distnet.settings.sources.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Name
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Cached Date
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {distnet.settings.sources.map((uriSource: Source) => (
+                <tr key={uriSource.id}>
+                  <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
+                  <td>
                     {distnet.cache[uriSource.id]
                       ? distnet.cache[uriSource.id].date
                       : '(no local copy yet)'}
-                  </li>
-                </ul>
-              </li>
-            ))}
-        </ul>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <span />
+        )}
         <button
           className={styles.btn}
           onClick={() => dispatch(dispatchCacheForAll())}
@@ -129,25 +142,22 @@ export default function Distnet() {
           load source
         </button>
         <div>{cacheErrorMessage}</div>
-        <ul>
-          {distnet.cache &&
-            _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-          &nbsp;characters of cached data
-        </ul>
+        <div>
+          <ul>
+            {distnet.cache &&
+              _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+            &nbsp;characters of cached data
+          </ul>
+        </div>
+        <div>
+          <h4>Help</h4>
+          For more troubleshooting details, right-click on the background and
+          select &quot; Inspect Element &quot; to open dev tools and click on
+          the &quot; Console &quot; to see the logs.
+        </div>
       </div>
 
-      <br />
-      {/** Push the "back" button down.  I don't know why it isn't down there already. * */}
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-
+      {/** Just for my convenience because I load source so often. */}
       <div className={styles.backButton} data-tid="backButton">
         <Link to={routes.HOME}>
           <i className="fa fa-arrow-left fa-3x" />
