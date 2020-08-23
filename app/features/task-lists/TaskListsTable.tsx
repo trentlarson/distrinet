@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 import * as R from 'ramda';
-import React from 'react';
+import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -43,10 +43,9 @@ export default function TaskListsTable() {
       <ul>
         {taskSources.map((source) => {
           const protocol = source.id.substring(0, source.id.indexOf(':'));
-          const execPath =
-            resourceTypes[protocol] && resourceTypes[protocol].executablePath;
-          const file =
-            distnet.cache[source.id] && distnet.cache[source.id].localFile;
+          const execPath = resourceTypes[protocol]?.executablePath;
+          const file = distnet.cache[source.id]?.localFile;
+          const [hoursPerWeek, setHoursPerWeek] = useState(5);
           return (
             <li key={source.id}>
               {source.name}
@@ -64,10 +63,11 @@ export default function TaskListsTable() {
               &nbsp;
               <button
                 type="button"
-                onClick={() => dispatch(retrieveForecast(source.id))}
+                onClick={() => dispatch(retrieveForecast(source.id, hoursPerWeek))}
               >
                 Forecast
               </button>
+              @ <input size='1' type='text' defaultValue={hoursPerWeek}/> hrs/wk
             </li>
           );
         })}
@@ -79,36 +79,43 @@ export default function TaskListsTable() {
     <div>
       <div>{execSources}</div>
       <div>{ReactHtmlParser(taskLists.forecastHtml)}</div>
-      <h4>All Tasks</h4>
-      <table>
-        <tbody>
-          {bigList &&
-            bigList.map((task: Task, index: number) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={`${task.sourceId}/${index}`}>
-                <td>{sourceMap[task.sourceId].name}</td>
-                <td>{task.priority && task.priority.toString()}</td>
-                <td>{task.estimate && task.estimate.toString()}</td>
-                <td>{task.description}</td>
-                <td>
-                  {task.children.length > 0 ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        console.log('Child tasks', task.children);
-                        return '';
-                      }}
-                    >
-                      children
-                    </button>
-                  ) : (
-                    ''
-                  )}
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      {bigList.length > 0 ? (
+        <div>
+          <h4>All Tasks</h4>
+          <table>
+            <tbody>
+              {bigList &&
+                bigList.map((task: Task, index: number) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <tr key={`${task.sourceId}/${index}`}>
+                    <td>{sourceMap[task.sourceId].name}</td>
+                    <td>{task.priority?.toString()}</td>
+                    <td>{task.estimate?.toString()}</td>
+                    <td>{task.description}</td>
+                    <td>
+                      {task.children.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            console.log('Child tasks', task.children);
+                            return '';
+                          }}
+                        >
+                          children
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+       ) : (
+        <span />
+       )
+      }
     </div>
   );
 }

@@ -16,6 +16,13 @@ export interface Task {
   children: Array<Task>;
 }
 
+interface IssueToSchedule {
+  key: string;
+  summary: string;
+  // number of seconds
+  issueEstSecondsRaw: number;
+}
+
 const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: { bigList: [] as Array<Task>, forecastHtml: '' as string },
@@ -129,7 +136,7 @@ async function retrieveAllTasks(
   return Promise.all(result);
 }
 
-export const retrieveForecast = (sourceId: string): AppThunk => async (
+export const retrieveForecast = (sourceId: string, hoursPerWeek: number): AppThunk => async (
   dispatch,
   getState
 ) => {
@@ -137,14 +144,16 @@ export const retrieveForecast = (sourceId: string): AppThunk => async (
     getState().taskLists.bigList,
     (task) => task.sourceId === sourceId
   );
-  const forecastTasks = tasks.map((t, i) => ({
-    key: i,
+  const forecastTasks: Array<IssueToSchedul> = tasks.map((t, i) => ({
+    key: i.toString(),
     summary: t.description,
+    issueEstSecondsRaw: t.estimate === null ? 0 : (2 ** t.estimate) * 60 * 60,
   }));
+  const forecastRequest = { issues: forecastTasks };
   const forecastResponse = await fetch('http://localhost:8090/display', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(forecastTasks),
+    body: JSON.stringify(forecastRequest),
   });
   const forecastString = await forecastResponse.text();
   return dispatch(
