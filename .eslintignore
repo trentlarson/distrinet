@@ -54,6 +54,9 @@ package.json
 *.sass.d.ts
 *.scss.d.ts
 
+# yarn additions (with large files)
+.yarn
+
 # custom distnet additions
 app/features/genealogy/js/d3.min.js
 app/features/genealogy/js/jquery-2.2.4.min.js

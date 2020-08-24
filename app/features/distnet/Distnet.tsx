@@ -152,8 +152,8 @@ export default function Distnet() {
         <div>
           <h4>Help</h4>
           For more troubleshooting details, right-click on the background and
-          select &quot;Inspect Element&quot; to open dev tools and click on
-          the &quot;Console&quot; to see the logs.
+          select &quot;Inspect Element&quot; to open dev tools and click on the
+          &quot;Console&quot; to see the logs.
         </div>
       </div>
 

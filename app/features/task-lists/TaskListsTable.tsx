@@ -24,6 +24,7 @@ export default function TaskListsTable() {
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
   );
+  const [hoursPerWeek, setHoursPerWeek] = useState(40);
 
   let bigList: Array<Task> = [];
   let execSources = <span />;
@@ -40,38 +41,52 @@ export default function TaskListsTable() {
     sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
 
     execSources = (
-      <ul>
-        {taskSources.map((source) => {
-          const protocol = source.id.substring(0, source.id.indexOf(':'));
-          const execPath = resourceTypes[protocol]?.executablePath;
-          const file = distnet.cache[source.id]?.localFile;
-          const [hoursPerWeek, setHoursPerWeek] = useState(5);
-          return (
-            <li key={source.id}>
-              {source.name}
-              &nbsp;
-              {execPath ? (
+      <div>
+        <ul>
+          {taskSources.map((source) => {
+            const protocol = source.id.substring(0, source.id.indexOf(':'));
+            const execPath = resourceTypes[protocol]?.executablePath;
+            const file = distnet.cache[source.id]?.localFile;
+            /** I cannot figure out how to fix this stupid error. */
+            /** eslint-disable-next-line react/jsx-curly-newline */
+            return (
+              <li key={source.id}>
+                {source.name}
+                &nbsp;
+                {execPath ? (
+                  <button
+                    type="button"
+                    onClick={() => execProtocolApp(execPath, [file])}
+                  >
+                    Open Copy
+                  </button>
+                ) : (
+                  <span />
+                )}
+                &nbsp;
                 <button
                   type="button"
-                  onClick={() => execProtocolApp(execPath, [file])}
+                  onClick={
+                    () => dispatch(retrieveForecast(source.id, hoursPerWeek))
+                    // This is soooo stupid that there's an error-level lint rule about this!
+                    // eslint-disable-next-line react/jsx-curly-newline
+                  }
                 >
-                  Open Copy
+                  Forecast
                 </button>
-              ) : (
-                <span />
-              )}
-              &nbsp;
-              <button
-                type="button"
-                onClick={() => dispatch(retrieveForecast(source.id, hoursPerWeek))}
-              >
-                Forecast
-              </button>
-              @ <input size='1' type='text' defaultValue={hoursPerWeek}/> hrs/wk
-            </li>
-          );
-        })}
-      </ul>
+              </li>
+            );
+          })}
+        </ul>
+        (Note: forecasts are estimated at
+        <input
+          size="1"
+          type="text"
+          defaultValue={hoursPerWeek}
+          onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
+        />
+        hrs/wk)
+      </div>
     );
   }
 
@@ -112,10 +127,9 @@ export default function TaskListsTable() {
             </tbody>
           </table>
         </div>
-       ) : (
+      ) : (
         <span />
-       )
-      }
+      )}
     </div>
   );
 }

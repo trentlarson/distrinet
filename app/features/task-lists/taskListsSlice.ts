@@ -136,10 +136,10 @@ async function retrieveAllTasks(
   return Promise.all(result);
 }
 
-export const retrieveForecast = (sourceId: string, hoursPerWeek: number): AppThunk => async (
-  dispatch,
-  getState
-) => {
+export const retrieveForecast = (
+  sourceId: string,
+  hoursPerWeek: number
+): AppThunk => async (dispatch, getState) => {
   const tasks = _.filter(
     getState().taskLists.bigList,
     (task) => task.sourceId === sourceId
@@ -147,9 +147,12 @@ export const retrieveForecast = (sourceId: string, hoursPerWeek: number): AppThu
   const forecastTasks: Array<IssueToSchedul> = tasks.map((t, i) => ({
     key: i.toString(),
     summary: t.description,
-    issueEstSecondsRaw: t.estimate === null ? 0 : (2 ** t.estimate) * 60 * 60,
+    issueEstSecondsRaw: t.estimate === null ? 0 : 2 ** t.estimate * 60 * 60,
   }));
-  const forecastRequest = { issues: forecastTasks };
+  const forecastRequest = {
+    issues: forecastTasks,
+    createPreferences: { defaultAssigneeHoursPerWeek: hoursPerWeek },
+  };
   const forecastResponse = await fetch('http://localhost:8090/display', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
