@@ -144,7 +144,7 @@ export const retrieveForecast = (
     getState().taskLists.bigList,
     (task) => task.sourceId === sourceId
   );
-  const forecastTasks: Array<IssueToSchedul> = tasks.map((t, i) => ({
+  const forecastTasks: Array<IssueToSchedule> = tasks.map((t, i) => ({
     key: i.toString(),
     summary: t.description,
     issueEstSecondsRaw: t.estimate === null ? 0 : 2 ** t.estimate * 60 * 60,

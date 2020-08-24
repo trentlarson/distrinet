@@ -80,7 +80,7 @@ export default function TaskListsTable() {
         </ul>
         (Note: forecasts are estimated at
         <input
-          size="1"
+          size={1}
           type="text"
           defaultValue={hoursPerWeek}
           onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
