@@ -159,9 +159,7 @@ export const retrieveForecast = (
     body: JSON.stringify(forecastRequest),
   });
   const forecastString = await forecastResponse.text();
-  return dispatch(
-    setForecastHtml(`<div><h4>Forecast</h4>${forecastString}</div>`)
-  );
+  return dispatch(setForecastHtml(forecastString));
 };
 
 export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
