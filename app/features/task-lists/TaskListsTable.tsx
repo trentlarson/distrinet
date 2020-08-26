@@ -28,7 +28,7 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 function labelValueInDescription(label: string, description: string) {
   const pairs = R.filter(R.test(/:/), R.split(' ', description));
   const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
-  return pair ? R.split(':', pair)[1] : '';
+  return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : '';
 }
 
 export default function TaskListsTable() {
