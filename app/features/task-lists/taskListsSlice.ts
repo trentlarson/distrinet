@@ -59,19 +59,34 @@ export function isTaskyamlSource(sourceId: string) {
   return sourceId.startsWith('taskyaml:');
 }
 
-export function taskFromString(sourceId, fullText, dependents, subtasks) {
-  let priority: number = NaN;
-  let estimate: number = NaN;
+export function taskFromString(
+  sourceId: string,
+  fullText: string,
+  dependents: Array<Task>,
+  subtasks: Array<Task>
+) {
+  let priority = NaN;
+  let estimate = NaN;
   let remainingText = fullText.trim();
   let space1Pos = remainingText.indexOf(' ');
-  if (space1Pos > -1) {
+  if (space1Pos > -1
+      || (space1Pos === -1 && remainingText.length > 0)) {
+    if (space1Pos === -1) {
+      // no spaces at all; still check if it's just a number
+      space1Pos = remainingText.length;
+    }
     priority = parseFloat(remainingText.substring(0, space1Pos));
-    if (!isNaN(priority)) {
+    if (!Number.isNaN(priority)) {
       remainingText = remainingText.substring(space1Pos + 1);
       let space2Pos = remainingText.indexOf(' ');
-      if (space2Pos > -1) {
+      if (space2Pos > -1
+          || (space2Pos === -1 && remainingText.length > 0)) {
+        if (space2Pos === -1) {
+          // no spaces left; still check if it's just a number
+          space2Pos = remainingText.length;
+        }
         estimate = parseFloat(remainingText.substring(0, space2Pos));
-        if (!isNaN(estimate)) {
+        if (!Number.isNaN(estimate)) {
           remainingText = remainingText.substring(space2Pos + 1);
         }
       }
