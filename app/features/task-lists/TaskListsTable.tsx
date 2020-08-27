@@ -31,6 +31,18 @@ function labelValueInDescription(label: string, description: string) {
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : '';
 }
 
+function labelValueRendering(label: string, description: string) {
+  const value = labelValueInDescription(label, description);
+  if (label === 'copy'
+      && value.length > 0) {
+    return <button>
+        { value }
+      </button>;
+  } else {
+    return value;
+  }
+}
+
 export default function TaskListsTable() {
   const dispatch = useDispatch();
   const taskLists = useSelector((state: RootState) => state.taskLists);
@@ -191,7 +203,7 @@ export default function TaskListsTable() {
                     <td>{task.estimate?.toString()}</td>
                     {labelsToShow.map((label) => (
                       <td key={label}>
-                        {labelValueInDescription(label, task.description)}
+                        {labelValueRendering(label, task.description)}
                       </td>
                     ))}
                     <td>{task.description}</td>
