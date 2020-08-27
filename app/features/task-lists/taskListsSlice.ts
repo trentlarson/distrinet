@@ -13,7 +13,8 @@ export interface Task {
   priority: number | null;
   estimate: number | null;
   description: string;
-  children: Array<Task>;
+  dependents: Array<Task>;
+  subtasks: Array<Task>;
 }
 
 interface IssueToSchedule {
@@ -58,6 +59,34 @@ export function isTaskyamlSource(sourceId: string) {
   return sourceId.startsWith('taskyaml:');
 }
 
+export function taskFromString(sourceId, fullText, dependents, subtasks) {
+  let priority: number = NaN;
+  let estimate: number = NaN;
+  let remainingText = fullText.trim();
+  let space1Pos = remainingText.indexOf(' ');
+  if (space1Pos > -1) {
+    priority = parseFloat(remainingText.substring(0, space1Pos));
+    if (!isNaN(priority)) {
+      remainingText = remainingText.substring(space1Pos + 1);
+      let space2Pos = remainingText.indexOf(' ');
+      if (space2Pos > -1) {
+        estimate = parseFloat(remainingText.substring(0, space2Pos));
+        if (!isNaN(estimate)) {
+          remainingText = remainingText.substring(space2Pos + 1);
+        }
+      }
+    }
+  }
+  return {
+    sourceId,
+    priority,
+    estimate,
+    description: remainingText,
+    dependents,
+    subtasks,
+  };
+}
+
 const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
   if (Array.isArray(issueList)) {
     // I don't expect to see arrays of arrays (outside blockers or subtasks).
@@ -65,31 +94,19 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
     return issueList.map((issue) => parseIssues(sourceId, issue)).flat();
   }
   if (typeof issueList === 'string') {
-    return {
-      sourceId,
-      priority: Number(issueList.toString().substring(0, 2)),
-      estimate: Number(issueList.toString().substring(3, 4)),
-      description: issueList.toString().substring(5),
-      children: [],
-    };
+    return taskFromString(sourceId, issueList, [], []);
   }
   if (typeof issueList === 'object') {
-    // expecting a key of the issue with value the children issues
+    // expecting a key of the issue with value the subtasks issues
     const key = Object.keys(issueList)[0].toString();
-    const subChildren = parseIssues(sourceId, issueList[key]);
-    let children = [];
-    if (Array.isArray(subChildren)) {
-      children = subChildren;
+    const subSubtasks = parseIssues(sourceId, issueList[key]);
+    let subtasks = [];
+    if (Array.isArray(subSubtasks)) {
+      subtasks = subSubtasks;
     } else {
-      children = [subChildren];
+      subtasks = [subSubtasks];
     }
-    return {
-      sourceId,
-      priority: Number(key.substring(0, 2)),
-      estimate: Number(key.substring(3, 4)),
-      description: key.substring(5),
-      children,
-    };
+    return taskFromString(sourceId, key, [], subtasks);
   }
   return {
     sourceId,
@@ -98,7 +115,8 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
     description: `Unknown Task Structure: ${typeof issueList} ${
       issueList ? issueList.toString() : ''
     }`,
-    children: [],
+    dependents: [],
+    subtasks: [],
   };
 };
 

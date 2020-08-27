@@ -7,7 +7,7 @@
 - 90 1 bug - sometimes the graph doesn't show after pasting the URL (after cache reload?)
 - 90 1 bug - clicking on otherLocationResource in the same page (repeatedly?) fails
 - 80 1 make it so that directory URIs work
-- 80 -1 allow loading of sources automatically (then remove bottom "back" button)
+- 80 -1 allow loading of sources automatically (then remove bottom "back" button):
   - add an indicator on the front page that it's loading
   - allow for deselection of files that might be too big
 - 80 0 bug - Matt's example from raw.githubusercontent renders external links that don't work
@@ -15,8 +15,8 @@
 - 80 0 add the otherLocations to children (so they can show links in the UI)
 - 80 0 try resourceId as an index into the current URI (since the resource URIs are now permissioned)
 - 80 1 click on a 4th-gen person and force further expansion
-- ? 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files
-  : - 90 1 handle when load success after save failure or vice versa
+- 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files:
+  - 90 1 handle when load success after save failure or vice versa
 - 80 1 give example of gedcomx protocol
 - 80 0 load only smaller (eg. < 5 MB) local files into cache
 - 80 1 save file - find next cache name
@@ -36,11 +36,11 @@
 - 70 1 show indicator if settings file has been changed
 - 70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to find documentation)
 - 70 2 save a preference for loading cache on app start
-- 65 0 add format/type info to the sources (for a more accurate indicator than just the URI "scheme:")
+- 65 0 add format/type info to the sources (for a more accurate indicator than just the URI "scheme:"):
   - add to samePerson
 - 60 0 show how the same code can be used in browser & in node
 - 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
 - 60 1 store correlations of local and remote URIs
 - 50 0 bug - note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
-- 20 0 read binary files id:read-binary
+- 20 0 read binary files id:#read-binary
 - 20 0 stop requiring semicolons in the code

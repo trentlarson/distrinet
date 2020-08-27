@@ -60,7 +60,7 @@ export default function TaskListsTable() {
             R.test(/^[A-Za-z0-9_-]*$/),
             R.map((item) => R.split(':', item)[0], pairs)
           );
-          allLabels = R.concat(allLabels, validKeys);
+          allLabels = R.concat(allLabels, validKeys).sort();
         }
       }
     }
@@ -73,43 +73,49 @@ export default function TaskListsTable() {
 
     execSources = (
       <div>
-        <ul>
-          {taskSources.map((source) => {
+        <table>
+          <tbody>
+            {taskSources.map((source) => {
             const protocol = source.id.substring(0, source.id.indexOf(':'));
             const execPath = resourceTypes[protocol]?.executablePath;
             const file = distnet.cache[source.id]?.localFile;
             /** I cannot figure out how to fix this stupid error. */
             /** eslint-disable-next-line react/jsx-curly-newline */
             return (
-              <li key={source.id}>
-                {source.name}
-                &nbsp;
-                {execPath ? (
+              <tr key={source.id}>
+                <td>
+                  {source.name}
+                </td>
+                <td>
+                  {execPath ? (
+                    <button
+                      type="button"
+                      onClick={() => execProtocolApp(execPath, [file])}
+                    >
+                      Open Copy
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                </td>
+                <td>
                   <button
                     type="button"
-                    onClick={() => execProtocolApp(execPath, [file])}
+                    onClick={
+                      () => dispatch(retrieveForecast(source.id, hoursPerWeek))
+                      // This is soooo stupid that there's an error-level lint rule about this!
+                      // eslint-disable-next-line react/jsx-curly-newline
+                    }
                   >
-                    Open Copy
+                    Forecast
                   </button>
-                ) : (
-                  <span />
-                )}
-                &nbsp;
-                <button
-                  type="button"
-                  onClick={
-                    () => dispatch(retrieveForecast(source.id, hoursPerWeek))
-                    // This is soooo stupid that there's an error-level lint rule about this!
-                    // eslint-disable-next-line react/jsx-curly-newline
-                  }
-                >
-                  Forecast
-                </button>
-              </li>
+                </td>
+              </tr>
             );
           })}
-        </ul>
-        (Note: forecasts are estimated at&nbsp;
+          </tbody>
+        </table>
+        (Forecasts are estimated at&nbsp;
         <input
           size={2}
           type="text"
@@ -173,7 +179,7 @@ export default function TaskListsTable() {
                   <th key={label}>{label}</th>
                 ))}
                 <th>Description</th>
-                <th>Log Children</th>
+                <th>Subtasks (to log)</th>
               </tr>
             </thead>
             <tbody>
@@ -191,15 +197,15 @@ export default function TaskListsTable() {
                     ))}
                     <td>{task.description}</td>
                     <td>
-                      {task.children.length > 0 ? (
+                      {task.subtasks.length > 0 ? (
                         <button
                           type="button"
                           onClick={() => {
-                            console.log('Child tasks', task.children);
+                            console.log('Subtasks', task.subtasks);
                             return '';
                           }}
                         >
-                          children
+                          subtasks
                         </button>
                       ) : (
                         <span />
