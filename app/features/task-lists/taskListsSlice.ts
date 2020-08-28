@@ -114,6 +114,14 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
   if (typeof issueList === 'object') {
     // expecting a key of the issue with value the subtasks issues
     const key = Object.keys(issueList)[0].toString();
+
+    // The value of the object should always be a list.
+    // Each value of the list is either a string (a standalone task)
+    // or an object where the key may be:
+    // - a word "subtasks", "supertasks", "blocks", or "awaits"
+    // - a task descriptions
+    // ... and the value is another task list.
+
     const subSubtasks = parseIssues(sourceId, issueList[key]);
     let subtasks = [];
     if (Array.isArray(subSubtasks)) {

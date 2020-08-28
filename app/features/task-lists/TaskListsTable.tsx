@@ -7,10 +7,12 @@ import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
   Task,
+  dispatchLoadAllSourcesIntoTasks,
   isTaskyamlSource,
   retrieveForecast,
   setForecastHtml,
 } from './taskListsSlice';
+import style from './style.css';
 
 const child = child_process.execFile;
 
@@ -50,6 +52,7 @@ export default function TaskListsTable() {
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
   );
+  const [listSourceIdsToShow, setListSourceIdsToShow] = useState([] as Array<string>);
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
 
@@ -59,9 +62,10 @@ export default function TaskListsTable() {
   let sourceMap: Record<string, Source> = {};
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
-      bigList = taskLists.bigList;
+      bigList = R.filter(task => R.includes(task.sourceId, listSourceIdsToShow),
+                         taskLists.bigList);
 
-      // process, eg. to find all the labels
+      // loop through and post-process, eg. to find all the labels
       for (let i = 0; i < bigList.length; i += 1) {
         const pairs = R.filter(
           R.test(/:/),
@@ -72,7 +76,7 @@ export default function TaskListsTable() {
             R.test(/^[A-Za-z0-9_-]*$/),
             R.map((item) => R.split(':', item)[0], pairs)
           );
-          allLabels = R.concat(allLabels, validKeys).sort();
+          allLabels = R.union(allLabels, validKeys).sort();
         }
       }
     }
@@ -95,7 +99,29 @@ export default function TaskListsTable() {
               /** eslint-disable-next-line react/jsx-curly-newline */
               return (
                 <tr key={source.id}>
-                  <td>{source.name}</td>
+                  <td>
+                    {source.name || '(unknown)'}
+                  </td>
+                  <td>
+                  <button
+                    onClick={() => {
+                      if (R.includes(source.id, listSourceIdsToShow)) {
+                        // remove it from the sources we're showing
+                        setListSourceIdsToShow(R.without([source.id], listSourceIdsToShow));
+                      } else {
+                        // add it to the sources we're showing
+                        setListSourceIdsToShow(R.union(listSourceIdsToShow, [source.id]));
+                      }
+                    }}
+                    style={{
+                      backgroundColor:
+                        R.includes(source.id, listSourceIdsToShow)
+                        ? 'grey'
+                        : 'white'
+                    }}
+                    >
+                      Show
+                    </button></td>
                   <td>
                     {execPath ? (
                       <button
@@ -138,8 +164,112 @@ export default function TaskListsTable() {
     );
   }
 
+  const bigListTable =
+    bigList.length > 0 ? (
+      <div>
+        <h4>All Tasks</h4>
+        Labels:
+        {allLabels.map((label) => (
+          <button
+            type="button"
+            key={label}
+            onClick={() => {
+              if (R.includes(label, labelsToShow)) {
+                // remove it from the labels we're showing
+                setLabelsToShow(R.without([label], labelsToShow));
+              } else {
+                // add it to the labels we're showing
+                setLabelsToShow(R.union(labelsToShow, [label]));
+              }
+            }}
+            style={{
+              backgroundColor: R.includes(label, labelsToShow)
+                ? 'grey'
+                : 'white',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+        <table>
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Prty</th>
+              <th>Est</th>
+              {labelsToShow.map((label) => (
+                <th key={label}>{label}</th>
+              ))}
+              <th>Description</th>
+              <th>Subtasks (to log)</th>
+              <th>Dependents (to log)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bigList &&
+              bigList.map((task: Task, index: number) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <tr key={`${task.sourceId}/${index}`}>
+                  <td>{sourceMap[task.sourceId].name}</td>
+                  <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
+                  <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
+                  {labelsToShow.map((label) => (
+                    <td key={label}>
+                      {labelValueRendering(label, task.description)}
+                    </td>
+                  ))}
+                  <td>{task.description}</td>
+                  <td>
+                    {task.subtasks.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          console.log('Subtasks', task.subtasks);
+                          return '';
+                        }}
+                      >
+                        subtasks
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                  </td>
+                  <td>
+                    {task.dependents.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          console.log('Dependents', task.dependents);
+                          return '';
+                        }}
+                      >
+                        dependents
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <span />
+    );
+
   return (
     <div>
+      <button
+        className={style.btn}
+        onClick={() => {
+          dispatch(dispatchLoadAllSourcesIntoTasks());
+        }}
+        data-tclass="btn"
+        type="button"
+      >
+        load tasks
+      </button>
       <div>{execSources}</div>
       <div>
         {taskLists.forecastHtml.length > 0 ? (
@@ -154,82 +284,7 @@ export default function TaskListsTable() {
           ''
         )}
       </div>
-      {bigList.length > 0 ? (
-        <div>
-          <h4>All Tasks</h4>
-          Labels:
-          {allLabels.map((label) => (
-            <button
-              type="button"
-              key={label}
-              onClick={() => {
-                if (R.any(R.identical(label), labelsToShow)) {
-                  // remove it from the labels we're showing
-                  setLabelsToShow(R.without([label], labelsToShow));
-                } else {
-                  // add it to the labels we're showing
-                  setLabelsToShow(R.union(labelsToShow, [label]));
-                }
-              }}
-              style={{
-                backgroundColor: R.any(R.identical(label), labelsToShow)
-                  ? 'grey'
-                  : 'white',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-          <table>
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>Prty</th>
-                <th>Est</th>
-                {labelsToShow.map((label) => (
-                  <th key={label}>{label}</th>
-                ))}
-                <th>Description</th>
-                <th>Subtasks (to log)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bigList &&
-                bigList.map((task: Task, index: number) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <tr key={`${task.sourceId}/${index}`}>
-                    <td>{sourceMap[task.sourceId].name}</td>
-                    <td>{task.priority?.toString()}</td>
-                    <td>{task.estimate?.toString()}</td>
-                    {labelsToShow.map((label) => (
-                      <td key={label}>
-                        {labelValueRendering(label, task.description)}
-                      </td>
-                    ))}
-                    <td>{task.description}</td>
-                    <td>
-                      {task.subtasks.length > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            console.log('Subtasks', task.subtasks);
-                            return '';
-                          }}
-                        >
-                          subtasks
-                        </button>
-                      ) : (
-                        <span />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <span />
-      )}
+      {bigListTable}
     </div>
   );
 }
