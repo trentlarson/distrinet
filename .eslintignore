@@ -58,6 +58,8 @@ package.json
 .yarn
 
 # custom distnet additions
+# This is especially annoying because lint changes the YAML semantics!
+tasks.yml
 app/features/genealogy/js/d3.min.js
 app/features/genealogy/js/jquery-2.2.4.min.js
 app/features/genealogy/js/ramda-0.25.0.min.js

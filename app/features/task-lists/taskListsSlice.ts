@@ -69,8 +69,7 @@ export function taskFromString(
   let estimate = NaN;
   let remainingText = fullText.trim();
   let space1Pos = remainingText.indexOf(' ');
-  if (space1Pos > -1
-      || (space1Pos === -1 && remainingText.length > 0)) {
+  if (space1Pos > -1 || (space1Pos === -1 && remainingText.length > 0)) {
     if (space1Pos === -1) {
       // no spaces at all; still check if it's just a number
       space1Pos = remainingText.length;
@@ -79,8 +78,7 @@ export function taskFromString(
     if (!Number.isNaN(priority)) {
       remainingText = remainingText.substring(space1Pos + 1);
       let space2Pos = remainingText.indexOf(' ');
-      if (space2Pos > -1
-          || (space2Pos === -1 && remainingText.length > 0)) {
+      if (space2Pos > -1 || (space2Pos === -1 && remainingText.length > 0)) {
         if (space2Pos === -1) {
           // no spaces left; still check if it's just a number
           space2Pos = remainingText.length;

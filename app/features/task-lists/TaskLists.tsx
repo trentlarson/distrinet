@@ -1,12 +1,10 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './style.css';
 import routes from '../../constants/routes.json';
 import TaskListsTable from './TaskListsTable';
 
 export default function TaskLists() {
-  const dispatch = useDispatch();
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">

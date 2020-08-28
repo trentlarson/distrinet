@@ -35,14 +35,10 @@ function labelValueInDescription(label: string, description: string) {
 
 function labelValueRendering(label: string, description: string) {
   const value = labelValueInDescription(label, description);
-  if (label === 'copy'
-      && value.length > 0) {
-    return <button>
-        { value }
-      </button>;
-  } else {
-    return value;
+  if (label === 'copy' && value.length > 0) {
+    return <button type="button">{value}</button>;
   }
+  return value;
 }
 
 export default function TaskListsTable() {
@@ -52,7 +48,9 @@ export default function TaskListsTable() {
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
   );
-  const [listSourceIdsToShow, setListSourceIdsToShow] = useState([] as Array<string>);
+  const [listSourceIdsToShow, setListSourceIdsToShow] = useState(
+    [] as Array<string>
+  );
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
 
@@ -62,8 +60,10 @@ export default function TaskListsTable() {
   let sourceMap: Record<string, Source> = {};
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
-      bigList = R.filter(task => R.includes(task.sourceId, listSourceIdsToShow),
-                         taskLists.bigList);
+      bigList = R.filter(
+        (task) => R.any(R.equals(task.sourceId), listSourceIdsToShow),
+        taskLists.bigList
+      );
 
       // loop through and post-process, eg. to find all the labels
       for (let i = 0; i < bigList.length; i += 1) {
@@ -78,6 +78,12 @@ export default function TaskListsTable() {
           );
           allLabels = R.union(allLabels, validKeys).sort();
         }
+      }
+      // Since it's possible that a source got removed,
+      // ensure that all showing labels are only ones found in allLabels.
+      if (!R.all((label) => R.any(R.equals(label), allLabels), labelsToShow)) {
+        // only doing it conditionally to avoid (infinite?) rerenders
+        setLabelsToShow(R.intersection(labelsToShow, allLabels));
       }
     }
 
@@ -99,29 +105,35 @@ export default function TaskListsTable() {
               /** eslint-disable-next-line react/jsx-curly-newline */
               return (
                 <tr key={source.id}>
+                  <td>{source.name || '(unknown)'}</td>
                   <td>
-                    {source.name || '(unknown)'}
-                  </td>
-                  <td>
-                  <button
-                    onClick={() => {
-                      if (R.includes(source.id, listSourceIdsToShow)) {
-                        // remove it from the sources we're showing
-                        setListSourceIdsToShow(R.without([source.id], listSourceIdsToShow));
-                      } else {
-                        // add it to the sources we're showing
-                        setListSourceIdsToShow(R.union(listSourceIdsToShow, [source.id]));
-                      }
-                    }}
-                    style={{
-                      backgroundColor:
-                        R.includes(source.id, listSourceIdsToShow)
-                        ? 'grey'
-                        : 'white'
-                    }}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (R.any(R.equals(source.id), listSourceIdsToShow)) {
+                          // remove it from the sources we're showing
+                          setListSourceIdsToShow(
+                            R.without([source.id], listSourceIdsToShow)
+                          );
+                        } else {
+                          // add it to the sources we're showing
+                          setListSourceIdsToShow(
+                            R.union(listSourceIdsToShow, [source.id])
+                          );
+                        }
+                      }}
+                      style={{
+                        backgroundColor: R.any(
+                          R.equals(source.id),
+                          listSourceIdsToShow
+                        )
+                          ? 'grey'
+                          : 'white',
+                      }}
                     >
                       Show
-                    </button></td>
+                    </button>
+                  </td>
                   <td>
                     {execPath ? (
                       <button
@@ -174,7 +186,7 @@ export default function TaskListsTable() {
             type="button"
             key={label}
             onClick={() => {
-              if (R.includes(label, labelsToShow)) {
+              if (R.any(R.equals(label), labelsToShow)) {
                 // remove it from the labels we're showing
                 setLabelsToShow(R.without([label], labelsToShow));
               } else {
@@ -183,7 +195,7 @@ export default function TaskListsTable() {
               }
             }}
             style={{
-              backgroundColor: R.includes(label, labelsToShow)
+              backgroundColor: R.any(R.equals(label), labelsToShow)
                 ? 'grey'
                 : 'white',
             }}
@@ -211,8 +223,12 @@ export default function TaskListsTable() {
                 // eslint-disable-next-line react/no-array-index-key
                 <tr key={`${task.sourceId}/${index}`}>
                   <td>{sourceMap[task.sourceId].name}</td>
-                  <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
-                  <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
+                  <td>
+                    {Number.isFinite(task.priority) ? task.priority : '-'}
+                  </td>
+                  <td>
+                    {Number.isFinite(task.estimate) ? task.estimate : '-'}
+                  </td>
                   {labelsToShow.map((label) => (
                     <td key={label}>
                       {labelValueRendering(label, task.description)}

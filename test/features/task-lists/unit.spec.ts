@@ -11,14 +11,10 @@ describe('taskFromString', () => {
     expect(taskFromString('', ' 9.876 -1.0 test me silly').description).toBe(
       'test me silly'
     );
-    expect(taskFromString('', ' 9.876 -1.0 ').description).toBe(
-      ''
-    );
+    expect(taskFromString('', ' 9.876 -1.0 ').description).toBe('');
   });
   it('should parse with only priority', () => {
-    expect(taskFromString('', ' 9.876 ').description).toBe(
-      ''
-    );
+    expect(taskFromString('', ' 9.876 ').description).toBe('');
     expect(taskFromString('', '0 test me silly').description).toBe(
       'test me silly'
     );
@@ -27,12 +23,8 @@ describe('taskFromString', () => {
     );
   });
   it('should parse with no priority', () => {
-    expect(taskFromString('', '').description).toBe(
-      ''
-    );
-    expect(taskFromString('', '    ').description).toBe(
-      ''
-    );
+    expect(taskFromString('', '').description).toBe('');
+    expect(taskFromString('', '    ').description).toBe('');
     expect(taskFromString('', ' test me silly').description).toBe(
       'test me silly'
     );
