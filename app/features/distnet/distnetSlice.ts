@@ -7,6 +7,7 @@ import yaml from 'js-yaml';
 import { AppThunk } from '../../store';
 import {
   CacheData,
+  CredentialType,
   DistnetState,
   Payload,
   Settings,
@@ -174,7 +175,7 @@ export const generateKeyAndSet = (settings: Settings) => {
   const creds = newSettings.credentials;
   let privCred = _.find(creds, (c) => c.id === 'privateKey');
   if (_.isNil(privCred)) {
-    privCred = { id: 'privateKey' };
+    privCred = { id: 'privateKey', type: CredentialType.PRIVATE_KEY };
   }
   privCred.privateKeyPkcs8Pem = keyPkcs8Pem.toString();
   newSettings.credentials = _.unionWith(

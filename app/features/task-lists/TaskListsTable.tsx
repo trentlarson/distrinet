@@ -8,7 +8,9 @@ import { Source } from '../distnet/distnetClasses';
 import {
   Task,
   dispatchLoadAllSourcesIntoTasks,
+  dispatchVolunteer,
   isTaskyamlSource,
+  labelValueInDescription,
   retrieveForecast,
   setForecastHtml,
 } from './taskListsSlice';
@@ -25,20 +27,14 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 }
 
 /**
- * return the value for the given label if in the description; otherwise, ''
+ * return a button for "copy" labels; otherwise, the non-null value or ''
  */
-function labelValueInDescription(label: string, description: string) {
-  const pairs = R.filter(R.test(/:/), R.split(' ', description));
-  const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
-  return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : '';
-}
-
 function labelValueRendering(label: string, description: string) {
   const value = labelValueInDescription(label, description);
-  if (label === 'copy' && value.length > 0) {
+  if (label === 'copy' && value && value.length > 0) {
     return <button type="button">{value}</button>;
   }
-  return value;
+  return R.isNil(value) ? '' : value;
 }
 
 export default function TaskListsTable() {
@@ -213,6 +209,7 @@ export default function TaskListsTable() {
                 <th key={label}>{label}</th>
               ))}
               <th>Description</th>
+              <th>Actions</th>
               <th>Subtasks (to log)</th>
               <th>Dependents (to log)</th>
             </tr>
@@ -235,6 +232,16 @@ export default function TaskListsTable() {
                     </td>
                   ))}
                   <td>{task.description}</td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dispatch(dispatchVolunteer(task));
+                      }}
+                    >
+                      Volunteer
+                    </button>
+                  </td>
                   <td>
                     {task.subtasks.length > 0 ? (
                       <button

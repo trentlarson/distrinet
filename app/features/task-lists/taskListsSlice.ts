@@ -1,12 +1,35 @@
 import { createSlice } from '@reduxjs/toolkit';
 import fs from 'fs';
 import _ from 'lodash';
+import * as R from 'ramda';
 import yaml from 'js-yaml';
+import url from 'url';
+import nodeCrypto from 'crypto';
+import * as uuid from 'uuid';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { Cache, CacheData, Payload } from '../distnet/distnetClasses';
+import {
+  Cache,
+  CacheData,
+  Payload,
+  WriteMethod,
+} from '../distnet/distnetClasses';
+import { globalUriForId } from '../distnet/uriTools';
 
 const fsPromises = fs.promises;
+
+export interface ProjectFile {
+  tasks?: Array<Task>;
+  log?: Array<Log>;
+}
+
+export interface Log {
+  id: string;
+  taskId: string;
+  contents: any;
+  publicKey?: string;
+  signature?: string;
+}
 
 export interface Task {
   sourceId: string;
@@ -15,6 +38,13 @@ export interface Task {
   description: string;
   dependents: Array<Task>;
   subtasks: Array<Task>;
+}
+
+interface VolunteerMessageForSigning {
+  did: string;
+  sourceId: string;
+  description: string;
+  time: string;
 }
 
 interface IssueToSchedule {
@@ -57,6 +87,15 @@ function sourceFromId(
 
 export function isTaskyamlSource(sourceId: string) {
   return sourceId.startsWith('taskyaml:');
+}
+
+/**
+ * return the value for the given label if in the description; otherwise, null
+ */
+export function labelValueInDescription(label: string, description: string) {
+  const pairs = R.filter(R.test(/:/), R.split(' ', description));
+  const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
+  return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
 
 export function taskFromString(
@@ -167,7 +206,9 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            const issues = parseIssues(entry.sourceId, contentTasks);
+            // The file is either one array or an object with an "issues" property.
+            const taskList = contentTasks.tasks || contentTasks;
+            const issues = parseIssues(entry.sourceId, taskList);
             if (Array.isArray(issues)) {
               return issues;
             }
@@ -218,6 +259,135 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
     getState().distnet.cache
   );
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
+};
+
+function saveToFile(
+  file: string,
+  text: string
+): Promise<void | { error: string }> {
+  return fsPromises.writeFile(file, text).catch((err) => {
+    console.error('Error saving to file:', err);
+    throw Error(
+      `Error saving to file: ${err} ... with err.toString() ${err.toString()}`
+    );
+  });
+}
+
+export const dispatchVolunteer = (task: Task): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  if (getState().distnet.settings.credentials) {
+    const keyContents = _.find(
+      getState().distnet.settings.credentials,
+      (c) => c.id === 'privateKey'
+    );
+    if (keyContents && keyContents.privateKeyPkcs8Pem) {
+      // figure out how to push out the message
+      const source = _.find(
+        getState().distnet.settings.sources,
+        (s) => s.id === task.sourceId
+      );
+      if (
+        source &&
+        source.urls &&
+        source.urls.length > 0 &&
+        getState().distnet.cache &&
+        getState().distnet.cache[task.sourceId] &&
+        getState().distnet.cache[task.sourceId].contents
+      ) {
+        const taskId = labelValueInDescription('id', task.description);
+
+        if (_.isNil(taskId)) {
+          alert(
+            'Cannot volunteer for a task without an ID.' +
+              '  Edit the task and add a unique "id:SOME_VALUE" in the description.'
+          );
+        } else {
+          // sign
+          const sign = nodeCrypto.createSign('SHA256');
+          const volunteerMessageForSigning: volunteerMessageForSigning = {
+            description: task.description,
+            did: 'did:none:UNKNOWN',
+            taskUri: globalUriForId(taskId, task.sourceId),
+            time: new Date().toISOString(),
+          };
+          sign.write(JSON.stringify(volunteerMessageForSigning));
+          sign.end();
+          const keyPem: string = keyContents.privateKeyPkcs8Pem;
+          const privateKey = nodeCrypto.createPrivateKey(keyPem);
+          const signature = sign.sign(privateKey, 'hex');
+
+          // now find where to write the task
+          let projectContents = yaml.safeLoad(
+            getState().distnet.cache[task.sourceId].contents
+          );
+          for (let i = 0; i < source.urls.length; i += 1) {
+            if (source.urls[i].writeMethod === WriteMethod.DIRECT_TO_FILE) {
+              if (Array.isArray(projectContents)) {
+                projectContents = { tasks: projectContents };
+              }
+              if (!projectContents.log) {
+                projectContents.log = [];
+              }
+              const newLog = {
+                id: uuid.v4(),
+                taskId,
+                data: { messageData: volunteerMessageForSigning },
+                time: volunteerMessageForSigning.time,
+                signature,
+              };
+              projectContents.log = _.concat([newLog], projectContents.log);
+              const projectYamlString = yaml.safeDump(projectContents);
+              saveToFile(
+                url.fileURLToPath(source.urls[i].url),
+                projectYamlString
+              )
+                .then(() => {
+                  console.log(
+                    'Successfully saved task',
+                    taskId,
+                    'to file',
+                    source.urls[i].url
+                  );
+                  return true;
+                })
+                .catch((err) => {
+                  console.log(
+                    'Failed to save task',
+                    taskId,
+                    'to file',
+                    source.urls[i].url,
+                    'because',
+                    err
+                  );
+                });
+            } else {
+              console.log(
+                'I do not know how to save task',
+                taskId,
+                '... to this URL',
+                source.urls[i]
+              );
+            }
+          }
+        }
+      } else {
+        console.log('I do not know how to save this task info anywhere:', task);
+        alert(
+          `I don't know how to save this task info anywhere: ${JSON.stringify(
+            task
+          )}`
+        );
+      }
+    } else {
+      alert(
+        'You have not set a "privateKey" in your settings, which is necessary' +
+          ' to submit a task.  To fix, go to the settings and click' +
+          ' "Generate Key".'
+      );
+    }
+  }
 };
 
 export default taskListsSlice.reducer;

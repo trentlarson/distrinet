@@ -25,9 +25,9 @@ export interface Settings {
 export interface Source {
   name: string;
   id: string;
-  type: string | undefined;
-  didDoc: DidDoc | undefined;
-  urls: Array<UrlData> | undefined;
+  type?: string;
+  didDoc?: DidDoc;
+  urls: Array<UrlData>;
 }
 
 interface DidDoc {
@@ -45,14 +45,24 @@ enum DidDocContext {
 export interface UrlData {
   url: string;
   credentials: Credential;
+  writeMethod: WriteMethod;
+}
+
+export enum WriteMethod {
+  DIRECT_TO_FILE = 'DIRECT_TO_FILE',
 }
 
 interface Credential {
   id?: string; // typically only used in the top-level credentials
-  type?: string;
+  type?: CredentialType;
   value?: string;
   privateKeyFile?: string;
   privateKeyPkcs8Pem?: string;
+}
+
+export enum CredentialType {
+  TOKEN = 'TOKEN',
+  PRIVATE_KEY = 'PRIVATE_KEY',
 }
 
 export interface ResourceTypes {

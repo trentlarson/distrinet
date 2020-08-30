@@ -1,52 +1,101 @@
----
-- 95 1 sign commitment
-- 93 0 package app for Martin id:#package
-- 93 0 determine problem with parsing JSON on private, eg. gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
-- 90 0 fix parseIssues for linked tasks eg. dependents (and show in list, not in a column)
-- 90 0 optimize mapping in localStorage by only beginning & end of refreshIfNewer, and by caching in memory
-- 90 1 create list-source directory file that points at other lists of sources
-- 90 1 add spinner when loading a new tree
-- 90 1 add tests - find, globalUriForResource, globalUriForId
-- 90 1 bug - sometimes the graph doesn't show after pasting the URL (after cache reload?)
-- 90 1 bug - clicking on otherLocationResource in the same page (repeatedly?) fails
-- 80 0 show subtasks in top list
-- 80 1 make it so that directory URIs work id:#dir-path-uris
-- 80 -1 allow loading of sources automatically (then remove bottom "back" button):
-  - add an indicator on the front page that it's loading
-  - allow for deselection of files that might be too big
-- 80 0 bug - Matt's example from raw.githubusercontent renders external links that don't work
-- 80 2 mark myself & save my URIs and build functions to relate-to-me
-- 80 0 add the otherLocations to children (so they can show links in the UI)
-- 80 0 try resourceId as an index into the current URI (since the resource URIs are now permissioned)
-- 80 1 click on a 4th-gen person and force further expansion
-- 80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files:
-  - 90 1 handle when load success after save failure or vice versa
-- 80 1 give example of gedcomx protocol
-- 80 0 load only smaller (eg. < 5 MB) local files into cache
-- 80 1 save file - find next cache name
-- 80 0 add spinner for the remote file loading (both cache refresh & local config)
-- 80 1 allow drag-and-drop to pull a new gedcomx file into distnet settings
-- 80 1 move feature-specific styling out of app/app.global.css
-- 80 0 on startup, check for files already cached in files and show that date
-- 75 0 add FamilySearch session ID in the UI somewhere
-- 75 2 start an HTTP server for file access (rather than direct library access)
-- 75 0 use logger instead of console.log
-- 75 0 handle more task YAML variations (eg. blocked & child issues)
-- 75 1 handle YAML TAGs
-- 70 1 change family lookup to work from "relationsips" not "display" (or fix the latter because "familiesAs..." are arrays)
-- 70 0 use paths.cache instead of paths.config in settings.ts (including path check)
-- 70 0 show if cached file already exists, and allow redownload
-- 70 0 get the Settings into its own page rather than editing Counter (see branch "separate-pages")
-- 70 1 handle timeout failures (tried node-fetch with abort-controller)
-- 70 1 show indicator if settings file has been changed
-- 70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to find documentation)
-- 70 2 save a preference for loading cache on app start
-- 65 0 add format/type info to the sources (for a more accurate indicator than just the URI "scheme:"):
-  - add to samePerson
-- 60 0 show how the same code can be used in browser & in node
-- 60 1 read large files, ie. stream into the cache file & don't load into cache if it's too big
-- 60 1 store correlations of local and remote URIs
-- 50 0 bug - note that the settingsSlice.ts has a bunch of eslint-disable-next-line commands that indicate bad practice
-- 50 0 allow blank settings files (which will still allow us to set top-level keys if missing) id:#set-settings-keys
-- 20 0 read binary files id:#read-binary
-- 20 0 stop requiring semicolons in the code
+tasks:
+  - 95 1 sign commitment
+  - 95 2 change settings format: sources & credentials into objects
+  - '93 0 package app for Martin id:#package'
+  - >-
+    93 0 determine problem with parsing JSON on private, eg.
+    gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
+  - 93 0 fix opening new window for remote content
+  - >-
+    90 0 fix parseIssues for linked tasks eg. dependents (and show in list, not
+    in a column)
+  - >-
+    90 0 optimize mapping in localStorage by only beginning & end of
+    refreshIfNewer, and by caching in memory
+  - 90 1 create list-source directory file that points at other lists of sources
+  - 90 1 add spinner when loading a new tree
+  - '90 1 add tests - find, globalUriForResource, globalUriForId'
+  - >-
+    90 1 bug - sometimes the graph doesn't show after pasting the URL (after
+    cache reload?)
+  - >-
+    90 1 bug - clicking on otherLocationResource in the same page (repeatedly?)
+    fails
+  - 80 0 show subtasks in top list
+  - '80 1 make it so that directory URIs work id:#dir-path-uris'
+  - 80 -1 allow loading of sources automatically (then remove bottom "back" button):
+      - add an indicator on the front page that it's loading
+      - allow for deselection of files that might be too big
+  - >-
+    80 0 bug - Matt's example from raw.githubusercontent renders external links
+    that don't work
+  - 80 2 mark myself & save my URIs and build functions to relate-to-me
+  - 80 0 add the otherLocations to children (so they can show links in the UI)
+  - >-
+    80 0 try resourceId as an index into the current URI (since the resource
+    URIs are now permissioned)
+  - 80 1 click on a 4th-gen person and force further expansion
+  - '80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files':
+      - 90 1 handle when load success after save failure or vice versa
+  - 80 1 give example of gedcomx protocol
+  - 80 0 load only smaller (eg. < 5 MB) local files into cache
+  - 80 1 save file - find next cache name
+  - >-
+    80 0 add spinner for the remote file loading (both cache refresh & local
+    config)
+  - 80 1 allow drag-and-drop to pull a new gedcomx file into distnet settings
+  - 80 1 move feature-specific styling out of app/app.global.css
+  - '80 0 on startup, check for files already cached in files and show that date'
+  - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
+  - '80 -1 in settings, rename source.id to source.uri'
+  - 75 0 add FamilySearch session ID in the UI somewhere
+  - >-
+    75 2 start an HTTP server for file access (rather than direct library
+    access)
+  - 75 0 use logger instead of console.log
+  - 75 0 handle more task YAML variations (eg. blocked & child issues)
+  - 75 1 handle YAML TAGs
+  - >-
+    70 1 change family lookup to work from "relationsips" not "display" (or fix
+    the latter because "familiesAs..." are arrays)
+  - >-
+    70 0 use paths.cache instead of paths.config in settings.ts (including path
+    check)
+  - '70 0 show if cached file already exists, and allow redownload'
+  - >-
+    70 0 get the Settings into its own page rather than editing Counter (see
+    branch "separate-pages")
+  - 70 1 handle timeout failures (tried node-fetch with abort-controller)
+  - 70 1 show indicator if settings file has been changed
+  - >-
+    70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to
+    find documentation)
+  - 70 2 save a preference for loading cache on app start
+  - 65 3 package for mobile
+  - '65 0 add format/type info to the sources (for a more accurate indicator than just the URI "scheme:")':
+      - add to samePerson
+  - >-
+    60 1 read large files, ie. stream into the cache file & don't load into
+    cache if it's too big
+  - 60 1 store correlations of local and remote URIs
+  - >-
+    50 0 bug - note that the settingsSlice.ts has a bunch of
+    eslint-disable-next-line commands that indicate bad practice
+  - >-
+    50 0 allow blank settings files (which will still allow us to set top-level
+    keys if missing) id:#set-settings-keys
+  - 40 0 show how the same code can be used in browser & in node
+  - '20 0 read binary files id:#read-binary'
+  - 20 0 stop requiring semicolons in the code
+log:
+  - id: 756c45b7-0fe6-4ef2-ba8a-2ad1d95c6620
+    taskId: '#package'
+    data:
+      messageData:
+        description: 'package app for Martin id:#package'
+        did: 'did:none:UNKNOWN'
+        taskUri: 'taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#package'
+        time: '2020-08-30T23:24:01.154Z'
+    time: '2020-08-30T23:24:01.154Z'
+    signature: >-
+      303e021d00aa9ea84e92702cffd43aaa79529c9047e1f3183d715242fd085df140021d00c08b24aa6f46086cc2ae1363c3a490487c605ddc1704894d3c359fd4

@@ -12,6 +12,10 @@
     globalUri
   * */
 
+  // gott replace all uses of these to point to distnet instead of here
+  // eslint-disable-next-line global-require
+  const { globalUriForId, isGlobalUri } = require('../../distnet/uriTools');
+
   /**
    * @param someUri should be a URI or some portion, starting with "/" or "?" or "#"
    * @param uriContext is the current document URI
@@ -26,27 +30,6 @@
       return uriContext + someUri;
     }
     return someUri;
-  }
-
-  /**
-   * from https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
-   * */
-  function isGlobalUri(string) {
-    return string && string.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]*:/));
-  }
-
-  /**
-   * Given an ID within some context, return the URI for it (ie. including the fragment)
-   * */
-  function globalUriForId(id, uriContext) {
-    if (isGlobalUri(id)) {
-      return id;
-    }
-    let finalId = id;
-    if (id.startsWith('#')) {
-      finalId = id.substring(1);
-    }
-    return `${uriContext}#${finalId}`;
   }
 
   /**
