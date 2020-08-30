@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import nodeCrypto from 'crypto';
 import _ from 'lodash';
 import yaml from 'js-yaml';
 
@@ -11,7 +12,7 @@ import {
   Settings,
   Source,
 } from './distnetClasses';
-import { loadSettings, saveSettingsToFile } from './settings';
+import { loadSettingsFromFile, saveSettingsToFile } from './settings';
 import {
   createCacheDir,
   reloadAllSourcesIntoCache,
@@ -21,7 +22,7 @@ import {
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
-    settings: { sources: [], resourceTypes: {} },
+    settings: { sources: [], resourceTypes: {}, credentials: [] },
     settingsErrorMessage: null,
     settingsText: null,
     settingsSaveErrorMessage: null,
@@ -59,7 +60,7 @@ const distnetSlice = createSlice({
   },
 });
 
-export const {
+const {
   setCachedStateForAll,
   setCachedStateForOne,
   setCacheErrorMessage,
@@ -80,7 +81,7 @@ function isSettings(
   );
 }
 
-export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
+export const dispatchSetSettingsTextAndYaml = (contents: string): AppThunk => (
   dispatch
 ) => {
   dispatch(setSettingsStateText(contents));
@@ -99,7 +100,7 @@ export const dispatchSaveSettingsTextAndYaml = (contents: string): AppThunk => (
       });
     } else {
       throw Error(
-        'That settings object does not have a Settings object format.'
+        'That settings object does not have a all settings elements, ie sources'
       );
     }
     dispatch(setSettingsErrorMessage(null));
@@ -120,17 +121,17 @@ function isError(
   return (value as { error: string }).error !== undefined;
 }
 
-export const dispatchLoadSettings = (): AppThunk => async (dispatch) => {
-  const result = await loadSettings();
+export const dispatchLoadSettingsFromFile = (): AppThunk => async (dispatch) => {
+  const result = await loadSettingsFromFile();
   console.log('New distnet settings text loaded:\n', result);
   if (isError(result)) {
     dispatch(setSettingsErrorMessage(result.error));
   } else {
-    dispatch(dispatchSaveSettingsTextAndYaml(result));
+    dispatch(dispatchSetSettingsTextAndYaml(result));
   }
 };
 
-export const dispatchSaveSettings = (): AppThunk => async (
+export const dispatchSaveSettingsToFile = (): AppThunk => async (
   dispatch,
   getState
 ) => {
@@ -153,10 +154,46 @@ export const dispatchSaveSettings = (): AppThunk => async (
     if (result && result.error) {
       dispatch(setSettingsSaveErrorMessage(result.error));
     } else {
-      dispatch(dispatchSaveSettingsTextAndYaml(settingsText));
+      dispatch(dispatchSetSettingsTextAndYaml(settingsText));
       dispatch(setSettingsSaveErrorMessage(null));
     }
   }
+};
+
+export const generateKeyAndSet = (settings: Settings) => {
+  let newSettings = _.cloneDeep(settings);
+  const { privateKey } = nodeCrypto.generateKeyPairSync('ec', {
+    namedCurve: 'secp224r1'
+  });
+  let keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  if (_.isNil(newSettings.credentials)) {
+    newSettings.credentials = [];
+  }
+  let creds = newSettings.credentials;
+  let privCred = _.find(creds, c => c.id === 'privateKey');
+  if (_.isNil(privCred)) {
+    privCred = { id: 'privateKey' };
+  }
+  privCred.privateKeyPkcs8Pem = keyPkcs8Pem.toString();
+  newSettings.credentials = _.unionWith(
+    [privCred],
+    creds,
+    (c1, c2) => c1.id === c2.id
+  );
+  return newSettings;
+}
+
+interface SettingsEditor {
+  (settings: Settings): Settings
+}
+
+export const dispatchModifySettings = (settingsEditor: SettingsEditor): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  let newSettings = settingsEditor(getState().distnet.settings);
+  let settingsYaml = yaml.safeDump(newSettings);
+  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml));
 };
 
 function removeNulls<T>(array: Array<T | null>): Array<T> {

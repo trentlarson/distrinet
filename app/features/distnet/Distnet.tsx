@@ -12,9 +12,11 @@ import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
   dispatchCacheForAll,
-  dispatchLoadSettings,
-  dispatchSaveSettings,
-  dispatchSaveSettingsTextAndYaml,
+  dispatchLoadSettingsFromFile,
+  dispatchModifySettings,
+  dispatchSaveSettingsToFile,
+  dispatchSetSettingsTextAndYaml,
+  generateKeyAndSet,
 } from './distnetSlice';
 
 export default function Distnet() {
@@ -74,7 +76,7 @@ export default function Distnet() {
           cols={80}
           value={distnet.settingsText || ''}
           onChange={(event) => {
-            dispatch(dispatchSaveSettingsTextAndYaml(event.target.value));
+            dispatch(dispatchSetSettingsTextAndYaml(event.target.value));
           }}
         />
         Config file is located here:&nbsp;
@@ -87,7 +89,7 @@ export default function Distnet() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchLoadSettings());
+            dispatch(dispatchLoadSettingsFromFile());
           }}
           data-tclass="btn"
           type="button"
@@ -97,12 +99,20 @@ export default function Distnet() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchSaveSettings());
+            dispatch(dispatchSaveSettingsToFile());
           }}
           data-tclass="btn"
           type="button"
         >
           save config
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            dispatch(dispatchModifySettings(generateKeyAndSet));
+          }}
+        >
+          Generate Key
         </button>
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (

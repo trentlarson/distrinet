@@ -14,7 +14,7 @@ const fsPromises = fs.promises;
  * return a Promise with the config file contents as a string
  * If an error occurs, the result is: { error: '...' }
  * */
-export function loadSettings(): Promise<string | { error: string }> {
+export function loadSettingsFromFile(): Promise<string | { error: string }> {
   return fsPromises
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())

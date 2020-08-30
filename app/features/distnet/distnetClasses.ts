@@ -19,6 +19,7 @@ export interface DistnetState {
 export interface Settings {
   sources: Array<Source>;
   resourceTypes: ResourceTypes;
+  credentials: Array<Credential>;
 }
 
 export interface Source {
@@ -47,9 +48,11 @@ export interface UrlData {
 }
 
 interface Credential {
-  type: string;
-  value: string;
-  privateKeyFile: string;
+  id?: string; // typically only used in the top-level credentials
+  type?: string;
+  value?: string;
+  privateKeyFile?: string;
+  privateKeyPkcs8Pem?: string;
 }
 
 export interface ResourceTypes {
