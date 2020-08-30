@@ -121,7 +121,9 @@ function isError(
   return (value as { error: string }).error !== undefined;
 }
 
-export const dispatchLoadSettingsFromFile = (): AppThunk => async (dispatch) => {
+export const dispatchLoadSettingsFromFile = (): AppThunk => async (
+  dispatch
+) => {
   const result = await loadSettingsFromFile();
   console.log('New distnet settings text loaded:\n', result);
   if (isError(result)) {
@@ -161,16 +163,16 @@ export const dispatchSaveSettingsToFile = (): AppThunk => async (
 };
 
 export const generateKeyAndSet = (settings: Settings) => {
-  let newSettings = _.cloneDeep(settings);
+  const newSettings = _.cloneDeep(settings);
   const { privateKey } = nodeCrypto.generateKeyPairSync('ec', {
-    namedCurve: 'secp224r1'
+    namedCurve: 'secp224r1',
   });
-  let keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  const keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
   if (_.isNil(newSettings.credentials)) {
     newSettings.credentials = [];
   }
-  let creds = newSettings.credentials;
-  let privCred = _.find(creds, c => c.id === 'privateKey');
+  const creds = newSettings.credentials;
+  let privCred = _.find(creds, (c) => c.id === 'privateKey');
   if (_.isNil(privCred)) {
     privCred = { id: 'privateKey' };
   }
@@ -181,18 +183,17 @@ export const generateKeyAndSet = (settings: Settings) => {
     (c1, c2) => c1.id === c2.id
   );
   return newSettings;
-}
+};
 
 interface SettingsEditor {
-  (settings: Settings): Settings
+  (settings: Settings): Settings;
 }
 
-export const dispatchModifySettings = (settingsEditor: SettingsEditor): AppThunk => async (
-  dispatch,
-  getState
-) => {
-  let newSettings = settingsEditor(getState().distnet.settings);
-  let settingsYaml = yaml.safeDump(newSettings);
+export const dispatchModifySettings = (
+  settingsEditor: SettingsEditor
+): AppThunk => async (dispatch, getState) => {
+  const newSettings = settingsEditor(getState().distnet.settings);
+  const settingsYaml = yaml.safeDump(newSettings);
   dispatch(dispatchSetSettingsTextAndYaml(settingsYaml));
 };
 

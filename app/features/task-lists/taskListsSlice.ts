@@ -120,25 +120,23 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
     if (issueList.issues) {
       // This must be the top level.  Load the array.
       return parseIssues(sourceId, issueList.issues);
-
-    } else {
-
-      // Except for the top level, the value of the object should always be a list.
-      // Each value of the list is either a string (a standalone task)
-      // or an object where the key may be:
-      //   - a word "subtasks", "supertasks", "blocks", or "awaits"
-      //   - a task descriptions
-      // ... and the value is another task list.
-
-      const subSubtasks = parseIssues(sourceId, issueList[key]);
-      let subtasks = [];
-      if (Array.isArray(subSubtasks)) {
-        subtasks = subSubtasks;
-      } else {
-        subtasks = [subSubtasks];
-      }
-      return taskFromString(sourceId, key, [], subtasks);
     }
+
+    // Except for the top level, the value of the object should always be a list.
+    // Each value of the list is either a string (a standalone task)
+    // or an object where the key may be:
+    //   - a word "subtasks", "supertasks", "blocks", or "awaits"
+    //   - a task descriptions
+    // ... and the value is another task list.
+
+    const subSubtasks = parseIssues(sourceId, issueList[key]);
+    let subtasks = [];
+    if (Array.isArray(subSubtasks)) {
+      subtasks = subSubtasks;
+    } else {
+      subtasks = [subSubtasks];
+    }
+    return taskFromString(sourceId, key, [], subtasks);
   }
   return {
     sourceId,
