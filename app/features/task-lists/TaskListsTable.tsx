@@ -95,7 +95,8 @@ export default function TaskListsTable() {
           <tbody>
             {taskSources.map((source) => {
               const protocol = source.id.substring(0, source.id.indexOf(':'));
-              const execPath = resourceTypes[protocol]?.executablePath;
+              const execPath =
+                resourceTypes && resourceTypes[protocol]?.executablePath;
               const file = distnet.cache[source.id]?.localFile;
               /** I cannot figure out how to fix this stupid error. */
               /** eslint-disable-next-line react/jsx-curly-newline */
