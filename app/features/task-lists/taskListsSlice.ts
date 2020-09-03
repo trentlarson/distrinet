@@ -19,14 +19,16 @@ import { globalUriForId } from '../distnet/uriTools';
 const fsPromises = fs.promises;
 
 export interface ProjectFile {
-  tasks?: Array<Task>;
+  tasks: Array<Task>;
   log?: Array<Log>;
 }
 
 export interface Log {
   id: string;
   taskId: string;
-  contents: any;
+  data: any;
+  time: string;
+  did?: string;
   publicKey?: string;
   signature?: string;
 }
@@ -40,10 +42,11 @@ export interface Task {
   subtasks: Array<Task>;
 }
 
+// Remember to keep these in alphabetical order for standard.
 interface VolunteerMessageForSigning {
-  did: string;
-  sourceId: string;
   description: string;
+  did: string;
+  taskUri: string;
   time: string;
 }
 
@@ -189,6 +192,28 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
   };
 };
 
+function isTaskArray(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  contents: string | object | undefined
+): contents is Array<Task> {
+  return (
+    typeof contents !== 'undefined' &&
+    typeof contents !== 'string' &&
+    (contents as Array<Task>).length > 0
+  );
+}
+
+function isProjectFile(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  contents: string | object | undefined
+): contents is ProjectFile {
+  return (
+    typeof contents !== 'undefined' &&
+    typeof contents !== 'string' &&
+    (contents as ProjectFile).tasks !== undefined
+  );
+}
+
 /**
  * @return a Promise that resolves to arrays of arrays of Tasks
  */
@@ -206,8 +231,15 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            // The file is either one array or an object with an "issues" property.
-            const taskList = contentTasks.tasks || contentTasks;
+            let taskList: Array<Task>;
+            if (isTaskArray(contentTasks)) {
+              taskList = contentTasks;
+            } else if (isProjectFile(contentTasks)) {
+              taskList = contentTasks.tasks;
+            } else {
+              console.error('Failure getting array or .tasks from source', entry.sourceId);
+              return [];
+            }
             const issues = parseIssues(entry.sourceId, taskList);
             if (Array.isArray(issues)) {
               return issues;
@@ -215,7 +247,7 @@ async function retrieveAllTasks(
             return [issues];
           })
           .catch((error) => {
-            console.error('Failure loading a YAML task list:', error);
+            console.error('Failure loading a YAML task list from source', entry.sourceId, ' ... with error', error);
             return [];
           });
         result = _.concat(result, next);
@@ -274,7 +306,7 @@ function saveToFile(
 }
 
 export const dispatchVolunteer = (task: Task): AppThunk => async (
-  dispatch,
+  _1,
   getState
 ) => {
   if (getState().distnet.settings.credentials) {
@@ -306,7 +338,7 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
         } else {
           // sign
           const sign = nodeCrypto.createSign('SHA256');
-          const volunteerMessageForSigning: volunteerMessageForSigning = {
+          const volunteerMessageForSigning: VolunteerMessageForSigning = {
             description: task.description,
             did: 'did:none:UNKNOWN',
             taskUri: globalUriForId(taskId, task.sourceId),
@@ -316,28 +348,38 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
           sign.end();
           const keyPem: string = keyContents.privateKeyPkcs8Pem;
           const privateKey = nodeCrypto.createPrivateKey(keyPem);
+          const publicKeyEncoded = nodeCrypto
+            .createPublicKey(keyPem)
+            .export({ type: 'spki', format: 'pem' })
+            .toString();
+          
           const signature = sign.sign(privateKey, 'hex');
 
-          // now find where to write the task
-          let projectContents = yaml.safeLoad(
+          let fileContents = yaml.safeLoad(
             getState().distnet.cache[task.sourceId].contents
           );
-          for (let i = 0; i < source.urls.length; i += 1) {
+          let projectContents: ProjectFile;
+          if (isTaskArray(fileContents)) {
+            projectContents = { tasks: fileContents }
+          } else if (isProjectFile(fileContents)) {
+            projectContents = fileContents;
+          } else {
+            console.log('Failed to load array or .tasks from source', task.sourceId);
+            alert('Failed to load array or .tasks from source ' + task.sourceId);
+            return;
+          }
+          for (let i = 0; projectContents && i < source.urls.length; i += 1) {
+            // now find where to write the task
             if (source.urls[i].writeMethod === WriteMethod.DIRECT_TO_FILE) {
-              if (Array.isArray(projectContents)) {
-                projectContents = { tasks: projectContents };
-              }
-              if (!projectContents.log) {
-                projectContents.log = [];
-              }
               const newLog = {
                 id: uuid.v4(),
-                taskId,
+                taskId: taskId,
                 data: { messageData: volunteerMessageForSigning },
                 time: volunteerMessageForSigning.time,
+                publicKey: publicKeyEncoded,
                 signature,
               };
-              projectContents.log = _.concat([newLog], projectContents.log);
+              projectContents.log = R.concat([newLog], projectContents.log || []);
               const projectYamlString = yaml.safeDump(projectContents);
               saveToFile(
                 url.fileURLToPath(source.urls[i].url),

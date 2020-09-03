@@ -88,14 +88,19 @@ tasks:
   - '20 0 read binary files id:#read-binary'
   - 20 0 stop requiring semicolons in the code
 log:
-  - id: 756c45b7-0fe6-4ef2-ba8a-2ad1d95c6620
+  - id: 37e71247-aca7-40e9-8ab3-e6235e8852bf
     taskId: '#package'
     data:
       messageData:
         description: 'package app for Martin id:#package'
         did: 'did:none:UNKNOWN'
         taskUri: 'taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#package'
-        time: '2020-08-30T23:24:01.154Z'
-    time: '2020-08-30T23:24:01.154Z'
+        time: '2020-09-03T02:57:55.949Z'
+    time: '2020-09-03T02:57:55.949Z'
+    publicKey: |
+      -----BEGIN PUBLIC KEY-----
+      ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEwoPYycwTyGBOxgSueDKchLN2RKtAyLmT
+      v0IFJmTIgqTPtBCLxuIfQ8L7nt+a7fgaeTOHmhMkwns=
+      -----END PUBLIC KEY-----
     signature: >-
-      303e021d00aa9ea84e92702cffd43aaa79529c9047e1f3183d715242fd085df140021d00c08b24aa6f46086cc2ae1363c3a490487c605ddc1704894d3c359fd4
+      303e021d00ef45c7d2ed5a47ffb4c67bfa431753a27226dc47935a9b30563a26f9021d00ac5c3823aad094438c2d6acffef2906eb2751a43717be3256a71524c
