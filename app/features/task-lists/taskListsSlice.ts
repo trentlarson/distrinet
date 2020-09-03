@@ -237,7 +237,10 @@ async function retrieveAllTasks(
             } else if (isProjectFile(contentTasks)) {
               taskList = contentTasks.tasks;
             } else {
-              console.error('Failure getting array or .tasks from source', entry.sourceId);
+              console.error(
+                'Failure getting array or .tasks from source',
+                entry.sourceId
+              );
               return [];
             }
             const issues = parseIssues(entry.sourceId, taskList);
@@ -247,7 +250,12 @@ async function retrieveAllTasks(
             return [issues];
           })
           .catch((error) => {
-            console.error('Failure loading a YAML task list from source', entry.sourceId, ' ... with error', error);
+            console.error(
+              'Failure loading a YAML task list from source',
+              entry.sourceId,
+              ' ... with error',
+              error
+            );
             return [];
           });
         result = _.concat(result, next);
@@ -352,20 +360,25 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
             .createPublicKey(keyPem)
             .export({ type: 'spki', format: 'pem' })
             .toString();
-          
+
           const signature = sign.sign(privateKey, 'hex');
 
-          let fileContents = yaml.safeLoad(
+          const fileContents = yaml.safeLoad(
             getState().distnet.cache[task.sourceId].contents
           );
           let projectContents: ProjectFile;
           if (isTaskArray(fileContents)) {
-            projectContents = { tasks: fileContents }
+            projectContents = { tasks: fileContents };
           } else if (isProjectFile(fileContents)) {
             projectContents = fileContents;
           } else {
-            console.log('Failed to load array or .tasks from source', task.sourceId);
-            alert('Failed to load array or .tasks from source ' + task.sourceId);
+            console.log(
+              'Failed to load array or .tasks from source',
+              task.sourceId
+            );
+            alert(
+              `Failed to load array or .tasks from source ${task.sourceId}`
+            );
             return;
           }
           for (let i = 0; projectContents && i < source.urls.length; i += 1) {
@@ -373,13 +386,16 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
             if (source.urls[i].writeMethod === WriteMethod.DIRECT_TO_FILE) {
               const newLog = {
                 id: uuid.v4(),
-                taskId: taskId,
+                taskId,
                 data: { messageData: volunteerMessageForSigning },
                 time: volunteerMessageForSigning.time,
                 publicKey: publicKeyEncoded,
                 signature,
               };
-              projectContents.log = R.concat([newLog], projectContents.log || []);
+              projectContents.log = R.concat(
+                [newLog],
+                projectContents.log || []
+              );
               const projectYamlString = yaml.safeDump(projectContents);
               saveToFile(
                 url.fileURLToPath(source.urls[i].url),
