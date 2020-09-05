@@ -134,6 +134,15 @@ export const dispatchLoadSettingsFromFile = (): AppThunk => async (
   }
 };
 
+export const dispatchLoadSettingsFromFileIfEmpty = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  if (!getState().distnet.settingsText) {
+    dispatch(dispatchLoadSettingsFromFile());
+  }
+};
+
 export const dispatchSaveSettingsToFile = (): AppThunk => async (
   dispatch,
   getState
