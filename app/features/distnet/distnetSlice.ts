@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
-import nodeCrypto from 'crypto';
+import bs58 from 'bs58';
+import nodeCrypto, { KeyObject } from 'crypto';
+
 import _ from 'lodash';
 import yaml from 'js-yaml';
 
@@ -172,12 +174,60 @@ export const dispatchSaveSettingsToFile = (): AppThunk => async (
   }
 };
 
+/**
+
+Everything about DIDs is complicated!  I don't know if I've done it right.
+
+Another option: use "key" DIDs.  (... which I could pull apart to make a "peer".)
+
+I'd like to user the [Peer DIDs](https://identity.foundation/peer-did-method-spec/index.html),
+but I can't figure out how to get the byte array from the KeyObject for the public key in the
+core crypto.js library.  Weird, huh?
+
+// eslint-disable-next-line max-len
+So I tried to use [crypt-ld](https://github.com/digitalbazaar/crypto-ld) with
+cryptoLD.generate({type: 'Ed25519VerificationKey2018'}) but it failed with the following:
+Uncaught (in promise) TypeError: semver__WEBPACK_IMPORTED_MODULE_3__.gte is not a function
+    at Function.generate (Ed25519VerificationKey2018.js:95)
+    at CryptoLD.generate (CryptoLD.js:45)
+
+ */
+
+/**
+ * @param publicKey: KeyObject (and it's only "any" because I can't find "KeyObject" anywhere)
+ *
+ * This may be wrong: it uses the DER bytes as SHA256 import.
+ * I don't think the DER format accurately gives the underlying bytes that make
+ * up the public key, but I can't find any other way to get the byte array!
+ *
+ * https://identity.foundation/peer-did-method-spec/index.html#method-specific-identifier
+ */
+function peerDidFromPublicKey(publicKey: KeyObject) {
+  const multicodecBuf: Buffer = Buffer.from([0x12, 0x20]);
+
+  const basisBuf: Buffer = publicKey.export({
+    type: 'spki',
+    format: 'der',
+  });
+  const numAlgoBuf: Buffer = nodeCrypto
+    .createHash('sha256')
+    .update(basisBuf)
+    .digest();
+  const encnumbasisBuf: Buffer = Buffer.concat([multicodecBuf, numAlgoBuf]);
+  const encnumbasis: string = bs58.encode(encnumbasisBuf);
+
+  const peerDid = `did:peer:1z${encnumbasis}`;
+  return peerDid;
+}
+
 export const generateKeyAndSet = (settings: Settings) => {
   const newSettings = _.cloneDeep(settings);
-  const { privateKey } = nodeCrypto.generateKeyPairSync('ec', {
+  const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
     namedCurve: 'secp224r1',
   });
+  const did = peerDidFromPublicKey(publicKey);
   const keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+
   if (_.isNil(newSettings.credentials)) {
     newSettings.credentials = [];
   }
@@ -186,7 +236,9 @@ export const generateKeyAndSet = (settings: Settings) => {
   if (_.isNil(privCred)) {
     privCred = { id: 'privateKey', type: CredentialType.PRIVATE_KEY };
   }
+  privCred.did = did;
   privCred.privateKeyPkcs8Pem = keyPkcs8Pem.toString();
+
   newSettings.credentials = _.unionWith(
     [privCred],
     creds,

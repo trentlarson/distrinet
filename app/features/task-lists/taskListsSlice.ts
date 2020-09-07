@@ -26,7 +26,7 @@ export interface ProjectFile {
 export interface Log {
   id: string;
   taskId: string;
-  data: any;
+  data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   time: string;
   did?: string;
   publicKey?: string;
@@ -141,6 +141,12 @@ export function taskFromString(
     subtasks,
   };
 }
+
+/**
+ * I want to use this but I guess circular aliases aren't allows.  Maybe a type guard instead?
+ *
+type InputIssue = string | Record<string, InputIssue> | Array<InputIssue>;
+ */
 
 /**
  * @param sourceId the source ID, an integral datum in every task

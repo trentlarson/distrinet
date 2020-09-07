@@ -1,4 +1,5 @@
 tasks:
+  - 96 1 write public page to show task priorities
   - 95 1 generate DID doc id:#did
   - 95 2 change internal settings format = sources & credentials into objects
   - '93 0 package app for Martin id:#package'

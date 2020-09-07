@@ -52,11 +52,17 @@ export enum WriteMethod {
   DIRECT_TO_FILE = 'DIRECT_TO_FILE',
 }
 
+/**
+ * This is a good candidate for extensions, eg. privateKeyFile
+ */
 interface Credential {
   id?: string; // typically only used in the top-level credentials
   type?: CredentialType;
-  value?: string;
-  privateKeyFile?: string;
+  value?: string; // useful for auth tokens
+  did?: string; // DID (Decentralized ID)
+
+  // from keyObjectexport with type 'pkcs8' and format 'pem'
+  // see https://nodejs.org/dist/latest-v12.x/docs/api/crypto.html#crypto_keyobject_export_options
   privateKeyPkcs8Pem?: string;
 }
 
