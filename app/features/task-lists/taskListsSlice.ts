@@ -45,7 +45,7 @@ export interface Task {
 // Remember to keep these in alphabetical order for standard.
 interface VolunteerMessageForSigning {
   description: string;
-  did: string;
+  did?: string;
   taskUri: string;
   time: string;
 }
@@ -401,7 +401,7 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
           for (let i = 0; projectContents && i < source.urls.length; i += 1) {
             // now find where to write the task
             if (source.urls[i].writeMethod === WriteMethod.DIRECT_TO_FILE) {
-              const newLog = {
+              const newLog: Log = {
                 id: uuid.v4(),
                 taskId,
                 data: { messageData: volunteerMessageForSigning },
