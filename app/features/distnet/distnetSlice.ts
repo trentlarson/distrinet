@@ -184,7 +184,6 @@ I'd like to user the [Peer DIDs](https://identity.foundation/peer-did-method-spe
 but I can't figure out how to get the byte array from the KeyObject for the public key in the
 core crypto.js library.  Weird, huh?
 
-// eslint-disable-next-line max-len
 So I tried to use [crypt-ld](https://github.com/digitalbazaar/crypto-ld) with
 cryptoLD.generate({type: 'Ed25519VerificationKey2018'}) but it failed with the following:
 Uncaught (in promise) TypeError: semver__WEBPACK_IMPORTED_MODULE_3__.gte is not a function

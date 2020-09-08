@@ -94,7 +94,7 @@ export default function Distnet() {
           data-tclass="btn"
           type="button"
         >
-          load config
+          reload config
         </button>
         <button
           className={styles.btn}
@@ -149,7 +149,7 @@ export default function Distnet() {
           data-tclass="btn"
           type="button"
         >
-          load source
+          reload source
         </button>
         <div>{cacheErrorMessage}</div>
         <div>

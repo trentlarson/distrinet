@@ -1,6 +1,7 @@
 tasks:
-  - 96 1 write public page to show task priorities
-  - 95 1 generate DID doc id:#did
+  - >-
+    96 1 write public page to show task priorities +#collaborate
+    id:public-task-page
   - 95 2 change internal settings format = sources & credentials into objects
   - '93 0 package app for Martin id:#package'
   - >-
@@ -50,6 +51,7 @@ tasks:
   - '80 0 on startup, check for files already cached in files and show that date'
   - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
   - '80 -1 in settings, rename source.id to source.uri'
+  - 80 1 change all alerts into on-page errors
   - 75 0 add FamilySearch session ID in the UI somewhere
   - >-
     75 2 start an HTTP server for file access (rather than direct library
@@ -89,19 +91,23 @@ tasks:
   - '20 0 read binary files id:#read-binary'
   - 20 0 stop requiring semicolons in the code
 log:
-  - id: 37e71247-aca7-40e9-8ab3-e6235e8852bf
-    taskId: '#package'
+  - id: 74fe88aa-1570-4d81-8a00-1079462255e2
+    taskId: public-task-page
     data:
       messageData:
-        description: 'package app for Martin id:#package'
-        did: 'did:none:UNKNOWN'
-        taskUri: 'taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#package'
-        time: '2020-09-03T02:57:55.949Z'
-    time: '2020-09-03T02:57:55.949Z'
+        description: >-
+          write public page to show task priorities +#collaborate
+          id:public-task-page
+        did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
+        taskUri: >-
+          taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#public-task-page
+        time: '2020-09-08T00:13:01.375Z'
+    time: '2020-09-08T00:13:01.375Z'
+    did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
     publicKey: |
       -----BEGIN PUBLIC KEY-----
-      ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEwoPYycwTyGBOxgSueDKchLN2RKtAyLmT
-      v0IFJmTIgqTPtBCLxuIfQ8L7nt+a7fgaeTOHmhMkwns=
+      ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEMt1EKASbMuTRGM/qsmZaxygO4/FsjnGE
+      PQnGph9BsYdyVJWmOQcnsi4M3xLQIYw190JpZDFd42Y=
       -----END PUBLIC KEY-----
     signature: >-
-      303e021d00ef45c7d2ed5a47ffb4c67bfa431753a27226dc47935a9b30563a26f9021d00ac5c3823aad094438c2d6acffef2906eb2751a43717be3256a71524c
+      303d021d00edfd9c72420138aee3e31adf85216664a1422ed3b8b6d0ae8592b583021c1d9f511c7d6cf5cafe2982ddf31a7dbce46ca26b6d1d33e41f30d410

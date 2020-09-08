@@ -307,6 +307,15 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
 };
 
+export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  if (getState().taskLists.bigList.length === 0) {
+    dispatch(dispatchLoadAllSourcesIntoTasks());
+  }
+};
+
 function saveToFile(
   file: string,
   text: string
@@ -354,10 +363,12 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
           const sign = nodeCrypto.createSign('SHA256');
           const volunteerMessageForSigning: VolunteerMessageForSigning = {
             description: task.description,
-            did: 'did:none:UNKNOWN',
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),
           };
+          if (keyContents.did) {
+            volunteerMessageForSigning.did = keyContents.did;
+          }
           sign.write(JSON.stringify(volunteerMessageForSigning));
           sign.end();
           const keyPem: string = keyContents.privateKeyPkcs8Pem;
@@ -398,6 +409,9 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
                 publicKey: publicKeyEncoded,
                 signature,
               };
+              if (volunteerMessageForSigning.did) {
+                newLog.did = volunteerMessageForSigning.did;
+              }
               projectContents.log = R.concat(
                 [newLog],
                 projectContents.log || []

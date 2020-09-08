@@ -292,7 +292,7 @@ export default function TaskListsTable() {
         data-tclass="btn"
         type="button"
       >
-        load tasks
+        reload tasks
       </button>
       <div>{execSources}</div>
       <div>
