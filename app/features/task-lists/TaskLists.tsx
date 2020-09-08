@@ -3,11 +3,11 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styles from './style.css';
 import routes from '../../constants/routes.json';
-import { dispatchLoadAllTaskListsIfEmpty } from './taskListsSlice';
+import { dispatchLoadAllSourcesIntoTasks } from './taskListsSlice';
 import TaskListsTable from './TaskListsTable';
 
 export default function TaskLists() {
-  useDispatch()(dispatchLoadAllTaskListsIfEmpty());
+  useDispatch()(dispatchLoadAllSourcesIntoTasks());
 
   return (
     <div>

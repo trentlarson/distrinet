@@ -307,6 +307,9 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
 };
 
+/**
+ * unused
+ *
 export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
   dispatch,
   getState
@@ -315,6 +318,8 @@ export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
     dispatch(dispatchLoadAllSourcesIntoTasks());
   }
 };
+ *
+ */
 
 function saveToFile(
   file: string,

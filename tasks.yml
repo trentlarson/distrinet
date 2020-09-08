@@ -1,6 +1,6 @@
 tasks:
   - >-
-    96 1 write public page to show task priorities +#collaborate
+    96 1 write public page to show task priorities +#collaborate +#collaborate-genealogy +#collaborate-projects
     id:public-task-page
   - 95 2 change internal settings format = sources & credentials into objects
   - '93 0 package app for Martin id:#package'

@@ -247,12 +247,16 @@ export default function TaskListsTable() {
                     {task.subtasks.length > 0 ? (
                       <button
                         type="button"
+                        className={style.subtask}
                         onClick={() => {
                           console.log('Subtasks', task.subtasks);
                           return '';
                         }}
                       >
-                        subtasks
+                        Subtasks
+                        <span className={style.tooltiptext}>
+                          Will show in console.
+                        </span>
                       </button>
                     ) : (
                       <span />
@@ -262,12 +266,16 @@ export default function TaskListsTable() {
                     {task.dependents.length > 0 ? (
                       <button
                         type="button"
+                        className={style.subtask}
                         onClick={() => {
                           console.log('Dependents', task.dependents);
                           return '';
                         }}
                       >
-                        dependents
+                        Dependents
+                        <span className={style.tooltiptext}>
+                          Will show in console.
+                        </span>
                       </button>
                     ) : (
                       <span />
@@ -284,16 +292,9 @@ export default function TaskListsTable() {
 
   return (
     <div>
-      <button
-        className={style.btn}
-        onClick={() => {
-          dispatch(dispatchLoadAllSourcesIntoTasks());
-        }}
-        data-tclass="btn"
-        type="button"
-      >
-        reload tasks
-      </button>
+      <br />
+      <br />
+      <br />
       <div>{execSources}</div>
       <div>
         {taskLists.forecastHtml.length > 0 ? (
