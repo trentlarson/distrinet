@@ -23,6 +23,7 @@ tasks:
   - >-
     90 1 bug - clicking on otherLocationResource in the same page (repeatedly?)
     fails
+  - 85 1 parse through local RootsMagic file (after adding matching URIs)
   - 80 0 save URI for current task list inside tasks.yml (good for referencing)
   - 80 0 show subtasks in top list
   - '80 1 make it so that directory URIs work id:#dir-path-uris'

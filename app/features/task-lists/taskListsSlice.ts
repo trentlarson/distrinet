@@ -19,14 +19,14 @@ import { globalUriForId } from '../distnet/uriTools';
 const fsPromises = fs.promises;
 
 export interface ProjectFile {
-  tasks: Array<Task>;
+  tasks: Array<InputIssues>;
   log?: Array<Log>;
 }
 
 export interface Log {
   id: string;
   taskId: string;
-  data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  data: unknown;
   time: string;
   did?: string;
   publicKey?: string;
@@ -142,17 +142,16 @@ export function taskFromString(
   };
 }
 
-/**
- * I want to use this but I guess circular aliases aren't allows.  Maybe a type guard instead?
- *
-type InputIssue = string | Record<string, InputIssue> | Array<InputIssue>;
- */
+type InputIssues = string | { [key: string]: InputIssues } | Array<InputIssues>;
 
 /**
  * @param sourceId the source ID, an integral datum in every task
  * @param issueList is some part of the recursive task string or list
  */
-const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
+const parseIssues = (
+  sourceId: string,
+  issueList: InputIssues
+): Task | Array<Task> => {
   if (Array.isArray(issueList)) {
     // I don't expect to see arrays of arrays (outside blockers or subtasks).
     // This helps with typechecks... hope it doesn't do anything unexpected.
@@ -190,29 +189,21 @@ const parseIssues = (sourceId: string, issueList: any): Task | Array<Task> => {
     sourceId,
     priority: null,
     estimate: null,
-    description: `Unknown Task Structure: ${typeof issueList} ${
-      issueList ? issueList.toString() : ''
-    }`,
+    description: `Unknown Task Structure: ${typeof issueList} ${issueList}`,
     dependents: [],
     subtasks: [],
   };
 };
 
-function isTaskArray(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  contents: string | object | undefined
-): contents is Array<Task> {
+function isInputIssueArray(contents: unknown): contents is Array<InputIssues> {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
-    (contents as Array<Task>).length > 0
+    (contents as Array<InputIssues>).length > 0
   );
 }
 
-function isProjectFile(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  contents: string | object | undefined
-): contents is ProjectFile {
+function isProjectFile(contents: unknown): contents is ProjectFile {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
@@ -237,8 +228,8 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            let taskList: Array<Task>;
-            if (isTaskArray(contentTasks)) {
+            let taskList: Array<InputIssues>;
+            if (isInputIssueArray(contentTasks)) {
               taskList = contentTasks;
             } else if (isProjectFile(contentTasks)) {
               taskList = contentTasks.tasks;
@@ -389,7 +380,7 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
             getState().distnet.cache[task.sourceId].contents
           );
           let projectContents: ProjectFile;
-          if (isTaskArray(fileContents)) {
+          if (isInputIssueArray(fileContents)) {
             projectContents = { tasks: fileContents };
           } else if (isProjectFile(fileContents)) {
             projectContents = fileContents;
