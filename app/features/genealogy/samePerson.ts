@@ -39,49 +39,42 @@ export default class MapperBetweenSets {
       const key = keys[ki];
       if (key.startsWith('gedcomx:')) {
         const content = JSON.parse(cache.valueFor(key).contents);
-        if (content.persons) {
-          for (
-            let pi = 0;
-            content.persons && pi < content.persons.length;
-            pi += 1
-          ) {
-            if (content.persons[pi].links) {
-              if (content.persons[pi].links.otherLocations) {
-                for (
-                  let li = 0;
-                  li <
-                  content.persons[pi].links.otherLocations.resources.length;
-                  li += 1
-                ) {
-                  const otherRes =
-                    content.persons[pi].links.otherLocations.resources[li];
-                  if (
-                    otherRes.format === 'gedcomx' ||
-                    otherRes.resource.startsWith('gedcomx:')
-                  ) {
-                    const thisId = uriTools.globalUriForId(
-                      content.persons[pi].id,
-                      key
-                    );
-                    const otherId = uriTools.globalUriForResource(
-                      otherRes.resource,
-                      key
-                    );
-                    this.addPair(thisId, otherId);
-                  }
-                }
-              } else if (content.persons[pi].links.person) {
+
+        for (
+          let pi = 0;
+          content.persons && pi < content.persons.length;
+          pi += 1
+        ) {
+          const { links } = content.persons[pi];
+          if (links && links.otherLocations) {
+            for (
+              let li = 0;
+              li < links.otherLocations.resources.length;
+              li += 1
+            ) {
+              const otherRes = links.otherLocations.resources[li];
+              if (
+                otherRes.format === 'gedcomx' ||
+                otherRes.resource.startsWith('gedcomx:')
+              ) {
                 const thisId = uriTools.globalUriForId(
                   content.persons[pi].id,
                   key
                 );
                 const otherId = uriTools.globalUriForResource(
-                  uriTools.removeQuery(content.persons[pi].links.person.href),
+                  otherRes.resource,
                   key
                 );
                 this.addPair(thisId, otherId);
               }
             }
+          } else if (links && links.person) {
+            const thisId = uriTools.globalUriForId(content.persons[pi].id, key);
+            const otherId = uriTools.globalUriForResource(
+              uriTools.removeQuery(content.persons[pi].links.person.href),
+              key
+            );
+            this.addPair(thisId, otherId);
           }
         }
       }

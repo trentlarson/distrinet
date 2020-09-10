@@ -7,7 +7,6 @@ import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
   Task,
-  dispatchLoadAllSourcesIntoTasks,
   dispatchVolunteer,
   isTaskyamlSource,
   labelValueInDescription,
