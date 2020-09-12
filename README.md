@@ -1,4 +1,5 @@
-# Distributed Project Management
+
+# Distributed Task Management
 
 See [distributed-task-lists](https://github.com/trentlarson/distributed-task-lists)
 
@@ -40,6 +41,12 @@ To test:
 - `yarn test-all`
 - Run [genealogy tests](app/features/genealogy/README.md).
 
+To package (following https://www.electron.build/auto-update ):
+
+- Edit both package.json versions.
+- `yarn package`
+- Upload to GitHub and create a release.
+
 When developing:
 
 - Note that it will run some tests before allowing merging to master, eg. `node_modules/bin/tsc`. Make sure those work because we enforce TypeScript.
@@ -65,6 +72,24 @@ Design
 - Options for IDs within resource: /person/ABCD-EFG or /person?id=ABCD-EFG or #ABCD-EFG
   Let's use fragments, since that's [used by GedcomX as well](https://github.com/FamilySearch/gedcomx/blob/master/specifications/json-format-specification.md#fragment-ids).
 
+Types of URI -> URL relationships:
+
+- For "sources", each URL is attempted in order.
+  - If any URL after the first is not writable, that's a different source you might be monitoring just to review changes (which you might not import).
+- 0 or more "sinks", though write method could be any:
+  - Direct to file (typically sync'd through external tool"
+    - OneDrive, Syncthing, Google Drive
+  - Direct to git
+  - git via request
+    - This may need a pointer to my own copy repro.
+  - Direct to Notion
+  - Direct to Facebook
+- Sync would be dynamically updating. (Maybe both source & sink?)
+  - Yjs & CRDTs
+- toggle settings on sources
+  - always load into memory (and watch for changes)
+  - keep a local history
+
 Thanks to:
 
 - [Electron React Boilerplate](https://electron-react-boilerplate.js.org/)
@@ -72,8 +97,12 @@ Thanks to:
 - [Justin York's D3 Pedigree Examples](https://github.com/justincy/d3-pedigree-examples)
 - [arrow image](https://svgsilh.com/9e9e9e/image/29170.html)
 
+
+
+
 Here's how this project was initially created:
 
+________________________________________________________________________________
 <img src="internals/img/erb-banner.png" width="100%" />
 
 <br>

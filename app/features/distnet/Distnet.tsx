@@ -165,6 +165,9 @@ export default function Distnet() {
           select &quot;Inspect Element&quot; to open dev tools and click on the
           &quot;Console&quot; to see the logs.
         </div>
+        <div>
+          Version { process.env.npm_package_version }
+        </div>
       </div>
 
       {/** Just for my convenience because I load source so often. */}
