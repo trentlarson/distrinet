@@ -1,3 +1,4 @@
+import electron from 'electron';
 import _ from 'lodash';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -167,6 +168,13 @@ export default function Distnet() {
         </div>
         <div>
           Version { process.env.npm_package_version }
+        </div>
+        <div>
+          <button
+            type='button'
+            onClick={ () => electron.remote.getCurrentWindow().toggleDevTools() } >
+            Toggle Dev Tools
+          </button>
         </div>
       </div>
 
