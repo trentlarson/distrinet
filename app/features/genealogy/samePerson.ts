@@ -6,7 +6,7 @@ const R = require('./js/ramda-0.25.0.min.js');
 const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
 
 /**
- * Use LocalStorage to maintain mappings between data sets
+ * Use browser storage to maintain mappings between data sets
  *
  */
 export default class MapperBetweenSets {
@@ -14,13 +14,13 @@ export default class MapperBetweenSets {
    * return list of all other IDs correlated with this one
    */
   public static retrieveFor(key: string): Array<string> {
-    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
+    const idMapStr = sessionStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
     return idMap[key] || [];
   }
 
   /**
-   * If there are items in the cache that are are newer, update the mappings in localStorage.
+   * If there are items in the cache that are are newer, update the mappings in sessionStorage.
    */
   public static refreshIfNewer(updateMillis: number, cacheMap: Cache): void {
     const allMillis = R.map(
@@ -83,17 +83,17 @@ export default class MapperBetweenSets {
   }
 
   /**
-   * Add these two ids one another's mappings in localStorage.
+   * Add these two ids one another's mappings in sessionStorage.
    */
   public static addPair(id1: string, id2: string): void {
-    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
+    const idMapStr = sessionStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
     const allSameIds = this.combineAllIdentities([id1, id2], idMap);
     for (let i = 0; i < allSameIds.length; i += 1) {
       const otherIds = R.without([allSameIds[i]], allSameIds);
       idMap[allSameIds[i]] = otherIds;
     }
-    localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
+    sessionStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
   }
 
   /**
