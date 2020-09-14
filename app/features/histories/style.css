@@ -4,16 +4,16 @@
 
 .sign {
   position: absolute;
-  top: 30%;
-  left: 45%;
-  font-size: 10rem;
+  top: 10%;
+  left: 25%;
+  font-size: 5rem;
   font-weight: bold;
   letter-spacing: -0.025em;
 }
 
-.btnGroup {
+.histories {
   position: relative;
-  top: 500px;
+  top: 200px;
   width: 480px;
   margin: 0 auto;
 }

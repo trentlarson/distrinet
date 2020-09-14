@@ -167,12 +167,14 @@ export default function Distnet() {
           &quot;Console&quot; to see the logs.
         </div>
         <div>
-          Version { process.env.npm_package_version }
+          Version
+          {process.env.npm_package_version}
         </div>
         <div>
           <button
-            type='button'
-            onClick={ () => electron.remote.getCurrentWindow().toggleDevTools() } >
+            type="button"
+            onClick={() => electron.remote.getCurrentWindow().toggleDevTools()}
+          >
             Toggle Dev Tools
           </button>
         </div>

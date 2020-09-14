@@ -1,13 +1,17 @@
 tasks:
-  - >-
-    96 1 write public page to show task priorities +#collaborate +#collaborate-genealogy +#collaborate-projects
-    id:public-task-page
-  - 95 2 change internal settings format = sources & credentials into objects
+  - 95 1 load history file from list & show relationship +#genealogy
+  - '95 1 make it so that directory URIs work id:#dir-path-uris +#genealogy +#collaborate'
   - '93 0 package app for Martin id:#package'
+    - fix problem loading process on packaged app (eg. settings & genealogy pages)
   - >-
     93 0 determine problem with parsing JSON on private, eg.
     gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
-  - 93 0 fix opening new window for remote content
+  - 91 2 change internal settings format = sources & credentials into objects
+  - 90 0 add due date parsing +#tasks
+  - 90 0 add project/epic parsing +#tasks
+  - >-
+    90 1 write public page to show task priorities +#collaborate +#collaborate-genealogy +#collaborate-projects
+    id:public-task-page
   - >-
     90 0 fix parseIssues for linked tasks eg. dependents (and show in list, not
     in a column)
@@ -25,9 +29,9 @@ tasks:
     fails
   - 90 0 show cached time, both file & memory; show out-of-date cache files
   - 85 1 parse through local RootsMagic file (after adding matching URIs)
+  - 80 1 package YAML task parsing for npm
   - 80 0 save URI for current task list inside tasks.yml (good for referencing)
   - 80 0 show subtasks in top list
-  - '80 1 make it so that directory URIs work id:#dir-path-uris'
   - 80 -1 allow loading of sources automatically (then remove bottom "back" button):
       - add an indicator on the front page that it's loading
       - allow for deselection of files that might be too big
