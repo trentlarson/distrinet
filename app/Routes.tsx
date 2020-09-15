@@ -54,6 +54,19 @@ const HistoriesPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+const LazyHistoryPage = React.lazy(() =>
+  import(
+    /* webpackChunkName: "HistoryPage" */ './features/histories/HistoryPage'
+  )
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const HistoryPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyHistoryPage {...props} />
+  </React.Suspense>
+);
+
 const LazyTaskListsPage = React.lazy(() =>
   import(
     /* webpackChunkName: "TaskListsPage" */ './features/task-lists/TaskListsPage'
@@ -75,6 +88,7 @@ export default function Routes() {
         <Route path={routes.DISTNET} component={DistnetPage} />
         <Route path={routes.GENEALOGY} component={GenealogyPage} />
         <Route path={routes.HISTORIES} component={HistoriesPage} />
+        <Route path={routes.HISTORY} component={HistoryPage} />
         <Route path={routes.TASK_LISTS} component={TaskListsPage} />
         {/* This HomePage Route must come last: any Route after it won't do anything if clicked. */}
         <Route path={routes.HOME} component={HomePage} />

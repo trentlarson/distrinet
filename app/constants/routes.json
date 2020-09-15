@@ -4,5 +4,6 @@
   "DISTNET": "/distnet",
   "GENEALOGY": "/genealogy",
   "HISTORIES": "/histories",
+  "HISTORY": "/history",
   "TASK_LISTS": "/task-lists"
 }

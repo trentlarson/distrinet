@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import GridLoader from 'react-spinners/GridLoader';
+import { URLSearchParams } from 'url';
+
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import {
@@ -97,11 +99,32 @@ export default function Histories() {
                 {histories.display[source.id]
                   ? histories.display[source.id].map((file: FileInfo) => {
                       const fileName = path.basename(file.fullPath);
+                      let link = <span />;
+                      if (
+                        fileName.endsWith('htm') ||
+                        fileName.endsWith('html')
+                      ) {
+                        link = (
+                          <Link
+                            to={{
+                              pathname: routes.HISTORY,
+                              search: new URLSearchParams({
+                                fullPath: file.fullPath,
+                              }).toString(),
+                            }}
+                          >
+                            (view)
+                          </Link>
+                        );
+                      }
                       // eslint-disable-next-line react/jsx-indent
                       return (
                         <li key={source.id + file.fullPath}>
                           {file.hasMatch ? '*' : '_'}
+                          &nbsp;
                           {fileName}
+                          &nbsp;
+                          {link}
                         </li>
                       );
                     })
