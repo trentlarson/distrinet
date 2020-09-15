@@ -15,10 +15,15 @@ import {
 } from './historiesSlice';
 import styles from './style.css';
 
+enum Visibility {
+  visible = 'visible',
+  hidden = 'hidden',
+}
+
 function isSearchingVisible(historiesIsSearching: SearchProgress) {
   return historiesIsSearching.done < historiesIsSearching.total
-    ? 'visible'
-    : 'hidden';
+    ? Visibility.visible
+    : Visibility.hidden;
 }
 
 export default function Histories() {
@@ -28,7 +33,7 @@ export default function Histories() {
     distnet.settings.sources
   );
   const dispatch = useDispatch();
-  const [idInputExpanded, setIdInputExpanded] = useState('hidden');
+  const [idInputExpanded, setIdInputExpanded] = useState(Visibility.hidden);
   const [idSearchTerm, setIdSearchTerm] = useState('');
 
   const histories = useSelector((state: RootState) => state.histories);
@@ -49,7 +54,7 @@ export default function Histories() {
             type="button"
             onClick={() => {
               setIdSearchTerm('');
-              setIdInputExpanded('visible');
+              setIdInputExpanded(Visibility.visible);
             }}
           >
             Search for ID
@@ -60,7 +65,7 @@ export default function Histories() {
             style={{ visibility: idInputExpanded }}
             onChange={(event) => {
               setIdSearchTerm(event.target.value);
-              setIdInputExpanded('hidden');
+              setIdInputExpanded(Visibility.hidden);
               if (event.target.value) {
                 dispatch(dispatchTextSearch(event.target.value));
               } else {

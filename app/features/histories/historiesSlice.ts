@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import fs, { promises as fsPromises } from 'fs';
 import path from 'path';
 import * as R from 'ramda';
+import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState } from '../../store';
@@ -50,8 +51,8 @@ const historiesSlice = createSlice({
       const fullPath = contents.payload;
       const newResult = R.clone(state.display);
       R.forEach(
-        (key) =>
-          R.forEach((file) => {
+        (key: string) =>
+          R.forEach((file: FileInfo) => {
             if (file.fullPath === fullPath) {
               file.hasMatch = true;
             }
@@ -141,14 +142,15 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
       const readStream = fs.createReadStream(file.fullPath, 'utf8');
       let prevChunk = '';
       readStream
-        .on('data', function (chunk) {
-          // adding chunks just in case the word crosses chunk boundaries
+        .on('data', function (this: Readable, chunk) {
+          // adding pieces of chunks just in case the word crosses chunk boundaries
           const bothChunks = prevChunk + chunk;
           if (bothChunks.indexOf(term) > -1) {
             dispatch(markMatch(file.fullPath));
             this.destroy();
           } else {
-            prevChunk = chunk;
+            // take enough of the previous chunk if it has some piece of the term
+            prevChunk = R.takeLast(term.length, chunk);
           }
         })
         .on('close', function () {
