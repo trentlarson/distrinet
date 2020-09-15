@@ -1,11 +1,25 @@
+import path from 'path';
 import * as R from 'ramda';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import GridLoader from 'react-spinners/GridLoader';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
-import { dispatchLoadDir, FileInfo } from './historiesSlice';
+import {
+  dispatchEraseSearchResults,
+  dispatchLoadDir,
+  dispatchTextSearch,
+  FileInfo,
+  SearchProgress,
+} from './historiesSlice';
 import styles from './style.css';
+
+function isSearchingVisible(historiesIsSearching: SearchProgress) {
+  return historiesIsSearching.done < historiesIsSearching.total
+    ? 'visible'
+    : 'hidden';
+}
 
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
@@ -14,6 +28,8 @@ export default function Histories() {
     distnet.settings.sources
   );
   const dispatch = useDispatch();
+  const [idInputExpanded, setIdInputExpanded] = useState('hidden');
+  const [idSearchTerm, setIdSearchTerm] = useState('');
 
   const histories = useSelector((state: RootState) => state.histories);
 
@@ -28,6 +44,36 @@ export default function Histories() {
         Histories
       </div>
       <div className={styles.histories}>
+        <div>
+          <button
+            type="button"
+            onClick={() => {
+              setIdSearchTerm('');
+              setIdInputExpanded('visible');
+            }}
+          >
+            Search for ID
+          </button>
+          <input
+            type="text"
+            size={32}
+            style={{ visibility: idInputExpanded }}
+            onChange={(event) => {
+              setIdSearchTerm(event.target.value);
+              setIdInputExpanded('hidden');
+              if (event.target.value) {
+                dispatch(dispatchTextSearch(event.target.value));
+              } else {
+                dispatch(dispatchEraseSearchResults());
+              }
+            }}
+          />
+        </div>
+        <div>{idSearchTerm}</div>
+        <div style={{ visibility: isSearchingVisible(histories.isSearching) }}>
+          <GridLoader color="silver" />
+          {`${histories.isSearching.done} / ${histories.isSearching.total}`}
+        </div>
         <ul>
           {historySources.map((source) => (
             <li key={source.id}>
@@ -44,10 +90,16 @@ export default function Histories() {
               <br />
               <ul>
                 {histories.display[source.id]
-                  ? histories.display[source.id].map((file: FileInfo) => (
+                  ? histories.display[source.id].map((file: FileInfo) => {
+                      const fileName = path.basename(file.fullPath);
                       // eslint-disable-next-line react/jsx-indent
-                      <li key={source.id + file.name}>{file.name}</li>
-                    ))
+                      return (
+                        <li key={source.id + file.fullPath}>
+                          {file.hasMatch ? '*' : '_'}
+                          {fileName}
+                        </li>
+                      );
+                    })
                   : ''}
               </ul>
             </li>

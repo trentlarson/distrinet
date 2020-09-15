@@ -1,5 +1,6 @@
 tasks:
   - 95 1 load history file from list & show relationship +#genealogy
+  - 95 0 file load: recurse
   - '95 1 make it so that directory URIs work id:#dir-path-uris +#genealogy +#collaborate'
   - '93 0 package app for Martin id:#package'
     - fix problem loading process on packaged app (eg. settings & genealogy pages)

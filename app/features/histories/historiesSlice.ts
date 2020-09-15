@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { promises as fsPromises } from 'fs';
+import fs, { promises as fsPromises } from 'fs';
+import path from 'path';
 import * as R from 'ramda';
 import { fileURLToPath } from 'url';
 // eslint-disable-next-line import/no-cycle
@@ -11,30 +12,82 @@ interface Payload<T> {
 }
 
 export interface FileInfo {
-  name: string;
+  fullPath: string;
   isDir: boolean;
   isFile: boolean;
+  hasMatch: boolean;
+}
+
+export interface SearchProgress {
+  done: number;
+  total: number;
 }
 
 export interface Display {
   display: Record<string, Array<FileInfo>>;
+  isSearching: SearchProgress;
 }
 
 const historiesSlice = createSlice({
   name: 'histories',
-  initialState: { display: {} } as Display,
+  initialState: { display: {}, isSearching: { done: 0, total: 0 } } as Display,
   reducers: {
     setDisplay: (state, contents: Payload<Record<string, Array<FileInfo>>>) => {
       state.display = contents.payload;
     },
+    eraseSearchResults: (state) => {
+      const newResult = R.clone(state.display);
+      R.forEach(
+        (key: string) =>
+          R.forEach((file: FileInfo) => {
+            file.hasMatch = false;
+          }, newResult[key]),
+        R.keys(newResult)
+      );
+      state.display = newResult;
+    },
+    markMatch: (state, contents: Payload<string>) => {
+      const fullPath = contents.payload;
+      const newResult = R.clone(state.display);
+      R.forEach(
+        (key) =>
+          R.forEach((file) => {
+            if (file.fullPath === fullPath) {
+              file.hasMatch = true;
+            }
+          }, newResult[key]),
+        R.keys(newResult)
+      );
+      state.display = newResult;
+    },
+    startSearchProgress: (state) => {
+      state.isSearching = { done: 0, total: 0 };
+    },
+    incrementSearchTotalBy: (state, contents: Payload<number>) => {
+      state.isSearching.total += contents.payload;
+    },
+    incrementSearchDone: (state) => {
+      state.isSearching.done += 1;
+    },
   },
 });
 
-export const { setDisplay } = historiesSlice.actions;
+export const {
+  setDisplay,
+  eraseSearchResults,
+  markMatch,
+  startSearchProgress,
+  incrementSearchTotalBy,
+  incrementSearchDone,
+} = historiesSlice.actions;
 
 export default historiesSlice.reducer;
 
 export const selectDisplay = (state: RootState) => state.histories.display;
+
+export const dispatchEraseSearchResults = (): AppThunk => async (dispatch) => {
+  dispatch(eraseSearchResults());
+};
 
 export const dispatchLoadDir = (historyUri: string): AppThunk => async (
   dispatch,
@@ -58,9 +111,10 @@ export const dispatchLoadDir = (historyUri: string): AppThunk => async (
       })
       .then((fileArray) => {
         const allFiles = fileArray.map((file) => ({
-          name: file.name,
+          fullPath: path.join(filePath, file.name),
           isDir: file.isDirectory(),
           isFile: file.isFile(),
+          hasMatch: false,
         }));
         const display = R.clone(getState().histories.display);
         display[historyUri] = allFiles;
@@ -72,4 +126,34 @@ export const dispatchLoadDir = (historyUri: string): AppThunk => async (
   } else {
     console.log('Not doing anything about histories URL', historyUri);
   }
+};
+
+export const dispatchTextSearch = (term: string): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  dispatch(eraseSearchResults());
+  dispatch(startSearchProgress());
+  R.keys(getState().histories.display).forEach((uri) => {
+    const files = getState().histories.display[uri];
+    dispatch(incrementSearchTotalBy(files.length));
+    files.forEach((file: FileInfo) => {
+      const readStream = fs.createReadStream(file.fullPath, 'utf8');
+      let prevChunk = '';
+      readStream
+        .on('data', function (chunk) {
+          // adding chunks just in case the word crosses chunk boundaries
+          const bothChunks = prevChunk + chunk;
+          if (bothChunks.indexOf(term) > -1) {
+            dispatch(markMatch(file.fullPath));
+            this.destroy();
+          } else {
+            prevChunk = chunk;
+          }
+        })
+        .on('close', function () {
+          dispatch(incrementSearchDone());
+        });
+    });
+  });
 };
