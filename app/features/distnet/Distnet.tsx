@@ -173,7 +173,9 @@ export default function Distnet() {
         <div>
           <button
             type="button"
-            onClick={() => electron.remote.getCurrentWindow().toggleDevTools()}
+            onClick={() =>
+              // eslint-disable-next-line prettier/prettier
+              electron.remote.getCurrentWindow().webContents.toggleDevTools()}
           >
             Toggle Dev Tools
           </button>

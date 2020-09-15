@@ -23,7 +23,9 @@ export default function Home(): JSX.Element {
         type="button"
         onClick={() => {
           // eslint-disable-next-line global-require
-          require('electron').remote.getCurrentWindow().toggleDevTools();
+          require('electron')
+            .remote.getCurrentWindow()
+            .webContents.toggleDevTools();
         }}
       >
         Toggle Dev Tools
