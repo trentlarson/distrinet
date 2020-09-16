@@ -1,10 +1,11 @@
+import electron from 'electron';
 import path from 'path';
 import * as R from 'ramda';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import GridLoader from 'react-spinners/GridLoader';
-import { URLSearchParams } from 'url';
+import url, { URLSearchParams } from 'url';
 
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
@@ -99,6 +100,7 @@ export default function Histories() {
                 {histories.display[source.id]
                   ? histories.display[source.id].map((file: FileInfo) => {
                       const fileName = path.basename(file.fullPath);
+                      const fileUrl = url.pathToFileURL(file.fullPath);
                       let link = <span />;
                       if (
                         fileName.endsWith('htm') ||
@@ -123,6 +125,17 @@ export default function Histories() {
                           {file.hasMatch ? '*' : '_'}
                           &nbsp;
                           {fileName}
+                          &nbsp;
+                          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                          <a
+                            href="#"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              electron.shell.openExternal(fileUrl.toString());
+                            }}
+                          >
+                            (open)
+                          </a>
                           &nbsp;
                           {link}
                         </li>
