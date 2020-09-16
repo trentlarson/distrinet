@@ -32,7 +32,7 @@ export default function HistoryPage(props: Record<string, any>) {
       </div>
       <br />
       <br />
-      <div>{ReactHtmlParser(contents.toString())}</div>
+      {ReactHtmlParser(contents.toString())}
     </div>
   );
 }
