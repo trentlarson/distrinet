@@ -53,9 +53,10 @@ interface VolunteerMessageForSigning {
 interface IssueToSchedule {
   key: string;
   summary: string;
+  priority: number | null;
   // number of seconds
-  issueEstSecondsRaw: number;
-  dueDate: string;
+  issueEstSecondsRaw: number | null;
+  dueDate: string | null;
 }
 
 const taskListsSlice = createSlice({
@@ -275,8 +276,8 @@ export const retrieveForecast = (
     key: i.toString(),
     summary: t.description,
     priority: t.priority,
-    issueEstSecondsRaw: t.estimate === null ? 0 : 2 ** t.estimate * 60 * 60,
-    dueDate: labelValueInDescription("due", t.description),
+    issueEstSecondsRaw: t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
+    dueDate: labelValueInDescription('due', t.description),
   }));
   const forecastRequest = {
     issues: forecastTasks,

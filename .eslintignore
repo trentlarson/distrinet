@@ -65,3 +65,4 @@ app/features/genealogy/js/jquery-2.2.4.min.js
 app/features/genealogy/js/ramda-0.25.0.min.js
 app/features/genealogy/js/tree.js
 app/features/genealogy/js/tree_ds.js
+app/features/histories/js/highlight-links.js
