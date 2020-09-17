@@ -2,12 +2,13 @@ tasks:
   - 95 1 load history file from list & show relationship +#genealogy
   - 95 0 file load: recurse
   - '95 1 make it so that directory URIs work id:#dir-path-uris +#genealogy +#collaborate'
-  - '93 0 package app for Martin id:#package'
+  - '93 0 package app for Martin id:#package':
     - fix problem loading process on packaged app (eg. settings & genealogy pages)
   - >-
     93 0 determine problem with parsing JSON on private, eg.
     gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
   - 91 2 change internal settings format = sources & credentials into objects
+  - 90 1 prepare demo for IonRev due:2020-09-20
   - 90 0 add due date parsing +#tasks
   - 90 0 add project/epic parsing +#tasks
   - >-
@@ -61,6 +62,7 @@ tasks:
   - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
   - '80 -1 in settings, rename source.id to source.uri'
   - 80 1 change all alerts into on-page errors
+  - 75 1 demo to Janell due:2020-12-27
   - 75 0 add FamilySearch session ID in the UI somewhere
   - >-
     75 2 start an HTTP server for file access (rather than direct library
@@ -98,7 +100,7 @@ tasks:
     keys if missing) id:#set-settings-keys
   - 40 0 show how the same code can be used in browser & in node
   - '20 0 read binary files id:#read-binary'
-  - 20 0 stop requiring semicolons in the code
+  - 20 4 stop requiring semicolons in the code
 log:
   - id: 74fe88aa-1570-4d81-8a00-1079462255e2
     taskId: public-task-page

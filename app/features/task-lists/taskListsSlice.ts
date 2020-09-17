@@ -55,6 +55,7 @@ interface IssueToSchedule {
   summary: string;
   // number of seconds
   issueEstSecondsRaw: number;
+  dueDate: string;
 }
 
 const taskListsSlice = createSlice({
@@ -273,11 +274,16 @@ export const retrieveForecast = (
   const forecastTasks: Array<IssueToSchedule> = tasks.map((t, i) => ({
     key: i.toString(),
     summary: t.description,
+    priority: t.priority,
     issueEstSecondsRaw: t.estimate === null ? 0 : 2 ** t.estimate * 60 * 60,
+    dueDate: labelValueInDescription("due", t.description),
   }));
   const forecastRequest = {
     issues: forecastTasks,
-    createPreferences: { defaultAssigneeHoursPerWeek: hoursPerWeek },
+    createPreferences: {
+      defaultAssigneeHoursPerWeek: hoursPerWeek,
+      reversePriority: true,
+    },
   };
   const forecastResponse = await fetch('http://localhost:8090/display', {
     method: 'POST',
