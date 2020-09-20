@@ -58,7 +58,7 @@ To create that patch file:
 - `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/app.global.css app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json yarn.lock > patch.diff`
 - ... then look through patch.diff and remove the references to "task" stuff.
 
-Tooling
+#### Tooling
 
 Current [sample app](https://github.com/trentlarson/distrinet) is built on the Electron framework.
 
