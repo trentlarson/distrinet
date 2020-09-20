@@ -1,0 +1,8 @@
+  - >-
+    90 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
+    id:public-task-page
+  - >-
+    90 0 fix parseIssues for linked tasks eg. dependents (and show in list, not
+    in a column)
+  - 80 0 show subtasks in top list
+  - 75 0 handle more task YAML variations (eg. blocked & child issues)

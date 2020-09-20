@@ -2,6 +2,16 @@
 
 Keep your own private trees, and point to public trees and browse seamlessly between the two.
 
+- Simply add GEDCOMX files with a URI prefixed with "gedcomx:" into the "distrinet settings", then you'll go to the "genealogy" part of this app and enter URIs and see people.
+
+## Design
+
+- Add a property "otherLocations" inside "persons[].links" any time you want to link an existing person to the same person in another data set.  It should be a URI.
+- For IDs within the same resource: use fragments (eg. #ABCD-EFG)
+  Using fragments since that's [used by GedcomX as well](https://github.com/FamilySearch/gedcomx/blob/master/specifications/json-format-specification.md#fragment-ids).
+
+## Development
+
 To test:
 
 - UI Genealogy Samples:
@@ -19,3 +29,9 @@ To test:
     - See two parents.
   - gedcomx:1bd0e1c4-aa66-4d12-93ff-0d8c4b13d252#norman
     - See 3 external links: api has pics, 15d has 2 parents, ancestors opens window
+
+## Kudos
+
+- [Matt Misbach's Decentralized Distributed Genealogical Tree graphics & parsing](https://github.com/DecentralizedGenealogy/webclient)
+- [Justin York's D3 Pedigree Examples](https://github.com/justincy/d3-pedigree-examples)
+- [arrow image](https://svgsilh.com/9e9e9e/image/29170.html)

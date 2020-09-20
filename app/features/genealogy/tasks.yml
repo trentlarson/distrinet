@@ -1,0 +1,35 @@
+  - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
+  - >-
+    93 0 determine problem with parsing JSON on private, eg.
+    gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
+  - 90 1 prepare demo for IonRev due:2020-09-20
+  - 90 1 add spinner when loading a new tree
+  - '90 1 add tests - find, globalUriForResource, globalUriForId'
+  - >-
+    90 1 bug - sometimes the graph doesn't show after pasting the URL (after
+    cache reload?)
+  - >-
+    90 1 bug - clicking on otherLocationResource in the same page (repeatedly?)
+    fails
+  - 85 1 parse through local RootsMagic file (after adding matching URIs)
+  - >-
+    80 0 bug - Matt's example from raw.githubusercontent renders external links
+    that don't work
+  - >-
+    80 0 bug - Matt's example from raw.githubusercontent renders external links
+    that don't work
+  - >-
+    80 0 try resourceId as an index into the current URI (since the resource
+    URIs are now permissioned)
+  - 80 1 click on a 4th-gen person and force further expansion
+  - 80 1 give example of gedcomx protocol
+  - 75 1 demo to Janell due:2020-12-27
+  - 75 0 add FamilySearch session ID in the UI somewhere
+  - >-
+    70 1 change family lookup to work from "relationsips" not "display" (or fix
+    the latter because "familiesAs..." are arrays)
+  - >-
+    70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to
+    find documentation)
+  - add format (mime type?) to otherLocations (maybe)
+  - 40 0 show how the same tree-browsing code can be used in browser & in node

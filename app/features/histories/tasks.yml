@@ -1,0 +1,2 @@
+  - '93 0 package app for Martin id:package':
+    - fix problem loading process on packaged app (eg. settings & genealogy pages)

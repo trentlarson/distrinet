@@ -32,7 +32,7 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
   const historySources = R.filter(
-    (s) => s.id.startsWith('histories'),
+    (s) => s.id.startsWith('histories:'),
     distnet.settings.sources
   );
   const dispatch = useDispatch();
