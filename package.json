@@ -97,7 +97,7 @@
     "publish": {
       "provider": "github",
       "owner": "trentlarson",
-      "repo": "dist-task-lists",
+      "repo": "distrinet",
       "private": false
     }
   },

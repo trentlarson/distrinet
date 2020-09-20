@@ -45,14 +45,14 @@ When developing:
 - Note that it will run some tests before allowing merging to master, eg. `node_modules/.bin/tsc`. Make sure those work because we enforce TypeScript.
 - Note that it will also run some pre-commit hooks, eg. `yarn lint`, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json.
 
-To start in a whole new repo, do the following in the same directory where you have dist-task-lists cloned:
+To start in a whole new repo, do the following in the same directory where you have distrinet cloned:
 
 - `git clone --depth 1 --single-branch https://github.com/electron-react-boilerplate/electron-react-boilerplate.git your-project-name`
 - `cd your-project-name`
 - `rm -rf .git`
 - Now if you want to save this as the baseline in git, `git init` and `git add .` and `git commit`
-- `git apply ../dist-task-lists/patch.diff`
-- `cp -r ../dist-task-lists/app/features/distnet app/features`
+- `git apply ../distrinet/patch.diff`
+- `cp -r ../distrinet/app/features/distnet app/features`
 - ... then continue with above.
 
 To create that patch file:
