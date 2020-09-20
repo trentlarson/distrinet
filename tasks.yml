@@ -2,7 +2,6 @@ tasks:
   - 95 1 load history file from list & show relationship +histories
   - 95 0 file load: recurse
   - 91 2 change internal settings format = sources & credentials into objects
-  - 90 0 add due date parsing +tasks
   - 90 0 add project/epic parsing +tasks
   - >-
     90 0 optimize mapping in localStorage by only beginning & end of

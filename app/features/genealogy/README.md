@@ -4,6 +4,10 @@ Keep your own private trees, and point to public trees and browse seamlessly bet
 
 - Simply add GEDCOMX files with a URI prefixed with "gedcomx:" into the "distrinet settings", then you'll go to the "genealogy" part of this app and enter URIs and see people.
 
+## User Stories
+
+- I can show my own ancestry, where it links to public data, where my sister and I share data, and where there are holes in my view (eg. her husband's family) which she can see.
+
 ## Design
 
 - Add a property "otherLocations" inside "persons[].links" any time you want to link an existing person to the same person in another data set.  It should be a URI.
