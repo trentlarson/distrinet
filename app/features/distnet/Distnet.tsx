@@ -167,7 +167,7 @@ export default function Distnet() {
           &quot;Console&quot; to see the logs.
         </div>
         <div>
-          Version
+          Version &nbsp;
           {process.env.npm_package_version}
         </div>
         <div>

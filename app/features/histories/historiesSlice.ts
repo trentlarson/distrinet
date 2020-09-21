@@ -142,6 +142,7 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
       const readStream = fs.createReadStream(file.fullPath, 'utf8');
       let prevChunk = '';
       readStream
+        // disable-eslint-next-line func-names
         .on('data', function (this: Readable, chunk) {
           // adding pieces of chunks just in case the word crosses chunk boundaries
           const bothChunks = prevChunk + chunk;
@@ -153,7 +154,7 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
             prevChunk = R.takeLast(term.length, chunk);
           }
         })
-        .on('close', function () {
+        .on('close', () => {
           dispatch(incrementSearchDone());
         });
     });

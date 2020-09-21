@@ -270,20 +270,6 @@ function removeNulls<T>(array: Array<T | null>): Array<T> {
   return result;
 }
 
-export const dispatchCacheForAll = (): AppThunk => async (
-  dispatch,
-  getState
-) => {
-  await createCacheDir().catch((error) => {
-    dispatch(setCacheErrorMessage(error.toString()));
-  });
-  const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
-    getState
-  );
-  const result: Array<CacheData> = removeNulls(allCaches);
-  return dispatch(setCachedStateForAll(result));
-};
-
 export const dispatchCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
@@ -302,6 +288,30 @@ export const dispatchCacheForId = (sourceId: string): AppThunk => async (
     `Failed to load source ${sourceId} into cache because it was not found in sources.`
   );
   return dispatch(() => {});
+};
+
+export const dispatchCacheForAll = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  await createCacheDir().catch((error) => {
+    dispatch(setCacheErrorMessage(error.toString()));
+  });
+  const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
+    getState
+  );
+  const result: Array<CacheData> = removeNulls(allCaches);
+  return dispatch(setCachedStateForAll(result));
+};
+
+export const dispatchLoadSettingsAndCacheIfEmpty = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  await dispatch(dispatchLoadSettingsFromFile());
+  if (Object.keys(getState().distnet.cache).length === 0) {
+    dispatch(dispatchCacheForAll());
+  }
 };
 
 export default distnetSlice.reducer;

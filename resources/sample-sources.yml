@@ -1,22 +1,22 @@
 ---
 sources:
-  - name: "Prosperity Restoration private tasks"
+  - name: 'Prosperity Restoration private tasks'
     # typically a DID URI but may be any other id, eg. a UUID
-    id: "did:peer:1z..."
-    did-doc: "..."
+    id: 'did:peer:1z...'
+    did-doc: '...'
     urls:
-    - url: "file:///Users/tlarson/from-prosperityrestoration.co/tasks.yml"
-    - url: "https://gitlab.com/prosperity-restoration/policies-hugo/-/raw/master/tasks.yml"
-    - url: "http://friends-ip.com/prosperity/tasks.yml"
-      credentials:
-        type: "SSH"
-        privateKeyFile: "~/.ssh/id_rsa"
-    - url: "http://friends-ip.com:8080/prosperity-tasks.yml"
-      credentials:
-        type: "HttpHeader"
-        key: "Authentication"
-        value: "Basic YWRtaW46YWRtaW4="
+      - url: 'file:///Users/tlarson/from-prosperityrestoration.co/tasks.yml'
+      - url: 'https://gitlab.com/prosperity-restoration/policies-hugo/-/raw/master/tasks.yml'
+      - url: 'http://friends-ip.com/prosperity/tasks.yml'
+        credentials:
+          type: 'SSH'
+          privateKeyFile: '~/.ssh/id_rsa'
+      - url: 'http://friends-ip.com:8080/prosperity-tasks.yml'
+        credentials:
+          type: 'HttpHeader'
+          key: 'Authentication'
+          value: 'Basic YWRtaW46YWRtaW4='
     # for remote docs, this is the date it was retrieved
-    retrievedDate: ""
-  - name: "Decentralized Genealogy"
+    retrievedDate: ''
+  - name: 'Decentralized Genealogy'
     uri:

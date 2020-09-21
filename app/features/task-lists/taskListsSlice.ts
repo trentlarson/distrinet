@@ -286,13 +286,24 @@ export const retrieveForecast = (
       reversePriority: true,
     },
   };
-  const forecastResponse = await fetch('http://localhost:8090/display', {
+  fetch('http://localhost:8090/display', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(forecastRequest),
-  });
-  const forecastString = await forecastResponse.text();
-  return dispatch(setForecastHtml(forecastString));
+  })
+    .then((forecastResponse) => {
+      return forecastResponse.text();
+    })
+    .then((forecastString) => {
+      return dispatch(setForecastHtml(forecastString));
+    })
+    .catch((err) => {
+      console.error(
+        "Got error retrieving forecast.  Maybe that service isn't running.",
+        err
+      );
+      throw err;
+    });
 };
 
 export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (

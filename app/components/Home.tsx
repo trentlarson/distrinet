@@ -3,10 +3,10 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import styles from './Home.css';
-import { dispatchLoadSettingsFromFileIfEmpty } from '../features/distnet/distnetSlice';
+import { dispatchLoadSettingsAndCacheIfEmpty } from '../features/distnet/distnetSlice';
 
 export default function Home(): JSX.Element {
-  useDispatch()(dispatchLoadSettingsFromFileIfEmpty());
+  useDispatch()(dispatchLoadSettingsAndCacheIfEmpty());
 
   return (
     <div className={styles.container} data-tid="container">

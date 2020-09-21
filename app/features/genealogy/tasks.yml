@@ -24,7 +24,9 @@
   - 80 1 click on a 4th-gen person and force further expansion
   - 80 1 give example of gedcomx protocol
   - 75 1 demo to Janell due:2020-12-27
-  - 75 0 add FamilySearch session ID in the UI somewhere
+  - 75 0 add FamilySearch session ID in the UI somewhere id:fssession-entry :
+    - create a bookmarklet that shows the session ID cookie when logged in
+  - 1 allow direct login to FamilySearch API to retrieve a token,  awaits:[fssession-entry]
   - >-
     70 1 change family lookup to work from "relationsips" not "display" (or fix
     the latter because "familiesAs..." are arrays)
