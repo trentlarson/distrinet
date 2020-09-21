@@ -34,7 +34,7 @@ To test:
 
 To package (following https://www.electron.build/auto-update ):
 
-- Edit both package.json versions.
+- Edit both package.json versions (in / and /app).
 - `yarn package`
 - Upload to GitHub and create a release.
 
