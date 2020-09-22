@@ -98,7 +98,7 @@ export function isTaskyamlSource(sourceId: string) {
  * return the value for the given label if in the description; otherwise, null
  */
 export function labelValueInDescription(label: string, description: string) {
-  const pairs = R.filter(R.test(/:/), R.split(' ', description));
+  const pairs = R.filter(R.test(/\S:\S/), R.split(' ', description));
   const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
