@@ -114,23 +114,37 @@ export function taskFromString(
   let remainingText = fullText.trim();
   let space1Pos = remainingText.indexOf(' ');
   if (space1Pos > -1 || (space1Pos === -1 && remainingText.length > 0)) {
+    // there's a space or a bunch of characters
     if (space1Pos === -1) {
       // no spaces at all; still check if it's just a number
       space1Pos = remainingText.length;
     }
-    priority = parseFloat(remainingText.substring(0, space1Pos));
-    if (!Number.isNaN(priority)) {
+    let firstNumber = parseFloat(remainingText.substring(0, space1Pos));
+    if (Number.isNaN(firstNumber)) {
+      // there's no number at all; it's all a description
+    } else {
+      // it's a number, either priority or estimate
       remainingText = remainingText.substring(space1Pos + 1);
       let space2Pos = remainingText.indexOf(' ');
       if (space2Pos > -1 || (space2Pos === -1 && remainingText.length > 0)) {
+        // there's a space or a bunch of characters
         if (space2Pos === -1) {
           // no spaces left; still check if it's just a number
           space2Pos = remainingText.length;
         }
-        estimate = parseFloat(remainingText.substring(0, space2Pos));
-        if (!Number.isNaN(estimate)) {
+        let secondNumber = parseFloat(remainingText.substring(0, space2Pos));
+        if (Number.isNaN(secondNumber)) {
+          // there's no second number, so the first number must be the estimate
+          estimate = firstNumber;
+        } else {
+          // there is a second number
+          priority = firstNumber;
+          estimate = secondNumber;
           remainingText = remainingText.substring(space2Pos + 1);
         }
+      } else {
+        // there's no more space or characters, so it must just be an estimate number
+        estimate = firstNumber;
       }
     }
   }
@@ -163,13 +177,8 @@ const parseIssues = (
     return taskFromString(sourceId, issueList, [], []);
   }
   if (typeof issueList === 'object') {
-    // expecting a key of the issue with value the subtasks issues
+    // expecting a key of the issue text with value of the subtask issues
     const key = Object.keys(issueList)[0].toString();
-
-    if (issueList.issues) {
-      // This must be the top level.  Load the array.
-      return parseIssues(sourceId, issueList.issues);
-    }
 
     // Except for the top level, the value of the object should always be a list.
     // Each value of the list is either a string (a standalone task)
@@ -189,6 +198,7 @@ const parseIssues = (
   }
   return {
     sourceId,
+
     priority: null,
     estimate: null,
     description: `Unknown Task Structure: ${typeof issueList} ${issueList}`,
@@ -209,7 +219,7 @@ function isProjectFile(contents: unknown): contents is ProjectFile {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
-    (contents as ProjectFile).tasks !== undefined
+    (contents as ProjectFile)['tasks'] !== undefined
   );
 }
 
@@ -234,7 +244,7 @@ async function retrieveAllTasks(
             if (isInputIssueArray(contentTasks)) {
               taskList = contentTasks;
             } else if (isProjectFile(contentTasks)) {
-              taskList = contentTasks.tasks;
+              taskList = contentTasks['tasks'];
             } else {
               console.error(
                 'Failure getting array or .tasks from source',
@@ -399,6 +409,7 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
           );
           let projectContents: ProjectFile;
           if (isInputIssueArray(fileContents)) {
+            // this changes the format to put the array under the "tasks" key
             projectContents = { tasks: fileContents };
           } else if (isProjectFile(fileContents)) {
             projectContents = fileContents;
