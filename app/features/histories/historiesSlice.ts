@@ -28,10 +28,54 @@ export interface FileTree {
   showTree: boolean;
 }
 
+export interface FileMatch {
+  uri: string;
+  path: string;
+}
+
 export interface Display {
   uriTree: Record<string, FileTree | null>; // keys are URIs from sources
   isSearching: SearchProgress;
 }
+
+const historiesSlice = createSlice({
+  name: 'histories',
+  initialState: { uriTree: {}, isSearching: { done: 0, total: 0 } } as Display,
+  reducers: {
+    setFileTree: (state, contents: Payload<Record<string, FileTree>>) => {
+      state.uriTree = contents.payload;
+    },
+    markMatchInPath: (state, uriAndMatch: Payload<FileMatch>) => {
+      state.uriTree[uriAndMatch.payload.uri]
+        .fileBranches[uriAndMatch.payload.path].hasMatch = true;
+    },
+    markShowNextLevel: (state, uriContents: Payload<string>) => {
+      state.uriTree[uriContents.payload].showTree = true;
+    },
+    startSearchProgress: (state) => {
+      state.isSearching = { done: 0, total: 0 };
+    },
+    incrementSearchTotalBy: (state, contents: Payload<number>) => {
+      state.isSearching.total += contents.payload;
+    },
+    incrementSearchDone: (state) => {
+      state.isSearching.done += 1;
+    },
+  },
+});
+
+export const {
+  setFileTree,
+  markMatchInPath,
+  markShowNextLevel,
+  startSearchProgress,
+  incrementSearchTotalBy,
+  incrementSearchDone,
+} = historiesSlice.actions;
+
+export default historiesSlice.reducer;
+
+export const selectFileTree = (state: RootState) => state.histories.uriTree;
 
 export const traverseFileTree = (someFun: (FileTree) => FileTree) => (
   tree: FileTree
@@ -49,68 +93,12 @@ export const traverseFileTree = (someFun: (FileTree) => FileTree) => (
   return result;
 };
 
-const historiesSlice = createSlice({
-  name: 'histories',
-  initialState: { uriTree: {}, isSearching: { done: 0, total: 0 } } as Display,
-  reducers: {
-    setFileTree: (state, contents: Payload<Record<string, FileTree>>) => {
-      state.uriTree = contents.payload;
-    },
-    eraseSearchResults: (state) => {
-      const newTree = traverseFileTree(
-        R.set(R.lensProp('hasMatch'), 'false'),
-        state.uriTree
-      );
-      state.uriTree = newTree;
-    },
-    markShowNextLevel: (state, uriContents: Payload<string>) => {
-      state.uriTree[uriContents.payload].showTree = true;
-    },
-    markMatch: (state, contents: Payload<Path>) => {
-      const filePath = contents.payload;
-      const newResult = R.clone(state.uriTree);
-
-      // needs rewriting for recursing
-
-      R.forEach(
-        (key: string) =>
-          R.forEach((file: FileTree) => {
-            if (path.format(file.path) === path.format(filePath)) {
-              file.hasMatch = true;
-            }
-          }, newResult[key]),
-        R.keys(newResult)
-      );
-      state.uriTree = newResult;
-    },
-    startSearchProgress: (state) => {
-      state.isSearching = { done: 0, total: 0 };
-    },
-    incrementSearchTotalBy: (state, contents: Payload<number>) => {
-      state.isSearching.total += contents.payload;
-    },
-    incrementSearchDone: (state) => {
-      state.isSearching.done += 1;
-    },
-  },
-});
-
-export const {
-  setFileTree,
-  eraseSearchResults,
-  markMatch,
-  markShowNextLevel,
-  startSearchProgress,
-  incrementSearchTotalBy,
-  incrementSearchDone,
-} = historiesSlice.actions;
-
-export default historiesSlice.reducer;
-
-export const selectFileTree = (state: RootState) => state.histories.uriTree;
-
-export const dispatchEraseSearchResults = (): AppThunk => async (dispatch) => {
-  dispatch(eraseSearchResults());
+export const dispatchEraseSearchResults = (): AppThunk => async (dispatch, getState) => {
+  const noMatchifyFun = traverseFileTree(
+    R.set(R.lensProp('hasMatch'), false)
+  );
+  let newTree = R.map(noMatchifyFun, getState().histories.uriTree);
+  dispatch(setFileTree(newTree));
 };
 
 /**
@@ -221,36 +209,37 @@ export const dispatchShowDir = (historyUri: string): AppThunk => async (
   dispatch
 ) => {
   dispatch(markShowNextLevel(historyUri));
-  /**
-  const source = R.find(
-    (s) => s.id === historyUri,
-    getState().distnet.settings.sources
-  );
-  const urlString =
-    source && source.urls && source.urls[0] && source.urls[0].url;
-  if (urlString && new URL(urlString).protocol === 'file:') {
-    const allFiles = await loadDir(fileURLToPath(urlString));
-    const uriTree = R.clone(getState().histories.uriTree);
-    uriTree[historyUri] = allFiles;
-    return dispatch(setFileTree(uriTree));
-  }
-  console.log('Not doing anything about histories URL', historyUri);
-  return null;
-* */
 };
+
+function markMatchInTree(uriTree: Record<string, FileTree>, filePath: string) {
+  const newResult = R.clone(uriTree);
+
+  R.forEach(
+    (key: string) =>
+      R.forEach((file: FileTree) => {
+        if (path.format(file.fullPath) === path.format(filePath)) {
+          file.hasMatch = true;
+        }
+      },
+      newResult[key]),
+    R.keys(newResult)
+  );
+  return newResult;
+}
 
 export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch,
   getState
 ) => {
-  dispatch(eraseSearchResults());
+  dispatch(dispatchEraseSearchResults());
   dispatch(startSearchProgress());
 
   R.keys(getState().histories.uriTree).forEach((uri) => {
-    const files = getState().histories.uriTree[uri];
-    dispatch(incrementSearchTotalBy(files.length));
-    files.forEach((file: FileTree) => {
-      const readStream = fs.createReadStream(path.format(file.path), 'utf8');
+    const tree = getState().histories.uriTree[uri];
+    dispatch(incrementSearchTotalBy(tree.fileBranches.length));
+    R.forEach((file: FileTree) => {
+      let pathStr = path.format(file.fullPath);
+      const readStream = fs.createReadStream(pathStr, 'utf8');
       let prevChunk = '';
       readStream
         // eslint-disable-next-line func-names
@@ -258,16 +247,17 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
           // adding pieces of chunks just in case the word crosses chunk boundaries
           const bothChunks = prevChunk + chunk;
           if (bothChunks.indexOf(term) > -1) {
-            dispatch(markMatch(file.path));
+            dispatch(markMatchInPath({ uri: uri, path: file.fullPath.base }));
             this.destroy();
           } else {
-            // take enough of the previous chunk if it has some piece of the term
+            // take enough of the previous chunk just in case it has some piece of the search term
             prevChunk = R.takeLast(term.length, chunk);
           }
         })
         .on('close', () => {
           dispatch(incrementSearchDone());
         });
-    });
+    },
+    R.filter((tree) => tree.isFile, R.values(tree.fileBranches)));
   });
 };

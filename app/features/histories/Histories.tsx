@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import GridLoader from 'react-spinners/GridLoader';
-import url, { URLSearchParams } from 'url';
+import url, { URLSearchParams, fileURLToPath } from 'url';
 
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
@@ -120,7 +120,7 @@ export default function Histories() {
                               to={{
                                 pathname: routes.HISTORY,
                                 search: new URLSearchParams({
-                                  fullPath: fileUrl,
+                                  fullPath: fileURLToPath(fileUrl),
                                 }).toString(),
                               }}
                             >
