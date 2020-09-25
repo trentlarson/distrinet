@@ -71,13 +71,15 @@ export default function Histories() {
             type="text"
             size={32}
             style={{ visibility: idInputExpanded }}
-            onChange={(event) => {
-              setIdSearchTerm(event.target.value);
-              setIdInputExpanded(Visibility.hidden);
-              if (event.target.value) {
-                dispatch(dispatchTextSearch(event.target.value));
-              } else {
-                dispatch(dispatchEraseSearchResults());
+            onKeyUp={(event) => {
+              if (event.keyCode === 13) { // enter key
+                setIdSearchTerm(event.target.value);
+                setIdInputExpanded(Visibility.hidden);
+                if (event.target.value) {
+                  dispatch(dispatchTextSearch(event.target.value));
+                } else {
+                  dispatch(dispatchEraseSearchResults());
+                }
               }
             }}
           />
