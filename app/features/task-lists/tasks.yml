@@ -1,3 +1,4 @@
+  - 90 0 add project/epic parsing +tasks
   - >-
     90 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
     id:public-task-page

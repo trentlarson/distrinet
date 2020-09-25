@@ -11,9 +11,10 @@ import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import {
   dispatchEraseSearchResults,
-  dispatchLoadDir,
+  dispatchLoadHistoryDirsIfEmpty,
+  dispatchShowDir,
   dispatchTextSearch,
-  FileInfo,
+  FileTree,
   SearchProgress,
 } from './historiesSlice';
 import styles from './style.css';
@@ -31,11 +32,15 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
+  const dispatch = useDispatch();
+
+  dispatch(dispatchLoadHistoryDirsIfEmpty());
+
   const historySources = R.filter(
     (s) => s.id.startsWith('histories:'),
     distnet.settings.sources
   );
-  const dispatch = useDispatch();
+
   const [idInputExpanded, setIdInputExpanded] = useState(Visibility.hidden);
   const [idSearchTerm, setIdSearchTerm] = useState('');
 
@@ -90,57 +95,62 @@ export default function Histories() {
               <button
                 type="button"
                 onClick={() => {
-                  dispatch(dispatchLoadDir(source.id));
+                  dispatch(dispatchShowDir(source.id));
                 }}
               >
-                reload
+                show
               </button>
               <br />
               <ul>
-                {histories.display[source.id]
-                  ? histories.display[source.id].map((file: FileInfo) => {
-                      const fileName = path.basename(file.fullPath);
-                      const fileUrl = url.pathToFileURL(file.fullPath);
-                      let link = <span />;
-                      if (
-                        fileName.endsWith('htm') ||
-                        fileName.endsWith('html')
-                      ) {
-                        link = (
-                          <Link
-                            to={{
-                              pathname: routes.HISTORY,
-                              search: new URLSearchParams({
-                                fullPath: file.fullPath,
-                              }).toString(),
-                            }}
-                          >
-                            (view)
-                          </Link>
+                {histories.uriTree[source.id] &&
+                histories.uriTree[source.id].showTree
+                  ? R.values(histories.uriTree[source.id].fileBranches).map(
+                      (file: FileTree) => {
+                        const fileName = file.fullPath.base;
+                        const fileUrl = url.pathToFileURL(
+                          path.format(file.fullPath)
+                        );
+                        let link = <span />;
+                        if (
+                          fileName.endsWith('htm') ||
+                          fileName.endsWith('html')
+                        ) {
+                          link = (
+                            <Link
+                              to={{
+                                pathname: routes.HISTORY,
+                                search: new URLSearchParams({
+                                  fullPath: fileUrl,
+                                }).toString(),
+                              }}
+                            >
+                              (view)
+                            </Link>
+                          );
+                        }
+                        // eslint-disable-next-line react/jsx-indent
+                        return (
+                          <li key={source.id + path.format(file.fullPath)}>
+                            {file.hasMatch ? '*' : '_'}
+                            &nbsp;
+                            {fileName}
+                            &nbsp;
+                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                            <a
+                              href="#"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                electron.shell.openExternal(fileUrl.toString());
+                              }}
+                            >
+                              (open)
+                            </a>
+                            &nbsp;
+                            {link}
+                          </li>
                         );
                       }
-                      // eslint-disable-next-line react/jsx-indent
-                      return (
-                        <li key={source.id + file.fullPath}>
-                          {file.hasMatch ? '*' : '_'}
-                          &nbsp;
-                          {fileName}
-                          &nbsp;
-                          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                          <a
-                            href="#"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              electron.shell.openExternal(fileUrl.toString());
-                            }}
-                          >
-                            (open)
-                          </a>
-                          &nbsp;
-                          {link}
-                        </li>
-                      );
-                    })
+                    )
                   : ''}
               </ul>
             </li>

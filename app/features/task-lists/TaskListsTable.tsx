@@ -219,7 +219,12 @@ export default function TaskListsTable() {
               bigList.map((task: Task, index: number) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <tr key={`${task.sourceId}/${index}`}>
-                  <td>{sourceMap[task.sourceId].name}</td>
+                  <td>
+                    {index > 0 &&
+                    bigList[index - 1].sourceId === bigList[index].sourceId
+                      ? ''
+                      : sourceMap[task.sourceId].name}
+                  </td>
                   <td>
                     {Number.isFinite(task.priority) ? task.priority : '-'}
                   </td>

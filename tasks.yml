@@ -1,14 +1,11 @@
 tasks:
-  - 95 1 load history file from list & show relationship +histories
-  - 95 0 file load: recurse
   - 91 2 change internal settings format = sources & credentials into objects
-  - 90 0 add project/epic parsing +tasks
   - >-
     90 0 optimize mapping in localStorage by only beginning & end of
     refreshIfNewer, and by caching in memory
   - 90 1 create list-source directory file that points at other lists of sources
-  - 90 0 show cached time, both file & memory; show out-of-date cache files
-  - 80 -1 more settings sanity-checking, eg. valid URLs
+  - '90 0 show cached time, both file & memory; show out-of-date cache files'
+  - '80 -1 more settings sanity-checking, eg. valid URLs'
   - 80 -2 warn when settings are changed and unsaved
   - 80 1 package YAML task parsing for npm
   - 80 0 save URI for current task list inside tasks.yml (good for referencing)
@@ -34,7 +31,7 @@ tasks:
     75 2 start an HTTP server for file access (rather than direct library
     access)
   - 75 0 use logger instead of console.log
-  - 75 1 handle YAML TAGs id:#yaml-tags
+  - '75 1 handle YAML TAGs id:#yaml-tags'
   - >-
     70 0 use paths.cache instead of paths.config in settings.ts (including path
     check)
@@ -43,7 +40,9 @@ tasks:
   - 70 1 show indicator if settings file has been changed
   - 70 2 save a preference for loading cache on app start
   - 65 3 package for mobile
-  - '65 0 add format (mime type?) info to the sources (for a more accurate indicator than just the URI "scheme:") id:source-with-format'
+  - >-
+    65 0 add format (mime type?) info to the sources (for a more accurate
+    indicator than just the URI "scheme:") id:source-with-format
   - >-
     60 1 read large files, ie. stream into the cache file & don't load into
     cache if it's too big
@@ -56,23 +55,22 @@ tasks:
   - '20 0 read binary files id:#read-binary'
   - 20 4 stop requiring semicolons in the code
 log:
-  - id: 74fe88aa-1570-4d81-8a00-1079462255e2
-    taskId: public-task-page
+  - id: a5365484-ce5c-499d-ab07-51434966e4fc
+    taskId: source-with-format
     data:
       messageData:
         description: >-
-          write public page to show task priorities +collaborate
-          id:public-task-page
+          add format (mime type?) info to the sources (for a more accurate
+          indicator than just the URI "scheme:") id:source-with-format
+        taskUri: 'taskyaml:trentlarson.com,2020:distrinet/tasks#source-with-format'
+        time: '2020-09-22T04:39:40.765Z'
         did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
-        taskUri: >-
-          taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#public-task-page
-        time: '2020-09-08T00:13:01.375Z'
-    time: '2020-09-08T00:13:01.375Z'
-    did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
+    time: '2020-09-22T04:39:40.765Z'
     publicKey: |
       -----BEGIN PUBLIC KEY-----
       ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEMt1EKASbMuTRGM/qsmZaxygO4/FsjnGE
       PQnGph9BsYdyVJWmOQcnsi4M3xLQIYw190JpZDFd42Y=
       -----END PUBLIC KEY-----
     signature: >-
-      303d021d00edfd9c72420138aee3e31adf85216664a1422ed3b8b6d0ae8592b583021c1d9f511c7d6cf5cafe2982ddf31a7dbce46ca26b6d1d33e41f30d410
+      303c021c2cc82ce7e4bfd7c98e165a98a2703170bb0522a73ef40739c84d62e0021c0c34c685ea7d6480eed522f9edb572b27beab5701da8b7218e7e5cd1
+    did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'

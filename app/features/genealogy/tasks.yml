@@ -12,6 +12,7 @@
     90 1 bug - clicking on otherLocationResource in the same page (repeatedly?)
     fails
   - 85 1 parse through local RootsMagic file (after adding matching URIs)
+  - 85 0 enable the link to the person's profile page
   - >-
     80 0 bug - Matt's example from raw.githubusercontent renders external links
     that don't work

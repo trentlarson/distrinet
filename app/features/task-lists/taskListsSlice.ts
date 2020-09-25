@@ -119,7 +119,7 @@ export function taskFromString(
       // no spaces at all; still check if it's just a number
       space1Pos = remainingText.length;
     }
-    let firstNumber = parseFloat(remainingText.substring(0, space1Pos));
+    const firstNumber = parseFloat(remainingText.substring(0, space1Pos));
     if (Number.isNaN(firstNumber)) {
       // there's no number at all; it's all a description
     } else {
@@ -132,7 +132,7 @@ export function taskFromString(
           // no spaces left; still check if it's just a number
           space2Pos = remainingText.length;
         }
-        let secondNumber = parseFloat(remainingText.substring(0, space2Pos));
+        const secondNumber = parseFloat(remainingText.substring(0, space2Pos));
         if (Number.isNaN(secondNumber)) {
           // there's no second number, so the first number must be the estimate
           estimate = firstNumber;
@@ -219,7 +219,7 @@ function isProjectFile(contents: unknown): contents is ProjectFile {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
-    (contents as ProjectFile)['tasks'] !== undefined
+    (contents as ProjectFile).tasks !== undefined
   );
 }
 
@@ -244,7 +244,7 @@ async function retrieveAllTasks(
             if (isInputIssueArray(contentTasks)) {
               taskList = contentTasks;
             } else if (isProjectFile(contentTasks)) {
-              taskList = contentTasks['tasks'];
+              taskList = contentTasks.tasks;
             } else {
               console.error(
                 'Failure getting array or .tasks from source',
