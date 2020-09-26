@@ -1,4 +1,4 @@
-  - 0 fix search spinner
+  - 0 fix search spinner & binary file search
   - 0 fix the markMatch to do a recursive search
   - 0 file load - recurse
   - 1 load history file from list & show relationship +histories

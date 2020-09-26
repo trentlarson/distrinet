@@ -19,4 +19,6 @@ sources:
     # for remote docs, this is the date it was retrieved
     retrievedDate: ''
   - name: 'Decentralized Genealogy'
-    uri:
+    id: "..."
+    urls:
+      - url: "..."
