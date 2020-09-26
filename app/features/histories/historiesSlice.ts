@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import fs, { promises as fsPromises } from 'fs';
-import path, { Path } from 'path';
+import path, { ParsedPath } from 'path';
 import * as R from 'ramda';
 import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
@@ -19,13 +19,13 @@ export interface SearchProgress {
 
 export interface FileTree {
   fileBranches: Record<string, FileTree>; // directory contents; keys are file/dir names (ie. path.base)
-  fullPath: Path;
-  hasMatch: boolean;
+  fullPath: ParsedPath;
+  hasMatch: boolean; // only makes sense on a file
   // Beware: it could be a non-dir/non-file.
   // See https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_class_fs_dirent
   isDir: boolean;
   isFile: boolean;
-  showTree: boolean;
+  showTree: boolean; // only makes sense on a dir
 }
 
 export interface FileMatch {
@@ -34,7 +34,11 @@ export interface FileMatch {
 }
 
 export interface Display {
-  uriTree: Record<string, FileTree | null>; // keys are URIs from sources
+  /**
+   * keys are URIs from sources
+   * null values can happen when it's a non-dir/non-file or on an error
+   */
+  uriTree: Record<string, FileTree>;
   isSearching: SearchProgress;
 }
 
@@ -46,11 +50,16 @@ const historiesSlice = createSlice({
       state.uriTree = contents.payload;
     },
     markMatchInPath: (state, uriAndMatch: Payload<FileMatch>) => {
-      state.uriTree[uriAndMatch.payload.uri]
-        .fileBranches[uriAndMatch.payload.path].hasMatch = true;
+      const tree = state.uriTree[uriAndMatch.payload.uri];
+      if (tree) {
+        tree.fileBranches[uriAndMatch.payload.path].hasMatch = true;
+      }
     },
-    markShowNextLevel: (state, uriContents: Payload<string>) => {
-      state.uriTree[uriContents.payload].showTree = true;
+    markToggleShowNextLevel: (state, uriContents: Payload<string>) => {
+      const tree = state.uriTree[uriContents.payload];
+      if (tree) {
+        tree.showTree = !tree.showTree;
+      }
     },
     startSearchProgress: (state) => {
       state.isSearching = { done: 0, total: 0 };
@@ -67,7 +76,7 @@ const historiesSlice = createSlice({
 export const {
   setFileTree,
   markMatchInPath,
-  markShowNextLevel,
+  markToggleShowNextLevel,
   startSearchProgress,
   incrementSearchTotalBy,
   incrementSearchDone,
@@ -77,7 +86,7 @@ export default historiesSlice.reducer;
 
 export const selectFileTree = (state: RootState) => state.histories.uriTree;
 
-export const traverseFileTree = (someFun: (FileTree) => FileTree) => (
+export const traverseFileTree = (someFun: (arg0: FileTree) => FileTree) => (
   tree: FileTree
 ): FileTree => {
   const result = someFun(tree);
@@ -93,83 +102,65 @@ export const traverseFileTree = (someFun: (FileTree) => FileTree) => (
   return result;
 };
 
-export const dispatchEraseSearchResults = (): AppThunk => async (dispatch, getState) => {
-  const noMatchifyFun = traverseFileTree(
-    R.set(R.lensProp('hasMatch'), false)
-  );
-  let newTree = R.map(noMatchifyFun, getState().histories.uriTree);
+export const dispatchEraseSearchResults = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  const noMatchifyFun = traverseFileTree(R.set(R.lensProp('hasMatch'), false));
+  const newTree = R.map(noMatchifyFun, getState().histories.uriTree);
   dispatch(setFileTree(newTree));
 };
 
 /**
  * Return the whole file tree for the given path
  */
-const loadDir = (fullPathStr: string): Promise<FileTree> => {
+const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
+  const fileTreeTemplate: FileTree = {
+    fileBranches: {},
+    fullPath: path.parse(fullPathStr),
+    hasMatch: false,
+    isDir: false,
+    isFile: false,
+    showTree: false,
+  };
   return fsPromises
     .stat(fullPathStr)
     .then((stats) => {
-      if (stats.isDirectory()) {
-        return fsPromises.readdir(fullPathStr, { withFileTypes: true });
-      }
-      if (stats.isFile()) {
-        // this only happens if the initial URI is a file (which would be weird)
-        return fullPathStr;
-      }
-      console.error('Got non-file/non-dir', fullPathStr);
-      return null;
-    })
-    .then((fileArray) => {
-      // fileArray is typically an Array<fs.Dirent> but may be a string (file name)
-      if (Array.isArray(fileArray)) {
-        const allFiles = fileArray.map(
-          (file) =>
-            ({
-              fullPath: path.parse(path.join(fullPathStr, file.name)),
-              isDir: file.isDirectory(),
-              isFile: file.isFile(),
-              hasMatch: false,
-              fileBranches: {},
-              showTree: false,
-            } as FileTree)
-        );
-
-        const recursivePromises: Array<Promise<FileTree>> = allFiles.map(
-          (fileTree) =>
-            fileTree.isDir // eslint-disable-next-line promise/no-nesting
-              ? loadDir(path.format(fileTree.fullPath)).then((tree) => ({
-                  fileBranches: tree,
-                  ...fileTree,
-                }))
-              : Promise.resolve(fileTree)
-        );
-
-        return Promise.all(recursivePromises);
-      }
-      if (fileArray === fullPathStr) {
-        // it's the file name (again, this would be weird)
-        return fullPathStr;
-      }
-      return null;
-    })
-    .then((allSubEntries) => {
-      const result = {
-        fullPath: path.parse(fullPathStr),
-        isDir: Array.isArray(allSubEntries),
-        isFile: allSubEntries === fullPathStr,
-        hasMatch: false,
-        fileBranches: {},
+      const result: FileTree = {
+        ...fileTreeTemplate,
+        isDir: stats.isDirectory(),
+        isFile: stats.isFile(),
       };
-      if (Array.isArray(allSubEntries)) {
-        allSubEntries.forEach((entry) => {
-          result.fileBranches[entry.fullPath.base] = entry;
-        });
+      if (stats.isDirectory()) {
+        return fsPromises
+          .readdir(fullPathStr)
+          .then((names) => {
+            const fileTreePromises = names.map((name) =>
+              loadFileOrDir(path.join(fullPathStr, name))
+            );
+            return Promise.all(fileTreePromises);
+          })
+          .then((fileTrees) => {
+            const names = fileTrees.map((ft) => ft.fullPath.base);
+            const branches = R.zipObj(names, fileTrees);
+            return {
+              ...result,
+              fileBranches: branches,
+            };
+          });
       }
       return result;
     })
     .catch((err) => {
-      console.error(`Got error accessing file/directory ${fullPathStr}`, err);
+      console.error(`Got error creating FileTree for ${fullPathStr}`, err);
+      return fileTreeTemplate;
     });
 };
+
+interface UriAndTree {
+  uri: string;
+  tree: FileTree;
+}
 
 export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
   dispatch,
@@ -180,22 +171,32 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
       (s) => s.id.startsWith('histories:'),
       getState().distnet.settings.sources
     );
-    const uriAndTreePromises = historySources.map((source) => {
-      if (
-        source.urls &&
-        source.urls[0] &&
-        source.urls[0].url &&
-        new URL(source.urls[0].url).protocol === 'file:'
-      ) {
-        return loadDir(fileURLToPath(source.urls[0].url)).then((fileTree) => {
-          return { uri: source.id, tree: fileTree };
-        });
+    const uriAndTreePromises: Array<Promise<UriAndTree | null>> = historySources.map(
+      (source) => {
+        if (
+          source.urls &&
+          source.urls[0] &&
+          source.urls[0].url &&
+          new URL(source.urls[0].url).protocol === 'file:'
+        ) {
+          return loadFileOrDir(fileURLToPath(source.urls[0].url)).then(
+            (fileTree) => {
+              return { uri: source.id, tree: fileTree };
+            }
+          );
+        }
+        return Promise.resolve(null);
       }
-      return Promise.resolve(null);
-    });
-    const uriTrees = await Promise.all(uriAndTreePromises);
-    const uriTree = R.zipObj(
-      // historySources.map((s) => s.id),
+    );
+    const uriTreeOrNulls: Array<UriAndTree | null> = await Promise.all(
+      uriAndTreePromises
+    );
+    const uriTrees: Array<UriAndTree> = uriTreeOrNulls.filter(
+      (x): x is UriAndTree => x !== null
+    );
+    // That same thing does NOT work with R.filter!  Ug.
+    // R.filter((x): x is UriAndTree => x !== null, uriTreeOrNulls);
+    const uriTree: Record<string, FileTree> = R.zipObj(
       uriTrees.map(R.prop('uri')),
       uriTrees.map(R.prop('tree'))
     );
@@ -205,27 +206,11 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
   }
 };
 
-export const dispatchShowDir = (historyUri: string): AppThunk => async (
+export const dispatchToggleShowDir = (historyUri: string): AppThunk => async (
   dispatch
 ) => {
-  dispatch(markShowNextLevel(historyUri));
+  dispatch(markToggleShowNextLevel(historyUri));
 };
-
-function markMatchInTree(uriTree: Record<string, FileTree>, filePath: string) {
-  const newResult = R.clone(uriTree);
-
-  R.forEach(
-    (key: string) =>
-      R.forEach((file: FileTree) => {
-        if (path.format(file.fullPath) === path.format(filePath)) {
-          file.hasMatch = true;
-        }
-      },
-      newResult[key]),
-    R.keys(newResult)
-  );
-  return newResult;
-}
 
 export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch,
@@ -234,30 +219,31 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch(dispatchEraseSearchResults());
   dispatch(startSearchProgress());
 
-  R.keys(getState().histories.uriTree).forEach((uri) => {
-    const tree = getState().histories.uriTree[uri];
-    dispatch(incrementSearchTotalBy(tree.fileBranches.length));
-    R.forEach((file: FileTree) => {
-      let pathStr = path.format(file.fullPath);
-      const readStream = fs.createReadStream(pathStr, 'utf8');
-      let prevChunk = '';
-      readStream
-        // eslint-disable-next-line func-names
-        .on('data', function (this: Readable, chunk) {
-          // adding pieces of chunks just in case the word crosses chunk boundaries
-          const bothChunks = prevChunk + chunk;
-          if (bothChunks.indexOf(term) > -1) {
-            dispatch(markMatchInPath({ uri: uri, path: file.fullPath.base }));
-            this.destroy();
-          } else {
-            // take enough of the previous chunk just in case it has some piece of the search term
-            prevChunk = R.takeLast(term.length, chunk);
-          }
-        })
-        .on('close', () => {
-          dispatch(incrementSearchDone());
-        });
-    },
-    R.filter((tree) => tree.isFile, R.values(tree.fileBranches)));
-  });
+  R.mapObjIndexed((tree: FileTree, uri: string) => {
+    dispatch(incrementSearchTotalBy(R.keys(tree.fileBranches).length));
+    R.forEach(
+      (file: FileTree) => {
+        const pathStr = path.format(file.fullPath);
+        const readStream = fs.createReadStream(pathStr, 'utf8');
+        let prevChunk = '';
+        readStream
+          // eslint-disable-next-line func-names
+          .on('data', function (this: Readable, chunk) {
+            // adding pieces of chunks just in case the word crosses chunk boundaries
+            const bothChunks = prevChunk + chunk;
+            if (bothChunks.indexOf(term) > -1) {
+              dispatch(markMatchInPath({ uri, path: file.fullPath.base }));
+              this.destroy();
+            } else {
+              // take enough of the previous chunk just in case it has some piece of the search term
+              prevChunk = R.takeLast(term.length, chunk);
+            }
+          })
+          .on('close', () => {
+            dispatch(incrementSearchDone());
+          });
+      },
+      R.filter((f) => f.isFile, R.values(tree.fileBranches))
+    );
+  }, getState().histories.uriTree);
 };

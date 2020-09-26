@@ -12,7 +12,7 @@ import { RootState } from '../../store';
 import {
   dispatchEraseSearchResults,
   dispatchLoadHistoryDirsIfEmpty,
-  dispatchShowDir,
+  dispatchToggleShowDir,
   dispatchTextSearch,
   FileTree,
   SearchProgress,
@@ -71,12 +71,15 @@ export default function Histories() {
             type="text"
             size={32}
             style={{ visibility: idInputExpanded }}
+            onChange={(event) => {
+              setIdSearchTerm(event.target.value);
+            }}
             onKeyUp={(event) => {
-              if (event.keyCode === 13) { // enter key
-                setIdSearchTerm(event.target.value);
+              if (event.keyCode === 13) {
+                // 13 = enter key
                 setIdInputExpanded(Visibility.hidden);
-                if (event.target.value) {
-                  dispatch(dispatchTextSearch(event.target.value));
+                if (idSearchTerm.length > 0) {
+                  dispatch(dispatchTextSearch(idSearchTerm));
                 } else {
                   dispatch(dispatchEraseSearchResults());
                 }
@@ -97,10 +100,10 @@ export default function Histories() {
               <button
                 type="button"
                 onClick={() => {
-                  dispatch(dispatchShowDir(source.id));
+                  dispatch(dispatchToggleShowDir(source.id));
                 }}
               >
-                show
+                {histories.uriTree[source.id]?.showTree ? 'hide' : 'show'}
               </button>
               <br />
               <ul>

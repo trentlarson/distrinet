@@ -146,10 +146,10 @@ export const reloadOneSourceIntoCache: (
       );
       return cacheInfo;
     }
-    console.error('Failed to retrieve file for', source);
+    console.error('Failed to retrieve and cache file for', source);
     return null;
   }
-  console.error('Failed to retrieve any sources for', sourceId);
+  console.error('Failed to retrieve and cache any sources for', sourceId);
   return null;
 };
 

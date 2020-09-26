@@ -1,13 +1,23 @@
 
 # Distributed Task Lists
 
-- Simply add a [TaskYaml](https://taskyaml.org) files with a URI prefixed with "taskyaml:" into the "distrinet settings", then you'll go to the "task lists" part of this app and see task lists.
+- Simply add [TaskYaml](https://taskyaml.org) files with a URI prefixed with "taskyaml:" into the "distrinet settings", then you'll go to the "task lists" part of this app and see task lists.
 
 For schedule forecasting:
 
 Download and run the [Schedule-Forecast service](https://github.com/trentlarson/Schedule-Forecast).
 
+
 ## Features
+
+#### Tools
+
+- Tools must support public and private folders.
+- Tools must support: ID string, priority number, estimate number, blocking & containing links between issues, and assignee user IDs
+- Tools may support optional task fields: skill set, watcher user IDs
+- Tools supporting export and/or import must preserve the mandatory task fields in each action.
+- Tools with APIs must support the mandatory task fields.
+- Tools should support [taskyaml.org](taskyaml.org) & CSV formats.
 
 
 #### Future
@@ -16,6 +26,7 @@ Download and run the [Schedule-Forecast service](https://github.com/trentlarson/
 - I can store my project task list and share it privately with selected individuals, with tools to make it easy to propose edits to the lists.
 - I can store a project task list in a public git repo.  Individuals can volunteer for items or propose changes.
 - Expose simple APIs, eg. basic REST endpoints supporting our schema.
+
 
 ## Related Work
 
