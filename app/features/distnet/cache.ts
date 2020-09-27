@@ -95,6 +95,7 @@ export const reloadOneSourceIntoCache: (
             );
 
             let contents: string;
+            // eslint-disable-next-line promise/no-nesting
             return fsPromises
               .unlink(cacheFile)
               .catch(() => {

@@ -1,5 +1,4 @@
-  - 0 fix search spinner & binary file search
-  - 0 fix the markMatch to do a recursive search
+  - 99 0 fix search on my test files
   - 0 file load - recurse
   - 1 load history file from list & show relationship +histories
   - '0 package app for Martin id:package':

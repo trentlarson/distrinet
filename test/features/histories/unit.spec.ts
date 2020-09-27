@@ -3,6 +3,7 @@ import * as R from 'ramda';
 
 import {
   FileTree,
+  isSearchable,
   traverseFileTree,
 } from '../../../app/features/histories/historiesSlice';
 
@@ -40,5 +41,25 @@ describe('traverse', () => {
     expect(
       traverseFileTree(R.set(R.lensProp('hasMatch'), true))(inputTree2)
     ).toEqual(outputTree2);
+  });
+});
+
+function isSearchableFile(name) {
+  return isSearchable({ fullPath: path.parse(name), isFile: true });
+}
+
+describe('searchable', () => {
+  it('should match', () => {
+    expect(isSearchableFile('junk.abc.txt')).toBe(true);
+    expect(isSearchableFile('junk.txt')).toBe(true);
+    expect(isSearchableFile('junk.md')).toBe(true);
+    expect(isSearchableFile('junk.odt')).toBe(true);
+    expect(isSearchableFile('junk.xml')).toBe(true);
+  });
+  it('should not match', () => {
+    expect(isSearchableFile('junk')).toBe(false);
+    expect(isSearchableFile('junktxt')).toBe(false);
+    expect(isSearchableFile('junk.tx')).toBe(false);
+    expect(isSearchableFile('junk.mdx')).toBe(false);
   });
 });

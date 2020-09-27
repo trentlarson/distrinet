@@ -14,7 +14,7 @@ tasks:
       - allow for deselection of files that might be too big
   - 80 2 mark myself & save my URIs and build functions to relate-to-me
   - 80 0 add the otherLocations to children (so they can show links in the UI)
-  - '80 1 tests - missing settings dir & file, missing cache dir, missing URLs, multiple OK files':
+  - '80 1 tests - missing settings dir & file, empty settings, missing cache dir, missing URLs, multiple OK files':
       - 90 1 handle when load success after save failure or vice versa
   - 80 0 load only smaller (eg. < 5 MB) local files into cache
   - 80 1 save file - find next cache name

@@ -65,7 +65,7 @@ export default function Histories() {
               setIdInputExpanded(Visibility.visible);
             }}
           >
-            Search for ID
+            Search
           </button>
           <input
             type="text"

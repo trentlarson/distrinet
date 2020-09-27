@@ -132,6 +132,7 @@ const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
         isFile: stats.isFile(),
       };
       if (stats.isDirectory()) {
+        // eslint-disable-next-line promise/no-nesting
         return fsPromises
           .readdir(fullPathStr)
           .then((names) => {
@@ -147,6 +148,9 @@ const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
               ...result,
               fileBranches: branches,
             };
+          })
+          .catch((err) => {
+            throw err;
           });
       }
       return result;
@@ -212,38 +216,84 @@ export const dispatchToggleShowDir = (historyUri: string): AppThunk => async (
   dispatch(markToggleShowNextLevel(historyUri));
 };
 
+const FILE_EXTENSIONS_FOR_SEARCH = [
+  '.doc',
+  '.docx',
+  '.htm',
+  '.html',
+  '.js',
+  '.md',
+  '.odt',
+  '.txt',
+  '.xml',
+];
+
+const FILE_REGEXP_STRINGS_FOR_SEARCH = R.map(
+  (name) => `${name.replace('.', '\\.')}$`,
+  FILE_EXTENSIONS_FOR_SEARCH
+);
+
+const FILE_REGEXPS_FOR_SEARCH = R.map(
+  (rexpStr) => new RegExp(rexpStr),
+  FILE_REGEXP_STRINGS_FOR_SEARCH
+);
+
+const EXTENSION_TESTER = R.anyPass(
+  R.map((regexp) => (str: string) => regexp.test(str), FILE_REGEXPS_FOR_SEARCH)
+);
+
+export function isSearchable(file: FileTree): boolean {
+  return !!file.isFile && EXTENSION_TESTER(path.format(file.fullPath));
+}
+
+const searchFileOrDir = (
+  uri: string,
+  tree: FileTree,
+  term: string,
+  // This is a ThunkDispatch but I can't figure out how to declare it.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: any
+) => {
+  R.forEach(
+    (file: FileTree) => {
+      dispatch(incrementSearchTotalBy(1));
+      const pathStr = path.format(file.fullPath);
+      const readStream = fs.createReadStream(pathStr, 'utf8');
+      let prevChunk = '';
+      readStream
+        // eslint-disable-next-line func-names
+        .on('data', function (this: Readable, chunk) {
+          // adding pieces of chunks just in case the word crosses chunk boundaries
+          const bothChunks = prevChunk + chunk;
+          if (bothChunks.indexOf(term) > -1) {
+            dispatch(markMatchInPath({ uri, path: file.fullPath.base }));
+            this.destroy();
+          } else {
+            // take enough of the previous chunk just in case it has some piece of the search term
+            prevChunk = R.takeLast(term.length, chunk);
+          }
+        })
+        .on('close', () => {
+          dispatch(incrementSearchDone());
+        });
+    },
+    R.filter((f) => isSearchable(f), R.values(tree.fileBranches))
+  );
+  R.forEach(
+    (file: FileTree) => {
+      searchFileOrDir(uri, file, term, dispatch);
+    },
+    R.filter((f) => f.isDir, R.values(tree.fileBranches))
+  );
+};
+
 export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch,
   getState
 ) => {
   dispatch(dispatchEraseSearchResults());
   dispatch(startSearchProgress());
-
   R.mapObjIndexed((tree: FileTree, uri: string) => {
-    dispatch(incrementSearchTotalBy(R.keys(tree.fileBranches).length));
-    R.forEach(
-      (file: FileTree) => {
-        const pathStr = path.format(file.fullPath);
-        const readStream = fs.createReadStream(pathStr, 'utf8');
-        let prevChunk = '';
-        readStream
-          // eslint-disable-next-line func-names
-          .on('data', function (this: Readable, chunk) {
-            // adding pieces of chunks just in case the word crosses chunk boundaries
-            const bothChunks = prevChunk + chunk;
-            if (bothChunks.indexOf(term) > -1) {
-              dispatch(markMatchInPath({ uri, path: file.fullPath.base }));
-              this.destroy();
-            } else {
-              // take enough of the previous chunk just in case it has some piece of the search term
-              prevChunk = R.takeLast(term.length, chunk);
-            }
-          })
-          .on('close', () => {
-            dispatch(incrementSearchDone());
-          });
-      },
-      R.filter((f) => f.isFile, R.values(tree.fileBranches))
-    );
+    searchFileOrDir(uri, tree, term, dispatch);
   }, getState().histories.uriTree);
 };
