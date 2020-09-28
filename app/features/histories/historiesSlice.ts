@@ -20,6 +20,7 @@ export interface SearchProgress {
 export interface FileTree {
   fileBranches: Record<string, FileTree>; // directory contents; keys are file/dir names (ie. path.base)
   fullPath: ParsedPath;
+  pathFromUri: ParsedPath;
   hasMatch: boolean; // only makes sense on a file
   // Beware: it could be a non-dir/non-file.
   // See https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_class_fs_dirent
@@ -30,7 +31,7 @@ export interface FileTree {
 
 export interface FileMatch {
   uri: string;
-  path: string;
+  pathFromUri: ParsedPath;
 }
 
 export interface Display {
@@ -42,6 +43,40 @@ export interface Display {
   isSearching: SearchProgress;
 }
 
+/**
+ * The FileTree underneath 'tree' that matches 'remainingPath'.
+ * A null value is an error case that should never happen.
+ */
+function retrieveFileTreeForPath(
+  tree: FileTree,
+  remainingPath: ParsedPath
+): FileTree | null {
+  if (!tree || !remainingPath) {
+    return null;
+  }
+  if (remainingPath.dir === '') {
+    if (remainingPath.base === tree.pathFromUri.base) {
+      return tree;
+    }
+    if (tree.fileBranches[remainingPath.base]) {
+      return tree.fileBranches[remainingPath.base];
+    }
+    return null;
+  }
+  // there's more to search
+  const [nextInPath, ...remainingPathParts] = R.split(
+    path.sep,
+    remainingPath.dir
+  );
+  const remainingPathAndFileParts = R.concat(remainingPathParts, [
+    remainingPath.base,
+  ]);
+  return retrieveFileTreeForPath(
+    tree.fileBranches[nextInPath],
+    path.parse(R.join(path.sep, remainingPathAndFileParts))
+  );
+}
+
 const historiesSlice = createSlice({
   name: 'histories',
   initialState: { uriTree: {}, isSearching: { done: 0, total: 0 } } as Display,
@@ -50,15 +85,42 @@ const historiesSlice = createSlice({
       state.uriTree = contents.payload;
     },
     markMatchInPath: (state, uriAndMatch: Payload<FileMatch>) => {
-      const tree = state.uriTree[uriAndMatch.payload.uri];
-      if (tree) {
-        tree.fileBranches[uriAndMatch.payload.path].hasMatch = true;
+      try {
+        const matched = retrieveFileTreeForPath(
+          state.uriTree[uriAndMatch.payload.uri],
+          uriAndMatch.payload.pathFromUri
+        );
+        if (matched) {
+          matched.hasMatch = true;
+          // tree.fileBranches[uriAndMatch.payload.path].hasMatch = true;
+        } else {
+          // todo id:log-errors
+          console.error(
+            'Unable to find match under the tree',
+            uriAndMatch.payload
+          );
+        }
+      } catch (e) {
+        // todo id:log-errors
+        console.error(
+          'Failed to mark match for',
+          uriAndMatch.payload,
+          'because',
+          e
+        );
       }
     },
     markToggleShowNextLevel: (state, uriContents: Payload<string>) => {
       const tree = state.uriTree[uriContents.payload];
       if (tree) {
         tree.showTree = !tree.showTree;
+      } else {
+        // see task id:log-errors
+        console.error(
+          'Unable to toggle showing next level for',
+          uriContents.payload,
+          'because it was not found in the top-level URIs.  Weird!'
+        );
       }
     },
     startSearchProgress: (state) => {
@@ -114,10 +176,14 @@ export const dispatchEraseSearchResults = (): AppThunk => async (
 /**
  * Return the whole file tree for the given path
  */
-const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
+const loadFileOrDir = (
+  fullPathStr: string,
+  pathFromUriStr: string
+): Promise<FileTree> => {
   const fileTreeTemplate: FileTree = {
     fileBranches: {},
     fullPath: path.parse(fullPathStr),
+    pathFromUri: path.parse(pathFromUriStr),
     hasMatch: false,
     isDir: false,
     isFile: false,
@@ -137,7 +203,10 @@ const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
           .readdir(fullPathStr)
           .then((names) => {
             const fileTreePromises = names.map((name) =>
-              loadFileOrDir(path.join(fullPathStr, name))
+              loadFileOrDir(
+                path.join(fullPathStr, name),
+                path.join(pathFromUriStr, name)
+              )
             );
             return Promise.all(fileTreePromises);
           })
@@ -156,7 +225,7 @@ const loadFileOrDir = (fullPathStr: string): Promise<FileTree> => {
       return result;
     })
     .catch((err) => {
-      console.error(`Got error creating FileTree for ${fullPathStr}`, err);
+      console.error(`Got error deriving FileTree for ${fullPathStr}`, err);
       return fileTreeTemplate;
     });
 };
@@ -181,9 +250,10 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
           source.urls &&
           source.urls[0] &&
           source.urls[0].url &&
+          // see task id:uri-local-version
           new URL(source.urls[0].url).protocol === 'file:'
         ) {
-          return loadFileOrDir(fileURLToPath(source.urls[0].url)).then(
+          return loadFileOrDir(fileURLToPath(source.urls[0].url), '').then(
             (fileTree) => {
               return { uri: source.id, tree: fileTree };
             }
@@ -246,6 +316,55 @@ export function isSearchable(file: FileTree): boolean {
   return !!file.isFile && EXTENSION_TESTER(path.format(file.fullPath));
 }
 
+const searchFile = (
+  uri: string,
+  file: FileTree,
+  term: string,
+  // This is a ThunkDispatch but I can't figure out how to declare it.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: any
+): void => {
+  if (!file.isFile) {
+    // see task id:log-error
+    throw Error(
+      `Trying to search non-file ${path.format(file.fullPath)} from URI ${uri}`
+    );
+  }
+
+  dispatch(incrementSearchTotalBy(1));
+  const pathStr = path.format(file.fullPath);
+  const readStream = fs.createReadStream(pathStr, {
+    emitClose: true,
+    encoding: 'utf8',
+  });
+  let prevChunk = '';
+  readStream
+    // eslint-disable-next-line func-names
+    .on('data', function (this: Readable, chunk) {
+      // adding pieces of chunks just in case the word crosses chunk boundaries
+      const bothChunks = prevChunk + chunk;
+      if (bothChunks.indexOf(term) > -1) {
+        dispatch(markMatchInPath({ uri, pathFromUri: file.pathFromUri }));
+        this.destroy();
+      } else {
+        // take enough of the previous chunk just in case it has some piece of the search term
+        prevChunk = R.takeLast(term.length, chunk);
+      }
+    })
+    .on('error', (err) => {
+      // see task id:log-error
+      console.error(
+        'While searching file',
+        path.format(file.fullPath),
+        'got error',
+        err
+      );
+    })
+    .on('close', () => {
+      dispatch(incrementSearchDone());
+    });
+};
+
 const searchFileOrDir = (
   uri: string,
   tree: FileTree,
@@ -253,38 +372,13 @@ const searchFileOrDir = (
   // This is a ThunkDispatch but I can't figure out how to declare it.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dispatch: any
-) => {
-  R.forEach(
-    (file: FileTree) => {
-      dispatch(incrementSearchTotalBy(1));
-      const pathStr = path.format(file.fullPath);
-      const readStream = fs.createReadStream(pathStr, 'utf8');
-      let prevChunk = '';
-      readStream
-        // eslint-disable-next-line func-names
-        .on('data', function (this: Readable, chunk) {
-          // adding pieces of chunks just in case the word crosses chunk boundaries
-          const bothChunks = prevChunk + chunk;
-          if (bothChunks.indexOf(term) > -1) {
-            dispatch(markMatchInPath({ uri, path: file.fullPath.base }));
-            this.destroy();
-          } else {
-            // take enough of the previous chunk just in case it has some piece of the search term
-            prevChunk = R.takeLast(term.length, chunk);
-          }
-        })
-        .on('close', () => {
-          dispatch(incrementSearchDone());
-        });
-    },
-    R.filter((f) => isSearchable(f), R.values(tree.fileBranches))
-  );
-  R.forEach(
-    (file: FileTree) => {
-      searchFileOrDir(uri, file, term, dispatch);
-    },
-    R.filter((f) => f.isDir, R.values(tree.fileBranches))
-  );
+): void => {
+  if (isSearchable(tree)) {
+    searchFile(uri, tree, term, dispatch);
+  }
+  R.forEach((file: FileTree) => {
+    searchFileOrDir(uri, file, term, dispatch);
+  }, R.values(tree.fileBranches));
 };
 
 export const dispatchTextSearch = (term: string): AppThunk => async (

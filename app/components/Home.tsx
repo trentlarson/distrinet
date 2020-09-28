@@ -17,7 +17,7 @@ export default function Home(): JSX.Element {
       <br />
       <Link to={routes.HISTORIES}>to histories</Link>
       <br />
-      <Link to={routes.TASK_LISTS}>to task lists</Link>
+      <Link to={routes.TASK_LISTS}>to projects</Link>
       <br />
       <button
         type="button"

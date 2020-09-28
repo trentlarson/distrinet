@@ -67,25 +67,31 @@ export default function Histories() {
           >
             Search
           </button>
-          <input
-            type="text"
-            size={32}
-            style={{ visibility: idInputExpanded }}
-            onChange={(event) => {
-              setIdSearchTerm(event.target.value);
-            }}
-            onKeyUp={(event) => {
-              if (event.keyCode === 13) {
-                // 13 = enter key
-                setIdInputExpanded(Visibility.hidden);
-                if (idSearchTerm.length > 0) {
-                  dispatch(dispatchTextSearch(idSearchTerm));
-                } else {
-                  dispatch(dispatchEraseSearchResults());
+          <span style={{ visibility: idInputExpanded }}>
+            <input
+              type="text"
+              size={32}
+              onChange={(event) => {
+                setIdSearchTerm(event.target.value);
+              }}
+              onKeyUp={(event) => {
+                if (event.keyCode === 13) {
+                  // 13 = enter key
+                  setIdInputExpanded(Visibility.hidden);
+                  if (idSearchTerm.length > 0) {
+                    // doing the timeout because the visibility take a long time for some reason
+                    setTimeout(
+                      () => dispatch(dispatchTextSearch(idSearchTerm)),
+                      200
+                    );
+                  } else {
+                    dispatch(dispatchEraseSearchResults());
+                  }
                 }
-              }
-            }}
-          />
+              }}
+            />
+            &nbsp;(hit Enter)
+          </span>
         </div>
         <div>{idSearchTerm}</div>
         <div style={{ visibility: isSearchingVisible(histories.isSearching) }}>
