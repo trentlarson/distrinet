@@ -116,52 +116,13 @@ export default function Histories() {
                 {histories.uriTree[source.id] &&
                 histories.uriTree[source.id].showTree
                   ? R.values(histories.uriTree[source.id].fileBranches).map(
-                      (file: FileTree) => {
-                        const fileName = file.fullPath.base;
-                        const fileUrl = url.pathToFileURL(
-                          path.format(file.fullPath)
-                        );
-                        let link = <span />;
-                        if (
-                          fileName.endsWith('htm') ||
-                          fileName.endsWith('html')
-                        ) {
-                          link = (
-                            <Link
-                              to={{
-                                pathname: routes.HISTORY,
-                                search: new URLSearchParams({
-                                  fullPath: fileURLToPath(fileUrl),
-                                }).toString(),
-                              }}
-                            >
-                              (view)
-                            </Link>
-                          );
-                        }
-                        // eslint-disable-next-line react/jsx-indent
-                        return (
-                          <li key={source.id + path.format(file.fullPath)}>
-                            {file.hasMatch ? '*' : '_'}
-                            &nbsp;
-                            {fileName}
-                            &nbsp;
-                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                            <a
-                              href="#"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                electron.shell.openExternal(fileUrl.toString());
-                              }}
-                            >
-                              (open)
-                            </a>
-                            &nbsp;
-                            {link}
-                          </li>
-                        );
-                      }
-                    )
+                      (file: FileTree) =>
+                        <FileLine
+                          key={source.id + path.format(file.fullPath)}
+                          file={file}
+                          sourceId={source.id}
+                        />
+                      )
                   : ''}
               </ul>
             </li>
@@ -170,4 +131,51 @@ export default function Histories() {
       </div>
     </div>
   );
+}
+
+function FileLine(props) {
+  const file = props.file;
+  const fileUrl = url.pathToFileURL(path.format(file.fullPath));
+
+  let link = <span />;
+  if (
+    props.file.fullPath.base.endsWith('htm') ||
+    props.file.fullPath.base.endsWith('html')
+  ) {
+    link = (
+      <Link
+        to={{
+          pathname: routes.HISTORY,
+          search: new URLSearchParams({
+            fullPath: fileURLToPath(fileUrl),
+          }).toString(),
+        }}
+      >
+        (view)
+      </Link>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line react/jsx-indent
+    <li>
+      {props.file.hasMatch ? '*' : '_'}
+      &nbsp;
+      {props.file.fullPath.base}
+      &nbsp;
+      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+      <a
+        href="#"
+        onClick={(event) => {
+          event.preventDefault();
+          electron.shell.openExternal(fileUrl.toString());
+        }}
+      >
+        (open)
+      </a>
+      &nbsp;
+      {link}
+    </li>
+  );
+
 }
