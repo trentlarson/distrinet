@@ -41,6 +41,17 @@ const GenealogyPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+const LazyHelpPage = React.lazy(() =>
+  import(/* webpackChunkName: "HelpPage" */ './features/distnet/HelpPage')
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const HelpPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyHelpPage {...props} />
+  </React.Suspense>
+);
+
 const LazyHistoriesPage = React.lazy(() =>
   import(
     /* webpackChunkName: "HistoriesPage" */ './features/histories/HistoriesPage'
@@ -87,6 +98,7 @@ export default function Routes() {
         <Route path={routes.COUNTER} component={CounterPage} />
         <Route path={routes.DISTNET} component={DistnetPage} />
         <Route path={routes.GENEALOGY} component={GenealogyPage} />
+        <Route path={routes.HELP} component={HelpPage} />
         <Route path={routes.HISTORIES} component={HistoriesPage} />
         <Route path={routes.HISTORY} component={HistoryPage} />
         <Route path={routes.TASK_LISTS} component={TaskListsPage} />

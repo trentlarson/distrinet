@@ -3,6 +3,7 @@
   "COUNTER": "/counter",
   "DISTNET": "/distnet",
   "GENEALOGY": "/genealogy",
+  "HELP": "/help",
   "HISTORIES": "/histories",
   "HISTORY": "/history",
   "TASK_LISTS": "/task-lists"

@@ -291,7 +291,7 @@ const FILE_EXTENSIONS_FOR_SEARCH = [
   '.docx',
   '.htm',
   '.html',
-  '.js',
+  '.json',
   '.md',
   '.odt',
   '.txt',

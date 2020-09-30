@@ -19,17 +19,7 @@ export default function Home(): JSX.Element {
       <br />
       <Link to={routes.TASK_LISTS}>to projects</Link>
       <br />
-      <button
-        type="button"
-        onClick={() => {
-          // eslint-disable-next-line global-require
-          require('electron')
-            .remote.getCurrentWindow()
-            .webContents.toggleDevTools();
-        }}
-      >
-        Toggle Dev Tools
-      </button>
+      <Link to={routes.HELP}>help</Link>
       <br />
       <Link to={routes.COUNTER}>to Counter</Link>
     </div>

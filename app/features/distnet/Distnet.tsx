@@ -20,6 +20,13 @@ import {
   generateKeyAndSet,
 } from './distnetSlice';
 
+function shortenString(str: string) {
+  if (str.length < 11) {
+    return str;
+  }
+  return `${str.substring(0, 4)}...${str.substring(str.length - 4)}`;
+}
+
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
@@ -70,7 +77,7 @@ export default function Distnet() {
       <div className={`distnet ${styles.distnet}`} data-tid="distnet">
         {settingsCountText}
       </div>
-      <div className={styles.btnGroup}>
+      <div className={styles.content}>
         Config file contents:
         <textarea
           rows={10}
@@ -80,6 +87,7 @@ export default function Distnet() {
             dispatch(dispatchSetSettingsTextAndYaml(event.target.value));
           }}
         />
+        <br />
         Config file is located here:&nbsp;
         <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
           {SETTINGS_FILE}
@@ -126,6 +134,9 @@ export default function Distnet() {
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Cached Date
                 </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -136,6 +147,23 @@ export default function Distnet() {
                     {distnet.cache[uriSource.id]
                       ? distnet.cache[uriSource.id].date
                       : '(no local copy yet)'}
+                  </td>
+                  <td>
+                    {uriSource.urls &&
+                      uriSource.urls.map((inUrl) => (
+                        // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                        <a
+                          href="#"
+                          key={inUrl.url}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            electron.shell.openExternal(inUrl.url);
+                          }}
+                        >
+                          {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                          (open&nbsp;{shortenString(inUrl.url)})
+                        </a>
+                      ))}
                   </td>
                 </tr>
               ))}
@@ -161,32 +189,9 @@ export default function Distnet() {
           </ul>
         </div>
         <div>
-          <h4>Help</h4>
-          For more troubleshooting details, right-click on the background and
-          select &quot;Inspect Element&quot; to open dev tools and click on the
-          &quot;Console&quot; to see the logs.
+          {typeof process !== 'undefined' &&
+            `Version ${process.env.npm_package_version}`}
         </div>
-        <div>
-          Version &nbsp;
-          {process.env.npm_package_version}
-        </div>
-        <div>
-          <button
-            type="button"
-            onClick={() =>
-              // eslint-disable-next-line prettier/prettier
-              electron.remote.getCurrentWindow().webContents.toggleDevTools()}
-          >
-            Toggle Dev Tools
-          </button>
-        </div>
-      </div>
-
-      {/** Just for my convenience because I load source so often. */}
-      <div className={styles.backButton} data-tid="backButton">
-        <Link to={routes.HOME}>
-          <i className="fa fa-arrow-left fa-3x" />
-        </Link>
       </div>
     </div>
   );

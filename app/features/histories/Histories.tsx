@@ -115,14 +115,11 @@ export default function Histories() {
               <ul>
                 {histories.uriTree[source.id] &&
                 histories.uriTree[source.id].showTree
-                  ? R.values(histories.uriTree[source.id].fileBranches).map(
-                      (file: FileTree) =>
-                        <FileLine
-                          key={source.id + path.format(file.fullPath)}
-                          file={file}
-                          sourceId={source.id}
-                        />
-                      )
+                  ? R.values(
+                      histories.uriTree[source.id].fileBranches
+                    ).map((file: FileTree) => (
+                      <FileLine key={path.format(file.fullPath)} file={file} />
+                    ))
                   : ''}
               </ul>
             </li>
@@ -133,13 +130,19 @@ export default function Histories() {
   );
 }
 
-function FileLine(props) {
-  const file = props.file;
+interface FileLineProps {
+  file: FileTree;
+}
+
+function FileLine(props: FileLineProps) {
+  const { file } = props;
   const fileUrl = url.pathToFileURL(path.format(file.fullPath));
 
   let link = <span />;
   if (
+    // eslint-disable-next-line react/destructuring-assignment
     props.file.fullPath.base.endsWith('htm') ||
+    // eslint-disable-next-line react/destructuring-assignment
     props.file.fullPath.base.endsWith('html')
   ) {
     link = (
@@ -157,10 +160,11 @@ function FileLine(props) {
   }
 
   return (
-    // eslint-disable-next-line react/jsx-indent
     <li>
+      {/* eslint-disable-next-line react/destructuring-assignment */}
       {props.file.hasMatch ? '*' : '_'}
       &nbsp;
+      {/* eslint-disable-next-line react/destructuring-assignment */}
       {props.file.fullPath.base}
       &nbsp;
       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
@@ -177,5 +181,4 @@ function FileLine(props) {
       {link}
     </li>
   );
-
 }

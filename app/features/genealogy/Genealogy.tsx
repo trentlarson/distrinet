@@ -105,9 +105,9 @@ function GenealogyView(options: TreeOption) {
 
   const help = `
     Sample URIs:
-      https://api.familysearch.org/platform/tree/persons/KWHH-HSW
       https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
       gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#KGY4-8D5
+      https://api.familysearch.org/platform/tree/persons/KWHH-HSW
   `;
 
   /* Can't wait to remove the alert and make a good UI! */
