@@ -127,7 +127,11 @@ Types of URI -> URL relationships:
     - always load into memory (and watch for changes)
     - keep a local history
 
+## Other
+
+To create your own URI, I recommend you use a scheme with your domain or email and the year (if you had it at the beginning of the year), such as "tag:my-email@protonmail.com,2020:stuff-for-home" following the [TagURI](http://taguri.org) [standard](http://www.faqs.org/rfcs/rfc4151.html).  It's an easy way to get started with unique IDs.
+
 ## Kudos
 
 - [Electron React Boilerplate](https://electron-react-boilerplate.js.org/)
-- ... and all the library dependencies in package.json!
+- ... and all the library dependencies in [package.json](./package.json)!

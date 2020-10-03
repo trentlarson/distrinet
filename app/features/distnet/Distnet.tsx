@@ -21,7 +21,7 @@ import {
 } from './distnetSlice';
 
 function shortenString(str: string) {
-  if (str.length < 11) {
+  if (!str || str.length < 11) {
     return str;
   }
   return `${str.substring(0, 4)}...${str.substring(str.length - 4)}`;
@@ -154,14 +154,14 @@ export default function Distnet() {
                         // eslint-disable-next-line jsx-a11y/anchor-is-valid
                         <a
                           href="#"
-                          key={inUrl.url}
+                          key={inUrl && inUrl.url}
                           onClick={(event) => {
                             event.preventDefault();
                             electron.shell.openExternal(inUrl.url);
                           }}
                         >
                           {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                          (open&nbsp;{shortenString(inUrl.url)})
+                          (open&nbsp;{shortenString(inUrl && inUrl.url)})
                         </a>
                       ))}
                   </td>

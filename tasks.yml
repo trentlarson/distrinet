@@ -33,7 +33,7 @@ tasks:
     75 2 start an HTTP server for file access (rather than direct library
     access)
   - 75 0 use logger instead of console.log
-  - '75 1 handle YAML TAGs id:#yaml-tags'
+  - '75 1 handle YAML TAGs id:yaml-tags'
   - >-
     70 0 use paths.cache instead of paths.config in settings.ts (including path
     check)
@@ -54,8 +54,8 @@ tasks:
     eslint-disable-next-line commands that indicate bad practice
   - >-
     50 0 allow blank settings files (which will still allow us to set top-level
-    keys if missing) id:#set-settings-keys
-  - '20 0 read binary files id:#read-binary'
+    keys if missing) id:set-settings-keys
+  - '20 0 read binary files id:read-binary'
   - 20 4 stop requiring semicolons in the code
 log:
   - id: a5365484-ce5c-499d-ab07-51434966e4fc
