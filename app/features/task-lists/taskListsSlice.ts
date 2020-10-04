@@ -319,8 +319,12 @@ async function retrieveAllTasks(
   return Promise.all(result);
 }
 
-function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
-  return createForecastTasks2(tasks, "")
+function idOrNestedId(summary: string, prefix: string, index: number): string {
+  let id = labelValueInSummary('id', summary);
+  if (id === null) {
+    id = prefix + index;
+  }
+  return id;
 }
 
 function createForecastTasks2(
@@ -333,19 +337,17 @@ function createForecastTasks2(
       key: id,
       summary: t.summary,
       priority: t.priority,
-      issueEstSecondsRaw: t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
+      issueEstSecondsRaw:
+        t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
       dueDate: labelValueInSummary('due', t.summary),
-      dependents: createForecastTasks2(t.dependents, prefix + id + "_d_"),
-      subtasks: createForecastTasks2(t.subtasks, prefix + id + "_s_"),
-  }});
+      dependents: createForecastTasks2(t.dependents, `${prefix + id}_d_`),
+      subtasks: createForecastTasks2(t.subtasks, `${prefix + id}_s_`),
+    };
+  });
 }
 
-function idOrNestedId(summary, prefix, index) {
-  let id = labelValueInSummary('id', summary);
-  if (id === null) {
-    id = prefix + index;
-  }
-  return id;
+function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
+  return createForecastTasks2(tasks, '');
 }
 
 export const retrieveForecast = (
