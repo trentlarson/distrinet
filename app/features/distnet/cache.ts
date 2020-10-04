@@ -77,7 +77,6 @@ export const reloadOneSourceIntoCache: (
                 'because',
                 err
               );
-              index += 1;
               return null;
             });
         } else {
@@ -138,7 +137,6 @@ export const reloadOneSourceIntoCache: (
                     'because',
                     err
                   );
-                  index += 1;
                   return null;
                 });
             })
@@ -150,7 +148,6 @@ export const reloadOneSourceIntoCache: (
                 'because',
                 err
               );
-              index += 1;
               return null;
             });
         }
