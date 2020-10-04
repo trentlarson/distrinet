@@ -333,9 +333,9 @@ function idOrNestedId(summary: string, prefix: string, index: number): string {
  * This will be used to fill in all the references.
  */
 function createMasterTaskList(
-  master: Record<string, IssuesToSchedule>,
+  master: Record<string, IssueToSchedule>,
   tasks: Array<IssueToSchedule>
-): Record<string, IssueToSchedule> {
+): void {
   for (let i = 0; i < tasks.length; i += 1) {
     master[tasks[i].key] = tasks[i];
     createMasterTaskList(master, tasks[i].dependents);
@@ -368,37 +368,39 @@ function createForecastTasksRaw(
 const REF_KEY = 'ref:';
 
 function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
-  let rawTrees = createForecastTasksRaw(tasks, '');
-  let masterMap = {};
+  let rawTrees: Array<IssueToSchedule> = createForecastTasksRaw(tasks, '');
+  const masterMap: Record<string, IssueToSchedule> = {};
   createMasterTaskList(masterMap, rawTrees);
   // now use master as a reference to fill in 'ref' references until they're all gone
   let changed;
   do {
     changed = false;
-    let keys = Object.keys(masterMap);
+    const keys = Object.keys(masterMap);
     for (let i = 0; i < keys.length; i += 1) {
-      let task = masterMap[keys[i]];
-      for (let depi = 0; depi < task.dependents.length; depi += 1) {
-        if (task.dependents[depi].summary?.startsWith(REF_KEY)) {
-          let refKey = task.dependents[depi].summary.substring(REF_KEY.length);
-          task.dependents[depi] = masterMap[refKey];
+      const issue = masterMap[keys[i]];
+      for (let depi = 0; depi < issue.dependents.length; depi += 1) {
+        if (issue.dependents[depi].summary?.startsWith(REF_KEY)) {
+          const refKey = issue.dependents[depi].summary.substring(
+            REF_KEY.length
+          );
+          issue.dependents[depi] = masterMap[refKey];
           changed = true;
-          // remove from the top-level tasks (to lesson duplication when sending)
-          rawTrees = R.reject((task) => (task.key === refKey), rawTrees);
+          // remove from the top-level issues (to lesson duplication when sending)
+          rawTrees = R.reject((iss) => iss.key === refKey, rawTrees);
         }
       }
-      for (let subi = 0; subi < task.subtasks.length; subi += 1) {
-        if (task.subtasks[subi].summary?.startsWith(REF_KEY)) {
-          let refKey = task.subtasks[subi].summary.substring(REF_KEY.length);
-          task.subtasks[subi] = masterMap[refKey];
+      for (let subi = 0; subi < issue.subtasks.length; subi += 1) {
+        if (issue.subtasks[subi].summary?.startsWith(REF_KEY)) {
+          const refKey = issue.subtasks[subi].summary.substring(REF_KEY.length);
+          issue.subtasks[subi] = masterMap[refKey];
           changed = true;
-          // remove from the top-level tasks (to lesson duplication when sending)
-          rawTrees = R.reject((task) => (task.key === refKey), rawTrees);
+          // remove from the top-level issues (to lesson duplication when sending)
+          rawTrees = R.reject((iss) => iss.key === refKey, rawTrees);
         }
       }
     }
   } while (changed);
-  //return R.values(masterMap);
+  // return R.values(masterMap);
   return rawTrees;
 }
 
