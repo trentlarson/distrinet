@@ -67,6 +67,7 @@ interface IssueToSchedule {
   // number of seconds
   issueEstSecondsRaw: number | null;
   dueDate: string | null;
+  mustStartOnDate: string | null;
   subtasks: Array<IssueToSchedule>;
   dependents: Array<IssueToSchedule>;
 }
@@ -368,6 +369,7 @@ function createForecastTasksRaw(
       issueEstSecondsRaw:
         t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
       dueDate: labelValueInSummary('due', t.summary),
+      mustStartOnDate: labelValueInSummary('mustStartOnDate', t.summary),
       dependents: createForecastTasksRaw(t.dependents, `${prefix + id}-d_`),
       subtasks: createForecastTasksRaw(t.subtasks, `${prefix + id}-s_`),
     };

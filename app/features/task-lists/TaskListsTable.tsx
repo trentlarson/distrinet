@@ -29,7 +29,7 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 /**
  * return a button for "copy" labels; otherwise, the non-null value or ''
  */
-/** I don't know what this is for.  (Note that it returns type "Element | string".)
+/** I don't know what this is for.  (Note that return type is "Element | string".)
 function labelValueRendering(label: string, summary: string) {
   const value = labelValueInSummary(label, summary);
   if (label === 'copy' && value && value.length > 0) {
@@ -205,7 +205,7 @@ export default function TaskListsTable() {
             <tr>
               <th>Project</th>
               <th>Prty</th>
-              <th>Est</th>
+              <th>Est<br/><sub>log<sub>2</sub></sub></th>
               {labelsToShow.map((label) => (
                 <th key={label}>{label}</th>
               ))}
@@ -252,7 +252,7 @@ export default function TaskListsTable() {
                           <a
                             onClick={() => {
                               setListSourceIdsToShow([newUri]);
-                              dispatch(retrieveForecast(newUri, hoursPerWeek))
+                              dispatch(retrieveForecast(newUri, hoursPerWeek));
                             }}
                           >
                             (visit)
