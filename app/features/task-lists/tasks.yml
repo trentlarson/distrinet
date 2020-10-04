@@ -1,4 +1,5 @@
-  - 91 1 fix scheduling for dependents/subtasks without priorities (or estimates?)
+  - 91 0 show where a task fits in with the rest
+  - 91 0 show my schedule based on an external deadline
   - 90 0 add project/epic parsing +tasks
   - >-
     90 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
@@ -10,7 +11,7 @@
   - 80 1 fix the definition to have blocks/awaits/subtasks/supertasks be keys (not nested lists), with tests
   - 80 1 Define a master project file that contains pointers to all task repos.
   - 80 0 show subtasks in top list
-  - 75 0 fix jsx-ally ignores
+  - 75 0 fix jsx-ally ignores (for accessibility)
   - 75 0 handle more task YAML variations (eg. blocked & child issues)
   - 75 1 work off SQLite
   - 50 1 sort by project & priority & estimate.

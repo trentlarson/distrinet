@@ -85,7 +85,7 @@ export default class MapperBetweenSets {
   /**
    * Add these two ids one another's mappings in sessionStorage.
    */
-  public static addPair(id1: string, id2: string): void {
+  static addPair(id1: string, id2: string): void {
     const idMapStr = sessionStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
     const allSameIds = this.combineAllIdentities([id1, id2], idMap);
@@ -99,7 +99,7 @@ export default class MapperBetweenSets {
   /**
    * Add initialIds to the allIdMappings
    */
-  public static combineAllIdentities(
+  static combineAllIdentities(
     initialIds: Array<string>,
     allIdMappings: Record<string, Array<string>>
   ): Array<string> {

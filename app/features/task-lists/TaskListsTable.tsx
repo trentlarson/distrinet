@@ -175,7 +175,8 @@ export default function TaskListsTable() {
   const bigListTable =
     bigList.length > 0 ? (
       <div>
-        <h4>All Tasks</h4>
+        <hr />
+        <h4>All Activities</h4>
         Labels:
         {allLabels.map((label) => (
           <button
@@ -251,6 +252,7 @@ export default function TaskListsTable() {
                           <a
                             onClick={() => {
                               setListSourceIdsToShow([newUri]);
+                              dispatch(retrieveForecast(newUri, hoursPerWeek))
                             }}
                           >
                             (visit)
@@ -334,6 +336,7 @@ export default function TaskListsTable() {
       <div>
         {taskLists.forecastHtml.length > 0 ? (
           <div>
+            <hr />
             <h4>Forecast</h4>
             <button type="button" onClick={() => dispatch(setForecastHtml(''))}>
               Remove
