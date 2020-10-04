@@ -50,9 +50,19 @@ export const reloadOneSourceIntoCache: (
       '...'
     );
     while (!cacheInfo && index < source.urls.length) {
-      const sourceUrl = new url.URL(source.urls[index].url);
-      console.log('... trying URL', sourceUrl.toString(), '...');
-      if (sourceUrl.protocol === 'file:') {
+      let thisIndex = index;
+      index += 1; // because an error before incrementing causes an infinte loop
+      let sourceUrl = null;
+      try {
+        sourceUrl = new url.URL(source.urls[thisIndex].url);
+      } catch (e) {
+        // probably a TypeError for a bad URL (including null or blank URLs)
+        console.log('Got error parsing URL', source.urls[thisIndex].url, 'in source', source, e);
+      }
+      if (!sourceUrl) {
+        // just continue without a result
+      } else if (sourceUrl.protocol === 'file:') {
+        console.log('... trying URL', sourceUrl.toString(), '...');
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fsPromises
           // without the encoding, readFile returns a Buffer
@@ -78,10 +88,14 @@ export const reloadOneSourceIntoCache: (
             return null;
           });
       } else {
+        console.log('... trying URL', sourceUrl.toString(), '...');
         // eslint-disable-next-line no-await-in-loop
         cacheInfo = await fetch(sourceUrl.toString())
           // eslint-disable-next-line no-loop-func
           .then((response: Response) => {
+            if (!response.ok) {
+              throw Error('Failed to get URL', sourceUrl.toString(), 'due to response code', response.status);
+            }
             const cacheDir =
               (getState().distnet.settings.fileSystem &&
                 getState().distnet.settings.fileSystem.cacheDir) ||

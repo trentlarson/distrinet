@@ -400,7 +400,7 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
       }
     }
   } while (changed);
-  // return R.values(masterMap);
+  // return R.values(masterMap); // useful for debugging since all tasks are at the top (though it sends much more data)
   return rawTrees;
 }
 
@@ -426,12 +426,16 @@ export const retrieveForecast = (
       showHierarchically: true,
     },
   };
-  fetch('http://localhost:8090/display', {
+  let urlString = 'http://localhost:8090/display';
+  fetch(urlString, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(forecastRequest),
   })
     .then((forecastResponse) => {
+      if (!forecastResponse.ok) {
+        throw Error('Failed to get forecast from', urlString, 'due to response code', forecastResponse.status);
+      }
       return forecastResponse.text();
     })
     .then((forecastString) => {
