@@ -6,9 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
+  findClosestUriForGlobalUri,
+  isGlobalUri,
+  globalUriScheme,
+} from '../distnet/uriTools';
+import {
   YamlTask,
   dispatchVolunteer,
-  isTaskyamlSource,
+  isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
   setForecastHtml,
@@ -53,6 +58,10 @@ export default function TaskListsTable() {
   let allLabels: Array<string> = [];
   let execSources = <span />;
   let sourceMap: Record<string, Source> = {};
+  const taskSources = R.filter(
+    (s) => isTaskyamlUriScheme(s.id),
+    distnet.settings.sources
+  );
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
       bigList = R.filter(
@@ -79,10 +88,6 @@ export default function TaskListsTable() {
       }
     }
 
-    const taskSources = R.filter(
-      (s) => isTaskyamlSource(s.id),
-      distnet.settings.sources
-    );
     sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
 
     execSources = (
@@ -228,11 +233,29 @@ export default function TaskListsTable() {
                   <td>
                     {Number.isFinite(task.estimate) ? task.estimate : '-'}
                   </td>
-                  {labelsToShow.map((label) => (
-                    <td key={label}>
-                      {labelValueRendering(label, task.summary)}
-                    </td>
-                  ))}
+                  {labelsToShow.map((label) => {
+                    let labelValue = labelValueRendering(label, task.summary);
+                    let more = <span />
+                    if (label === 'ref' && isTaskyamlUriScheme(labelValue)) {
+                    console.log('Investigating', labelValue, R.map(R.prop('id'), taskSources))
+                    console.log('Investigating', findClosestUriForGlobalUri)
+                      let newUri = findClosestUriForGlobalUri(
+                        labelValue,
+                        R.map(R.prop('id'), taskSources)
+                      );
+                      if (newUri != null) {
+                        more = <span
+                          onClick={ () => { setListSourceIdsToShow([newUri]); } }
+                        >
+                          (visit)
+                        </span>;
+                      }
+                    }
+                    return <td key={label}>
+                        {labelValue}
+                        &nbsp;{more}
+                      </td>;
+                  })}
                   <td>{task.summary}</td>
                   <td>
                     <button

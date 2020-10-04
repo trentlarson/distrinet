@@ -14,7 +14,13 @@ import {
   Payload,
   WriteMethod,
 } from '../distnet/distnetClasses';
-import { globalUriForId } from '../distnet/uriTools';
+import {
+  isGlobalUri,
+  globalUriForId,
+  globalUriScheme,
+} from '../distnet/uriTools';
+
+const TASKYAML_SCHEME = "taskyaml";
 
 const fsPromises = fs.promises;
 
@@ -96,8 +102,8 @@ function sourceFromId(
 }
 * */
 
-export function isTaskyamlSource(sourceId: string) {
-  return sourceId.startsWith('taskyaml:');
+export function isTaskyamlUriScheme(sourceId: string) {
+  return isGlobalUri(sourceId) && globalUriScheme(sourceId) == TASKYAML_SCHEME;
 }
 
 /**
@@ -279,7 +285,7 @@ async function retrieveAllTasks(
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      if (isTaskyamlSource(entry.sourceId)) {
+      if (isTaskyamlUriScheme(entry.sourceId)) {
         const next: Promise<Array<YamlTask>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())

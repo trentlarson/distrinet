@@ -87,7 +87,9 @@ export const reloadOneSourceIntoCache: (
             .then((response: Response) => {
               if (!response.ok) {
                 throw Error(
-                  `Failed to get URL${sourceUrl.toString()}due to response code${
+                  `Failed to get URL ${
+                    sourceUrl.toString()
+                  } due to response code ${
                     response.status
                   }`
                 );

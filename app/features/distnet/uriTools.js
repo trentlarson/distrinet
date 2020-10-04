@@ -2,10 +2,18 @@
 // eslint-disable-next-line func-names
 (function (exports) {
   /**
-   * from https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
+   * from https://tools.ietf.org/html/rfc3986#section-3
+   * also useful is https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
    * */
-  function isGlobalUri(string) {
-    return string && string.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]*:/));
+  function isGlobalUri(uri) {
+    return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]*:/));
+  }
+
+  function globalUriScheme(uri) {
+    if (!isGlobalUri(uri)) {
+      throw Error('Cannot find scheme for non-global URI ' + uri);
+    }
+    return uri.split(':')[0];
   }
 
   /**
@@ -22,6 +30,28 @@
     return `${uriContext}#${finalId}`;
   }
 
+  /**
+   * Find the longest member or uriList that is a prefix of uri, or null if none match.
+   * */
+  function findClosestUriForGlobalUri(uri, uriList) {
+    let maxUri = ''
+    for (let i = 0; i < uriList.length; i++) {
+      sourceUri = uriList[i];
+      console.log('Looking for URI match', uri, sourceUri);
+      if (uri.startsWith(sourceUri) && sourceUri.length > maxUri.length) {
+        console.log('Found URI match', uri, sourceUri);
+        maxUri = sourceUri;
+      }
+    }
+    if (maxUri !== '') {
+      return maxUri;
+    } else {
+      return null;
+    }
+  }
+
+  exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isGlobalUri = isGlobalUri;
   exports.globalUriForId = globalUriForId;
+  exports.globalUriScheme = globalUriScheme;
 })(typeof exports === 'undefined' ? (this.uriTools = {}) : exports);
