@@ -61,6 +61,8 @@ interface IssueToSchedule {
   // number of seconds
   issueEstSecondsRaw: number | null;
   dueDate: string | null;
+  subtasks: Array<IssueToSchedule>;
+  dependents: Array<IssueToSchedule>;
 }
 
 const taskListsSlice = createSlice({
@@ -317,6 +319,35 @@ async function retrieveAllTasks(
   return Promise.all(result);
 }
 
+function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
+  return createForecastTasks2(tasks, "")
+}
+
+function createForecastTasks2(
+  tasks: Array<YamlTask>,
+  prefix: string
+): Array<IssueToSchedule> {
+  return tasks.map((t, i) => {
+    const id = idOrNestedId(t.summary, prefix, i);
+    return {
+      key: id,
+      summary: t.summary,
+      priority: t.priority,
+      issueEstSecondsRaw: t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
+      dueDate: labelValueInSummary('due', t.summary),
+      dependents: createForecastTasks2(t.dependents, prefix + id + "_d_"),
+      subtasks: createForecastTasks2(t.subtasks, prefix + id + "_s_"),
+  }});
+}
+
+function idOrNestedId(summary, prefix, index) {
+  let id = labelValueInSummary('id', summary);
+  if (id === null) {
+    id = prefix + index;
+  }
+  return id;
+}
+
 export const retrieveForecast = (
   sourceId: string,
   hoursPerWeek: number
@@ -325,13 +356,7 @@ export const retrieveForecast = (
     getState().taskLists.bigList,
     (task) => task.sourceId === sourceId
   );
-  const forecastTasks: Array<IssueToSchedule> = tasks.map((t, i) => ({
-    key: i.toString(),
-    summary: t.summary,
-    priority: t.priority,
-    issueEstSecondsRaw: t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
-    dueDate: labelValueInSummary('due', t.summary),
-  }));
+  const forecastTasks: Array<IssueToSchedule> = createForecastTasks(tasks);
   const forecastRequest = {
     issues: forecastTasks,
     createPreferences: {
@@ -340,6 +365,9 @@ export const retrieveForecast = (
     },
     displayPreferences: {
       embedJiraLinks: false,
+      showBlocked: true,
+      showDependenciesInSeparateColumns: true,
+      showHierarchically: true,
     },
   };
   fetch('http://localhost:8090/display', {

@@ -1,4 +1,4 @@
-  - 91 1 add dependent/subtask parsing
+  - 91 1 fix scheduling for dependents/subtasks without priorities (or estimates?)
   - 90 0 add project/epic parsing +tasks
   - >-
     90 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
