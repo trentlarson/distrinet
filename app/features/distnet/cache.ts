@@ -50,109 +50,119 @@ export const reloadOneSourceIntoCache: (
       '...'
     );
     while (!cacheInfo && index < source.urls.length) {
-      let thisIndex = index;
+      const thisIndex = index;
       index += 1; // because an error before incrementing causes an infinte loop
-      let sourceUrl = null;
       try {
-        sourceUrl = new url.URL(source.urls[thisIndex].url);
+        const sourceUrl = new url.URL(source.urls[thisIndex].url);
+        if (sourceUrl.protocol === 'file:') {
+          console.log('... trying URL', sourceUrl.toString(), '...');
+          // eslint-disable-next-line no-await-in-loop
+          cacheInfo = await fsPromises
+            // without the encoding, readFile returns a Buffer
+            .readFile(sourceUrl, { encoding: 'utf8' })
+            .then((contents) => {
+              return {
+                sourceId,
+                sourceUrl: sourceUrl.toString(),
+                localFile: url.fileURLToPath(sourceUrl),
+                contents,
+                date: new Date().toISOString(),
+              };
+            })
+            // eslint-disable-next-line no-loop-func
+            .catch((err) => {
+              console.log(
+                '... failed to read file',
+                sourceUrl.toString(),
+                'because',
+                err
+              );
+              index += 1;
+              return null;
+            });
+        } else {
+          console.log('... trying URL', sourceUrl.toString(), '...');
+          // eslint-disable-next-line no-await-in-loop
+          cacheInfo = await fetch(sourceUrl.toString())
+            // eslint-disable-next-line no-loop-func
+            .then((response: Response) => {
+              if (!response.ok) {
+                throw Error(
+                  `Failed to get URL${sourceUrl.toString()}due to response code${
+                    response.status
+                  }`
+                );
+              }
+              const cacheDir =
+                (getState().distnet.settings.fileSystem &&
+                  getState().distnet.settings.fileSystem.cacheDir) ||
+                DEFAULT_CACHE_DIR;
+              const cacheFile = path.join(
+                cacheDir,
+                sourceIdToFilename(sourceId)
+              );
+              console.log(
+                '... successfully fetched URL',
+                sourceUrl.toString(),
+                'response, so will write that to a local cache file',
+                cacheFile
+              );
+
+              let contents: string;
+              // eslint-disable-next-line promise/no-nesting
+              return fsPromises
+                .unlink(cacheFile)
+                .catch(() => {
+                  // we're fine if it doesn't exit
+                })
+                .then(() => {
+                  return response.text(); // we're assuming the file is not binary (see task read-binary)
+                })
+                .then((data: string) => {
+                  contents = data;
+                  return fsPromises.writeFile(cacheFile, contents);
+                })
+                .then(() => {
+                  return {
+                    sourceId,
+                    sourceUrl: sourceUrl.toString(),
+                    localFile: cacheFile,
+                    contents,
+                    date: new Date().toISOString(),
+                  };
+                })
+                .catch((err) => {
+                  console.log(
+                    '... failed to cache URL',
+                    sourceUrl.toString(),
+                    'because',
+                    err
+                  );
+                  index += 1;
+                  return null;
+                });
+            })
+            // eslint-disable-next-line no-loop-func
+            .catch((err) => {
+              console.log(
+                '... failed to fetch URL',
+                sourceUrl.toString(),
+                'because',
+                err
+              );
+              index += 1;
+              return null;
+            });
+        }
       } catch (e) {
         // probably a TypeError for a bad URL (including null or blank URLs)
-        console.log('Got error parsing URL', source.urls[thisIndex].url, 'in source', source, e);
-      }
-      if (!sourceUrl) {
-        // just continue without a result
-      } else if (sourceUrl.protocol === 'file:') {
-        console.log('... trying URL', sourceUrl.toString(), '...');
-        // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fsPromises
-          // without the encoding, readFile returns a Buffer
-          .readFile(sourceUrl, { encoding: 'utf8' })
-          .then((contents) => {
-            return {
-              sourceId,
-              sourceUrl: sourceUrl.toString(),
-              localFile: url.fileURLToPath(sourceUrl),
-              contents,
-              date: new Date().toISOString(),
-            };
-          })
-          // eslint-disable-next-line no-loop-func
-          .catch((err) => {
-            console.log(
-              '... failed to read file',
-              sourceUrl.toString(),
-              'because',
-              err
-            );
-            index += 1;
-            return null;
-          });
-      } else {
-        console.log('... trying URL', sourceUrl.toString(), '...');
-        // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fetch(sourceUrl.toString())
-          // eslint-disable-next-line no-loop-func
-          .then((response: Response) => {
-            if (!response.ok) {
-              throw Error('Failed to get URL', sourceUrl.toString(), 'due to response code', response.status);
-            }
-            const cacheDir =
-              (getState().distnet.settings.fileSystem &&
-                getState().distnet.settings.fileSystem.cacheDir) ||
-              DEFAULT_CACHE_DIR;
-            const cacheFile = path.join(cacheDir, sourceIdToFilename(sourceId));
-            console.log(
-              '... successfully fetched URL',
-              sourceUrl.toString(),
-              'response, so will write that to a local cache file',
-              cacheFile
-            );
-
-            let contents: string;
-            // eslint-disable-next-line promise/no-nesting
-            return fsPromises
-              .unlink(cacheFile)
-              .catch(() => {
-                // we're fine if it doesn't exit
-              })
-              .then(() => {
-                return response.text(); // we're assuming the file is not binary (see task read-binary)
-              })
-              .then((data: string) => {
-                contents = data;
-                return fsPromises.writeFile(cacheFile, contents);
-              })
-              .then(() => {
-                return {
-                  sourceId,
-                  sourceUrl: sourceUrl.toString(),
-                  localFile: cacheFile,
-                  contents,
-                  date: new Date().toISOString(),
-                };
-              })
-              .catch((err) => {
-                console.log(
-                  '... failed to cache URL',
-                  sourceUrl.toString(),
-                  'because',
-                  err
-                );
-                index += 1;
-                return null;
-              });
-          })
-          // eslint-disable-next-line no-loop-func
-          .catch((err) => {
-            console.log(
-              '... failed to fetch URL',
-              sourceUrl.toString(),
-              'because',
-              err
-            );
-            index += 1;
-            return null;
-          });
+        console.log(
+          'Got error loading URL',
+          source.urls[thisIndex].url,
+          'in source',
+          source,
+          e
+        );
       }
     }
     if (cacheInfo) {

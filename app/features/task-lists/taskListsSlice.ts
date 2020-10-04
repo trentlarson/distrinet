@@ -426,7 +426,7 @@ export const retrieveForecast = (
       showHierarchically: true,
     },
   };
-  let urlString = 'http://localhost:8090/display';
+  const urlString = 'http://localhost:8090/display';
   fetch(urlString, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -434,7 +434,9 @@ export const retrieveForecast = (
   })
     .then((forecastResponse) => {
       if (!forecastResponse.ok) {
-        throw Error('Failed to get forecast from', urlString, 'due to response code', forecastResponse.status);
+        throw Error(
+          `Failed to get forecast from ${urlString} due to response code ${forecastResponse.status}`
+        );
       }
       return forecastResponse.text();
     })
