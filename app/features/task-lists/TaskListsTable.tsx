@@ -5,11 +5,7 @@ import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
-import {
-  findClosestUriForGlobalUri,
-  isGlobalUri,
-  globalUriScheme,
-} from '../distnet/uriTools';
+import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
   YamlTask,
   dispatchVolunteer,
@@ -33,6 +29,7 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 /**
  * return a button for "copy" labels; otherwise, the non-null value or ''
  */
+/** I don't know what this is for.  (Note that it returns type "Element | string".)
 function labelValueRendering(label: string, summary: string) {
   const value = labelValueInSummary(label, summary);
   if (label === 'copy' && value && value.length > 0) {
@@ -40,6 +37,7 @@ function labelValueRendering(label: string, summary: string) {
   }
   return R.isNil(value) ? '' : value;
 }
+* */
 
 export default function TaskListsTable() {
   const dispatch = useDispatch();
@@ -234,27 +232,40 @@ export default function TaskListsTable() {
                     {Number.isFinite(task.estimate) ? task.estimate : '-'}
                   </td>
                   {labelsToShow.map((label) => {
-                    let labelValue = labelValueRendering(label, task.summary);
-                    let more = <span />
-                    if (label === 'ref' && isTaskyamlUriScheme(labelValue)) {
-                    console.log('Investigating', labelValue, R.map(R.prop('id'), taskSources))
-                    console.log('Investigating', findClosestUriForGlobalUri)
-                      let newUri = findClosestUriForGlobalUri(
+                    const labelValue = labelValueInSummary(label, task.summary);
+                    let more = <span />;
+                    if (
+                      label === 'ref' &&
+                      labelValue &&
+                      isTaskyamlUriScheme(labelValue)
+                    ) {
+                      const newUri = findClosestUriForGlobalUri(
                         labelValue,
                         R.map(R.prop('id'), taskSources)
                       );
                       if (newUri != null) {
-                        more = <span
-                          onClick={ () => { setListSourceIdsToShow([newUri]); } }
-                        >
-                          (visit)
-                        </span>;
+                        /* eslint-disable jsx-a11y/anchor-is-valid */
+                        /* eslint-disable jsx-a11y/click-events-have-key-events */
+                        /* eslint-disable jsx-a11y/no-static-element-interactions */
+                        more = (
+                          <a
+                            onClick={() => {
+                              setListSourceIdsToShow([newUri]);
+                            }}
+                          >
+                            (visit)
+                          </a>
+                        );
+                        /* eslint-enable */
                       }
                     }
-                    return <td key={label}>
+                    return (
+                      <td key={label}>
                         {labelValue}
-                        &nbsp;{more}
-                      </td>;
+                        &nbsp;
+                        {more}
+                      </td>
+                    );
                   })}
                   <td>{task.summary}</td>
                   <td>

@@ -10,6 +10,7 @@
   - 80 1 fix the definition to have blocks/awaits/subtasks/supertasks be keys (not nested lists), with tests
   - 80 1 Define a master project file that contains pointers to all task repos.
   - 80 0 show subtasks in top list
+  - 75 0 fix jsx-ally ignores
   - 75 0 handle more task YAML variations (eg. blocked & child issues)
   - 75 1 work off SQLite
   - 50 1 sort by project & priority & estimate.

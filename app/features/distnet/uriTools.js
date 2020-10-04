@@ -11,7 +11,7 @@
 
   function globalUriScheme(uri) {
     if (!isGlobalUri(uri)) {
-      throw Error('Cannot find scheme for non-global URI ' + uri);
+      throw Error(`Cannot find scheme for non-global URI ${uri}`);
     }
     return uri.split(':')[0];
   }
@@ -34,20 +34,17 @@
    * Find the longest member or uriList that is a prefix of uri, or null if none match.
    * */
   function findClosestUriForGlobalUri(uri, uriList) {
-    let maxUri = ''
-    for (let i = 0; i < uriList.length; i++) {
-      sourceUri = uriList[i];
-      console.log('Looking for URI match', uri, sourceUri);
+    let maxUri = '';
+    for (let i = 0; i < uriList.length; i += 1) {
+      const sourceUri = uriList[i];
       if (uri.startsWith(sourceUri) && sourceUri.length > maxUri.length) {
-        console.log('Found URI match', uri, sourceUri);
         maxUri = sourceUri;
       }
     }
     if (maxUri !== '') {
       return maxUri;
-    } else {
-      return null;
     }
+    return null;
   }
 
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;

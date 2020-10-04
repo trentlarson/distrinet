@@ -20,7 +20,7 @@ import {
   globalUriScheme,
 } from '../distnet/uriTools';
 
-const TASKYAML_SCHEME = "taskyaml";
+const TASKYAML_SCHEME = 'taskyaml';
 
 const fsPromises = fs.promises;
 
@@ -103,13 +103,16 @@ function sourceFromId(
 * */
 
 export function isTaskyamlUriScheme(sourceId: string) {
-  return isGlobalUri(sourceId) && globalUriScheme(sourceId) == TASKYAML_SCHEME;
+  return isGlobalUri(sourceId) && globalUriScheme(sourceId) === TASKYAML_SCHEME;
 }
 
 /**
  * return the value for the given label if in the summary; otherwise, null
  */
-export function labelValueInSummary(label: string, summary: string) {
+export function labelValueInSummary(
+  label: string,
+  summary: string
+): string | null {
   const pairs = R.filter(R.test(/\S:\S/), R.split(' ', summary));
   const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
