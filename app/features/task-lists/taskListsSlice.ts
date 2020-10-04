@@ -33,18 +33,22 @@ export interface Log {
   signature?: string;
 }
 
-export interface Task {
+/**
+ * This doesn't have an ID because it's not required and we'll often have to
+ * generate an ID, so that should use a different type than this raw data.
+ */
+export interface YamlTask {
   sourceId: string;
   priority: number | null;
   estimate: number | null;
-  description: string;
-  dependents: Array<Task>;
-  subtasks: Array<Task>;
+  summary: string;
+  dependents: Array<YamlTask>;
+  subtasks: Array<YamlTask>;
 }
 
 // Remember to keep these in alphabetical order for standard.
 interface VolunteerMessageForSigning {
-  description: string;
+  summary: string;
   did?: string;
   taskUri: string;
   time: string;
@@ -61,12 +65,12 @@ interface IssueToSchedule {
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
-  initialState: { bigList: [] as Array<Task>, forecastHtml: '' as string },
+  initialState: { bigList: [] as Array<YamlTask>, forecastHtml: '' as string },
   reducers: {
-    setTaskList: (state, tasks: Payload<Array<Task>>) => {
+    setTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = tasks.payload;
     },
-    addTaskList: (state, tasks: Payload<Array<Task>>) => {
+    addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
     setForecastHtml: (state, html: Payload<string>) => {
@@ -95,10 +99,10 @@ export function isTaskyamlSource(sourceId: string) {
 }
 
 /**
- * return the value for the given label if in the description; otherwise, null
+ * return the value for the given label if in the summary; otherwise, null
  */
-export function labelValueInDescription(label: string, description: string) {
-  const pairs = R.filter(R.test(/\S:\S/), R.split(' ', description));
+export function labelValueInSummary(label: string, summary: string) {
+  const pairs = R.filter(R.test(/\S:\S/), R.split(' ', summary));
   const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
@@ -106,8 +110,8 @@ export function labelValueInDescription(label: string, description: string) {
 export function taskFromString(
   sourceId: string,
   fullText: string,
-  dependents: Array<Task>,
-  subtasks: Array<Task>
+  dependents: Array<YamlTask>,
+  subtasks: Array<YamlTask>
 ) {
   let priority = NaN;
   let estimate = NaN;
@@ -121,7 +125,7 @@ export function taskFromString(
     }
     const firstNumber = parseFloat(remainingText.substring(0, space1Pos));
     if (Number.isNaN(firstNumber)) {
-      // there's no number at all; it's all a description
+      // there's no number at all; it's all a summary
     } else {
       // it's a number, either priority or estimate
       remainingText = remainingText.substring(space1Pos + 1);
@@ -152,7 +156,7 @@ export function taskFromString(
     sourceId,
     priority,
     estimate,
-    description: remainingText,
+    summary: remainingText,
     dependents,
     subtasks,
   };
@@ -164,44 +168,83 @@ type InputIssues = string | { [key: string]: InputIssues } | Array<InputIssues>;
  * @param sourceId the source ID, an integral datum in every task
  * @param issueList is some part of the recursive task string or list
  */
-const parseIssues = (
+const parseYamlIssues = (
   sourceId: string,
   issueList: InputIssues
-): Task | Array<Task> => {
+): YamlTask | Array<YamlTask> => {
   if (Array.isArray(issueList)) {
     // I don't expect to see arrays of arrays (outside blockers or subtasks).
     // This helps with typechecks... hope it doesn't do anything unexpected.
-    return issueList.map((issue) => parseIssues(sourceId, issue)).flat();
+    return issueList.map((issue) => parseYamlIssues(sourceId, issue)).flat();
   }
   if (typeof issueList === 'string') {
     return taskFromString(sourceId, issueList, [], []);
   }
   if (typeof issueList === 'object') {
-    // expecting a key of the issue text with value of the subtask issues
-    const key = Object.keys(issueList)[0].toString();
-
-    // Except for the top level, the value of the object should always be a list.
-    // Each value of the list is either a string (a standalone task)
-    // or an object where the key may be:
-    //   - a word "subtasks", "supertasks", "blocks", or "awaits"
-    //   - a task descriptions
-    // ... and the value is another task list.
-
-    const subSubtasks = parseIssues(sourceId, issueList[key]);
-    let subtasks = [];
-    if (Array.isArray(subSubtasks)) {
-      subtasks = subSubtasks;
-    } else {
-      subtasks = [subSubtasks];
+    // If null, I don't know what that means.
+    if (issueList === null) {
+      throw Error('One of the activities is null.');
     }
-    return taskFromString(sourceId, key, [], subtasks);
+
+    const issueObj = issueList;
+
+    // If there's a single key, it must be the summary.
+    // If there are more, the summary is whichever has a value "null".
+    // (It's the first key, but some parsers don't put it first in JSON.)
+    const keys = Object.keys(issueObj);
+    let summary = '';
+    let dependents: Array<YamlTask> = [];
+    let subtasks: Array<YamlTask> = [];
+    if (keys.length === 1) {
+      // it must be a summary, with subtasks as values
+      summary = Object.keys(issueObj)[0].toString();
+      const tempSubtasks = parseYamlIssues(sourceId, issueObj.subtasks);
+      if (Array.isArray(tempSubtasks)) {
+        subtasks = tempSubtasks;
+      } else {
+        subtasks = [tempSubtasks];
+      }
+    } else {
+      // There are many keys.  Assume any with value of null is the summary.
+      /* eslint-disable @typescript-eslint/dot-notation */
+      if (issueObj['summary']) {
+        summary = issueObj['summary'].toString();
+      }
+      for (let i = 0; !summary && i < keys.length; i += 1) {
+        if (issueObj[keys[i]] === null) {
+          summary = keys[i];
+        }
+      }
+      // doing this because our YamlTask interface doesn't include an ID, so it'll be parsed out later
+      if (issueObj['id']) {
+        summary += ` id:${issueObj['id'].toString().replace(/\s/g, '_')}`;
+      }
+      if (issueObj['blocks']) {
+        const tempDependents = parseYamlIssues(sourceId, issueObj['blocks']);
+        if (Array.isArray(tempDependents)) {
+          dependents = tempDependents;
+        } else {
+          dependents = [tempDependents];
+        }
+      }
+      if (issueObj['subtasks']) {
+        const tempSubtasks = parseYamlIssues(sourceId, issueObj['subtasks']);
+        if (Array.isArray(tempSubtasks)) {
+          subtasks = tempSubtasks;
+        } else {
+          subtasks = [tempSubtasks];
+        }
+      }
+      /* eslint-enable @typescript-eslint/dot-notation */
+    }
+
+    return taskFromString(sourceId, summary, dependents, subtasks);
   }
   return {
     sourceId,
-
     priority: null,
     estimate: null,
-    description: `Unknown Task Structure: ${typeof issueList} ${issueList}`,
+    summary: `Unknown YamlTask Structure: ${typeof issueList} ${issueList}`,
     dependents: [],
     subtasks: [],
   };
@@ -224,18 +267,18 @@ function isProjectFile(contents: unknown): contents is ProjectFile {
 }
 
 /**
- * @return a Promise that resolves to arrays of arrays of Tasks
+ * @return a Promise that resolves to arrays of arrays of YamlTasks
  */
 async function retrieveAllTasks(
   cacheSources: Cache
-): Promise<Array<Array<Task>>> {
-  let result: Array<Promise<Array<Task>>> = [];
+): Promise<Array<Array<YamlTask>>> {
+  let result: Array<Promise<Array<YamlTask>>> = [];
   const cacheValues: Array<CacheData> = _.values(cacheSources);
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
       if (isTaskyamlSource(entry.sourceId)) {
-        const next: Promise<Array<Task>> = fsPromises
+        const next: Promise<Array<YamlTask>> = fsPromises
           .readFile(entry.localFile)
           .then((resp) => resp.toString())
           .then((contents) => {
@@ -252,7 +295,7 @@ async function retrieveAllTasks(
               );
               return [];
             }
-            const issues = parseIssues(entry.sourceId, taskList);
+            const issues = parseYamlIssues(entry.sourceId, taskList);
             if (Array.isArray(issues)) {
               return issues;
             }
@@ -284,16 +327,19 @@ export const retrieveForecast = (
   );
   const forecastTasks: Array<IssueToSchedule> = tasks.map((t, i) => ({
     key: i.toString(),
-    summary: t.description,
+    summary: t.summary,
     priority: t.priority,
     issueEstSecondsRaw: t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
-    dueDate: labelValueInDescription('due', t.description),
+    dueDate: labelValueInSummary('due', t.summary),
   }));
   const forecastRequest = {
     issues: forecastTasks,
     createPreferences: {
       defaultAssigneeHoursPerWeek: hoursPerWeek,
       reversePriority: true,
+    },
+    displayPreferences: {
+      embedJiraLinks: false,
     },
   };
   fetch('http://localhost:8090/display', {
@@ -320,7 +366,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: Array<Array<Task>> = await retrieveAllTasks(
+  const result: Array<Array<YamlTask>> = await retrieveAllTasks(
     getState().distnet.cache
   );
   return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
@@ -352,7 +398,7 @@ function saveToFile(
   });
 }
 
-export const dispatchVolunteer = (task: Task): AppThunk => async (
+export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
   _1,
   getState
 ) => {
@@ -375,18 +421,18 @@ export const dispatchVolunteer = (task: Task): AppThunk => async (
         getState().distnet.cache[task.sourceId] &&
         getState().distnet.cache[task.sourceId].contents
       ) {
-        const taskId = labelValueInDescription('id', task.description);
+        const taskId = labelValueInSummary('id', task.summary);
 
         if (_.isNil(taskId)) {
           alert(
             'Cannot volunteer for a task without an ID.' +
-              '  Edit the task and add a unique "id:SOME_VALUE" in the description.'
+              '  Edit the task and add a unique "id:SOME_VALUE" in the summary.'
           );
         } else {
           // sign
           const sign = nodeCrypto.createSign('SHA256');
           const volunteerMessageForSigning: VolunteerMessageForSigning = {
-            description: task.description,
+            summary: task.summary,
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),
           };

@@ -6,10 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
-  Task,
+  YamlTask,
   dispatchVolunteer,
   isTaskyamlSource,
-  labelValueInDescription,
+  labelValueInSummary,
   retrieveForecast,
   setForecastHtml,
 } from './taskListsSlice';
@@ -28,8 +28,8 @@ function execProtocolApp(execPath: string, args: Array<string>) {
 /**
  * return a button for "copy" labels; otherwise, the non-null value or ''
  */
-function labelValueRendering(label: string, description: string) {
-  const value = labelValueInDescription(label, description);
+function labelValueRendering(label: string, summary: string) {
+  const value = labelValueInSummary(label, summary);
   if (label === 'copy' && value && value.length > 0) {
     return <button type="button">{value}</button>;
   }
@@ -49,7 +49,7 @@ export default function TaskListsTable() {
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
 
-  let bigList: Array<Task> = [];
+  let bigList: Array<YamlTask> = [];
   let allLabels: Array<string> = [];
   let execSources = <span />;
   let sourceMap: Record<string, Source> = {};
@@ -62,10 +62,7 @@ export default function TaskListsTable() {
 
       // loop through and post-process, eg. to find all the labels
       for (let i = 0; i < bigList.length; i += 1) {
-        const pairs = R.filter(
-          R.test(/:/),
-          R.split(' ', bigList[i].description)
-        );
+        const pairs = R.filter(R.test(/:/), R.split(' ', bigList[i].summary));
         if (pairs.length > 0) {
           const validKeys = R.filter(
             R.test(/^[A-Za-z0-9_-]*$/),
@@ -208,7 +205,7 @@ export default function TaskListsTable() {
               {labelsToShow.map((label) => (
                 <th key={label}>{label}</th>
               ))}
-              <th>Description</th>
+              <th>Summary</th>
               <th>Actions</th>
               <th>Subtasks (to log)</th>
               <th>Dependents (to log)</th>
@@ -216,7 +213,7 @@ export default function TaskListsTable() {
           </thead>
           <tbody>
             {bigList &&
-              bigList.map((task: Task, index: number) => (
+              bigList.map((task: YamlTask, index: number) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <tr key={`${task.sourceId}/${index}`}>
                   <td>
@@ -233,10 +230,10 @@ export default function TaskListsTable() {
                   </td>
                   {labelsToShow.map((label) => (
                     <td key={label}>
-                      {labelValueRendering(label, task.description)}
+                      {labelValueRendering(label, task.summary)}
                     </td>
                   ))}
-                  <td>{task.description}</td>
+                  <td>{task.summary}</td>
                   <td>
                     <button
                       type="button"
