@@ -198,7 +198,7 @@ const parseYamlIssues = (
     if (keys.length === 1) {
       // it must be a summary, with subtasks as values
       summary = Object.keys(issueObj)[0].toString();
-      const tempSubtasks = parseYamlIssues(sourceId, issueObj.subtasks);
+      const tempSubtasks = parseYamlIssues(sourceId, issueObj[summary]);
       if (Array.isArray(tempSubtasks)) {
         subtasks = tempSubtasks;
       } else {
