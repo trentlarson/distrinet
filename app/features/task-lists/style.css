@@ -36,6 +36,10 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+li {
+  list-style: square;
+}
+
 .subtask .tooltiptext {
   visibility: hidden;
   width: 120px;

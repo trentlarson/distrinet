@@ -327,7 +327,26 @@ function idOrNestedId(summary: string, prefix: string, index: number): string {
   return id;
 }
 
-function createForecastTasks2(
+/**
+ * Create a mapping with all tasks indexed by keys.
+ * This modifies 'master' to contain all the issues.
+ * This will be used to fill in all the references.
+ */
+function createMasterTaskList(
+  master: Record<string, IssuesToSchedule>,
+  tasks: Array<IssueToSchedule>
+): Record<string, IssueToSchedule> {
+  for (let i = 0; i < tasks.length; i += 1) {
+    master[tasks[i].key] = tasks[i];
+    createMasterTaskList(master, tasks[i].dependents);
+    createMasterTaskList(master, tasks[i].subtasks);
+  }
+}
+
+/**
+ * This translates each YamlTask into an issue for the forecast, with the same dependent/subtask structure.
+ */
+function createForecastTasksRaw(
   tasks: Array<YamlTask>,
   prefix: string
 ): Array<IssueToSchedule> {
@@ -336,18 +355,51 @@ function createForecastTasks2(
     return {
       key: id,
       summary: t.summary,
-      priority: t.priority,
+      priority: Number.isNaN(t.priority) ? 0 : t.priority,
       issueEstSecondsRaw:
         t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
       dueDate: labelValueInSummary('due', t.summary),
-      dependents: createForecastTasks2(t.dependents, `${prefix + id}_d_`),
-      subtasks: createForecastTasks2(t.subtasks, `${prefix + id}_s_`),
+      dependents: createForecastTasksRaw(t.dependents, `${prefix + id}-d_`),
+      subtasks: createForecastTasksRaw(t.subtasks, `${prefix + id}-s_`),
     };
   });
 }
 
+const REF_KEY = 'ref:';
+
 function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
-  return createForecastTasks2(tasks, '');
+  let rawTrees = createForecastTasksRaw(tasks, '');
+  let masterMap = {};
+  createMasterTaskList(masterMap, rawTrees);
+  // now use master as a reference to fill in 'ref' references until they're all gone
+  let changed;
+  do {
+    changed = false;
+    let keys = Object.keys(masterMap);
+    for (let i = 0; i < keys.length; i += 1) {
+      let task = masterMap[keys[i]];
+      for (let depi = 0; depi < task.dependents.length; depi += 1) {
+        if (task.dependents[depi].summary?.startsWith(REF_KEY)) {
+          let refKey = task.dependents[depi].summary.substring(REF_KEY.length);
+          task.dependents[depi] = masterMap[refKey];
+          changed = true;
+          // remove from the top-level tasks (to lesson duplication when sending)
+          rawTrees = R.reject((task) => (task.key === refKey), rawTrees);
+        }
+      }
+      for (let subi = 0; subi < task.subtasks.length; subi += 1) {
+        if (task.subtasks[subi].summary?.startsWith(REF_KEY)) {
+          let refKey = task.subtasks[subi].summary.substring(REF_KEY.length);
+          task.subtasks[subi] = masterMap[refKey];
+          changed = true;
+          // remove from the top-level tasks (to lesson duplication when sending)
+          rawTrees = R.reject((task) => (task.key === refKey), rawTrees);
+        }
+      }
+    }
+  } while (changed);
+  //return R.values(masterMap);
+  return rawTrees;
 }
 
 export const retrieveForecast = (
