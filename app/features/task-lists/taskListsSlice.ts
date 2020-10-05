@@ -422,25 +422,31 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
 
 export const retrieveForecast = (
   sourceId: string,
-  hoursPerWeek: number
+  hoursPerWeek: number,
+  focusOnTask: string
 ): AppThunk => async (dispatch, getState) => {
   const tasks = _.filter(
     getState().taskLists.bigList,
     (task) => task.sourceId === sourceId
   );
-  const forecastTasks: Array<IssueToSchedule> = createForecastTasks(tasks);
+  const issues: Array<IssueToSchedule> = createForecastTasks(tasks);
+  const createPreferences = {
+    defaultAssigneeHoursPerWeek: hoursPerWeek,
+    reversePriority: true,
+  };
+  const displayPreferences = {
+    embedJiraLinks: false,
+    showBlocked: true,
+    showDependenciesInSeparateColumns: true,
+    showHierarchically: true,
+  }
+  if (focusOnTask) {
+    displayPreferences.showIssues = [focusOnTask];
+  }
   const forecastRequest = {
-    issues: forecastTasks,
-    createPreferences: {
-      defaultAssigneeHoursPerWeek: hoursPerWeek,
-      reversePriority: true,
-    },
-    displayPreferences: {
-      embedJiraLinks: false,
-      showBlocked: true,
-      showDependenciesInSeparateColumns: true,
-      showHierarchically: true,
-    },
+    issues,
+    createPreferences,
+    displayPreferences,
   };
   const urlString = 'http://localhost:8090/display';
   fetch(urlString, {

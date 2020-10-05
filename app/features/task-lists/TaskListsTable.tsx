@@ -50,6 +50,7 @@ export default function TaskListsTable() {
     [] as Array<string>
   );
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
+  const [focusOnTaskId, setFocusOnTaskId] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
 
   let bigList: Array<YamlTask> = [];
@@ -147,7 +148,7 @@ export default function TaskListsTable() {
                       type="button"
                       onClick={
                         () =>
-                          dispatch(retrieveForecast(source.id, hoursPerWeek))
+                          dispatch(retrieveForecast(source.id, hoursPerWeek, focusOnTaskId))
                         // This is soooo stupid that there's an error-level lint rule about this!
                         // eslint-disable-next-line react/jsx-curly-newline
                       }
@@ -164,10 +165,17 @@ export default function TaskListsTable() {
         <input
           size={2}
           type="text"
-          defaultValue={hoursPerWeek}
+          value={hoursPerWeek}
           onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
         />
-        &nbsp;hrs/wk)
+        &nbsp;hrs/wk and focused on&nbsp;
+        <input
+          size={20}
+          type="text"
+          value={focusOnTaskId}
+          onChange={(e) => setFocusOnTaskId(e.target.value)}
+        />
+        )
       </div>
     );
   }
@@ -259,7 +267,8 @@ export default function TaskListsTable() {
                           <a
                             onClick={() => {
                               setListSourceIdsToShow([newUri]);
-                              dispatch(retrieveForecast(newUri, hoursPerWeek));
+                              setFocusOnTaskId('');
+                              dispatch(retrieveForecast(newUri, hoursPerWeek, ''));
                             }}
                           >
                             (visit)
@@ -345,7 +354,13 @@ export default function TaskListsTable() {
           <div>
             <hr />
             <h4>Forecast</h4>
-            <button type="button" onClick={() => dispatch(setForecastHtml(''))}>
+            <button
+              type="button"
+              onClick={() => {
+                setFocusOnTaskId('');
+                dispatch(setForecastHtml(''));
+              }}
+            >
               Remove
             </button>
             {ReactHtmlParser(taskLists.forecastHtml)}
