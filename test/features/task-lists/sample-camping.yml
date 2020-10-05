@@ -1,0 +1,22 @@
+- everyone gets off work ref:taskyaml:taskyaml.org,2020:sample/work-week#leave-work mustStartOnDate:2020-10-09T16:00:00+0600:
+  blocks:
+    - ref:drive
+    - ref:safe-firepit
+- id:drive
+- build a id:safe-firepit
+- id:chop-firewood +tend-to-fire
+- id:put-up-tent
+- id:eat:
+    - id:cook:
+      blocks:
+        - ref:fill-my-belly
+    - id:fill-my-belly:
+      blocks:
+        - ref:wash-dishes
+    - id:wash-dishes
+- id:start-fire +eat awaits:chop-firewood awaits:safe-firepit
+- id:build-up-coals +tend-to-fire:
+  blocks:
+    - ref:cook
+- put out fire +tend-to-fire
+- sleep awaits:put-up-tent awaits:tend-to-fire

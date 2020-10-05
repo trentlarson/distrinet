@@ -1,0 +1,78 @@
+- id:Service_Revenue :
+  subtasks:
+  - ref:Oasis_Maintenance
+  - ref:Oasis_Installation
+- id:Capital_Revenue :
+  subtasks:
+  - ref:Interest
+  - ref:Investment
+- id:Expenses :
+  subtasks:
+  - ref:Direct_Expenses
+  - ref:Indirect_Expenses
+- id:Direct_Expenses :
+  subtasks:
+  - ref:Labor_Expenses
+  - ref:Material_Expenses
+  - ref:Other_Direct_Expenses
+- id:Indirect_Expenses :
+  subtasks:
+  - ref:Overhead_Expenses
+  - ref:Financial_Expenses
+- id:Oasis :
+  subtasks:
+  - ref:Oasis_Market
+  - ref:Oasis_Product
+  - ref:Oasis_Management
+- id:Oasis_Market :
+  subtasks:
+  - ref:Oasis_Customers
+  - ref:Oasis_Channels
+  - ref:Oasis_Value_Proposition
+  - ref:Oasis_Sales_Locations
+- id:Oasis_Sales_Locations :
+  subtasks:
+  - ref:Oasis_Regulations
+  - ref:Location_Conditions
+- id:Oasis_Regulations :
+  subtasks:
+  - ref:Safety_Regulations
+  - ref:Standards
+  - ref:Government_Regulations
+- id:Oasis_Product :
+  subtasks:
+  - ref:Product_Fit
+  - ref:Product_Form
+  - ref:Product_Function
+- id:Revenue :
+  subtasks:
+  - ref:Capital_Revenue
+  - ref:Product_Revenue
+  - ref:Service_Revenue
+- id:Product_Revenue :
+  subtasks:
+  - ref:Oasis
+- id:Business :
+  subtasks:
+  - ref:Revenue
+  - ref:Expenses
+- id:Oasis_Maintenance
+- id:Interest
+- id:Investment
+- id:Labor_Expenses
+- id:Material_Expenses
+- id:Other_Direct_Expenses
+- id:Overhead_Expenses
+- id:Financial_Expenses
+- id:Oasis_Management
+- id:Oasis_Customers
+- id:Oasis_Channels
+- id:Oasis_Value_Proposition
+- id:Location_Conditions
+- id:Safety_Regulations
+- id:Standards
+- id:Government_Regulations
+- id:Product_Fit
+- id:Product_Form
+- id:Product_Function
+- id:Oasis_Installation
