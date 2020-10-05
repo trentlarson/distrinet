@@ -217,15 +217,16 @@ const parseYamlIssues = (
         subtasks = [tempSubtasks];
       }
     } else {
-      // There are many keys.  Assume any with value of null is the summary.
       /* eslint-disable @typescript-eslint/dot-notation */
-      if (issueObj['summary']) {
-        summary = issueObj['summary'].toString();
-      }
+      // There are many keys.  Assume any with value of null is the summary
       for (let i = 0; !summary && i < keys.length; i += 1) {
         if (issueObj[keys[i]] === null) {
           summary = keys[i];
         }
+      }
+      // ... but override that if there's something explicit
+      if (issueObj['summary']) {
+        summary = issueObj['summary'].toString();
       }
       // doing this because our YamlTask interface doesn't include an ID, so it'll be parsed out later
       if (issueObj['id']) {
@@ -376,7 +377,7 @@ function createForecastTasksRaw(
   });
 }
 
-const REF_KEY = 'ref:';
+const REF_KEY = 'ref';
 
 function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
   let rawTrees: Array<IssueToSchedule> = createForecastTasksRaw(tasks, '');
@@ -390,23 +391,27 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
     for (let i = 0; i < keys.length; i += 1) {
       const issue = masterMap[keys[i]];
       for (let depi = 0; depi < issue.dependents.length; depi += 1) {
-        if (issue.dependents[depi].summary?.startsWith(REF_KEY)) {
-          const refKey = issue.dependents[depi].summary.substring(
-            REF_KEY.length
-          );
-          issue.dependents[depi] = masterMap[refKey];
+        const depRef = labelValueInSummary(
+          REF_KEY,
+          issue.dependents[depi].summary
+        );
+        if (depRef !== null) {
+          issue.dependents[depi] = masterMap[depRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)
-          rawTrees = R.reject((iss) => iss.key === refKey, rawTrees);
+          rawTrees = R.reject((iss) => iss.key === depRef, rawTrees);
         }
       }
       for (let subi = 0; subi < issue.subtasks.length; subi += 1) {
-        if (issue.subtasks[subi].summary?.startsWith(REF_KEY)) {
-          const refKey = issue.subtasks[subi].summary.substring(REF_KEY.length);
-          issue.subtasks[subi] = masterMap[refKey];
+        const subRef = labelValueInSummary(
+          REF_KEY,
+          issue.subtasks[subi].summary
+        );
+        if (subRef !== null) {
+          issue.subtasks[subi] = masterMap[subRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)
-          rawTrees = R.reject((iss) => iss.key === refKey, rawTrees);
+          rawTrees = R.reject((iss) => iss.key === subRef, rawTrees);
         }
       }
     }

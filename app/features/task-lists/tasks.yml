@@ -1,13 +1,9 @@
-  - 91 0 show my schedule based on an external deadline
   - 91 0 show where a task fits in with the rest (ie. focus on it in the forecast)
-  - 90 0 add project/epic parsing +tasks
+  - 90 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
+  - 0 parse Orlin's project supertasks:supertasks
   - >-
-    90 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
+    80 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
     id:public-task-page
-  - >-
-    90 0 fix parseIssues for linked tasks eg. dependents (and show in list, not
-    in a column)
-  - 80 0 add awaits/supertask parsing
   - 80 1 fix the definition to have blocks/awaits/subtasks/supertasks be keys (not nested lists), with tests
   - 80 1 Define a master project file that contains pointers to all task repos.
   - 80 0 show subtasks in top list

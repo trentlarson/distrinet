@@ -205,7 +205,14 @@ export default function TaskListsTable() {
             <tr>
               <th>Project</th>
               <th>Prty</th>
-              <th>Est<br/><sub>log<sub>2</sub></sub></th>
+              <th>
+                Est
+                <br />
+                <sub>
+                  log
+                  <sub>2</sub>
+                </sub>
+              </th>
               {labelsToShow.map((label) => (
                 <th key={label}>{label}</th>
               ))}

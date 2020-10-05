@@ -21,7 +21,11 @@ Download and run the [Schedule-Forecast service](https://github.com/trentlarson/
 - I can create a list of projects & their locations, then can report on high priority, high/low estimates, and recently changed activity from any or all of them.
 - I can store my project task list and share it privately with selected individuals, with tools to make it easy to propose edits to the lists.
 - I can store a project task list in a public git repo.  Individuals can volunteer for items or propose changes.
-- Expose simple APIs, eg. basic REST endpoints supporting our schema.
+- I can use simple APIs, eg. basic REST endpoints supporting our schema.
+
+- I can see the next task in the critical path for project delivery in order to push on the next-most-important piece of the project (and report on whether the due dates are as expected).
+- I can see where my task(s) fit into the full picture.
+- I can see when other tasks are done so that they can plan their time according to the dependencies.
 
 #### Tools
 
