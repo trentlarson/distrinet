@@ -148,7 +148,13 @@ export default function TaskListsTable() {
                       type="button"
                       onClick={
                         () =>
-                          dispatch(retrieveForecast(source.id, hoursPerWeek, focusOnTaskId))
+                          dispatch(
+                            retrieveForecast(
+                              source.id,
+                              hoursPerWeek,
+                              focusOnTaskId
+                            )
+                          )
                         // This is soooo stupid that there's an error-level lint rule about this!
                         // eslint-disable-next-line react/jsx-curly-newline
                       }
@@ -268,7 +274,9 @@ export default function TaskListsTable() {
                             onClick={() => {
                               setListSourceIdsToShow([newUri]);
                               setFocusOnTaskId('');
-                              dispatch(retrieveForecast(newUri, hoursPerWeek, ''));
+                              dispatch(
+                                retrieveForecast(newUri, hoursPerWeek, '')
+                              );
                             }}
                           >
                             (visit)

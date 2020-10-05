@@ -5,6 +5,7 @@
   - 92 -1 change all "key:value" keys to constants
   - 91 0 show where a task fits in with the rest (ie. focus on it in the forecast)
   - 90 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
+  - 90 1 when browsing external lists, detect internal task URLs
   - 55 0 move 'ref' processing to parse YAML?
   - 50 -1 automatically create supertask if it doesn't exist
   - >-

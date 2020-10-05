@@ -434,15 +434,14 @@ export const retrieveForecast = (
     defaultAssigneeHoursPerWeek: hoursPerWeek,
     reversePriority: true,
   };
+  const showIssues = focusOnTask ? [focusOnTask] : undefined;
   const displayPreferences = {
     embedJiraLinks: false,
     showBlocked: true,
     showDependenciesInSeparateColumns: true,
     showHierarchically: true,
-  }
-  if (focusOnTask) {
-    displayPreferences.showIssues = [focusOnTask];
-  }
+    showIssues,
+  };
   const forecastRequest = {
     issues,
     createPreferences,
