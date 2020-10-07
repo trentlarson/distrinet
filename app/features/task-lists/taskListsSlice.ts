@@ -72,9 +72,17 @@ interface IssueToSchedule {
   dependents: Array<IssueToSchedule>;
 }
 
+interface ForecastData {
+  sourceId: string;
+  html: string;
+}
+
 const taskListsSlice = createSlice({
   name: 'taskLists',
-  initialState: { bigList: [] as Array<YamlTask>, forecastHtml: '' as string },
+  initialState: {
+    bigList: [] as Array<YamlTask>,
+    forecastData: { sourceId: '', html: '' } as ForecastData,
+  },
   reducers: {
     setTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = tasks.payload;
@@ -82,8 +90,8 @@ const taskListsSlice = createSlice({
     addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
-    setForecastHtml: (state, html: Payload<string>) => {
-      state.forecastHtml = html.payload;
+    setForecastData: (state, html: Payload<forecastData>) => {
+      state.forecastData = html.payload;
     },
   },
 });
@@ -91,7 +99,7 @@ const taskListsSlice = createSlice({
 export const {
   setTaskList,
   addTaskList,
-  setForecastHtml,
+  setForecastData,
 } = taskListsSlice.actions;
 
 /** potentially useful
@@ -462,7 +470,7 @@ export const retrieveForecast = (
       return forecastResponse.text();
     })
     .then((forecastString) => {
-      return dispatch(setForecastHtml(forecastString));
+      return dispatch(setForecastData({sourceId, html: forecastString}));
     })
     .catch((err) => {
       console.error(

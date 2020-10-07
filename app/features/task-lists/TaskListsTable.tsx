@@ -12,7 +12,7 @@ import {
   isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
-  setForecastHtml,
+  setForecastData,
 } from './taskListsSlice';
 import style from './style.css';
 
@@ -391,20 +391,26 @@ export default function TaskListsTable() {
         )}
       </div>
       <div>
-        {taskLists.forecastHtml.length > 0 ? (
+        {taskLists.forecastData.html.length > 0 ? (
           <div>
             <hr />
-            <h4>Forecast</h4>
+            <h4>
+              {
+                R.find((s) => s.id === taskLists.forecastData.sourceId,
+                       taskSources)
+                  .name
+              } Forecast
+            </h4>
             <button
               type="button"
               onClick={() => {
                 setFocusOnTaskId('');
-                dispatch(setForecastHtml(''));
+                dispatch(setForecastData({sourceId: '', html: ''}));
               }}
             >
               Remove
             </button>
-            {ReactHtmlParser(taskLists.forecastHtml)}
+            {ReactHtmlParser(taskLists.forecastData.html)}
           </div>
         ) : (
           ''
