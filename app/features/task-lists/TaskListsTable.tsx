@@ -3,8 +3,8 @@ import * as R from 'ramda';
 import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { Source } from '../distnet/distnetClasses';
+import { AppThunk, RootState } from '../../store';
+import { Cache, ResourceTypes, Source } from '../distnet/distnetClasses';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
   YamlTask,
@@ -38,6 +38,289 @@ function labelValueRendering(label: string, summary: string) {
   return R.isNil(value) ? '' : value;
 }
 * */
+
+function execSources(
+  dispatch: (arg0: AppThunk) => void,
+  cache: Cache,
+  taskSources: Array<Source>,
+  resourceTypes: ResourceTypes,
+  hoursPerWeek: number,
+  setHoursPerWeek: (arg0: number) => void,
+  focusOnTaskId: string,
+  setFocusOnTaskId: (arg0: string) => void,
+  listSourceIdsToShow: Array<string>,
+  setListSourceIdsToShow: (arg0: Array<string>) => void
+) {
+  return (
+    <div>
+      <table>
+        <tbody>
+          {taskSources.map((source) => {
+            const protocol = source.id.substring(0, source.id.indexOf(':'));
+            const execPath =
+              resourceTypes && resourceTypes[protocol]?.executablePath;
+            const file = cache[source.id]?.localFile;
+            /** I cannot figure out how to fix this stupid error. */
+            /** eslint-disable-next-line react/jsx-curly-newline */
+            return (
+              <tr key={source.id}>
+                <td>{source.name || '(unknown)'}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (R.any(R.equals(source.id), listSourceIdsToShow)) {
+                        // remove it from the sources we're showing
+                        setListSourceIdsToShow(
+                          R.without([source.id], listSourceIdsToShow)
+                        );
+                      } else {
+                        // add it to the sources we're showing
+                        setListSourceIdsToShow(
+                          R.union(listSourceIdsToShow, [source.id])
+                        );
+                      }
+                    }}
+                    style={{
+                      backgroundColor: R.any(
+                        R.equals(source.id),
+                        listSourceIdsToShow
+                      )
+                        ? 'grey'
+                        : 'white',
+                    }}
+                  >
+                    Show
+                  </button>
+                </td>
+                <td>
+                  {execPath ? (
+                    <button
+                      type="button"
+                      onClick={() => execProtocolApp(execPath, [file])}
+                    >
+                      Open Copy
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={
+                      () =>
+                        dispatch(
+                          retrieveForecast(
+                            source.id,
+                            hoursPerWeek,
+                            focusOnTaskId
+                          )
+                        )
+                      // This is soooo stupid that there's an error-level lint rule about this!
+                      // eslint-disable-next-line react/jsx-curly-newline
+                    }
+                  >
+                    Forecast
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      (Forecasts are estimated at&nbsp;
+      <input
+        size={2}
+        type="text"
+        value={hoursPerWeek}
+        onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
+      />
+      &nbsp;hrs/wk and focused on&nbsp;
+      <input
+        size={20}
+        type="text"
+        value={focusOnTaskId}
+        onChange={(e) => setFocusOnTaskId(e.target.value)}
+      />
+      )
+    </div>
+  );
+}
+
+function bigListTable(
+  dispatch: (arg0: AppThunk) => void,
+  taskSources: Array<Source>,
+  hoursPerWeek: number,
+  setFocusOnTaskId: (arg0: string) => void,
+  setListSourceIdsToShow: (arg0: Array<string>) => void,
+  labelsToShow: Array<string>,
+  setLabelsToShow: (arg0: Array<string>) => void,
+  bigList: Array<YamlTask>,
+  allLabels: Array<string>
+) {
+  const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
+
+  return bigList.length === 0 ? (
+    <span />
+  ) : (
+    <div>
+      <hr />
+      <h4>All Activities</h4>
+      Labels:
+      {allLabels.map((label) => (
+        <button
+          type="button"
+          key={label}
+          onClick={() => {
+            if (R.any(R.equals(label), labelsToShow)) {
+              // remove it from the labels we're showing
+              setLabelsToShow(R.without([label], labelsToShow));
+            } else {
+              // add it to the labels we're showing
+              setLabelsToShow(R.union(labelsToShow, [label]));
+            }
+          }}
+          style={{
+            backgroundColor: R.any(R.equals(label), labelsToShow)
+              ? 'grey'
+              : 'white',
+          }}
+        >
+          {label}
+        </button>
+      ))}
+      <table>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Prty</th>
+            <th>
+              Est
+              <br />
+              <sub>
+                log
+                <sub>2</sub>
+              </sub>
+            </th>
+            {labelsToShow.map((label) => (
+              <th key={label}>{label}</th>
+            ))}
+            <th>Summary</th>
+            <th>Actions</th>
+            <th>Subtasks (to log)</th>
+            <th>Dependents (to log)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bigList &&
+            bigList.map((task: YamlTask, index: number) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <tr key={`${task.sourceId}/${index}`}>
+                <td>
+                  {index > 0 &&
+                  bigList[index - 1].sourceId === bigList[index].sourceId
+                    ? ''
+                    : sourceMap[task.sourceId].name}
+                </td>
+                <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
+                <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
+                {labelsToShow.map((label) => {
+                  const labelValue = labelValueInSummary(label, task.summary);
+                  let more = <span />;
+                  if (
+                    label === 'ref' &&
+                    labelValue &&
+                    isTaskyamlUriScheme(labelValue)
+                  ) {
+                    const newUri = findClosestUriForGlobalUri(
+                      labelValue,
+                      R.map(R.prop('id'), taskSources)
+                    );
+                    if (newUri != null) {
+                      /* eslint-disable jsx-a11y/anchor-is-valid */
+                      /* eslint-disable jsx-a11y/click-events-have-key-events */
+                      /* eslint-disable jsx-a11y/no-static-element-interactions */
+                      more = (
+                        <a
+                          onClick={() => {
+                            setListSourceIdsToShow([newUri]);
+                            setFocusOnTaskId('');
+                            dispatch(
+                              retrieveForecast(newUri, hoursPerWeek, '')
+                            );
+                          }}
+                        >
+                          (visit)
+                        </a>
+                      );
+                      /* eslint-enable */
+                    }
+                  }
+                  return (
+                    <td key={label}>
+                      {labelValue}
+                      &nbsp;
+                      {more}
+                    </td>
+                  );
+                })}
+                <td>{task.summary}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch(dispatchVolunteer(task));
+                    }}
+                  >
+                    Volunteer
+                  </button>
+                </td>
+                <td>
+                  {task.subtasks.length > 0 ? (
+                    <button
+                      type="button"
+                      className={style.subtask}
+                      onClick={() => {
+                        console.log('Subtasks', task.subtasks);
+                        return '';
+                      }}
+                    >
+                      Subtasks
+                      <span className={style.tooltiptext}>
+                        Will show in console.
+                      </span>
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                </td>
+                <td>
+                  {task.dependents.length > 0 ? (
+                    <button
+                      type="button"
+                      className={style.subtask}
+                      onClick={() => {
+                        console.log('Dependents', task.dependents);
+                        return '';
+                      }}
+                    >
+                      Dependents
+                      <span className={style.tooltiptext}>
+                        Will show in console.
+                      </span>
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function TaskListsTable() {
   const dispatch = useDispatch();
@@ -83,7 +366,7 @@ export default function TaskListsTable() {
     }
   }
 
-  const taskSources = R.filter(
+  const taskSources: Array<Source> = R.filter(
     (s) => isTaskyamlUriScheme(s.id),
     distnet.settings.sources
   );
@@ -93,7 +376,20 @@ export default function TaskListsTable() {
       <br />
       <br />
       <br />
-      <div>{execSources(taskSources, bigList, allLabels)}</div>
+      <div>
+        {execSources(
+          dispatch,
+          distnet.cache,
+          taskSources,
+          resourceTypes,
+          hoursPerWeek,
+          setHoursPerWeek,
+          focusOnTaskId,
+          setFocusOnTaskId,
+          listSourceIdsToShow,
+          setListSourceIdsToShow
+        )}
+      </div>
       <div>
         {taskLists.forecastHtml.length > 0 ? (
           <div>
@@ -114,276 +410,17 @@ export default function TaskListsTable() {
           ''
         )}
       </div>
-      {bigListTable(taskSources, bigList, allLabels)}
+      {bigListTable(
+        dispatch,
+        taskSources,
+        hoursPerWeek,
+        setFocusOnTaskId,
+        setListSourceIdsToShow,
+        labelsToShow,
+        setLabelsToShow,
+        bigList,
+        allLabels
+      )}
     </div>
   );
-}
-
-function execSources(taskSources, bigList, allLabels) {
-
-    return(
-      <div>
-        <table>
-          <tbody>
-            {taskSources.map((source) => {
-              const protocol = source.id.substring(0, source.id.indexOf(':'));
-              const execPath =
-                resourceTypes && resourceTypes[protocol]?.executablePath;
-              const file = distnet.cache[source.id]?.localFile;
-              /** I cannot figure out how to fix this stupid error. */
-              /** eslint-disable-next-line react/jsx-curly-newline */
-              return (
-                <tr key={source.id}>
-                  <td>{source.name || '(unknown)'}</td>
-                  <td>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (R.any(R.equals(source.id), listSourceIdsToShow)) {
-                          // remove it from the sources we're showing
-                          setListSourceIdsToShow(
-                            R.without([source.id], listSourceIdsToShow)
-                          );
-                        } else {
-                          // add it to the sources we're showing
-                          setListSourceIdsToShow(
-                            R.union(listSourceIdsToShow, [source.id])
-                          );
-                        }
-                      }}
-                      style={{
-                        backgroundColor: R.any(
-                          R.equals(source.id),
-                          listSourceIdsToShow
-                        )
-                          ? 'grey'
-                          : 'white',
-                      }}
-                    >
-                      Show
-                    </button>
-                  </td>
-                  <td>
-                    {execPath ? (
-                      <button
-                        type="button"
-                        onClick={() => execProtocolApp(execPath, [file])}
-                      >
-                        Open Copy
-                      </button>
-                    ) : (
-                      <span />
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      onClick={
-                        () =>
-                          dispatch(
-                            retrieveForecast(
-                              source.id,
-                              hoursPerWeek,
-                              focusOnTaskId
-                            )
-                          )
-                        // This is soooo stupid that there's an error-level lint rule about this!
-                        // eslint-disable-next-line react/jsx-curly-newline
-                      }
-                    >
-                      Forecast
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        (Forecasts are estimated at&nbsp;
-        <input
-          size={2}
-          type="text"
-          value={hoursPerWeek}
-          onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
-        />
-        &nbsp;hrs/wk and focused on&nbsp;
-        <input
-          size={20}
-          type="text"
-          value={focusOnTaskId}
-          onChange={(e) => setFocusOnTaskId(e.target.value)}
-        />
-        )
-      </div>
-    );
-  }
-}
-
-function bigListTable(taskSources, bigList, allLabels) {
-
-  sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-
-  return bigList.length === 0 ? (
-      <span />
-    ) : (
-      <div>
-        <hr />
-        <h4>All Activities</h4>
-        Labels:
-        {allLabels.map((label) => (
-          <button
-            type="button"
-            key={label}
-            onClick={() => {
-              if (R.any(R.equals(label), labelsToShow)) {
-                // remove it from the labels we're showing
-                setLabelsToShow(R.without([label], labelsToShow));
-              } else {
-                // add it to the labels we're showing
-                setLabelsToShow(R.union(labelsToShow, [label]));
-              }
-            }}
-            style={{
-              backgroundColor: R.any(R.equals(label), labelsToShow)
-                ? 'grey'
-                : 'white',
-            }}
-          >
-            {label}
-          </button>
-        ))}
-        <table>
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Prty</th>
-              <th>
-                Est
-                <br />
-                <sub>
-                  log
-                  <sub>2</sub>
-                </sub>
-              </th>
-              {labelsToShow.map((label) => (
-                <th key={label}>{label}</th>
-              ))}
-              <th>Summary</th>
-              <th>Actions</th>
-              <th>Subtasks (to log)</th>
-              <th>Dependents (to log)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bigList &&
-              bigList.map((task: YamlTask, index: number) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <tr key={`${task.sourceId}/${index}`}>
-                  <td>
-                    {index > 0 &&
-                    bigList[index - 1].sourceId === bigList[index].sourceId
-                      ? ''
-                      : sourceMap[task.sourceId].name}
-                  </td>
-                  <td>
-                    {Number.isFinite(task.priority) ? task.priority : '-'}
-                  </td>
-                  <td>
-                    {Number.isFinite(task.estimate) ? task.estimate : '-'}
-                  </td>
-                  {labelsToShow.map((label) => {
-                    const labelValue = labelValueInSummary(label, task.summary);
-                    let more = <span />;
-                    if (
-                      label === 'ref' &&
-                      labelValue &&
-                      isTaskyamlUriScheme(labelValue)
-                    ) {
-                      const newUri = findClosestUriForGlobalUri(
-                        labelValue,
-                        R.map(R.prop('id'), taskSources)
-                      );
-                      if (newUri != null) {
-                        /* eslint-disable jsx-a11y/anchor-is-valid */
-                        /* eslint-disable jsx-a11y/click-events-have-key-events */
-                        /* eslint-disable jsx-a11y/no-static-element-interactions */
-                        more = (
-                          <a
-                            onClick={() => {
-                              setListSourceIdsToShow([newUri]);
-                              setFocusOnTaskId('');
-                              dispatch(
-                                retrieveForecast(newUri, hoursPerWeek, '')
-                              );
-                            }}
-                          >
-                            (visit)
-                          </a>
-                        );
-                        /* eslint-enable */
-                      }
-                    }
-                    return (
-                      <td key={label}>
-                        {labelValue}
-                        &nbsp;
-                        {more}
-                      </td>
-                    );
-                  })}
-                  <td>{task.summary}</td>
-                  <td>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        dispatch(dispatchVolunteer(task));
-                      }}
-                    >
-                      Volunteer
-                    </button>
-                  </td>
-                  <td>
-                    {task.subtasks.length > 0 ? (
-                      <button
-                        type="button"
-                        className={style.subtask}
-                        onClick={() => {
-                          console.log('Subtasks', task.subtasks);
-                          return '';
-                        }}
-                      >
-                        Subtasks
-                        <span className={style.tooltiptext}>
-                          Will show in console.
-                        </span>
-                      </button>
-                    ) : (
-                      <span />
-                    )}
-                  </td>
-                  <td>
-                    {task.dependents.length > 0 ? (
-                      <button
-                        type="button"
-                        className={style.subtask}
-                        onClick={() => {
-                          console.log('Dependents', task.dependents);
-                          return '';
-                        }}
-                      >
-                        Dependents
-                        <span className={style.tooltiptext}>
-                          Will show in console.
-                        </span>
-                      </button>
-                    ) : (
-                      <span />
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-    );
 }
