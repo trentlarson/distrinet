@@ -90,7 +90,10 @@ const taskListsSlice = createSlice({
     addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
     },
-    setForecastData: (state, html: Payload<forecastData>) => {
+    clearForecastData: (state) => {
+      state.forecastData = { sourceId: '', html: '' };
+    },
+    setForecastData: (state, html: Payload<ForecastData>) => {
       state.forecastData = html.payload;
     },
   },
@@ -99,6 +102,7 @@ const taskListsSlice = createSlice({
 export const {
   setTaskList,
   addTaskList,
+  clearForecastData,
   setForecastData,
 } = taskListsSlice.actions;
 
@@ -470,7 +474,7 @@ export const retrieveForecast = (
       return forecastResponse.text();
     })
     .then((forecastString) => {
-      return dispatch(setForecastData({sourceId, html: forecastString}));
+      return dispatch(setForecastData({ sourceId, html: forecastString }));
     })
     .catch((err) => {
       console.error(

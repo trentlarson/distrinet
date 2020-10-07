@@ -12,7 +12,7 @@ import {
   isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
-  setForecastData,
+  clearForecastData,
 } from './taskListsSlice';
 import style from './style.css';
 
@@ -94,18 +94,6 @@ function execSources(
                   </button>
                 </td>
                 <td>
-                  {execPath ? (
-                    <button
-                      type="button"
-                      onClick={() => execProtocolApp(execPath, [file])}
-                    >
-                      Open Copy
-                    </button>
-                  ) : (
-                    <span />
-                  )}
-                </td>
-                <td>
                   <button
                     type="button"
                     onClick={
@@ -123,6 +111,18 @@ function execSources(
                   >
                     Forecast
                   </button>
+                </td>
+                <td>
+                  {execPath ? (
+                    <button
+                      type="button"
+                      onClick={() => execProtocolApp(execPath, [file])}
+                    >
+                      Open Copy
+                    </button>
+                  ) : (
+                    <span />
+                  )}
                 </td>
               </tr>
             );
@@ -396,16 +396,18 @@ export default function TaskListsTable() {
             <hr />
             <h4>
               {
-                R.find((s) => s.id === taskLists.forecastData.sourceId,
-                       taskSources)
-                  .name
-              } Forecast
+                R.find(
+                  (s) => s.id === taskLists.forecastData.sourceId,
+                  taskSources
+                )?.name
+              }
+              &nbsp;Forecast
             </h4>
             <button
               type="button"
               onClick={() => {
                 setFocusOnTaskId('');
-                dispatch(setForecastData({sourceId: '', html: ''}));
+                dispatch(clearForecastData());
               }}
             >
               Remove
