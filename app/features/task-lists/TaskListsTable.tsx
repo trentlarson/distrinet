@@ -55,12 +55,7 @@ export default function TaskListsTable() {
 
   let bigList: Array<YamlTask> = [];
   let allLabels: Array<string> = [];
-  let execSources = <span />;
-  let sourceMap: Record<string, Source> = {};
-  const taskSources = R.filter(
-    (s) => isTaskyamlUriScheme(s.id),
-    distnet.settings.sources
-  );
+
   if (taskLists) {
     if (taskLists.bigList && taskLists.bigList.length > 0) {
       bigList = R.filter(
@@ -86,10 +81,47 @@ export default function TaskListsTable() {
         setLabelsToShow(R.intersection(labelsToShow, allLabels));
       }
     }
+  }
 
-    sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
+  const taskSources = R.filter(
+    (s) => isTaskyamlUriScheme(s.id),
+    distnet.settings.sources
+  );
 
-    execSources = (
+  return (
+    <div>
+      <br />
+      <br />
+      <br />
+      <div>{execSources(taskSources, bigList, allLabels)}</div>
+      <div>
+        {taskLists.forecastHtml.length > 0 ? (
+          <div>
+            <hr />
+            <h4>Forecast</h4>
+            <button
+              type="button"
+              onClick={() => {
+                setFocusOnTaskId('');
+                dispatch(setForecastHtml(''));
+              }}
+            >
+              Remove
+            </button>
+            {ReactHtmlParser(taskLists.forecastHtml)}
+          </div>
+        ) : (
+          ''
+        )}
+      </div>
+      {bigListTable(taskSources, bigList, allLabels)}
+    </div>
+  );
+}
+
+function execSources(taskSources, bigList, allLabels) {
+
+    return(
       <div>
         <table>
           <tbody>
@@ -185,9 +217,15 @@ export default function TaskListsTable() {
       </div>
     );
   }
+}
 
-  const bigListTable =
-    bigList.length > 0 ? (
+function bigListTable(taskSources, bigList, allLabels) {
+
+  sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
+
+  return bigList.length === 0 ? (
+      <span />
+    ) : (
       <div>
         <hr />
         <h4>All Activities</h4>
@@ -347,37 +385,5 @@ export default function TaskListsTable() {
           </tbody>
         </table>
       </div>
-    ) : (
-      <span />
     );
-
-  return (
-    <div>
-      <br />
-      <br />
-      <br />
-      <div>{execSources}</div>
-      <div>
-        {taskLists.forecastHtml.length > 0 ? (
-          <div>
-            <hr />
-            <h4>Forecast</h4>
-            <button
-              type="button"
-              onClick={() => {
-                setFocusOnTaskId('');
-                dispatch(setForecastHtml(''));
-              }}
-            >
-              Remove
-            </button>
-            {ReactHtmlParser(taskLists.forecastHtml)}
-          </div>
-        ) : (
-          ''
-        )}
-      </div>
-      {bigListTable}
-    </div>
-  );
 }
