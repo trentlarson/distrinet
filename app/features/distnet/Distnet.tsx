@@ -19,6 +19,7 @@ import {
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
 } from './distnetSlice';
+import { globalUriScheme } from './uriTools';
 
 function shortenString(str: string) {
   if (!str || str.length < 11) {
@@ -132,6 +133,9 @@ export default function Distnet() {
                   Name
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Scheme
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Cached Date
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
@@ -143,6 +147,7 @@ export default function Distnet() {
               {distnet.settings.sources.map((uriSource: Source) => (
                 <tr key={uriSource.id}>
                   <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
+                  <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
                   <td>
                     {distnet.cache[uriSource.id]
                       ? distnet.cache[uriSource.id].date
