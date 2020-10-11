@@ -1,6 +1,6 @@
-  - 93 1 parse Orlin's project supertasks:supertasks
+  - 93 0 allow refresh of a task from the task list page
   - 92 1 handle when subtasks/dependents are missing
-  - 92 0 add ID to YamlTask and allow it to be null?
+  - 92 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - 92 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
   - 92 -1 change all "key:value" keys to constants
   - 91 0 show where a task fits in with the rest (ie. focus on it in the forecast)
@@ -18,3 +18,5 @@
   - 45 0 handle more task YAML variations (eg. blocked & child issues)
   - 45 1 work off SQLite
   - 40 2 Make an edit to a task list and ensure a collaborator can see it.
+
+  - 0 0 93 1 parse Orlin's project supertasks:supertasks

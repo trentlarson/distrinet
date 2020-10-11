@@ -193,10 +193,6 @@ export default function Distnet() {
             &nbsp;characters of cached data
           </ul>
         </div>
-        <div>
-          {typeof process !== 'undefined' &&
-            `Version ${process.env.npm_package_version}`}
-        </div>
       </div>
     </div>
   );

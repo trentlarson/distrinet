@@ -88,11 +88,14 @@ export interface Cache {
 
 export interface CacheData {
   sourceId: string;
-  sourceUrl: string; // whichever URL was used as the source
-  localFile: string; // local path, without "file:"
+  // whichever URL was used as the source
+  sourceUrl: string;
+  // local path (not URL, ie without "file://")
+  localFile: string;
+  // non-null if small enough to fit all file contents in memory
   contents: string;
-  // this is a string so that it can be serialized, eg. into the Redux state
-  date: string;
+  // date the local copy on disk was last updated
+  date: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 export class CacheWrapper {

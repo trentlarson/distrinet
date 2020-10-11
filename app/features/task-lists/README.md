@@ -45,4 +45,4 @@ Download and run the [Schedule-Forecast service](https://github.com/trentlarson/
   https://www.researchgate.net/publication/237297345_Distributed_Task_Management_by_Means_of_Workflow_Atoms
 - Distributed task management system based on Git and Markdown (2016)
   https://github.com/sologub/frump
-
+- Tasks.org is open-source with sync to many services and a mobile version (on F-Droid)

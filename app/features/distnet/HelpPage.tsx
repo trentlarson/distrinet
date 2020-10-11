@@ -1,4 +1,5 @@
 import React from 'react';
+import process from 'process';
 import { Link } from 'react-router-dom';
 
 import routes from '../../constants/routes.json';
@@ -7,8 +8,6 @@ import styles from './Distnet.css';
 /** ************************************************************
 
  Add very little functionality here! This page should always work.
-
- Even "process" references have caused problems.  Ug.
 
  Put functionality inside function calls (eg behind buttons).
 
@@ -29,8 +28,8 @@ export default function HelpPage(): JSX.Element {
       <br />
       <h2>Help</h2>
       <h3>Why isn't my data updating?</h3>
-      Caching is on by default. To refresh the cache, go to "distrinet settings"
-      and click on "reload source".
+      Caching is on by default, so you might see old data. To refresh the cache,
+      go to "distrinet settings" and click on "reload source".
       <h3>Advanced Help</h3>
       <button
         type="button"
@@ -42,6 +41,26 @@ export default function HelpPage(): JSX.Element {
         }}
       >
         Toggle Dev Tools
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          let appInfo = `
+            ${process.env.npm_package_name}
+            Version ${process.env.npm_package_version}
+          `;
+          alert(appInfo);
+        }}
+      >
+        Show App Info
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          console.log('process.env',process.env)
+        }}
+      >
+        Log process.env
       </button>
     </>
   );
