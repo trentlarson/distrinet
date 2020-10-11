@@ -9,24 +9,34 @@ interface Payload<T> {
 
 const genealogySlice = createSlice({
   name: 'genealogy',
-  initialState: { rootUri: '', correlatedIdsRefreshedMillis: 0 },
+  initialState: {
+    correlatedIdsRefreshedMillis: 0,
+    fsSessionId: '',
+    rootUri: '',
+  },
   reducers: {
-    setRootUri: (state, contents: Payload<string>) => {
-      state.rootUri = contents.payload;
-    },
     setCorrelatedIdsRefreshedMillis: (state, contents: Payload<number>) => {
       state.correlatedIdsRefreshedMillis = contents.payload;
+    },
+    setFsSessionId: (state, contents: Payload<string>) => {
+      state.fsSessionId = contents.payload;
+    },
+    setRootUri: (state, contents: Payload<string>) => {
+      state.rootUri = contents.payload;
     },
   },
 });
 
 export const {
-  setRootUri,
   setCorrelatedIdsRefreshedMillis,
+  setFsSessionId,
+  setRootUri,
 } = genealogySlice.actions;
 
 export default genealogySlice.reducer;
 
-export const selectRootUri = (state: RootState) => state.genealogy.rootUri;
+export const selectFsSessionId = (state: RootState) =>
+  state.genealogy.fsSessionId;
 export const selectCorrelatedIdsRefreshedMillis = (state: RootState) =>
   state.genealogy.correlatedIdsRefreshedMillis;
+export const selectRootUri = (state: RootState) => state.genealogy.rootUri;

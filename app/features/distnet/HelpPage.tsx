@@ -45,7 +45,7 @@ export default function HelpPage(): JSX.Element {
       <button
         type="button"
         onClick={() => {
-          let appInfo = `
+          const appInfo = `
             ${process.env.npm_package_name}
             Version ${process.env.npm_package_version}
           `;
@@ -57,7 +57,7 @@ export default function HelpPage(): JSX.Element {
       <button
         type="button"
         onClick={() => {
-          console.log('process.env',process.env)
+          console.log('process.env', process.env);
         }}
       >
         Log process.env
