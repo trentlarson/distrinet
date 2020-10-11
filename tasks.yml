@@ -1,6 +1,5 @@
 tasks:
   - 1 change the file loading date to be the actual date of the local file (whereas currently it's the date the local "file://" file was read).  Consolidate content-loading.
-  - 0 bug - distrinet settings page breaks on 'yarn start'
   - 90 2 change internal settings format = sources & credentials into objects
   - >-
     90 0 optimize mapping in localStorage by only beginning & end of

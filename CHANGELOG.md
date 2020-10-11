@@ -10,16 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.1.2] - 2020-10-11
+
+### Added
+
+- Genealogy: allow entering FS Session ID
+- Histories: search through files recursively
+- Task Lists: send subtasks & dependents to forecasting; allow focus on a referenced task
+
+### Fixed
+
+- Fix error in settings & genealogy for packaged app (due to 'process' reference)
 
 
-## [0.1.1] - 2020-09-25
+## [0.1.1] - 2020-09-25 - 9ce0e01da4b7b6cd1649519eff7001fdd33d7bf7
 
 ### Added
 
 - Histories: allow typing of search term
 
 
-## [0.0.2] - 2020-09-21
+## [0.0.2] - 2020-09-21 - 3bb2906775490659f4574457276b345b3022287b
 
 ### Added
 
