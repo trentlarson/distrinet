@@ -23,7 +23,7 @@ export interface Settings {
 }
 
 export interface Source {
-  name: string;
+  name?: string;
   id: string;
   type?: string;
   didDoc?: DidDoc;

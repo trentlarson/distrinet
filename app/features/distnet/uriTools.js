@@ -9,9 +9,13 @@
     return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]*:/));
   }
 
+  /**
+   * @return the scheme (before the ':'), or null if it's not a global URI
+   */
   function globalUriScheme(uri) {
     if (!isGlobalUri(uri)) {
-      throw Error(`Cannot find scheme for non-global URI ${uri}`);
+      console.log(`Cannot find scheme for non-global URI ${uri}`);
+      return null;
     }
     return uri.split(':')[0];
   }

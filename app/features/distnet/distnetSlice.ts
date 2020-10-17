@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import bs58 from 'bs58';
-import nodeCrypto, { KeyObject } from 'crypto';
-
-import _ from 'lodash';
 import yaml from 'js-yaml';
+import _ from 'lodash';
+import nodeCrypto, { KeyObject } from 'crypto';
+import * as R from 'ramda';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
@@ -101,6 +101,14 @@ export const dispatchSetSettingsTextAndYaml = (contents: string): AppThunk => (
           throw Error(`Source #${index} has no URL.`);
         }
       });
+      const sourcesById = R.groupBy(R.prop('id'), loaded.sources);
+      const dupsLists = R.filter((sa) => sa.length > 1, R.values(sourcesById));
+      if (dupsLists.length > 0) {
+        const ids = R.map((dups) => dups[0].id, dupsLists);
+        throw Error(
+          `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`
+        );
+      }
     } else {
       throw Error(
         'That settings object does not have a all settings elements, ie sources'
