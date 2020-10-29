@@ -9,6 +9,7 @@
  * */
 export interface DistnetState {
   settings: Settings;
+  settingsChanged: boolean;
   settingsErrorMessage: string | null;
   settingsText: string | null;
   settingsSaveErrorMessage: string | null;

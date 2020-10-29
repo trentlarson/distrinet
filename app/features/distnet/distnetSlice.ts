@@ -92,9 +92,7 @@ function isSettings(
 export const dispatchSetSettingsTextAndYaml = (
   contents: string,
   sameAsFile: boolean
-): AppThunk => (
-  dispatch
-) => {
+): AppThunk => (dispatch) => {
   dispatch(setSettingsStateText(contents));
   dispatch(setSettingsChanged(!sameAsFile));
   try {
