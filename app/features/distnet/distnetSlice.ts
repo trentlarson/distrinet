@@ -26,6 +26,7 @@ const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
     settings: { sources: [], resourceTypes: {}, credentials: [] },
+    settingsChanged: false,
     settingsErrorMessage: null,
     settingsText: null,
     settingsSaveErrorMessage: null,
@@ -33,6 +34,9 @@ const distnetSlice = createSlice({
     cacheErrorMessage: null,
   } as DistnetState,
   reducers: {
+    setSettingsChanged: (state, contents: Payload<boolean>) => {
+      state.settingsChanged = contents.payload;
+    },
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
     },
@@ -67,6 +71,7 @@ const {
   setCachedStateForAll,
   setCachedStateForOne,
   setCacheErrorMessage,
+  setSettingsChanged,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
   setSettingsStateObject,
@@ -84,10 +89,14 @@ function isSettings(
   );
 }
 
-export const dispatchSetSettingsTextAndYaml = (contents: string): AppThunk => (
+export const dispatchSetSettingsTextAndYaml = (
+  contents: string,
+  sameAsFile: boolean
+): AppThunk => (
   dispatch
 ) => {
   dispatch(setSettingsStateText(contents));
+  dispatch(setSettingsChanged(!sameAsFile));
   try {
     const loaded = yaml.safeLoad(contents);
     dispatch(setSettingsStateObject(loaded));
@@ -98,7 +107,7 @@ export const dispatchSetSettingsTextAndYaml = (contents: string): AppThunk => (
         if (!s || !s.id) {
           throw Error(`Source #${index} or its ID is null or undefined.`);
         } else if (!s.urls || s.urls.length === 0) {
-          throw Error(`Source #${index} has no URL.`);
+          throw Error(`Source #${index + 1} has no URL.`);
         }
       });
       const sourcesById = R.groupBy(R.prop('id'), loaded.sources);
@@ -140,7 +149,7 @@ export const dispatchLoadSettingsFromFile = (): AppThunk => async (
   if (isError(result)) {
     dispatch(setSettingsErrorMessage(result.error));
   } else {
-    dispatch(dispatchSetSettingsTextAndYaml(result));
+    dispatch(dispatchSetSettingsTextAndYaml(result, true));
   }
 };
 
@@ -176,7 +185,7 @@ export const dispatchSaveSettingsToFile = (): AppThunk => async (
     if (result && result.error) {
       dispatch(setSettingsSaveErrorMessage(result.error));
     } else {
-      dispatch(dispatchSetSettingsTextAndYaml(settingsText));
+      dispatch(dispatchSetSettingsTextAndYaml(settingsText, true));
       dispatch(setSettingsSaveErrorMessage(null));
     }
   }
@@ -263,7 +272,7 @@ export const dispatchModifySettings = (
 ): AppThunk => async (dispatch, getState) => {
   const newSettings = settingsEditor(getState().distnet.settings);
   const settingsYaml = yaml.safeDump(newSettings);
-  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml));
+  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, false));
 };
 
 function removeNulls<T>(array: Array<T | null>): Array<T> {

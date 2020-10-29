@@ -7,3 +7,5 @@
   - 1 load the right local copy (because it might not be element 0) id:uri-local-version
   - '0 package app for Martin id:package':
     - fix problem loading process on packaged app (eg. settings & genealogy pages)
+    - ref:taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#package
+    - ref:taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#dir-path-uris

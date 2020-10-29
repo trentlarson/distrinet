@@ -38,6 +38,14 @@ export default function Distnet() {
     settingsNum === 1 ? '' : 's'
   }`;
 
+  const settingsChangedMessage = distnet.settingsChanged ? (
+    <div style={{ color: 'orange' }}>
+      Settings have been changed and not yet saved.
+    </div>
+  ) : (
+    <div />
+  );
+
   const settingsFullErrorMessage = distnet.settingsErrorMessage ? (
     <div style={{ color: 'orange' }}>
       There was an error parsing the settings. (Previous settings are still in
@@ -85,7 +93,7 @@ export default function Distnet() {
           cols={80}
           value={distnet.settingsText || ''}
           onChange={(event) => {
-            dispatch(dispatchSetSettingsTextAndYaml(event.target.value));
+            dispatch(dispatchSetSettingsTextAndYaml(event.target.value, false));
           }}
         />
         <br />
@@ -94,6 +102,7 @@ export default function Distnet() {
           {SETTINGS_FILE}
         </a>
         <br />
+        <div>{settingsChangedMessage}</div>
         <div>{settingsFullErrorMessage}</div>
         <div>{settingsFullSaveErrorMessage}</div>
         <button

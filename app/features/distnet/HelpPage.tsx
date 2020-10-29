@@ -29,7 +29,8 @@ export default function HelpPage(): JSX.Element {
       <h2>Help</h2>
       <h3>Why isn't my data updating?</h3>
       Caching is on by default, so you might see old data. To refresh the cache,
-      go to "distrinet settings" and click on "reload source".
+      go to "distrinet settings" and click on "reload source", and if that fails
+      then restart this whole app.
       <h3>Advanced Help</h3>
       <button
         type="button"
