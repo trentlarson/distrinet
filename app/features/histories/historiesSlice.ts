@@ -77,10 +77,20 @@ function retrieveFileTreeForPath(
   );
 }
 
+const blankState = {
+  uriTree: {},
+  isSearching: { done: 0, total: 0 },
+} as Display;
+
 const historiesSlice = createSlice({
   name: 'histories',
-  initialState: { uriTree: {}, isSearching: { done: 0, total: 0 } } as Display,
+  initialState: blankState,
   reducers: {
+    resetState: (state) => {
+      // Gross. What is the built-in way to reset the whole state?
+      state.uriTree = blankState.uriTree;
+      state.isSearching = blankState.isSearching;
+    },
     setFileTree: (state, contents: Payload<Record<string, FileTree>>) => {
       state.uriTree = contents.payload;
     },
@@ -136,6 +146,7 @@ const historiesSlice = createSlice({
 });
 
 export const {
+  resetState,
   setFileTree,
   markMatchInPath,
   markToggleShowNextLevel,

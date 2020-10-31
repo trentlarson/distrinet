@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 import bs58 from 'bs58';
 import yaml from 'js-yaml';
 import _ from 'lodash';
@@ -89,6 +89,14 @@ function isSettings(
   );
 }
 
+let resetStateMethods: Array<ActionCreatorWithoutPayload<string>> = [];
+
+export const callResetStateMethods = (): AppThunk => async (dispatch) => {
+  for (let i = 0; i < resetStateMethods.length; i += 1) {
+    dispatch(resetStateMethods[i]());
+  }
+};
+
 export const dispatchSetSettingsTextAndYaml = (
   contents: string,
   sameAsFile: boolean
@@ -122,6 +130,7 @@ export const dispatchSetSettingsTextAndYaml = (
       );
     }
     dispatch(setSettingsErrorMessage(null));
+    dispatch(callResetStateMethods());
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
     console.error(
@@ -319,14 +328,14 @@ export const dispatchCacheForAll = (): AppThunk => async (
   return dispatch(setCachedStateForAll(result));
 };
 
-export const dispatchLoadSettingsAndCacheIfEmpty = (): AppThunk => async (
-  dispatch,
-  getState
-) => {
+export const dispatchLoadSettingsAndCacheIfEmpty = (
+  methodsThatResetState: Array<ActionCreatorWithoutPayload<string>>
+): AppThunk => async (dispatch, getState) => {
   await dispatch(dispatchLoadSettingsFromFile());
   if (Object.keys(getState().distnet.cache).length === 0) {
     dispatch(dispatchCacheForAll());
   }
+  resetStateMethods = methodsThatResetState;
 };
 
 export default distnetSlice.reducer;

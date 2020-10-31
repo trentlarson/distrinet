@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import styles from './Home.css';
 import { dispatchLoadSettingsAndCacheIfEmpty } from '../features/distnet/distnetSlice';
+import { resetState as historiesResetState } from '../features/histories/historiesSlice';
 
 export default function Home(): JSX.Element {
-  useDispatch()(dispatchLoadSettingsAndCacheIfEmpty());
+  useDispatch()(dispatchLoadSettingsAndCacheIfEmpty([historiesResetState]));
 
   return (
     <div className={styles.container} data-tid="container">

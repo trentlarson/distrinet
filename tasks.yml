@@ -13,7 +13,9 @@ tasks:
   - 80 0 add warnings for settings, eg. when the ID isn't a global URI (not an error)
   - 80 1 package YAML task parsing for npm
   - 80 0 save URI for current task list inside tasks.yml (good for referencing)
-  - 80 0 allow a text search of the items on a page (a la browser CTRL-f)
+  - 80 0 allow a text search of the items on a page (a la browser CTRL-f):
+    - https://www.electronjs.org/docs/api/web-contents#contentsfindinpagetext-options
+    - https://www.geeksforgeeks.org/how-to-find-text-on-page-in-electronjs/
   - 80 -1 allow loading of sources automatically (then remove bottom "back" button):
       - add an indicator on the front page that it's loading
       - allow for deselection of files that might be too big
