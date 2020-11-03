@@ -207,63 +207,71 @@ const parseYamlIssues = (
   if (typeof issueList === 'object') {
     // If null, I don't know what that means.
     if (issueList === null) {
-      throw Error('One of the activities is null.');
-    }
-
-    const issueObj = issueList;
-
-    // If there's a single key, it must be the summary.
-    // If there are more, the summary is whichever has a value "null".
-    // (It's the first key, but some parsers don't put it first in JSON.)
-    const keys = Object.keys(issueObj);
-    let summary = '';
-    let dependents: Array<YamlTask> = [];
-    let subtasks: Array<YamlTask> = [];
-    if (keys.length === 1) {
-      // it must be a summary, with subtasks as values
-      summary = Object.keys(issueObj)[0].toString();
-      const tempSubtasks = parseYamlIssues(sourceId, issueObj[summary]);
-      if (Array.isArray(tempSubtasks)) {
-        subtasks = tempSubtasks;
-      } else {
-        subtasks = [tempSubtasks];
-      }
+      return {
+        sourceId,
+        priority: null,
+        estimate: null,
+        summary: `(null)`,
+        dependents: [],
+        subtasks: [],
+      };
     } else {
-      /* eslint-disable @typescript-eslint/dot-notation */
-      // There are many keys.  Assume any with value of null is the summary
-      for (let i = 0; !summary && i < keys.length; i += 1) {
-        if (issueObj[keys[i]] === null) {
-          summary = keys[i];
-        }
-      }
-      // ... but override that if there's something explicit
-      if (issueObj['summary']) {
-        summary = issueObj['summary'].toString();
-      }
-      // doing this because our YamlTask interface doesn't include an ID, so it'll be parsed out later
-      if (issueObj['id']) {
-        summary += ` id:${issueObj['id'].toString().replace(/\s/g, '_')}`;
-      }
-      if (issueObj['blocks']) {
-        const tempDependents = parseYamlIssues(sourceId, issueObj['blocks']);
-        if (Array.isArray(tempDependents)) {
-          dependents = tempDependents;
-        } else {
-          dependents = [tempDependents];
-        }
-      }
-      if (issueObj['subtasks']) {
-        const tempSubtasks = parseYamlIssues(sourceId, issueObj['subtasks']);
+
+      const issueObj = issueList;
+
+      // If there's a single key, it must be the summary.
+      // If there are more, the summary is whichever has a value "null".
+      // (It's the first key, but some parsers don't put it first in JSON.)
+      const keys = Object.keys(issueObj);
+      let summary = '';
+      let dependents: Array<YamlTask> = [];
+      let subtasks: Array<YamlTask> = [];
+      if (keys.length === 1) {
+        // it must be a summary, with subtasks as values
+        summary = Object.keys(issueObj)[0].toString();
+        const tempSubtasks = parseYamlIssues(sourceId, issueObj[summary]);
         if (Array.isArray(tempSubtasks)) {
           subtasks = tempSubtasks;
         } else {
           subtasks = [tempSubtasks];
         }
+      } else {
+        /* eslint-disable @typescript-eslint/dot-notation */
+        // There are many keys.  Assume any with value of null is the summary
+        for (let i = 0; !summary && i < keys.length; i += 1) {
+          if (issueObj[keys[i]] === null) {
+            summary = keys[i];
+          }
+        }
+        // ... but override that if there's something explicit
+        if (issueObj['summary']) {
+          summary = issueObj['summary'].toString();
+        }
+        // doing this because our YamlTask interface doesn't include an ID, so it'll be parsed out later
+        if (issueObj['id']) {
+          summary += ` id:${issueObj['id'].toString().replace(/\s/g, '_')}`;
+        }
+        if (issueObj['blocks']) {
+          const tempDependents = parseYamlIssues(sourceId, issueObj['blocks']);
+          if (Array.isArray(tempDependents)) {
+            dependents = tempDependents;
+          } else {
+            dependents = [tempDependents];
+          }
+        }
+        if (issueObj['subtasks']) {
+          const tempSubtasks = parseYamlIssues(sourceId, issueObj['subtasks']);
+          if (Array.isArray(tempSubtasks)) {
+            subtasks = tempSubtasks;
+          } else {
+            subtasks = [tempSubtasks];
+          }
+        }
+        /* eslint-enable @typescript-eslint/dot-notation */
       }
-      /* eslint-enable @typescript-eslint/dot-notation */
-    }
 
-    return taskFromString(sourceId, summary, dependents, subtasks);
+      return taskFromString(sourceId, summary, dependents, subtasks);
+    }
   }
   return {
     sourceId,
