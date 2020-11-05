@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import fs from 'fs';
-import _ from 'lodash';
 import * as R from 'ramda';
 import yaml from 'js-yaml';
 import url from 'url';
@@ -25,7 +24,7 @@ const TASKYAML_SCHEME = 'taskyaml';
 const fsPromises = fs.promises;
 
 export interface ProjectFile {
-  tasks: Array<InputIssues>;
+  tasks: Array<YamlInputIssues>;
   log?: Array<Log>;
 }
 
@@ -84,8 +83,8 @@ const taskListsSlice = createSlice({
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
-    setTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
-      state.bigList = tasks.payload;
+    setTaskList: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
+      state.bigList = R.flatten(tasks.payload);
     },
     addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
       state.bigList = state.bigList.concat(tasks.payload);
@@ -111,7 +110,7 @@ function sourceFromId(
   id: string,
   settingsSources: Array<Source>
 ): Source | undefined {
-  return _.find(settingsSources, (source) => source.id === id);
+  return R.find((source) => source.id === id, settingsSources);
 }
 * */
 
@@ -186,7 +185,10 @@ export function taskFromString(
   };
 }
 
-type InputIssues = string | { [key: string]: InputIssues } | Array<InputIssues>;
+type YamlInputIssues =
+  | string
+  | { [key: string]: YamlInputIssues }
+  | Array<YamlInputIssues>;
 
 /**
  * @param sourceId the source ID, an integral datum in every task
@@ -194,7 +196,7 @@ type InputIssues = string | { [key: string]: InputIssues } | Array<InputIssues>;
  */
 const parseYamlIssues = (
   sourceId: string,
-  issueList: InputIssues
+  issueList: YamlInputIssues
 ): YamlTask | Array<YamlTask> => {
   if (Array.isArray(issueList)) {
     // I don't expect to see arrays of arrays (outside blockers or subtasks).
@@ -282,11 +284,13 @@ const parseYamlIssues = (
   };
 };
 
-function isInputIssueArray(contents: unknown): contents is Array<InputIssues> {
+function isInputIssueArray(
+  contents: unknown
+): contents is Array<YamlInputIssues> {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
-    (contents as Array<InputIssues>).length > 0
+    (contents as Array<YamlInputIssues>).length > 0
   );
 }
 
@@ -305,7 +309,7 @@ async function retrieveAllTasks(
   cacheSources: Cache
 ): Promise<Array<Array<YamlTask>>> {
   let result: Array<Promise<Array<YamlTask>>> = [];
-  const cacheValues: Array<CacheData> = _.values(cacheSources);
+  const cacheValues: Array<CacheData> = R.values(cacheSources);
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
@@ -315,7 +319,7 @@ async function retrieveAllTasks(
           .then((resp) => resp.toString())
           .then((contents) => {
             const contentTasks = yaml.safeLoad(contents);
-            let taskList: Array<InputIssues>;
+            let taskList: Array<YamlInputIssues>;
             if (isInputIssueArray(contentTasks)) {
               taskList = contentTasks;
             } else if (isProjectFile(contentTasks)) {
@@ -342,7 +346,7 @@ async function retrieveAllTasks(
             );
             return [];
           });
-        result = _.concat(result, next);
+        result = R.concat(result, [next]);
       }
     }
   }
@@ -390,8 +394,8 @@ function createForecastTasksRaw(
         t.estimate === null ? null : 2 ** t.estimate * 60 * 60,
       dueDate: labelValueInSummary('due', t.summary),
       mustStartOnDate: labelValueInSummary('mustStartOnDate', t.summary),
-      dependents: createForecastTasksRaw(t.dependents, `${prefix + id}-d_`),
-      subtasks: createForecastTasksRaw(t.subtasks, `${prefix + id}-s_`),
+      dependents: createForecastTasksRaw(t.dependents, `${prefix + id}_d-`),
+      subtasks: createForecastTasksRaw(t.subtasks, `${prefix + id}_s-`),
     };
   });
 }
@@ -444,9 +448,9 @@ export const retrieveForecast = (
   hoursPerWeek: number,
   focusOnTask: string
 ): AppThunk => async (dispatch, getState) => {
-  const tasks = _.filter(
-    getState().taskLists.bigList,
-    (task) => task.sourceId === sourceId
+  const tasks = R.filter(
+    (task) => task.sourceId === sourceId,
+    getState().taskLists.bigList
   );
   const issues: Array<IssueToSchedule> = createForecastTasks(tasks);
   const createPreferences = {
@@ -499,7 +503,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   const result: Array<Array<YamlTask>> = await retrieveAllTasks(
     getState().distnet.cache
   );
-  return dispatch(setTaskList(_.compact(_.flattenDeep(result))));
+  return dispatch(setTaskList(result));
 };
 
 /**
@@ -533,15 +537,15 @@ export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
   getState
 ) => {
   if (getState().distnet.settings.credentials) {
-    const keyContents = _.find(
-      getState().distnet.settings.credentials,
-      (c) => c.id === 'privateKey'
+    const keyContents = R.find(
+      (c) => c.id === 'privateKey',
+      getState().distnet.settings.credentials
     );
     if (keyContents && keyContents.privateKeyPkcs8Pem) {
       // figure out how to push out the message
-      const source = _.find(
-        getState().distnet.settings.sources,
-        (s) => s.id === task.sourceId
+      const source = R.find(
+        (s) => s.id === task.sourceId,
+        getState().distnet.settings.sources
       );
       if (
         source &&
@@ -553,7 +557,7 @@ export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
       ) {
         const taskId = labelValueInSummary('id', task.summary);
 
-        if (_.isNil(taskId)) {
+        if (R.isNil(taskId)) {
           alert(
             'Cannot volunteer for a task without an ID.' +
               '  Edit the task and add a unique "id:SOME_VALUE" in the summary.'
