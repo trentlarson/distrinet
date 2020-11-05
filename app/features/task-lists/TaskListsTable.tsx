@@ -340,11 +340,10 @@ export default function TaskListsTable() {
   let allLabels: Array<string> = [];
 
   if (taskLists) {
-    if (taskLists.bigList && taskLists.bigList.length > 0) {
-      bigList = R.filter(
-        (task) => R.any(R.equals(task.sourceId), listSourceIdsToShow),
-        taskLists.bigList
-      );
+    if (taskLists.allLists && R.keys(taskLists.allLists).length > 0) {
+      const showLists = R.props(listSourceIdsToShow, taskLists.allLists);
+      const showListsDefined = R.reject(R.isNil, showLists);
+      bigList = R.flatten(showListsDefined);
 
       // loop through and post-process, eg. to find all the labels
       for (let i = 0; i < bigList.length; i += 1) {

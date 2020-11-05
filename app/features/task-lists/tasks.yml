@@ -1,4 +1,5 @@
   - 93 0 allow refresh of a task from the task list page
+  - 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
   - 92 1 handle when subtasks/dependents are missing
   - 92 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - 92 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
@@ -7,6 +8,7 @@
   - 90 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
   - 90 1 when browsing external lists, detect internal task URLs
   - 55 0 move 'ref' processing to parse YAML?
+  - refactor retrieveAllTasks to return Records instead of one large list
   - 50 -1 automatically create supertask if it doesn't exist
   - >-
     50 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects

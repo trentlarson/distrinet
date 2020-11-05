@@ -79,15 +79,21 @@ interface ForecastData {
 const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
-    bigList: [] as Array<YamlTask>,
+    allLists: {} as Record<string, Array<YamlTask>>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
     setTaskList: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
-      state.bigList = R.flatten(tasks.payload);
+      R.forEach((list: Array<YamlTask>) => {
+        if (list.length > 0) {
+          state.allLists[list[0].sourceId] = list;
+        }
+      }, tasks.payload);
     },
     addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
-      state.bigList = state.bigList.concat(tasks.payload);
+      if (tasks.payload.length > 0) {
+        state.allLists[tasks.payload[0].sourceId] = tasks.payload;
+      }
     },
     clearForecastData: (state) => {
       state.forecastData = { sourceId: '', html: '' };
@@ -448,10 +454,7 @@ export const retrieveForecast = (
   hoursPerWeek: number,
   focusOnTask: string
 ): AppThunk => async (dispatch, getState) => {
-  const tasks = R.filter(
-    (task) => task.sourceId === sourceId,
-    getState().taskLists.bigList
-  );
+  const tasks = getState().taskLists.allLists[sourceId];
   const issues: Array<IssueToSchedule> = createForecastTasks(tasks);
   const createPreferences = {
     defaultAssigneeHoursPerWeek: hoursPerWeek,
@@ -513,7 +516,7 @@ export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  if (getState().taskLists.bigList.length === 0) {
+  if (R.keys(getState().taskLists.allLists).length === 0) {
     dispatch(dispatchLoadAllSourcesIntoTasks());
   }
 };
