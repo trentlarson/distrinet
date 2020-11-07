@@ -127,7 +127,9 @@ function execSources(
                   )}
                 </td>
                 <td>
-                  {cache[source.id] ? cache[source.id].updatedDate : '(not loaded)'}
+                  {cache[source.id]
+                    ? cache[source.id].updatedDate
+                    : '(not loaded)'}
                 </td>
                 <td>
                   <button

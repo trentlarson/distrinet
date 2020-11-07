@@ -66,30 +66,31 @@ export const reloadOneSourceIntoCache: (
             // without the encoding, readFile returns a Buffer
             .readFile(sourceUrl, { encoding: 'utf8' })
             .then((contents) => {
+              return (
+                fsPromises
+                  .stat(sourceUrl)
+                  .then((stats) => {
+                    const modDate = stats.mtime;
 
-              return fsPromises
-                .stat(sourceUrl)
-                .then((stats) => {
-                  let modDate = stats.mtime;
-
-                  return {
-                    sourceId,
-                    sourceUrl: sourceUrl.toString(),
-                    localFile: url.fileURLToPath(sourceUrl),
-                    contents,
-                    updatedDate: modDate.toISOString(),
-                  };
-                })
-                // eslint-disable-next-line no-loop-func
-                .catch((err) => {
-                  console.log(
-                    '... failed to read file',
-                    sourceUrl.toString(),
-                    'for caching because',
-                    err
-                  );
-                  return null;
-                });
+                    return {
+                      sourceId,
+                      sourceUrl: sourceUrl.toString(),
+                      localFile: url.fileURLToPath(sourceUrl),
+                      contents,
+                      updatedDate: modDate.toISOString(),
+                    };
+                  })
+                  // eslint-disable-next-line no-loop-func
+                  .catch((err) => {
+                    console.log(
+                      '... failed to read file',
+                      sourceUrl.toString(),
+                      'for caching because',
+                      err
+                    );
+                    return null;
+                  })
+              );
             })
             .catch((err) => {
               // couldn't stat the file
