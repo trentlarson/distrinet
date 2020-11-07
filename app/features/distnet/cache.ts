@@ -60,23 +60,41 @@ export const reloadOneSourceIntoCache: (
             sourceUrl.toString(),
             'for caching...'
           );
+
           // eslint-disable-next-line no-await-in-loop
           cacheInfo = await fsPromises
             // without the encoding, readFile returns a Buffer
             .readFile(sourceUrl, { encoding: 'utf8' })
             .then((contents) => {
-              return {
-                sourceId,
-                sourceUrl: sourceUrl.toString(),
-                localFile: url.fileURLToPath(sourceUrl),
-                contents,
-                date: new Date().toISOString(),
-              };
+
+              return fsPromises
+                .stat(sourceUrl)
+                .then((stats) => {
+                  let modDate = stats.mtime;
+
+                  return {
+                    sourceId,
+                    sourceUrl: sourceUrl.toString(),
+                    localFile: url.fileURLToPath(sourceUrl),
+                    contents,
+                    updatedDate: modDate.toISOString(),
+                  };
+                })
+                // eslint-disable-next-line no-loop-func
+                .catch((err) => {
+                  console.log(
+                    '... failed to read file',
+                    sourceUrl.toString(),
+                    'for caching because',
+                    err
+                  );
+                  return null;
+                });
             })
-            // eslint-disable-next-line no-loop-func
             .catch((err) => {
+              // couldn't stat the file
               console.log(
-                '... failed to read file',
+                '... failed to find file stats for',
                 sourceUrl.toString(),
                 'for caching because',
                 err
@@ -135,7 +153,7 @@ export const reloadOneSourceIntoCache: (
                     sourceUrl: sourceUrl.toString(),
                     localFile: cacheFile,
                     contents,
-                    date: new Date().toISOString(),
+                    updatedDate: new Date().toISOString(),
                   };
                 })
                 .catch((err) => {

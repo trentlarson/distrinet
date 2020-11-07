@@ -96,7 +96,7 @@ export interface CacheData {
   // non-null if small enough to fit all file contents in memory
   contents: string;
   // ISO-formatted date that the local copy on disk was last updated
-  date: string; // this is a string so that it can be serialized, eg. into the Redux state
+  updatedDate: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 export class CacheWrapper {

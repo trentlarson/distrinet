@@ -1,9 +1,7 @@
-  - 93 0 allow refresh of a task from the task list page
   - 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
   - 92 1 handle when subtasks/dependents are missing
   - 92 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - 92 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
-  - -1 fix date on task-list screen to be date loaded (refresh shouldn't update for file sources)
   - 0 use js-yaml safeLoadAll instead of safeLoad
   - 92 -1 change all "key:value" keys to constants
   - 91 0 show where a task fits in with the rest (ie. focus on it in the forecast)

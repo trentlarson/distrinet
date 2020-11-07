@@ -159,8 +159,8 @@ export default function Distnet() {
                   <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
                   <td>
                     {distnet.cache[uriSource.id]
-                      ? distnet.cache[uriSource.id].date
-                      : '(no local copy yet)'}
+                      ? distnet.cache[uriSource.id].updatedDate
+                      : '(no cached copy)'}
                   </td>
                   <td>
                     {uriSource.urls &&
