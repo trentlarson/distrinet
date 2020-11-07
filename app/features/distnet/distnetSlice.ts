@@ -51,7 +51,7 @@ const distnetSlice = createSlice({
     },
     setCachedStateForAll: (state, result: Payload<Array<CacheData>>) => {
       const newData: Array<CacheData> = result.payload;
-      console.log('Refreshing from', newData);
+      console.log('Refreshing cache from', newData);
       for (let i = 0; i < newData.length; i += 1) {
         state.cache[newData[i].sourceId] = newData[i];
       }
@@ -294,7 +294,7 @@ function removeNulls<T>(array: Array<T | null>): Array<T> {
   return result;
 }
 
-export const dispatchCacheForId = (sourceId: string): AppThunk => async (
+export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
 ) => {

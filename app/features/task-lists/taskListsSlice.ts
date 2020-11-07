@@ -8,8 +8,8 @@ import * as uuid from 'uuid';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 import {
-  Cache,
   CacheData,
+  DistnetState,
   Payload,
   WriteMethod,
 } from '../distnet/distnetClasses';
@@ -18,6 +18,8 @@ import {
   globalUriForId,
   globalUriScheme,
 } from '../distnet/uriTools';
+// eslint-disable-next-line import/no-cycle
+import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
 
 const TASKYAML_SCHEME = 'taskyaml';
 
@@ -76,6 +78,11 @@ interface ForecastData {
   html: string;
 }
 
+interface IdAndTaskList {
+  sourceId: string;
+  taskList: Array<YamlTask>;
+}
+
 const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
@@ -83,17 +90,17 @@ const taskListsSlice = createSlice({
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
-    setTaskList: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
+    setAllTaskLists: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
+      const newState: Record<string, Array<YamlTask>> = {};
       R.forEach((list: Array<YamlTask>) => {
         if (list.length > 0) {
-          state.allLists[list[0].sourceId] = list;
+          newState[list[0].sourceId] = list;
         }
       }, tasks.payload);
+      state.allLists = newState;
     },
-    addTaskList: (state, tasks: Payload<Array<YamlTask>>) => {
-      if (tasks.payload.length > 0) {
-        state.allLists[tasks.payload[0].sourceId] = tasks.payload;
-      }
+    setTaskList: (state, tasks: Payload<IdAndTaskList>) => {
+      state.allLists[tasks.payload.sourceId] = tasks.payload.taskList;
     },
     clearForecastData: (state) => {
       state.forecastData = { sourceId: '', html: '' };
@@ -105,10 +112,10 @@ const taskListsSlice = createSlice({
 });
 
 export const {
-  setTaskList,
-  addTaskList,
   clearForecastData,
+  setAllTaskLists,
   setForecastData,
+  setTaskList,
 } = taskListsSlice.actions;
 
 /** potentially useful
@@ -309,49 +316,47 @@ function isProjectFile(contents: unknown): contents is ProjectFile {
 }
 
 /**
+ * @return a Promise that resolves to arrays of YamlTasks
+ */
+async function retrieveTasksFromSource(
+  sourceId: string,
+  distnet: DistnetState
+): Promise<Array<YamlTask>> {
+  try {
+    const contentTasks = yaml.safeLoad(distnet.cache[sourceId].contents);
+    let taskList: Array<YamlInputIssues>;
+    if (isInputIssueArray(contentTasks)) {
+      taskList = contentTasks;
+    } else if (isProjectFile(contentTasks)) {
+      taskList = contentTasks.tasks;
+    } else {
+      console.error('Failure getting array or .tasks from source', sourceId);
+      return [];
+    }
+    const issues = parseYamlIssues(sourceId, taskList);
+    if (Array.isArray(issues)) {
+      return issues;
+    }
+    return [issues];
+  } catch (e) {
+    console.error('Failure loading tasks from source', sourceId, e);
+    return [];
+  }
+}
+
+/**
  * @return a Promise that resolves to arrays of arrays of YamlTasks
  */
-async function retrieveAllTasks(
-  cacheSources: Cache
+async function retrieveAllTasksFromSources(
+  distnet: DistnetState
 ): Promise<Array<Array<YamlTask>>> {
   let result: Array<Promise<Array<YamlTask>>> = [];
-  const cacheValues: Array<CacheData> = R.values(cacheSources);
+  const cacheValues: Array<CacheData> = R.values(distnet.cache);
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
       if (isTaskyamlUriScheme(entry.sourceId)) {
-        const next: Promise<Array<YamlTask>> = fsPromises
-          .readFile(entry.localFile)
-          .then((resp) => resp.toString())
-          .then((contents) => {
-            const contentTasks = yaml.safeLoad(contents);
-            let taskList: Array<YamlInputIssues>;
-            if (isInputIssueArray(contentTasks)) {
-              taskList = contentTasks;
-            } else if (isProjectFile(contentTasks)) {
-              taskList = contentTasks.tasks;
-            } else {
-              console.error(
-                'Failure getting array or .tasks from source',
-                entry.sourceId
-              );
-              return [];
-            }
-            const issues = parseYamlIssues(entry.sourceId, taskList);
-            if (Array.isArray(issues)) {
-              return issues;
-            }
-            return [issues];
-          })
-          .catch((error) => {
-            console.error(
-              'Failure loading a YAML task list from source',
-              entry.sourceId,
-              ' ... with error',
-              error
-            );
-            return [];
-          });
+        const next = retrieveTasksFromSource(entry.sourceId, distnet);
         result = R.concat(result, [next]);
       }
     }
@@ -499,14 +504,25 @@ export const retrieveForecast = (
     });
 };
 
+export const dispatchLoadOneSourceIntoTasks = (
+  sourceId: string
+): AppThunk => async (dispatch, getState) => {
+  await dispatch(dispatchReloadCacheForId(sourceId));
+  const result: Array<YamlTask> = await retrieveTasksFromSource(
+    sourceId,
+    getState().distnet
+  );
+  return dispatch(setTaskList({ sourceId, taskList: result }));
+};
+
 export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const result: Array<Array<YamlTask>> = await retrieveAllTasks(
-    getState().distnet.cache
+  const result: Array<Array<YamlTask>> = await retrieveAllTasksFromSources(
+    getState().distnet
   );
-  return dispatch(setTaskList(result));
+  return dispatch(setAllTaskLists(result));
 };
 
 /**

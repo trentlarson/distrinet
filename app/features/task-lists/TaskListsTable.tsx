@@ -7,12 +7,13 @@ import { AppThunk, RootState } from '../../store';
 import { Cache, ResourceTypes, Source } from '../distnet/distnetClasses';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
-  YamlTask,
+  clearForecastData,
+  dispatchLoadOneSourceIntoTasks,
   dispatchVolunteer,
   isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
-  clearForecastData,
+  YamlTask,
 } from './taskListsSlice';
 import style from './style.css';
 
@@ -106,6 +107,7 @@ function execSources(
                           )
                         )
                       // This is soooo stupid that there's an error-level lint rule about this!
+                      // ... and that it gives you an error if you put it on the previous line.
                       // eslint-disable-next-line react/jsx-curly-newline
                     }
                   >
@@ -123,6 +125,22 @@ function execSources(
                   ) : (
                     <span />
                   )}
+                </td>
+                <td>
+                  {cache[source.id] ? cache[source.id].date : '(not loaded)'}
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={
+                      () => dispatch(dispatchLoadOneSourceIntoTasks(source.id))
+                      // This is soooo stupid that there's an error-level lint rule about this!
+                      // ... and that it gives you an error if you put it on the previous line.
+                      // eslint-disable-next-line react/jsx-curly-newline
+                    }
+                  >
+                    Reload
+                  </button>
                 </td>
               </tr>
             );

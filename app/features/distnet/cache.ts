@@ -45,9 +45,9 @@ export const reloadOneSourceIntoCache: (
   if (source && source.urls) {
     let index = 0;
     console.log(
-      'Trying URLs',
+      'Trying to retrieve URLs',
       source.urls.map((u: UrlData) => u.url),
-      '...'
+      'for caching...'
     );
     while (!cacheInfo && index < source.urls.length) {
       const thisIndex = index;
@@ -55,7 +55,11 @@ export const reloadOneSourceIntoCache: (
       try {
         const sourceUrl = new url.URL(source.urls[thisIndex].url);
         if (sourceUrl.protocol === 'file:') {
-          console.log('... trying URL', sourceUrl.toString(), '...');
+          console.log(
+            '... trying to read file',
+            sourceUrl.toString(),
+            'for caching...'
+          );
           // eslint-disable-next-line no-await-in-loop
           cacheInfo = await fsPromises
             // without the encoding, readFile returns a Buffer
@@ -74,20 +78,24 @@ export const reloadOneSourceIntoCache: (
               console.log(
                 '... failed to read file',
                 sourceUrl.toString(),
-                'because',
+                'for caching because',
                 err
               );
               return null;
             });
         } else {
-          console.log('... trying URL', sourceUrl.toString(), '...');
+          console.log(
+            '... trying to retrieve URL',
+            sourceUrl.toString(),
+            ' for caching...'
+          );
           // eslint-disable-next-line no-await-in-loop
           cacheInfo = await fetch(sourceUrl.toString())
             // eslint-disable-next-line no-loop-func
             .then((response: Response) => {
               if (!response.ok) {
                 throw Error(
-                  `Failed to get URL ${sourceUrl.toString()} due to response code ${
+                  `Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${
                     response.status
                   }`
                 );
@@ -101,7 +109,7 @@ export const reloadOneSourceIntoCache: (
                 sourceIdToFilename(sourceId)
               );
               console.log(
-                '... successfully fetched URL',
+                '... successfully retrieved URL',
                 sourceUrl.toString(),
                 'response, so will write that to a local cache file',
                 cacheFile
@@ -143,9 +151,9 @@ export const reloadOneSourceIntoCache: (
             // eslint-disable-next-line no-loop-func
             .catch((err) => {
               console.log(
-                '... failed to fetch URL',
+                '... failed to retrieve URL',
                 sourceUrl.toString(),
-                'because',
+                'and cache because',
                 err
               );
               return null;
@@ -154,7 +162,7 @@ export const reloadOneSourceIntoCache: (
       } catch (e) {
         // probably a TypeError for a bad URL (including null or blank URLs)
         console.log(
-          'Got error loading URL',
+          'Failed to retrieve and cache URL',
           source.urls[thisIndex].url,
           'in source',
           source,
@@ -164,7 +172,7 @@ export const reloadOneSourceIntoCache: (
     }
     if (cacheInfo) {
       console.log(
-        `Successfully retrieved file for ${source.sourceUrl} and cached at ${cacheInfo.localFile}`
+        `Successfully retrieved ${cacheInfo.sourceUrl} and cached at ${cacheInfo.localFile}`
       );
       return cacheInfo;
     }
