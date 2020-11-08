@@ -2,7 +2,6 @@
   - >-
     93 0 determine problem with parsing JSON on private, eg.
     gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman
-  - 90 1 prepare demo for IonRev due:2020-09-20
   - 90 1 add spinner when loading a new tree
   - '90 1 add tests - find, globalUriForResource, globalUriForId'
   - >-
@@ -36,3 +35,4 @@
     find documentation)
   - add format (mime type?) to otherLocations (maybe)
   - 40 0 show how the same tree-browsing code can be used in browser & in node
+  - done! prepare demo for IonRev due:2020-09-20

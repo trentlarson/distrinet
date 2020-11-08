@@ -1,4 +1,3 @@
-  - 0 show only top 3 of each list
   - 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
   - 92 1 handle when subtasks/dependents are missing
   - 92 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
