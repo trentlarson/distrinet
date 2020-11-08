@@ -176,17 +176,26 @@ function bigListTable(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   labelsToShow: Array<string>,
   setLabelsToShow: (arg0: Array<string>) => void,
-  bigList: Array<YamlTask>,
+  showOnlyTop3: boolean,
+  setShowOnlyTop3: (arg0: boolean) => void,
+  showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
 
-  return bigList.length === 0 ? (
+  return R.keys(showLists).length === 0 ? (
     <span />
   ) : (
     <div>
       <hr />
       <h4>All Activities</h4>
+      <input
+        type='checkbox'
+        checked={showOnlyTop3}
+        onChange={(e) => { setShowOnlyTop3(!showOnlyTop3) }}
+      />
+      Show only the top 3 of each list.
+      <br/>
       Labels:
       {allLabels.map((label) => (
         <button
@@ -233,109 +242,113 @@ function bigListTable(
           </tr>
         </thead>
         <tbody>
-          {bigList &&
-            bigList.map((task: YamlTask, index: number) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={`${task.sourceId}/${index}`}>
-                <td>
-                  {index > 0 &&
-                  bigList[index - 1].sourceId === bigList[index].sourceId
-                    ? ''
-                    : sourceMap[task.sourceId].name}
-                </td>
-                <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
-                <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
-                {labelsToShow.map((label) => {
-                  const labelValue = labelValueInSummary(label, task.summary);
-                  let more = <span />;
-                  if (
-                    label === 'ref' &&
-                    labelValue &&
-                    isTaskyamlUriScheme(labelValue)
-                  ) {
-                    const newUri = findClosestUriForGlobalUri(
-                      labelValue,
-                      R.map(R.prop('id'), taskSources)
-                    );
-                    if (newUri != null) {
-                      /* eslint-disable jsx-a11y/anchor-is-valid */
-                      /* eslint-disable jsx-a11y/click-events-have-key-events */
-                      /* eslint-disable jsx-a11y/no-static-element-interactions */
-                      more = (
-                        <a
-                          onClick={() => {
-                            setListSourceIdsToShow([newUri]);
-                            setFocusOnTaskId('');
-                            dispatch(
-                              retrieveForecast(newUri, hoursPerWeek, '')
-                            );
-                          }}
-                        >
-                          (visit)
-                        </a>
+          {
+            R.keys(showLists).map((sourceId) =>
+              R.take(showOnlyTop3 ? 3 : showLists[sourceId].length,
+                     showLists[sourceId]).map((task: YamlTask, index: number) =>
+                // eslint-disable-next-line react/no-array-index-key
+                <tr key={`${task.sourceId}/${index}`}>
+                  <td>
+                    {index > 0
+                      ? ''
+                      : sourceMap[task.sourceId].name}
+                  </td>
+                  <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
+                  <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
+                  {labelsToShow.map((label) => {
+                    const labelValue = labelValueInSummary(label, task.summary);
+                    let more = <span />;
+                    if (
+                      label === 'ref' &&
+                      labelValue &&
+                      isTaskyamlUriScheme(labelValue)
+                    ) {
+                      const newUri = findClosestUriForGlobalUri(
+                        labelValue,
+                        R.map(R.prop('id'), taskSources)
                       );
-                      /* eslint-enable */
+                      if (newUri != null) {
+                        /* eslint-disable jsx-a11y/anchor-is-valid */
+                        /* eslint-disable jsx-a11y/click-events-have-key-events */
+                        /* eslint-disable jsx-a11y/no-static-element-interactions */
+                        more = (
+                          <a
+                            onClick={() => {
+                              setListSourceIdsToShow([newUri]);
+                              setFocusOnTaskId('');
+                              dispatch(
+                                retrieveForecast(newUri, hoursPerWeek, '')
+                              );
+                            }}
+                          >
+                            (visit)
+                          </a>
+                        );
+                        /* eslint-enable */
+                      }
                     }
-                  }
-                  return (
-                    <td key={label}>
-                      {labelValue}
-                      &nbsp;
-                      {more}
-                    </td>
-                  );
-                })}
-                <td>{task.summary}</td>
-                <td>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dispatch(dispatchVolunteer(task));
-                    }}
-                  >
-                    Volunteer
-                  </button>
-                </td>
-                <td>
-                  {task.subtasks.length > 0 ? (
+                    return (
+                      <td key={label}>
+                        {labelValue}
+                        &nbsp;
+                        {more}
+                      </td>
+                    );
+                  })}
+                  <td>{task.summary}</td>
+                  <td>
                     <button
                       type="button"
-                      className={style.subtask}
                       onClick={() => {
-                        console.log('Subtasks', task.subtasks);
-                        return '';
+                        dispatch(dispatchVolunteer(task));
                       }}
                     >
-                      Subtasks
-                      <span className={style.tooltiptext}>
-                        Will show in console.
-                      </span>
+                      Volunteer
                     </button>
-                  ) : (
-                    <span />
-                  )}
-                </td>
-                <td>
-                  {task.dependents.length > 0 ? (
-                    <button
-                      type="button"
-                      className={style.subtask}
-                      onClick={() => {
-                        console.log('Dependents', task.dependents);
-                        return '';
-                      }}
-                    >
-                      Dependents
-                      <span className={style.tooltiptext}>
-                        Will show in console.
-                      </span>
-                    </button>
-                  ) : (
-                    <span />
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    {task.subtasks.length > 0 ? (
+                      <button
+                        type="button"
+                        className={style.subtask}
+                        onClick={() => {
+                          console.log('Subtasks', task.subtasks);
+                          return '';
+                        }}
+                      >
+                        Subtasks
+                        <span className={style.tooltiptext}>
+                          Will show in console.
+                        </span>
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                  </td>
+                  <td>
+                    {task.dependents.length > 0 ? (
+                      <button
+                        type="button"
+                        className={style.subtask}
+                        onClick={() => {
+                          console.log('Dependents', task.dependents);
+                          return '';
+                        }}
+                      >
+                        Dependents
+                        <span className={style.tooltiptext}>
+                          Will show in console.
+                        </span>
+                      </button>
+                    ) : (
+                      <span />
+                    )}
+                  </td>
+                </tr>
+
+              )
+            )
+          }
         </tbody>
       </table>
     </div>
@@ -355,19 +368,19 @@ export default function TaskListsTable() {
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
   const [focusOnTaskId, setFocusOnTaskId] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
+  const [showOnlyTop3, setShowOnlyTop3] = useState(false);
 
-  let bigList: Array<YamlTask> = [];
   let allLabels: Array<string> = [];
 
+  let showLists = {} as Record<string, Array<YamlTask>>;
   if (taskLists) {
     if (taskLists.allLists && R.keys(taskLists.allLists).length > 0) {
-      const showLists = R.props(listSourceIdsToShow, taskLists.allLists);
-      const showListsDefined = R.reject(R.isNil, showLists);
-      bigList = R.flatten(showListsDefined);
+      showLists = R.pick(listSourceIdsToShow, taskLists.allLists);
 
       // loop through and post-process, eg. to find all the labels
-      for (let i = 0; i < bigList.length; i += 1) {
-        const pairs = R.filter(R.test(/:/), R.split(' ', bigList[i].summary));
+      const oneBigList = R.flatten(R.values(showLists));
+      for (let i = 0; i < oneBigList.length; i += 1) {
+        const pairs = R.filter(R.test(/:/), R.split(' ', oneBigList[i].summary));
         if (pairs.length > 0) {
           const validKeys = R.filter(
             R.test(/^[A-Za-z0-9_-]*$/),
@@ -445,7 +458,9 @@ export default function TaskListsTable() {
         setListSourceIdsToShow,
         labelsToShow,
         setLabelsToShow,
-        bigList,
+        showOnlyTop3,
+        setShowOnlyTop3,
+        showLists,
         allLabels
       )}
     </div>

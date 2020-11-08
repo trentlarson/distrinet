@@ -11,7 +11,7 @@ export default function Home(): JSX.Element {
 
   return (
     <div className={styles.container} data-tid="container">
-      <h2>Home</h2>
+      <h2>Go</h2>
       <Link to={routes.DISTNET}>to distrinet settings</Link>
       <br />
       <Link to={routes.GENEALOGY}>to genealogy</Link>
