@@ -40,7 +40,7 @@ function labelValueRendering(label: string, summary: string) {
 }
 * */
 
-function execSources(
+function sourceActions(
   dispatch: (arg0: AppThunk) => void,
   cache: Cache,
   taskSources: Array<Source>,
@@ -55,6 +55,25 @@ function execSources(
   return (
     <div>
       <table>
+        <thead>
+          <tr>
+            <td />
+            <td>
+              <button
+                type="button"
+                onClick={() => {
+                  if (listSourceIdsToShow.length === 0) {
+                    setListSourceIdsToShow(taskSources.map((s) => s.id));
+                  } else {
+                    setListSourceIdsToShow([]);
+                  }
+                }}
+              >
+                Toggle
+              </button>
+            </td>
+          </tr>
+        </thead>
         <tbody>
           {taskSources.map((source) => {
             const protocol = source.id.substring(0, source.id.indexOf(':'));
@@ -409,7 +428,7 @@ export default function TaskListsTable() {
       <br />
       <br />
       <div>
-        {execSources(
+        {sourceActions(
           dispatch,
           distnet.cache,
           taskSources,
