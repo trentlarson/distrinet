@@ -430,8 +430,7 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
           REF_KEY,
           issue.dependents[depi].summary
         );
-        if (depRef !== null
-            && masterMap[depRef]) {
+        if (depRef !== null && masterMap[depRef]) {
           issue.dependents[depi] = masterMap[depRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)
@@ -443,8 +442,7 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
           REF_KEY,
           issue.subtasks[subi].summary
         );
-        if (subRef !== null
-            && masterMap[subRef]) {
+        if (subRef !== null && masterMap[subRef]) {
           issue.subtasks[subi] = masterMap[subRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)
