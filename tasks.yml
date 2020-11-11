@@ -4,7 +4,8 @@ tasks:
     90 0 optimize mapping in localStorage by only beginning & end of
     refreshIfNewer, and by caching in memory
   - 90 1 create list-source directory file that points at other lists of sources
-  - '90 0 show cached time, both file & memory; show out-of-date cache files'
+  - '90 0 show cached time, both file & memory'
+  - 90 0 write version of reloadOneSourceIntoCache that only loads local files if the timestamp has changed
   - 85 1 define a place for backups, including settings.yml
   - 85 disable lint-fix on YAML files (especially test ones)
   - '80 -1 more settings sanity-checking, eg. no duplicate IDs, valid URLs'

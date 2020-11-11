@@ -397,7 +397,7 @@ function createForecastTasksRaw(
 ): Array<IssueToSchedule> {
   return tasks.map((t, i) => {
     const id = idOrNestedId(t.summary, prefix, i);
-    return {
+    const result = {
       key: id,
       summary: t.summary,
       priority: Number.isNaN(t.priority) ? 0 : t.priority,
@@ -408,6 +408,7 @@ function createForecastTasksRaw(
       dependents: createForecastTasksRaw(t.dependents, `${prefix + id}_d-`),
       subtasks: createForecastTasksRaw(t.subtasks, `${prefix + id}_s-`),
     };
+    return result;
   });
 }
 
@@ -422,14 +423,15 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
   do {
     changed = false;
     const keys = Object.keys(masterMap);
-    for (let i = 0; i < keys.length; i += 1) {
-      const issue = masterMap[keys[i]];
+    for (let keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {
+      const issue = masterMap[keys[keyIndex]];
       for (let depi = 0; depi < issue.dependents.length; depi += 1) {
         const depRef = labelValueInSummary(
           REF_KEY,
           issue.dependents[depi].summary
         );
-        if (depRef !== null) {
+        if (depRef !== null
+            && masterMap[depRef]) {
           issue.dependents[depi] = masterMap[depRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)
@@ -441,7 +443,8 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
           REF_KEY,
           issue.subtasks[subi].summary
         );
-        if (subRef !== null) {
+        if (subRef !== null
+            && masterMap[subRef]) {
           issue.subtasks[subi] = masterMap[subRef];
           changed = true;
           // remove from the top-level issues (to lesson duplication when sending)

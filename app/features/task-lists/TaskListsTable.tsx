@@ -175,7 +175,7 @@ function sourceActions(
         value={hoursPerWeek}
         onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
       />
-      &nbsp;hrs/wk and focused on&nbsp;
+      &nbsp;hrs/wk and focused on issue ID&nbsp;
       <input
         size={20}
         type="text"

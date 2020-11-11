@@ -112,10 +112,10 @@ Types of URI -> URL relationships:
 - For "sources.urLs":
   - The first URL is preferred.  If that's a remote URL:
     - You might have a local copy (eg. a git clone), and that "file:///" URL would be what to put as the second URL.
-    - If there is no local copy, a copy will be downloaded and stored by this app..
-  - Any URLs after the first are typically writable and not read (except to detect conflicts).
+    - If there is no local copy, a copy will be downloaded and stored by this app.
+  - Any URLs after the first are typically writable but not read (except when disconnected or to detect conflicts).
   - Future write methods could include:
-    - Direct to file (typically sync'd through external tool"
+    - Direct to file (typically sync'd through external tool)
       - OneDrive, Syncthing, Google Drive
     - Direct to git
     - git via request
