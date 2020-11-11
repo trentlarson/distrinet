@@ -257,9 +257,9 @@ function bigListTable(
               <th key={label}>{label}</th>
             ))}
             <th>Summary</th>
-            <th>Actions</th>
             <th>Subtasks (to log)</th>
             <th>Dependents (to log)</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -315,16 +315,6 @@ function bigListTable(
                 })}
                 <td>{task.summary}</td>
                 <td>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dispatch(dispatchVolunteer(task));
-                    }}
-                  >
-                    Volunteer
-                  </button>
-                </td>
-                <td>
                   {task.subtasks.length > 0 ? (
                     <button
                       type="button"
@@ -361,6 +351,16 @@ function bigListTable(
                   ) : (
                     <span />
                   )}
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch(dispatchVolunteer(task));
+                    }}
+                  >
+                    Volunteer
+                  </button>
                 </td>
               </tr>
             ))
