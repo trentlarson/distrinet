@@ -187,6 +187,114 @@ function sourceActions(
   );
 }
 
+function oneTaskRow(
+  task: TaskYaml,
+  index: number,
+  hoursPerWeek: number,
+  taskSources: Array<Source>,
+  labelsToShow: Array<string>,
+  setListSourceIdsToShow: (arg0: Array<string>) => void,
+  setFocusOnTaskId: (arg0: string) => void,
+  dispatch: (arg0: AppThunk) => void
+) {
+  const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
+  // eslint-disable-next-line react/no-array-index-key
+  return <tr key={`${task.sourceId}/${index}`}>
+      <td>{index > 0 ? '' : sourceMap[task.sourceId].name}</td>
+      <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
+      <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
+      {labelsToShow.map((label) => {
+        const labelValue = labelValueInSummary(label, task.summary);
+        let more = <span />;
+        if (
+          label === 'ref' &&
+          labelValue &&
+          isTaskyamlUriScheme(labelValue)
+        ) {
+          const newUri = findClosestUriForGlobalUri(
+            labelValue,
+            R.map(R.prop('id'), taskSources)
+          );
+          if (newUri != null) {
+            /* eslint-disable jsx-a11y/anchor-is-valid */
+            /* eslint-disable jsx-a11y/click-events-have-key-events */
+            /* eslint-disable jsx-a11y/no-static-element-interactions */
+            more = (
+              <a
+                onClick={() => {
+                  setListSourceIdsToShow([newUri]);
+                  setFocusOnTaskId('');
+                  dispatch(
+                    retrieveForecast(newUri, hoursPerWeek, '')
+                  );
+                }}
+              >
+                (visit)
+              </a>
+            );
+            /* eslint-enable */
+          }
+        }
+        return (
+          <td key={label}>
+            {labelValue}
+            &nbsp;
+            {more}
+          </td>
+        );
+      })}
+      <td>{task.summary}</td>
+      <td>
+        {task.subtasks.length > 0 ? (
+          <button
+            type="button"
+            className={style.subtask}
+            onClick={() => {
+              console.log('Subtasks', task.subtasks);
+              return '';
+            }}
+          >
+            Subtasks
+            <span className={style.tooltiptext}>
+              Will show in console.
+            </span>
+          </button>
+        ) : (
+          <span />
+        )}
+      </td>
+      <td>
+        {task.dependents.length > 0 ? (
+          <button
+            type="button"
+            className={style.subtask}
+            onClick={() => {
+              console.log('Dependents', task.dependents);
+              return '';
+            }}
+          >
+            Dependents
+            <span className={style.tooltiptext}>
+              Will show in console.
+            </span>
+          </button>
+        ) : (
+          <span />
+        )}
+      </td>
+      <td>
+        <button
+          type="button"
+          onClick={() => {
+            dispatch(dispatchVolunteer(task));
+          }}
+        >
+          Volunteer
+        </button>
+      </td>
+    </tr>;
+}
+
 function bigListTable(
   dispatch: (arg0: AppThunk) => void,
   taskSources: Array<Source>,
@@ -200,7 +308,6 @@ function bigListTable(
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
-  const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
 
   return R.keys(showLists).length === 0 ? (
     <span />
@@ -268,101 +375,7 @@ function bigListTable(
               showOnlyTop3 ? 3 : showLists[sourceId].length,
               showLists[sourceId]
             ).map((task: YamlTask, index: number) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={`${task.sourceId}/${index}`}>
-                <td>{index > 0 ? '' : sourceMap[task.sourceId].name}</td>
-                <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
-                <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
-                {labelsToShow.map((label) => {
-                  const labelValue = labelValueInSummary(label, task.summary);
-                  let more = <span />;
-                  if (
-                    label === 'ref' &&
-                    labelValue &&
-                    isTaskyamlUriScheme(labelValue)
-                  ) {
-                    const newUri = findClosestUriForGlobalUri(
-                      labelValue,
-                      R.map(R.prop('id'), taskSources)
-                    );
-                    if (newUri != null) {
-                      /* eslint-disable jsx-a11y/anchor-is-valid */
-                      /* eslint-disable jsx-a11y/click-events-have-key-events */
-                      /* eslint-disable jsx-a11y/no-static-element-interactions */
-                      more = (
-                        <a
-                          onClick={() => {
-                            setListSourceIdsToShow([newUri]);
-                            setFocusOnTaskId('');
-                            dispatch(
-                              retrieveForecast(newUri, hoursPerWeek, '')
-                            );
-                          }}
-                        >
-                          (visit)
-                        </a>
-                      );
-                      /* eslint-enable */
-                    }
-                  }
-                  return (
-                    <td key={label}>
-                      {labelValue}
-                      &nbsp;
-                      {more}
-                    </td>
-                  );
-                })}
-                <td>{task.summary}</td>
-                <td>
-                  {task.subtasks.length > 0 ? (
-                    <button
-                      type="button"
-                      className={style.subtask}
-                      onClick={() => {
-                        console.log('Subtasks', task.subtasks);
-                        return '';
-                      }}
-                    >
-                      Subtasks
-                      <span className={style.tooltiptext}>
-                        Will show in console.
-                      </span>
-                    </button>
-                  ) : (
-                    <span />
-                  )}
-                </td>
-                <td>
-                  {task.dependents.length > 0 ? (
-                    <button
-                      type="button"
-                      className={style.subtask}
-                      onClick={() => {
-                        console.log('Dependents', task.dependents);
-                        return '';
-                      }}
-                    >
-                      Dependents
-                      <span className={style.tooltiptext}>
-                        Will show in console.
-                      </span>
-                    </button>
-                  ) : (
-                    <span />
-                  )}
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dispatch(dispatchVolunteer(task));
-                    }}
-                  >
-                    Volunteer
-                  </button>
-                </td>
-              </tr>
+              oneTaskRow(task, index, hoursPerWeek, taskSources, labelsToShow, setListSourceIdsToShow, setFocusOnTaskId, dispatch)
             ))
           )}
         </tbody>

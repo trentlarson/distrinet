@@ -7,7 +7,7 @@ tasks:
   - '90 0 show cached time, both file & memory'
   - 90 0 write version of reloadOneSourceIntoCache that only loads local files if the timestamp has changed
   - 85 1 define a place for backups, including settings.yml
-  - 85 disable lint-fix on YAML files (especially test ones)
+  - 85 0 disable lint-fix on YAML files (especially test ones)
   - '80 -1 more settings sanity-checking, eg. no duplicate IDs, valid URLs'
   - 80 -2 warn when settings are changed and unsaved
   - 80 0 add warnings for settings, eg. when the ID isn't a global URI (not an error)
