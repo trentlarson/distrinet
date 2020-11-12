@@ -199,18 +199,15 @@ function oneTaskRow(
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   // eslint-disable-next-line react/no-array-index-key
-  return <tr key={`${task.sourceId}/${index}`}>
+  return (
+    <tr key={`${task.sourceId}/${index}`}>
       <td>{index > 0 ? '' : sourceMap[task.sourceId].name}</td>
       <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
       <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
       {labelsToShow.map((label) => {
         const labelValue = labelValueInSummary(label, task.summary);
         let more = <span />;
-        if (
-          label === 'ref' &&
-          labelValue &&
-          isTaskyamlUriScheme(labelValue)
-        ) {
+        if (label === 'ref' && labelValue && isTaskyamlUriScheme(labelValue)) {
           const newUri = findClosestUriForGlobalUri(
             labelValue,
             R.map(R.prop('id'), taskSources)
@@ -224,9 +221,7 @@ function oneTaskRow(
                 onClick={() => {
                   setListSourceIdsToShow([newUri]);
                   setFocusOnTaskId('');
-                  dispatch(
-                    retrieveForecast(newUri, hoursPerWeek, '')
-                  );
+                  dispatch(retrieveForecast(newUri, hoursPerWeek, ''));
                 }}
               >
                 (visit)
@@ -255,9 +250,7 @@ function oneTaskRow(
             }}
           >
             Subtasks
-            <span className={style.tooltiptext}>
-              Will show in console.
-            </span>
+            <span className={style.tooltiptext}>Will show in console.</span>
           </button>
         ) : (
           <span />
@@ -274,9 +267,7 @@ function oneTaskRow(
             }}
           >
             Dependents
-            <span className={style.tooltiptext}>
-              Will show in console.
-            </span>
+            <span className={style.tooltiptext}>Will show in console.</span>
           </button>
         ) : (
           <span />
@@ -292,7 +283,8 @@ function oneTaskRow(
           Volunteer
         </button>
       </td>
-    </tr>;
+    </tr>
+  );
 }
 
 function bigListTable(
@@ -308,7 +300,6 @@ function bigListTable(
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
-
   return R.keys(showLists).length === 0 ? (
     <span />
   ) : (
@@ -374,9 +365,18 @@ function bigListTable(
             R.take(
               showOnlyTop3 ? 3 : showLists[sourceId].length,
               showLists[sourceId]
-            ).map((task: YamlTask, index: number) => (
-              oneTaskRow(task, index, hoursPerWeek, taskSources, labelsToShow, setListSourceIdsToShow, setFocusOnTaskId, dispatch)
-            ))
+            ).map((task: YamlTask, index: number) =>
+              oneTaskRow(
+                task,
+                index,
+                hoursPerWeek,
+                taskSources,
+                labelsToShow,
+                setListSourceIdsToShow,
+                setFocusOnTaskId,
+                dispatch
+              )
+            )
           )}
         </tbody>
       </table>
