@@ -252,7 +252,9 @@ function oneTaskRow(
             }}
           >
             &gt;
-            <span className={style.tooltiptext}>Will show subtasks in console.</span>
+            <span className={style.tooltiptext}>
+              Will show subtasks in console.
+            </span>
           </button>
         ) : (
           <span />
@@ -269,7 +271,9 @@ function oneTaskRow(
             }}
           >
             &gt;
-            <span className={style.tooltiptext}>Will show dependents in console.</span>
+            <span className={style.tooltiptext}>
+              Will show dependents in console.
+            </span>
           </button>
         ) : (
           <span />
@@ -301,48 +305,47 @@ function smallListTable(
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
-      <table>
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Prty</th>
-            <th>
-              Est
-              <br />
-              <sub>
-                log
-                <sub>2</sub>
-              </sub>
-            </th>
-            {labelsToShow.map((label) => (
-              <th key={label}>{label}</th>
-            ))}
-            <th>Summary</th>
-            <th>Sub (to log)</th>
-            <th>Dep (to log)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {activityLists.map((activityList) =>
-             activityList.map((task: YamlTask, index: number) =>
-               oneTaskRow(
-                 task,
-                 index,
-                 hoursPerWeek,
-                 taskSources,
-                 labelsToShow,
-                 setListSourceIdsToShow,
-                 setFocusOnTaskId,
-                 subtasksToExpand,
-                 setSubtasksToExpand,
-                 dispatch
-               )
-             )
-           )
-          }
-        </tbody>
-      </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Prty</th>
+          <th>
+            Est
+            <br />
+            <sub>
+              log
+              <sub>2</sub>
+            </sub>
+          </th>
+          {labelsToShow.map((label) => (
+            <th key={label}>{label}</th>
+          ))}
+          <th>Summary</th>
+          <th>Sub (to log)</th>
+          <th>Dep (to log)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {activityLists.map((activityList) =>
+          activityList.map((task: YamlTask, index: number) =>
+            oneTaskRow(
+              task,
+              index,
+              hoursPerWeek,
+              taskSources,
+              labelsToShow,
+              setListSourceIdsToShow,
+              setFocusOnTaskId,
+              subtasksToExpand,
+              setSubtasksToExpand,
+              dispatch
+            )
+          )
+        )}
+      </tbody>
+    </table>
   );
 }
 
@@ -400,20 +403,21 @@ function bigListTable(
         </button>
       ))}
       {smallListTable(
-         R.keys(showLists).map((sourceId) =>
-           R.take(
-             showOnlyTop3 ? 3 : showLists[sourceId].length,
-             showLists[sourceId]
-           )),
-         hoursPerWeek,
-         taskSources,
-         labelsToShow,
-         setListSourceIdsToShow,
-         setFocusOnTaskId,
-         subtasksToExpand,
-         setSubtasksToExpand,
-         dispatch
-       )}
+        R.keys(showLists).map((sourceId) =>
+          R.take(
+            showOnlyTop3 ? 3 : showLists[sourceId].length,
+            showLists[sourceId]
+          )
+        ),
+        hoursPerWeek,
+        taskSources,
+        labelsToShow,
+        setListSourceIdsToShow,
+        setFocusOnTaskId,
+        subtasksToExpand,
+        setSubtasksToExpand,
+        dispatch
+      )}
     </div>
   );
 }
@@ -439,7 +443,7 @@ export default function TaskListsTable() {
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
   const [subtasksToExpand, setSubtasksToExpand] = useState({
     show: true,
-    subtasks: [] as Array<SubtaskPath>
+    subtasks: [] as Array<SubtaskPath>,
   });
 
   let allLabels: Array<string> = [];
