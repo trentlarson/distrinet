@@ -188,13 +188,15 @@ function sourceActions(
 }
 
 function oneTaskRow(
-  task: TaskYaml,
+  task: YamlTask,
   index: number,
   hoursPerWeek: number,
   taskSources: Array<Source>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
+  subtasksToExpand: SubtaskPath,
+  setSubtasksToExpand: (arg0: SubtaskPath) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
@@ -249,8 +251,8 @@ function oneTaskRow(
               return '';
             }}
           >
-            Subtasks
-            <span className={style.tooltiptext}>Will show in console.</span>
+            &gt;
+            <span className={style.tooltiptext}>Will show subtasks in console.</span>
           </button>
         ) : (
           <span />
@@ -266,8 +268,8 @@ function oneTaskRow(
               return '';
             }}
           >
-            Dependents
-            <span className={style.tooltiptext}>Will show in console.</span>
+            &gt;
+            <span className={style.tooltiptext}>Will show dependents in console.</span>
           </button>
         ) : (
           <span />
@@ -287,6 +289,63 @@ function oneTaskRow(
   );
 }
 
+function smallListTable(
+  activityLists: Array<Array<YamlTask>>,
+  hoursPerWeek: number,
+  taskSources: Array<Source>,
+  labelsToShow: Array<string>,
+  setListSourceIdsToShow: (arg0: Array<string>) => void,
+  setFocusOnTaskId: (arg0: string) => void,
+  subtasksToExpand: SubtaskPath,
+  setSubtasksToExpand: (arg0: SubtaskPath) => void,
+  dispatch: (arg0: AppThunk) => void
+) {
+  return (
+      <table>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Prty</th>
+            <th>
+              Est
+              <br />
+              <sub>
+                log
+                <sub>2</sub>
+              </sub>
+            </th>
+            {labelsToShow.map((label) => (
+              <th key={label}>{label}</th>
+            ))}
+            <th>Summary</th>
+            <th>Sub (to log)</th>
+            <th>Dep (to log)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {activityLists.map((activityList) =>
+             activityList.map((task: YamlTask, index: number) =>
+               oneTaskRow(
+                 task,
+                 index,
+                 hoursPerWeek,
+                 taskSources,
+                 labelsToShow,
+                 setListSourceIdsToShow,
+                 setFocusOnTaskId,
+                 subtasksToExpand,
+                 setSubtasksToExpand,
+                 dispatch
+               )
+             )
+           )
+          }
+        </tbody>
+      </table>
+  );
+}
+
 function bigListTable(
   dispatch: (arg0: AppThunk) => void,
   taskSources: Array<Source>,
@@ -297,6 +356,8 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
+  subtasksToExpand: SubtaskPath,
+  setSubtasksToExpand: (arg0: SubtaskPath) => void,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
@@ -338,50 +399,28 @@ function bigListTable(
           {label}
         </button>
       ))}
-      <table>
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Prty</th>
-            <th>
-              Est
-              <br />
-              <sub>
-                log
-                <sub>2</sub>
-              </sub>
-            </th>
-            {labelsToShow.map((label) => (
-              <th key={label}>{label}</th>
-            ))}
-            <th>Summary</th>
-            <th>Subtasks (to log)</th>
-            <th>Dependents (to log)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {R.keys(showLists).map((sourceId) =>
-            R.take(
-              showOnlyTop3 ? 3 : showLists[sourceId].length,
-              showLists[sourceId]
-            ).map((task: YamlTask, index: number) =>
-              oneTaskRow(
-                task,
-                index,
-                hoursPerWeek,
-                taskSources,
-                labelsToShow,
-                setListSourceIdsToShow,
-                setFocusOnTaskId,
-                dispatch
-              )
-            )
-          )}
-        </tbody>
-      </table>
+      {smallListTable(
+         R.keys(showLists).map((sourceId) =>
+           R.take(
+             showOnlyTop3 ? 3 : showLists[sourceId].length,
+             showLists[sourceId]
+           )),
+         hoursPerWeek,
+         taskSources,
+         labelsToShow,
+         setListSourceIdsToShow,
+         setFocusOnTaskId,
+         subtasksToExpand,
+         setSubtasksToExpand,
+         dispatch
+       )}
     </div>
   );
+}
+
+interface SubtaskPath {
+  show: boolean;
+  subtasks: Array<SubtaskPath>;
 }
 
 export default function TaskListsTable() {
@@ -398,6 +437,10 @@ export default function TaskListsTable() {
   const [focusOnTaskId, setFocusOnTaskId] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
+  const [subtasksToExpand, setSubtasksToExpand] = useState({
+    show: true,
+    subtasks: [] as Array<SubtaskPath>
+  });
 
   let allLabels: Array<string> = [];
 
@@ -492,6 +535,8 @@ export default function TaskListsTable() {
         setLabelsToShow,
         showOnlyTop3,
         setShowOnlyTop3,
+        subtasksToExpand,
+        setSubtasksToExpand,
         showLists,
         allLabels
       )}
