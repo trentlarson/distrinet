@@ -15,6 +15,12 @@ import {
   retrieveForecast,
   YamlTask,
 } from './taskListsSlice';
+import {
+  areSubtasksExpanded,
+  subtaskPathFromYamlTaskList,
+  toggleSubtasksExpanded,
+  SubtaskPath,
+} from './util';
 import style from './style.css';
 
 const child = child_process.execFile;
@@ -187,6 +193,8 @@ function sourceActions(
   );
 }
 
+
+
 function oneTaskRow(
   task: YamlTask,
   index: number,
@@ -195,8 +203,9 @@ function oneTaskRow(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  subtasksToExpand: SubtaskPath,
-  setSubtasksToExpand: (arg0: SubtaskPath) => void,
+  subtaskPath: Array<number>,
+  subtasksToExpand: Record<string, SubtaskPath>,
+  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
@@ -243,19 +252,20 @@ function oneTaskRow(
       <td>{task.summary}</td>
       <td>
         {task.subtasks.length > 0 ? (
-          <button
-            type="button"
-            className={style.subtask}
-            onClick={() => {
-              console.log('Subtasks', task.subtasks);
-              return '';
-            }}
-          >
-            &gt;
-            <span className={style.tooltiptext}>
-              Will show subtasks in console.
-            </span>
-          </button>
+          <span>
+            <button
+              type="button"
+              className={style.subtask}
+              onClick={() => {
+                console.log('Subtasks', task.subtasks);
+              }}
+            >
+              &gt;
+              <span className={style.tooltiptext}>
+                Will show subtasks in console.
+              </span>
+            </button>
+          </span>
         ) : (
           <span />
         )}
@@ -300,8 +310,9 @@ function smallListTable(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  subtasksToExpand: SubtaskPath,
-  setSubtasksToExpand: (arg0: SubtaskPath) => void,
+  subtaskPath: Array<number>,
+  subtasksToExpand: Record<string, SubtaskPath>,
+  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
@@ -338,6 +349,7 @@ function smallListTable(
               labelsToShow,
               setListSourceIdsToShow,
               setFocusOnTaskId,
+              R.concat(subtaskPath, [index]),
               subtasksToExpand,
               setSubtasksToExpand,
               dispatch
@@ -359,8 +371,8 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
-  subtasksToExpand: SubtaskPath,
-  setSubtasksToExpand: (arg0: SubtaskPath) => void,
+  subtasksToExpand: Record<string, SubtaskPath>,
+  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
@@ -414,17 +426,13 @@ function bigListTable(
         labelsToShow,
         setListSourceIdsToShow,
         setFocusOnTaskId,
+        [],
         subtasksToExpand,
         setSubtasksToExpand,
         dispatch
       )}
     </div>
   );
-}
-
-interface SubtaskPath {
-  show: boolean;
-  subtasks: Array<SubtaskPath>;
 }
 
 export default function TaskListsTable() {
@@ -441,10 +449,6 @@ export default function TaskListsTable() {
   const [focusOnTaskId, setFocusOnTaskId] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
-  const [subtasksToExpand, setSubtasksToExpand] = useState({
-    show: true,
-    subtasks: [] as Array<SubtaskPath>,
-  });
 
   let allLabels: Array<string> = [];
 
@@ -481,6 +485,13 @@ export default function TaskListsTable() {
     (s) => isTaskyamlUriScheme(s.id),
     distnet.settings.sources
   );
+
+  const subtaskPathKeys = R.keys(taskLists.allLists);
+  const subtaskPathVals = R.values(taskLists.allLists)
+    .map((tl) => subtaskPathFromYamlTaskList(tl));
+  const subtaskPaths = R.zipObj(subtaskPathKeys, subtaskPathVals);
+  // source-ID-based index into SubtaskPath objects
+  const [subtasksToExpand, setSubtasksToExpand] = useState(subtaskPaths);
 
   return (
     <div>

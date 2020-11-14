@@ -36,7 +36,7 @@ export interface FileMatch {
 
 export interface Display {
   /**
-   * keys are URIs from sources
+   * keys are URIs of source IDs
    * null values can happen when it's a non-dir/non-file or on an error
    */
   uriTree: Record<string, FileTree>;
@@ -78,8 +78,8 @@ function retrieveFileTreeForPath(
 }
 
 const blankState = {
-  uriTree: {},
-  isSearching: { done: 0, total: 0 },
+  uriTree: {} as Record<string, FileTree>,
+  isSearching: { done: 0, total: 0 } as SearchProgress,
 } as Display;
 
 const historiesSlice = createSlice({
@@ -180,7 +180,10 @@ export const dispatchEraseSearchResults = (): AppThunk => async (
   getState
 ) => {
   const noMatchifyFun = traverseFileTree(R.set(R.lensProp('hasMatch'), false));
-  const newTree = R.map(noMatchifyFun, getState().histories.uriTree);
+  // Why does R.map(noMatchifyFun, getState().histories.uriTree) no longer typecheck?
+  const treeKeys = R.keys(getState().histories.uriTree);
+  const treeVals = R.map(noMatchifyFun, R.values(getState().histories.uriTree));
+  const newTree = R.zipObj(treeKeys, treeVals);
   dispatch(setFileTree(newTree));
 };
 
@@ -351,7 +354,7 @@ const searchFile = (
   let prevChunk = '';
   readStream
     // eslint-disable-next-line func-names
-    .on('data', function (this: Readable, chunk) {
+    .on('data', function (this: Readable, chunk: string) {
       // adding pieces of chunks just in case the word crosses chunk boundaries
       const bothChunks = prevChunk + chunk;
       if (bothChunks.indexOf(term) > -1) {
