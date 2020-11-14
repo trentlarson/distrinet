@@ -193,8 +193,6 @@ function sourceActions(
   );
 }
 
-
-
 function oneTaskRow(
   task: YamlTask,
   index: number,
@@ -487,8 +485,9 @@ export default function TaskListsTable() {
   );
 
   const subtaskPathKeys = R.keys(taskLists.allLists);
-  const subtaskPathVals = R.values(taskLists.allLists)
-    .map((tl) => subtaskPathFromYamlTaskList(tl));
+  const subtaskPathVals = R.values(taskLists.allLists).map((tl) =>
+    subtaskPathFromYamlTaskList(tl)
+  );
   const subtaskPaths = R.zipObj(subtaskPathKeys, subtaskPathVals);
   // source-ID-based index into SubtaskPath objects
   const [subtasksToExpand, setSubtasksToExpand] = useState(subtaskPaths);
