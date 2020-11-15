@@ -13,12 +13,11 @@ import {
   isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
+  dispatchToggleSubtaskExpansionUi,
   YamlTask,
 } from './taskListsSlice';
 import {
   areSubtasksExpanded,
-  subtaskPathFromYamlTaskList,
-  toggleSubtasksExpanded,
   SubtaskPath,
 } from './util';
 import style from './style.css';
@@ -193,35 +192,6 @@ function sourceActions(
   );
 }
 
-function maybeShowSubtasks(
-                 task,
-                 hoursPerWeek,
-                 taskSources,
-                 labelsToShow,
-                 setListSourceIdsToShow,
-                 setFocusOnTaskId,
-                 subtaskPath,
-                 subtasksToExpand,
-                 setSubtasksToExpand,
-                 dispatch
-) {
-  if (areSubtasksExpanded(subtaskPath, subtasksToExpand[task.sourceId])) {
-    return smallListTable(
-                 [task.subtasks],
-                 hoursPerWeek,
-                 taskSources,
-                 labelsToShow,
-                 setListSourceIdsToShow,
-                 setFocusOnTaskId,
-                 subtaskPath,
-                 subtasksToExpand,
-                 setSubtasksToExpand,
-                 dispatch
-               );
-  }
-  return <span />;
-}
-
 function oneTaskRow(
   task: YamlTask,
   index: number,
@@ -232,15 +202,10 @@ function oneTaskRow(
   setFocusOnTaskId: (arg0: string) => void,
   subtaskPath: Array<number>,
   subtasksToExpand: Record<string, SubtaskPath>,
-  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
-if (!subtasksToExpand) {
-  console.log("!! subtasksToExpand bad on oneTaskRow", subtasksToExpand, task)
-} else {
-  console.log("OK oneTaskRow")
-}
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
+  const expanded = areSubtasksExpanded(subtaskPath, subtasksToExpand[task.sourceId]);
   // eslint-disable-next-line react/no-array-index-key
   return (
     <tr key={`${task.sourceId}/${index}`}>
@@ -289,19 +254,18 @@ if (!subtasksToExpand) {
               type="button"
               className={style.subtask}
               onClick={() => {
-                console.log('Subtasks', task.subtasks);
-                setSubtasksToExpand(toggleSubtasksExpanded(task.sourceId, subtaskPath, subtasksToExpand));
-                console.log('set subtasksToExpand',subtasksToExpand)
+                dispatch(dispatchToggleSubtaskExpansionUi(
+                  task.sourceId,
+                  subtaskPath,
+                  subtasksToExpand
+                ));
               }}
             >
-              &gt;
-              <span className={style.tooltiptext}>
-                Will show subtasks in console.
-              </span>
+              { expanded ? '<' : '>' }
             </button>
-{(() => { console.log("Pulling",task.sourceId, 'out of', subtasksToExpand); return <span/>;})()}
-            {maybeShowSubtasks(
-                 task,
+            {expanded
+             ? smallListTable(
+                 [task.subtasks],
                  hoursPerWeek,
                  taskSources,
                  labelsToShow,
@@ -309,10 +273,10 @@ if (!subtasksToExpand) {
                  setFocusOnTaskId,
                  subtaskPath,
                  subtasksToExpand,
-                 setSubtasksToExpand,
                  dispatch
-             )
-            }
+               )
+             : <span />
+           }
           </span>
         ) : (
           <span />
@@ -359,14 +323,8 @@ function smallListTable(
   setFocusOnTaskId: (arg0: string) => void,
   subtaskPath: Array<number>,
   subtasksToExpand: Record<string, SubtaskPath>,
-  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
-if (!subtasksToExpand) {
-  console.log("!! subtasksToExpand bad on smallListTable", subtasksToExpand, activityLists)
-} else {
-  console.log("OK smallListTable")
-}
   return (
     <table>
       <thead>
@@ -385,7 +343,7 @@ if (!subtasksToExpand) {
             <th key={label}>{label}</th>
           ))}
           <th>Summary</th>
-          <th>Sub (to log)</th>
+          <th>Sub</th>
           <th>Dep (to log)</th>
           <th>Actions</th>
         </tr>
@@ -403,7 +361,6 @@ if (!subtasksToExpand) {
               setFocusOnTaskId,
               R.concat(subtaskPath, [index]),
               subtasksToExpand,
-              setSubtasksToExpand,
               dispatch
             )
           )
@@ -424,7 +381,6 @@ function bigListTable(
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
   subtasksToExpand: Record<string, SubtaskPath>,
-  setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
@@ -480,7 +436,6 @@ function bigListTable(
         setFocusOnTaskId,
         [],
         subtasksToExpand,
-        setSubtasksToExpand,
         dispatch
       )}
     </div>
@@ -537,18 +492,6 @@ export default function TaskListsTable() {
     (s) => isTaskyamlUriScheme(s.id),
     distnet.settings.sources
   );
-
-  const subtaskPathKeys = R.keys(taskLists.allLists);
-  const subtaskPathVals = R.values(taskLists.allLists).map((tl) =>
-    subtaskPathFromYamlTaskList(tl)
-  );
-  // source-ID-based index into SubtaskPath objects
-  let subtaskPaths = R.zipObj(subtaskPathKeys, subtaskPathVals);
-  // Initializing with 'useState(subtaskPaths)' always yields '{}'. Ug.
-  const [subtasksToExpand, setSubtasksToExpand] = useState({});
-  if (R.isEmpty(subtasksToExpand) && !R.isEmpty(subtaskPaths)) {
-    setSubtasksToExpand(subtaskPaths);
-  }
 
   return (
     <div>
@@ -607,8 +550,7 @@ export default function TaskListsTable() {
         setLabelsToShow,
         showOnlyTop3,
         setShowOnlyTop3,
-        subtasksToExpand,
-        setSubtasksToExpand,
+        taskLists.display,
         showLists,
         allLabels
       )}

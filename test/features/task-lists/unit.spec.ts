@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 
 import { taskFromString } from '../../../app/features/task-lists/taskListsSlice';
-import { toggleSubtasksExpanded } from '../../../app/features/task-lists/util';
+import { toggleSubtasksExpandedOneSource } from '../../../app/features/task-lists/util';
 
 describe('taskFromString', () => {
   it('should parse with both priority and estimate', () => {
@@ -61,12 +61,12 @@ const sub322trueLastFalse = {
   subtasks: [ R.clone(sub21false), R.clone(sub21true), R.clone(sub1false), R.clone(sub1false) ]
 };
 
-describe('toggleSubtasksExpanded', () => {
+describe('toggleSubtasksExpandedOneSource', () => {
   it('should toggle at the right level', () => {
-    expect(toggleSubtasksExpanded([], sub1false)).toEqual(sub1true);
-    expect(toggleSubtasksExpanded([], sub1true)).toEqual(sub1false);
-    expect(toggleSubtasksExpanded([], sub322false)).toEqual(sub322true);
-    expect(toggleSubtasksExpanded([3], sub322true)).toEqual(sub322trueLastFalse);
-    expect(toggleSubtasksExpanded([1, 1], sub322true)).toEqual(sub322trueMidFalse);
+    expect(toggleSubtasksExpandedOneSource([], sub1false)).toEqual(sub1true);
+    expect(toggleSubtasksExpandedOneSource([], sub1true)).toEqual(sub1false);
+    expect(toggleSubtasksExpandedOneSource([], sub322false)).toEqual(sub322true);
+    expect(toggleSubtasksExpandedOneSource([3], sub322true)).toEqual(sub322trueLastFalse);
+    expect(toggleSubtasksExpandedOneSource([1, 1], sub322true)).toEqual(sub322trueMidFalse);
   });
 });

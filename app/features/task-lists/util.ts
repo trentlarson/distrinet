@@ -29,7 +29,6 @@ export function areSubtasksExpanded(
   subtaskPath: Array<number>,
   subtasksToExpand: SubtaskPath
 ): boolean {
-console.log('checking path ', subtaskPath, 'of', subtasksToExpand)
   if (!subtasksToExpand) {
     console.log("Empty areSubtasksExpanded subtasksToExpand", subtasksToExpand);
     return false;
@@ -40,7 +39,6 @@ console.log('checking path ', subtaskPath, 'of', subtasksToExpand)
     R.drop(1, subtaskPath),
     subtasksToExpand.subtasks[subtaskPath[0]]
   );
-console.log('areSubtasksExpanded result', result)
   return result;
 }
 
@@ -61,9 +59,7 @@ export function toggleSubtasksExpandedOneSource(
   subtaskPath: Array<number>,
   subtasksToExpandOneSource: SubtaskPath
 ): SubtaskPath {
-console.log("toggleSubtasksExpandedOneSource subtaskPath", subtaskPath)
   if (subtaskPath.length === 0) {
-console.log("Got to final in path, toggling to ", !subtasksToExpandOneSource.expanded)
     return {
       expanded: !subtasksToExpandOneSource.expanded,
       subtasks: R.clone(subtasksToExpandOneSource.subtasks),
@@ -82,13 +78,13 @@ console.log("Got to final in path, toggling to ", !subtasksToExpandOneSource.exp
     );
   }
 
+  let key = subtaskPath[0];
   const remainingPath: Array<number> = R.drop(1, subtaskPath);
-  const newSubtasks = R.adjust(
-    subtaskPath[0],
+  const newSubtasks: Array<SubtaskPath> = R.adjust(
+    key,
     R.curry(toggleSubtasksExpandedOneSource)(remainingPath),
     R.clone(subtasksToExpandOneSource.subtasks)
   );
-console.log("toggleSubtasksExpandedOneSource returning", newSubtasks)
   return {
     expanded: subtasksToExpandOneSource.expanded,
     subtasks: newSubtasks,
