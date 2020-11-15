@@ -1,6 +1,17 @@
 import * as R from 'ramda';
 
-import { YamlTask } from './taskListsSlice';
+/**
+ * This doesn't have an ID because it's not required and we'll often have to
+ * generate an ID, so that should use a different type than this raw data.
+ */
+export interface YamlTask {
+  sourceId: string;
+  priority: number | null;
+  estimate: number | null;
+  summary: string;
+  dependents: Array<YamlTask>;
+  subtasks: Array<YamlTask>;
+}
 
 export interface SubtaskPath {
   expanded: boolean;
@@ -30,26 +41,17 @@ export function areSubtasksExpanded(
   subtasksToExpand: SubtaskPath
 ): boolean {
   if (!subtasksToExpand) {
-    console.log("Empty areSubtasksExpanded subtasksToExpand", subtasksToExpand);
+    console.log('Empty areSubtasksExpanded subtasksToExpand', subtasksToExpand);
     return false;
-  } else if (subtaskPath.length === 0) {
+  }
+  if (subtaskPath.length === 0) {
     return subtasksToExpand.expanded;
   }
-  let result = areSubtasksExpanded(
+  const result = areSubtasksExpanded(
     R.drop(1, subtaskPath),
     subtasksToExpand.subtasks[subtaskPath[0]]
   );
   return result;
-}
-
-export function toggleSubtasksExpanded(
-  sourceId: string,
-  subtaskPath: Array<number>,
-  subtasksToExpand: Record<string, SubtaskPath>
-): Record<string, SubtaskPath> {
-  subtasksToExpand[sourceId] =
-    toggleSubtasksExpandedOneSource(subtaskPath, subtasksToExpand[sourceId]);
-  return subtasksToExpand;
 }
 
 /**
@@ -74,11 +76,13 @@ export function toggleSubtasksExpandedOneSource(
         subtaskPath[0]
       } ... for subtaskPath ${JSON.stringify(
         subtaskPath
-      )} ... for subtasksToExpandOneSource ${JSON.stringify(subtasksToExpandOneSource)}`
+      )} ... for subtasksToExpandOneSource ${JSON.stringify(
+        subtasksToExpandOneSource
+      )}`
     );
   }
 
-  let key = subtaskPath[0];
+  const key = subtaskPath[0];
   const remainingPath: Array<number> = R.drop(1, subtaskPath);
   const newSubtasks: Array<SubtaskPath> = R.adjust(
     key,
@@ -89,4 +93,16 @@ export function toggleSubtasksExpandedOneSource(
     expanded: subtasksToExpandOneSource.expanded,
     subtasks: newSubtasks,
   };
+}
+
+export function toggleSubtasksExpanded(
+  sourceId: string,
+  subtaskPath: Array<number>,
+  subtasksToExpand: Record<string, SubtaskPath>
+): Record<string, SubtaskPath> {
+  subtasksToExpand[sourceId] = toggleSubtasksExpandedOneSource(
+    subtaskPath,
+    subtasksToExpand[sourceId]
+  );
+  return subtasksToExpand;
 }

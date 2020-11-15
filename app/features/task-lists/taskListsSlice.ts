@@ -22,6 +22,7 @@ import {
   SubtaskPath,
   subtaskPathFromYamlTaskList,
   toggleSubtasksExpandedOneSource,
+  YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
 import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
@@ -43,19 +44,6 @@ export interface Log {
   did?: string;
   publicKey?: string;
   signature?: string;
-}
-
-/**
- * This doesn't have an ID because it's not required and we'll often have to
- * generate an ID, so that should use a different type than this raw data.
- */
-export interface YamlTask {
-  sourceId: string;
-  priority: number | null;
-  estimate: number | null;
-  summary: string;
-  dependents: Array<YamlTask>;
-  subtasks: Array<YamlTask>;
 }
 
 // Remember to keep these in alphabetical order for standard.
@@ -127,13 +115,15 @@ const taskListsSlice = createSlice({
       state,
       sourceAndSubtaskPath: Payload<SourcePathAndExpansion>
     ) => {
-      let subtasksToExpand = sourceAndSubtaskPath.payload.subtasksToExpand[
+      const subtasksToExpand =
+        sourceAndSubtaskPath.payload.subtasksToExpand[
+          sourceAndSubtaskPath.payload.sourceId
+        ];
+      state.display[
         sourceAndSubtaskPath.payload.sourceId
-      ];
-      state.display[sourceAndSubtaskPath.payload.sourceId] =
-        toggleSubtasksExpandedOneSource(
-          sourceAndSubtaskPath.payload.subtaskPath,
-          subtasksToExpand
+      ] = toggleSubtasksExpandedOneSource(
+        sourceAndSubtaskPath.payload.subtaskPath,
+        subtasksToExpand
       );
     },
     clearForecastData: (state) => {
@@ -546,12 +536,14 @@ export const dispatchToggleSubtaskExpansionUi = (
   subtaskPath: Array<number>,
   subtasksToExpand: Record<string, SubtaskPath>
 ): AppThunk => async (dispatch) => {
-  dispatch(toggleSubtaskInSourceExpansionUi({
-    sourceId,
-    subtaskPath,
-    subtasksToExpand
-  }));
-}
+  dispatch(
+    toggleSubtaskInSourceExpansionUi({
+      sourceId,
+      subtaskPath,
+      subtasksToExpand,
+    })
+  );
+};
 
 export const dispatchLoadOneSourceIntoTasks = (
   sourceId: string
@@ -562,10 +554,12 @@ export const dispatchLoadOneSourceIntoTasks = (
     getState().distnet
   );
   await dispatch(setTaskList({ sourceId, taskList }));
-  return dispatch(setUiForPath({
-    sourceId,
-    subtasksToExpand: subtaskPathFromYamlTaskList(taskList),
-  }));
+  return dispatch(
+    setUiForPath({
+      sourceId,
+      subtasksToExpand: subtaskPathFromYamlTaskList(taskList),
+    })
+  );
 };
 
 export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
@@ -581,11 +575,13 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   const subtaskPathVals = R.values(getState().taskLists.allLists).map((tl) =>
     subtaskPathFromYamlTaskList(tl)
   );
-  for (let i = 0; i < subtaskPathKeys.length; i++) {
-    dispatch(setUiForPath({
-      sourceId: subtaskPathKeys[i],
-      subtasksToExpand: subtaskPathVals[i]
-    }))
+  for (let i = 0; i < subtaskPathKeys.length; i += 1) {
+    dispatch(
+      setUiForPath({
+        sourceId: subtaskPathKeys[i],
+        subtasksToExpand: subtaskPathVals[i],
+      })
+    );
   }
 };
 

@@ -14,12 +14,8 @@ import {
   labelValueInSummary,
   retrieveForecast,
   dispatchToggleSubtaskExpansionUi,
-  YamlTask,
 } from './taskListsSlice';
-import {
-  areSubtasksExpanded,
-  SubtaskPath,
-} from './util';
+import { areSubtasksExpanded, SubtaskPath, YamlTask } from './util';
 import style from './style.css';
 
 const child = child_process.execFile;
@@ -205,7 +201,10 @@ function oneTaskRow(
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-  const expanded = areSubtasksExpanded(subtaskPath, subtasksToExpand[task.sourceId]);
+  const expanded = areSubtasksExpanded(
+    subtaskPath,
+    subtasksToExpand[task.sourceId]
+  );
   // eslint-disable-next-line react/no-array-index-key
   return (
     <tr key={`${task.sourceId}/${index}`}>
@@ -254,29 +253,33 @@ function oneTaskRow(
               type="button"
               className={style.subtask}
               onClick={() => {
-                dispatch(dispatchToggleSubtaskExpansionUi(
-                  task.sourceId,
-                  subtaskPath,
-                  subtasksToExpand
-                ));
+                dispatch(
+                  dispatchToggleSubtaskExpansionUi(
+                    task.sourceId,
+                    subtaskPath,
+                    subtasksToExpand
+                  )
+                );
               }}
             >
-              { expanded ? '<' : '>' }
+              {expanded ? '<' : '>'}
             </button>
-            {expanded
-             ? smallListTable(
-                 [task.subtasks],
-                 hoursPerWeek,
-                 taskSources,
-                 labelsToShow,
-                 setListSourceIdsToShow,
-                 setFocusOnTaskId,
-                 subtaskPath,
-                 subtasksToExpand,
-                 dispatch
-               )
-             : <span />
-           }
+            {expanded ? (
+              // eslint-disable-next-line  @typescript-eslint/no-use-before-define
+              smallListTable(
+                [task.subtasks],
+                hoursPerWeek,
+                taskSources,
+                labelsToShow,
+                setListSourceIdsToShow,
+                setFocusOnTaskId,
+                subtaskPath,
+                subtasksToExpand,
+                dispatch
+              )
+            ) : (
+              <span />
+            )}
           </span>
         ) : (
           <span />
