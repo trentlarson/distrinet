@@ -193,6 +193,35 @@ function sourceActions(
   );
 }
 
+function maybeShowSubtasks(
+                 task,
+                 hoursPerWeek,
+                 taskSources,
+                 labelsToShow,
+                 setListSourceIdsToShow,
+                 setFocusOnTaskId,
+                 subtaskPath,
+                 subtasksToExpand,
+                 setSubtasksToExpand,
+                 dispatch
+) {
+  if (areSubtasksExpanded(subtaskPath, subtasksToExpand[task.sourceId])) {
+    return smallListTable(
+                 [task.subtasks],
+                 hoursPerWeek,
+                 taskSources,
+                 labelsToShow,
+                 setListSourceIdsToShow,
+                 setFocusOnTaskId,
+                 subtaskPath,
+                 subtasksToExpand,
+                 setSubtasksToExpand,
+                 dispatch
+               );
+  }
+  return <span />;
+}
+
 function oneTaskRow(
   task: YamlTask,
   index: number,
@@ -206,6 +235,11 @@ function oneTaskRow(
   setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
+if (!subtasksToExpand) {
+  console.log("!! subtasksToExpand bad on oneTaskRow", subtasksToExpand, task)
+} else {
+  console.log("OK oneTaskRow")
+}
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   // eslint-disable-next-line react/no-array-index-key
   return (
@@ -256,6 +290,8 @@ function oneTaskRow(
               className={style.subtask}
               onClick={() => {
                 console.log('Subtasks', task.subtasks);
+                setSubtasksToExpand(toggleSubtasksExpanded(task.sourceId, subtaskPath, subtasksToExpand));
+                console.log('set subtasksToExpand',subtasksToExpand)
               }}
             >
               &gt;
@@ -263,6 +299,20 @@ function oneTaskRow(
                 Will show subtasks in console.
               </span>
             </button>
+{(() => { console.log("Pulling",task.sourceId, 'out of', subtasksToExpand); return <span/>;})()}
+            {maybeShowSubtasks(
+                 task,
+                 hoursPerWeek,
+                 taskSources,
+                 labelsToShow,
+                 setListSourceIdsToShow,
+                 setFocusOnTaskId,
+                 subtaskPath,
+                 subtasksToExpand,
+                 setSubtasksToExpand,
+                 dispatch
+             )
+            }
           </span>
         ) : (
           <span />
@@ -275,7 +325,6 @@ function oneTaskRow(
             className={style.subtask}
             onClick={() => {
               console.log('Dependents', task.dependents);
-              return '';
             }}
           >
             &gt;
@@ -313,6 +362,11 @@ function smallListTable(
   setSubtasksToExpand: (arg0: Record<string, SubtaskPath>) => void,
   dispatch: (arg0: AppThunk) => void
 ) {
+if (!subtasksToExpand) {
+  console.log("!! subtasksToExpand bad on smallListTable", subtasksToExpand, activityLists)
+} else {
+  console.log("OK smallListTable")
+}
   return (
     <table>
       <thead>
@@ -488,9 +542,13 @@ export default function TaskListsTable() {
   const subtaskPathVals = R.values(taskLists.allLists).map((tl) =>
     subtaskPathFromYamlTaskList(tl)
   );
-  const subtaskPaths = R.zipObj(subtaskPathKeys, subtaskPathVals);
   // source-ID-based index into SubtaskPath objects
-  const [subtasksToExpand, setSubtasksToExpand] = useState(subtaskPaths);
+  let subtaskPaths = R.zipObj(subtaskPathKeys, subtaskPathVals);
+  // Initializing with 'useState(subtaskPaths)' always yields '{}'. Ug.
+  const [subtasksToExpand, setSubtasksToExpand] = useState({});
+  if (R.isEmpty(subtasksToExpand) && !R.isEmpty(subtaskPaths)) {
+    setSubtasksToExpand(subtaskPaths);
+  }
 
   return (
     <div>

@@ -18,6 +18,10 @@ import {
   globalUriForId,
   globalUriScheme,
 } from '../distnet/uriTools';
+import {
+  modifyToggleSubtaskExpanded,
+  SubtaskPath
+} from './util';
 // eslint-disable-next-line import/no-cycle
 import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
 
@@ -87,6 +91,7 @@ const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
     allLists: {} as Record<string, Array<YamlTask>>,
+    display: {} as Record<string, SubtaskPath>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
