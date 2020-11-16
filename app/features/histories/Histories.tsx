@@ -101,6 +101,8 @@ export default function Histories() {
         <ul>
           {historySources.map((source) => (
             <li key={source.id}>
+              {histories.uriTree[source.id]?.hasMatch ? '*' : ''}
+              &nbsp;
               {source.name}
               &nbsp;
               <button

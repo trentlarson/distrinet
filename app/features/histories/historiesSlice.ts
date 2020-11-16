@@ -4,8 +4,7 @@ import path, { ParsedPath } from 'path';
 import * as R from 'ramda';
 import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
-// eslint-disable-next-line import/no-cycle
-import { AppThunk, RootState } from '../../store';
+import { AppThunk } from '../../store';
 
 interface Payload<T> {
   type: string;
@@ -21,7 +20,7 @@ export interface FileTree {
   fileBranches: Record<string, FileTree>; // directory contents; keys are file/dir names (ie. path.base)
   fullPath: ParsedPath;
   pathFromUri: ParsedPath;
-  hasMatch: boolean; // only makes sense on a file
+  hasMatch: boolean; // mark for file and containing directories
   // Beware: it could be a non-dir/non-file.
   // See https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_class_fs_dirent
   isDir: boolean;
@@ -31,7 +30,7 @@ export interface FileTree {
 
 export interface FileMatch {
   uri: string;
-  pathFromUri: ParsedPath;
+  pathFromUri: Array<FileTree>;
 }
 
 export interface Display {
@@ -47,7 +46,8 @@ export interface Display {
  * The FileTree underneath 'tree' that matches 'remainingPath'.
  * A null value is an error case that should never happen.
  */
-function retrieveFileTreeForPath(
+/** This isn't as useful as expected. If we revive, see tests.
+export function retrieveFileTreeForPath(
   tree: FileTree,
   remainingPath: ParsedPath
 ): FileTree | null {
@@ -76,6 +76,7 @@ function retrieveFileTreeForPath(
     path.parse(R.join(path.sep, remainingPathAndFileParts))
   );
 }
+**/
 
 const blankState = {
   uriTree: {} as Record<string, FileTree>,
@@ -96,19 +97,14 @@ const historiesSlice = createSlice({
     },
     markMatchInPath: (state, uriAndMatch: Payload<FileMatch>) => {
       try {
-        const matched = retrieveFileTreeForPath(
-          state.uriTree[uriAndMatch.payload.uri],
-          uriAndMatch.payload.pathFromUri
-        );
-        if (matched) {
-          matched.hasMatch = true;
-          // tree.fileBranches[uriAndMatch.payload.path].hasMatch = true;
-        } else {
-          // todo id:log-errors
-          console.error(
-            'Unable to find match under the tree',
-            uriAndMatch.payload
-          );
+        let nextTree = state.uriTree[uriAndMatch.payload.uri];
+        nextTree.hasMatch = true;
+        // first one is always the URI, so drop it
+        let remainingTrees = R.drop(1, uriAndMatch.payload.pathFromUri);
+        while (remainingTrees.length > 0) {
+          nextTree = nextTree.fileBranches[remainingTrees[0].fullPath.base];
+          nextTree.hasMatch = true;
+          remainingTrees = R.drop(1, remainingTrees);
         }
       } catch (e) {
         // todo id:log-errors
@@ -161,8 +157,9 @@ export const {
 
 export default historiesSlice.reducer;
 
-export const selectFileTree = (state: RootState) => state.histories.uriTree;
-
+/**
+ * Run the function to modify each node and on its children and return the new node.
+ */
 export const traverseFileTree = (someFun: (arg0: FileTree) => FileTree) => (
   tree: FileTree
 ): FileTree => {
@@ -322,7 +319,7 @@ const FILE_REGEXP_STRINGS_FOR_SEARCH = R.map(
 );
 
 const FILE_REGEXPS_FOR_SEARCH = R.map(
-  (rexpStr) => new RegExp(rexpStr),
+  (rexpStr) => new RegExp(rexpStr, 'i'),
   FILE_REGEXP_STRINGS_FOR_SEARCH
 );
 
@@ -336,11 +333,10 @@ export function isSearchable(file: FileTree): boolean {
 
 const searchFile = (
   uri: string,
+  pathBefore: Array<FileTree>,
   file: FileTree,
   term: string,
-  // This is a ThunkDispatch but I can't figure out how to declare it.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatch: any
+  dispatch: (arg0: AppThunk) => void
 ): void => {
   if (!file.isFile) {
     // see task id:log-error
@@ -362,7 +358,10 @@ const searchFile = (
       // adding pieces of chunks just in case the word crosses chunk boundaries
       const bothChunks = prevChunk + chunk;
       if (termRegex.test(bothChunks)) {
-        dispatch(markMatchInPath({ uri, pathFromUri: file.pathFromUri }));
+        dispatch(markMatchInPath({
+          uri,
+          pathFromUri: R.concat(pathBefore, [file]),
+        }));
         this.destroy();
       } else {
         // take enough of the previous chunk just in case it has some piece of the search term
@@ -385,17 +384,16 @@ const searchFile = (
 
 const searchFileOrDir = (
   uri: string,
+  pathBefore: Array<FileTree>,
   tree: FileTree,
   term: string,
-  // This is a ThunkDispatch but I can't figure out how to declare it.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatch: any
+  dispatch: (arg0: AppThunk) => void
 ): void => {
   if (isSearchable(tree)) {
-    searchFile(uri, tree, term, dispatch);
+    searchFile(uri, pathBefore, tree, term, dispatch);
   }
   R.forEach((file: FileTree) => {
-    searchFileOrDir(uri, file, term, dispatch);
+    searchFileOrDir(uri, R.concat(pathBefore, [tree]), file, term, dispatch);
   }, R.values(tree.fileBranches));
 };
 
@@ -433,6 +431,6 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch(dispatchEraseSearchResults());
   dispatch(setSearchProgressCount(0));
   R.mapObjIndexed((tree: FileTree, uri: string) => {
-    searchFileOrDir(uri, tree, term, dispatch);
+    searchFileOrDir(uri, [], tree, term, dispatch);
   }, getState().histories.uriTree);
 };
