@@ -10,6 +10,7 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import {
+  dispatchCountSearchable,
   dispatchEraseSearchResults,
   dispatchLoadHistoryDirsIfEmpty,
   dispatchToggleShowDir,
@@ -79,11 +80,8 @@ export default function Histories() {
                   // 13 = enter key
                   setIdInputExpanded(Visibility.hidden);
                   if (idSearchTerm.length > 0) {
-                    // doing the timeout because the visibility take a long time for some reason
-                    setTimeout(
-                      () => dispatch(dispatchTextSearch(idSearchTerm)),
-                      200
-                    );
+                    dispatch(dispatchCountSearchable());
+                    dispatch(dispatchTextSearch(idSearchTerm));
                   } else {
                     dispatch(dispatchEraseSearchResults());
                   }
@@ -93,10 +91,10 @@ export default function Histories() {
             &nbsp;(hit Enter)
           </span>
         </div>
-        <div>{idSearchTerm}</div>
-        <div style={{ visibility: isSearchingVisible(histories.isSearching) }}>
+        <div>{!!idSearchTerm ? 'Results for: ' + idSearchTerm : "" }</div>
+        <div style={{ visibility: isSearchingVisible(histories.searchProgress) }}>
           <GridLoader color="silver" />
-          {`${histories.isSearching.done} / ${histories.isSearching.total}`}
+          {`${histories.searchProgress.done} / ${histories.searchProgress.total}`}
         </div>
         <ul>
           {historySources.map((source) => (

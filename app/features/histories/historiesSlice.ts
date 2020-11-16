@@ -40,7 +40,7 @@ export interface Display {
    * null values can happen when it's a non-dir/non-file or on an error
    */
   uriTree: Record<string, FileTree>;
-  isSearching: SearchProgress;
+  searchProgress: SearchProgress;
 }
 
 /**
@@ -79,7 +79,7 @@ function retrieveFileTreeForPath(
 
 const blankState = {
   uriTree: {} as Record<string, FileTree>,
-  isSearching: { done: 0, total: 0 } as SearchProgress,
+  searchProgress: { done: 0, total: 0 } as SearchProgress,
 } as Display;
 
 const historiesSlice = createSlice({
@@ -89,7 +89,7 @@ const historiesSlice = createSlice({
     resetState: (state) => {
       // Gross. What is the built-in way to reset the whole state?
       state.uriTree = blankState.uriTree;
-      state.isSearching = blankState.isSearching;
+      state.searchProgress = blankState.searchProgress;
     },
     setFileTree: (state, contents: Payload<Record<string, FileTree>>) => {
       state.uriTree = contents.payload;
@@ -133,14 +133,17 @@ const historiesSlice = createSlice({
         );
       }
     },
-    startSearchProgress: (state) => {
-      state.isSearching = { done: 0, total: 0 };
+    setSearchTotalCount: (state, count: Payload<number>) => {
+      state.searchProgress.total = count.payload;
+    },
+    setSearchProgressCount: (state, count: Payload<number>) => {
+      state.searchProgress.done = count.payload;
     },
     incrementSearchTotalBy: (state, contents: Payload<number>) => {
-      state.isSearching.total += contents.payload;
+      state.searchProgress.total += contents.payload;
     },
     incrementSearchDone: (state) => {
-      state.isSearching.done += 1;
+      state.searchProgress.done += 1;
     },
   },
 });
@@ -150,7 +153,8 @@ export const {
   setFileTree,
   markMatchInPath,
   markToggleShowNextLevel,
-  startSearchProgress,
+  setSearchProgressCount,
+  setSearchTotalCount,
   incrementSearchTotalBy,
   incrementSearchDone,
 } = historiesSlice.actions;
@@ -345,8 +349,8 @@ const searchFile = (
     );
   }
 
-  dispatch(incrementSearchTotalBy(1));
   const pathStr = path.format(file.fullPath);
+  const termRegex = new RegExp(term, 'i');
   const readStream = fs.createReadStream(pathStr, {
     emitClose: true,
     encoding: 'utf8',
@@ -357,7 +361,7 @@ const searchFile = (
     .on('data', function (this: Readable, chunk: string) {
       // adding pieces of chunks just in case the word crosses chunk boundaries
       const bothChunks = prevChunk + chunk;
-      if (bothChunks.indexOf(term) > -1) {
+      if (termRegex.test(bothChunks)) {
         dispatch(markMatchInPath({ uri, pathFromUri: file.pathFromUri }));
         this.destroy();
       } else {
@@ -395,12 +399,39 @@ const searchFileOrDir = (
   }, R.values(tree.fileBranches));
 };
 
+export const countSearchableFiles = (tree: FileTree): int => {
+  let count = 0;
+  if (isSearchable(tree)) {
+    count += 1;
+  }
+  if (R.values(tree.fileBranches).length > 0) {
+    const searchableChildren =
+      R.values(tree.fileBranches).map(countSearchableFiles);
+    count += R.reduce(R.add, 0, searchableChildren);
+  }
+  return count;
+}
+
+export const dispatchCountSearchable = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  dispatch(setSearchTotalCount(0));
+  const fullCount =
+    R.reduce(
+      R.add,
+      0,
+      R.values(getState().histories.uriTree).map(countSearchableFiles)
+    );
+  dispatch(setSearchTotalCount(fullCount));
+}
+
 export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch,
   getState
 ) => {
   dispatch(dispatchEraseSearchResults());
-  dispatch(startSearchProgress());
+  dispatch(setSearchProgressCount(0));
   R.mapObjIndexed((tree: FileTree, uri: string) => {
     searchFileOrDir(uri, tree, term, dispatch);
   }, getState().histories.uriTree);
