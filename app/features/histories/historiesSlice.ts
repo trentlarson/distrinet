@@ -399,32 +399,32 @@ const searchFileOrDir = (
   }, R.values(tree.fileBranches));
 };
 
-export const countSearchableFiles = (tree: FileTree): int => {
+export const countSearchableFiles = (tree: FileTree): number => {
   let count = 0;
   if (isSearchable(tree)) {
     count += 1;
   }
   if (R.values(tree.fileBranches).length > 0) {
-    const searchableChildren =
-      R.values(tree.fileBranches).map(countSearchableFiles);
+    const searchableChildren = R.values(tree.fileBranches).map(
+      countSearchableFiles
+    );
     count += R.reduce(R.add, 0, searchableChildren);
   }
   return count;
-}
+};
 
 export const dispatchCountSearchable = (): AppThunk => async (
   dispatch,
   getState
 ) => {
   dispatch(setSearchTotalCount(0));
-  const fullCount =
-    R.reduce(
-      R.add,
-      0,
-      R.values(getState().histories.uriTree).map(countSearchableFiles)
-    );
+  const fullCount = R.reduce(
+    R.add,
+    0,
+    R.values(getState().histories.uriTree).map(countSearchableFiles)
+  );
   dispatch(setSearchTotalCount(fullCount));
-}
+};
 
 export const dispatchTextSearch = (term: string): AppThunk => async (
   dispatch,

@@ -91,8 +91,10 @@ export default function Histories() {
             &nbsp;(hit Enter)
           </span>
         </div>
-        <div>{!!idSearchTerm ? 'Results for: ' + idSearchTerm : "" }</div>
-        <div style={{ visibility: isSearchingVisible(histories.searchProgress) }}>
+        <div>{idSearchTerm ? `Results for: ${idSearchTerm}` : ''}</div>
+        <div
+          style={{ visibility: isSearchingVisible(histories.searchProgress) }}
+        >
           <GridLoader color="silver" />
           {`${histories.searchProgress.done} / ${histories.searchProgress.total}`}
         </div>
