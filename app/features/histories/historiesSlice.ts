@@ -4,6 +4,7 @@ import path, { ParsedPath } from 'path';
 import * as R from 'ramda';
 import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
+// eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 
 interface Payload<T> {
@@ -76,7 +77,7 @@ export function retrieveFileTreeForPath(
     path.parse(R.join(path.sep, remainingPathAndFileParts))
   );
 }
-**/
+* */
 
 const blankState = {
   uriTree: {} as Record<string, FileTree>,
@@ -336,7 +337,9 @@ const searchFile = (
   pathBefore: Array<FileTree>,
   file: FileTree,
   term: string,
-  dispatch: (arg0: AppThunk) => void
+  // This is a ThunkDispatch but I can't figure out how to declare it.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: any
 ): void => {
   if (!file.isFile) {
     // see task id:log-error
@@ -358,10 +361,12 @@ const searchFile = (
       // adding pieces of chunks just in case the word crosses chunk boundaries
       const bothChunks = prevChunk + chunk;
       if (termRegex.test(bothChunks)) {
-        dispatch(markMatchInPath({
-          uri,
-          pathFromUri: R.concat(pathBefore, [file]),
-        }));
+        dispatch(
+          markMatchInPath({
+            uri,
+            pathFromUri: R.concat(pathBefore, [file]),
+          })
+        );
         this.destroy();
       } else {
         // take enough of the previous chunk just in case it has some piece of the search term
@@ -387,7 +392,9 @@ const searchFileOrDir = (
   pathBefore: Array<FileTree>,
   tree: FileTree,
   term: string,
-  dispatch: (arg0: AppThunk) => void
+  // This is a ThunkDispatch but I can't figure out how to declare it.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: any
 ): void => {
   if (isSearchable(tree)) {
     searchFile(uri, pathBefore, tree, term, dispatch);
