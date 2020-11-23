@@ -32,6 +32,9 @@ const TASKYAML_SCHEME = 'taskyaml';
 
 const fsPromises = fs.promises;
 
+export const DEFAULT_HOURS_PER_WEEK = 40;
+export const DEFAULT_TASK_COMMENT = 'I volunteer to work on this.';
+
 export interface ProjectFile {
   tasks: Array<YamlInputIssues>;
   log?: Array<Log>;
@@ -614,10 +617,10 @@ function saveToFile(
   });
 }
 
-export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
-  _1,
-  getState
-) => {
+export const dispatchVolunteer = (
+  task: YamlTask,
+  comment: string
+): AppThunk => async (_1, getState) => {
   if (getState().distnet.settings.credentials) {
     const keyContents = R.find(
       (c) => c.id === 'privateKey',
@@ -648,7 +651,7 @@ export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
           // sign
           const sign = nodeCrypto.createSign('SHA256');
           const volunteerMessageForSigning: VolunteerMessageForSigning = {
-            comment: 'I volunteer to work on this.',
+            comment,
             summary: task.summary,
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),

@@ -8,6 +8,8 @@ import { Cache, ResourceTypes, Source } from '../distnet/distnetClasses';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
   clearForecastData,
+  DEFAULT_HOURS_PER_WEEK,
+  DEFAULT_TASK_COMMENT,
   dispatchLoadOneSourceIntoTasks,
   dispatchVolunteer,
   isTaskyamlUriScheme,
@@ -50,6 +52,8 @@ function sourceActions(
   setHoursPerWeek: (arg0: number) => void,
   focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
+  taskSigningComment: string,
+  setTaskSigningComment: (arg0: string) => void,
   listSourceIdsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void
 ) {
@@ -184,6 +188,15 @@ function sourceActions(
         onChange={(e) => setFocusOnTaskId(e.target.value)}
       />
       )
+      <br />
+      (Task signatures will contain this comment:
+      <input
+        size={40}
+        type="text"
+        value={taskSigningComment}
+        onChange={(e) => setTaskSigningComment(e.target.value)}
+      />
+      )
     </div>
   );
 }
@@ -192,6 +205,7 @@ function oneTaskRow(
   task: YamlTask,
   index: number,
   hoursPerWeek: number,
+  taskSigningComment: string,
   taskSources: Array<Source>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
@@ -269,6 +283,7 @@ function oneTaskRow(
               smallListTable(
                 [task.subtasks],
                 hoursPerWeek,
+                taskSigningComment,
                 taskSources,
                 labelsToShow,
                 setListSourceIdsToShow,
@@ -307,7 +322,7 @@ function oneTaskRow(
         <button
           type="button"
           onClick={() => {
-            dispatch(dispatchVolunteer(task));
+            dispatch(dispatchVolunteer(task, taskSigningComment));
           }}
         >
           Volunteer
@@ -320,6 +335,7 @@ function oneTaskRow(
 function smallListTable(
   activityLists: Array<Array<YamlTask>>,
   hoursPerWeek: number,
+  taskSigningComment: string,
   taskSources: Array<Source>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
@@ -358,6 +374,7 @@ function smallListTable(
               task,
               index,
               hoursPerWeek,
+              taskSigningComment,
               taskSources,
               labelsToShow,
               setListSourceIdsToShow,
@@ -377,6 +394,7 @@ function bigListTable(
   dispatch: (arg0: AppThunk) => void,
   taskSources: Array<Source>,
   hoursPerWeek: number,
+  taskSigningComment: string,
   setFocusOnTaskId: (arg0: string) => void,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   labelsToShow: Array<string>,
@@ -433,6 +451,7 @@ function bigListTable(
           )
         ),
         hoursPerWeek,
+        taskSigningComment,
         taskSources,
         labelsToShow,
         setListSourceIdsToShow,
@@ -455,8 +474,11 @@ export default function TaskListsTable() {
   const [listSourceIdsToShow, setListSourceIdsToShow] = useState(
     [] as Array<string>
   );
-  const [hoursPerWeek, setHoursPerWeek] = useState(40);
+  const [hoursPerWeek, setHoursPerWeek] = useState(DEFAULT_HOURS_PER_WEEK);
   const [focusOnTaskId, setFocusOnTaskId] = useState('');
+  const [taskSigningComment, setTaskSigningComment] = useState(
+    DEFAULT_TASK_COMMENT
+  );
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
 
@@ -511,6 +533,8 @@ export default function TaskListsTable() {
           setHoursPerWeek,
           focusOnTaskId,
           setFocusOnTaskId,
+          taskSigningComment,
+          setTaskSigningComment,
           listSourceIdsToShow,
           setListSourceIdsToShow
         )}
@@ -547,6 +571,7 @@ export default function TaskListsTable() {
         dispatch,
         taskSources,
         hoursPerWeek,
+        taskSigningComment,
         setFocusOnTaskId,
         setListSourceIdsToShow,
         labelsToShow,
