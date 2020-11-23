@@ -5,17 +5,21 @@ tasks:
     refreshIfNewer, and by caching in memory
   - 90 1 create list-source directory file that points at other lists of sources
   - '90 0 show cached time, both file & memory'
-  - 90 0 write version of reloadOneSourceIntoCache that only loads local files if the timestamp has changed
-  - 85 1 define a place for backups, including settings.yml
-  - 85 0 disable lint-fix on YAML files (especially test ones)
+  - >-
+    90 0 write version of reloadOneSourceIntoCache that only loads local files
+    if the timestamp has changed
+  - '85 1 define a place for backups, including settings.yml'
   - '80 -1 more settings sanity-checking, eg. no duplicate IDs, valid URLs'
   - 80 -2 warn when settings are changed and unsaved
-  - 80 0 add warnings for settings, eg. when the ID isn't a global URI (not an error)
+  - >-
+    80 0 add warnings for settings, eg. when the ID isn't a global URI (not an
+    error)
   - 80 1 package YAML task parsing for npm
   - 80 0 save URI for current task list inside tasks.yml (good for referencing)
   - 80 0 allow a text search of the items on a page (a la browser CTRL-f):
-    - https://www.electronjs.org/docs/api/web-contents#contentsfindinpagetext-options
-    - https://www.geeksforgeeks.org/how-to-find-text-on-page-in-electronjs/
+      - >-
+        https://www.electronjs.org/docs/api/web-contents#contentsfindinpagetext-options
+      - 'https://www.geeksforgeeks.org/how-to-find-text-on-page-in-electronjs/'
   - 80 -1 allow loading of sources automatically (then remove bottom "back" button):
       - add an indicator on the front page that it's loading
       - allow for deselection of files that might be too big
@@ -28,7 +32,9 @@ tasks:
   - >-
     80 0 add spinner for the remote file loading (both cache refresh & local
     config)
-  - 80 1 allow drag-and-drop to pull a new local file/folder into distnet settings
+  - >-
+    80 1 allow drag-and-drop to pull a new local file/folder into distnet
+    settings
   - 80 1 move feature-specific styling out of app/app.global.css
   - '80 0 on startup, check for files already cached in files and show that date'
   - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
@@ -47,7 +53,7 @@ tasks:
   - 70 1 show indicator if settings file has been changed
   - 70 2 save a preference for loading cache on app start
   - 65 3 package for mobile
-  - -1 add sample-sources.yml to test suite
+  - '-1 add sample-sources.yml to test suite'
   - >-
     65 0 add format (mime type?) info to the sources (for a more accurate
     indicator than just the URI "scheme:") id:source-with-format
@@ -63,22 +69,23 @@ tasks:
   - '20 0 read binary files id:read-binary'
   - 20 4 stop requiring semicolons in the code
 log:
-  - id: a5365484-ce5c-499d-ab07-51434966e4fc
+  - id: 95b1aba0-82cb-4bf2-ba61-f7e4fc63b7e6
     taskId: source-with-format
     data:
       messageData:
-        description: >-
+        comment: I volunteer to work on this.
+        summary: >-
           add format (mime type?) info to the sources (for a more accurate
           indicator than just the URI "scheme:") id:source-with-format
         taskUri: 'taskyaml:trentlarson.com,2020:distrinet/tasks#source-with-format'
-        time: '2020-09-22T04:39:40.765Z'
+        time: '2020-11-23T01:07:13.637Z'
         did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
-    time: '2020-09-22T04:39:40.765Z'
+    time: '2020-11-23T01:07:13.637Z'
     publicKey: |
       -----BEGIN PUBLIC KEY-----
       ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEMt1EKASbMuTRGM/qsmZaxygO4/FsjnGE
       PQnGph9BsYdyVJWmOQcnsi4M3xLQIYw190JpZDFd42Y=
       -----END PUBLIC KEY-----
     signature: >-
-      303c021c2cc82ce7e4bfd7c98e165a98a2703170bb0522a73ef40739c84d62e0021c0c34c685ea7d6480eed522f9edb572b27beab5701da8b7218e7e5cd1
+      303d021c2a84c0ff729e971636c1933f031c7129b7cf570317e7a4db6a47f68c021d00d5f4e48daa5fea67c7541878637fa1efc0c8df8300a5afb0147692d6
     did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'

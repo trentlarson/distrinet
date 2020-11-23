@@ -1,4 +1,3 @@
-  - 0 show stars next to all parent directories
   - 0 expand subdirectories in display
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
   - -1 automatically focus on the search input box

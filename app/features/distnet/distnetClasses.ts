@@ -46,11 +46,15 @@ enum DidDocContext {
 export interface UrlData {
   url: string;
   credentials: Credential;
-  writeMethod: WriteMethod;
+
+  // A folder typically has one method for synchronizing via tools.
+  // In addition, it might be copied on demand manually or via Distrinet.
+  syncMethod: SyncMethod;
 }
 
-export enum WriteMethod {
-  DIRECT_TO_FILE = 'DIRECT_TO_FILE',
+export enum SyncMethod {
+  // default method (if not set) could be some manual copy or via Distrinet
+  GIT = 'GIT',
 }
 
 /**
@@ -122,6 +126,7 @@ export interface Payload<T> {
   payload: T;
 }
 
-const APP_NAME = 'dist-task-lists';
+export const APP_NAME = 'dist-task-lists';
 
-export { APP_NAME };
+export const FILE_PROTOCOL = 'file:';
+export const isFileUrl = (u: string) => new URL(u).protocol === FILE_PROTOCOL;

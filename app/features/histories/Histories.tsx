@@ -111,7 +111,7 @@ export default function Histories() {
                   dispatch(dispatchToggleShowDir(source.id));
                 }}
               >
-                {histories.uriTree[source.id]?.showTree ? 'hide' : 'show'}
+                {histories.uriTree[source.id]?.showTree ? '<' : '>'}
               </button>
               <br />
               <ul>

@@ -1,17 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
-import fs from 'fs';
-import * as R from 'ramda';
-import yaml from 'js-yaml';
-import url from 'url';
 import nodeCrypto from 'crypto';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import * as R from 'ramda';
+import url from 'url';
 import * as uuid from 'uuid';
+
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 import {
   CacheData,
   DistnetState,
+  isFileUrl,
   Payload,
-  WriteMethod,
 } from '../distnet/distnetClasses';
 import {
   isGlobalUri,
@@ -48,8 +49,9 @@ export interface Log {
 
 // Remember to keep these in alphabetical order for standard.
 interface VolunteerMessageForSigning {
-  summary: string;
   did?: string;
+  comment: string;
+  summary: string;
   taskUri: string;
   time: string;
 }
@@ -646,6 +648,7 @@ export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
           // sign
           const sign = nodeCrypto.createSign('SHA256');
           const volunteerMessageForSigning: VolunteerMessageForSigning = {
+            comment: 'I volunteer to work on this.',
             summary: task.summary,
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),
@@ -685,7 +688,7 @@ export const dispatchVolunteer = (task: YamlTask): AppThunk => async (
           }
           for (let i = 0; projectContents && i < source.urls.length; i += 1) {
             // now find where to write the task
-            if (source.urls[i].writeMethod === WriteMethod.DIRECT_TO_FILE) {
+            if (isFileUrl(source.urls[i].url)) {
               const newLog: Log = {
                 id: uuid.v4(),
                 taskId,
