@@ -19,6 +19,15 @@ export interface UiTree {
   subtasks: Array<UiTree>;
 }
 
+export enum UiTreeProperty {
+  DEPENDENTS = 'dependentsExpanded',
+  SUBTASKS = 'subtasksExpanded',
+}
+
+export enum UiTreeLinkageProperty {
+  SUBTASKS = 'subtasks',
+}
+
 /**
  * return a UiTree model for the given yamlTaskList
  */
@@ -60,7 +69,7 @@ export function areSubtasksExpanded(
  * return copy of subtasksToEditOneSource with the item at path subtaskPath edited via editFun
  */
 export function editUiTreeAtPathOneSource(
-  linkageProperty: string,
+  linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
   uiTreePath: Array<number>,
   uiTreesToEditOneSource: UiTree
@@ -99,7 +108,7 @@ export function editUiTreeAtPathOneSource(
 }
 
 export function editUiTreeAtPath(
-  linkageProperty: string,
+  linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
   sourceId: string,
   uiTreePath: Array<number>,

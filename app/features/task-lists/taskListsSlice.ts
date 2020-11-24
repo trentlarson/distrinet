@@ -21,6 +21,8 @@ import {
 } from '../distnet/uriTools';
 import {
   UiTree,
+  UiTreeProperty,
+  UiTreeLinkageProperty,
   uiTreeFromYamlTaskList,
   editUiTreeAtPathOneSource,
   YamlTask,
@@ -92,7 +94,10 @@ interface SourcePathAndExpansion {
   subtasksToExpand: Record<string, UiTree>;
 }
 
-export const togglePropertyFun = (property: string, uiTreePath: UiTree) => {
+export const togglePropertyFun = (
+  property: UiTreeProperty,
+  uiTreePath: UiTree
+) => {
   return R.set(R.lensProp(property), !R.prop(property, uiTreePath), uiTreePath);
 };
 export const toggleProperty = R.curry(togglePropertyFun);
@@ -132,8 +137,8 @@ const taskListsSlice = createSlice({
       state.display[
         sourceAndUiTree.payload.sourceId
       ] = editUiTreeAtPathOneSource(
-        'subtasks',
-        toggleProperty('subtasksExpanded'),
+        UiTreeLinkageProperty.SUBTASKS,
+        toggleProperty(UiTreeProperty.SUBTASKS),
         sourceAndUiTree.payload.uiTreePath,
         subtasksToExpand
       );
