@@ -92,13 +92,10 @@ interface SourcePathAndExpansion {
   subtasksToExpand: Record<string, UiTree>;
 }
 
-export const toggleExpanded = (uiTreePath: UiTree) => {
-  return R.set(
-    R.lensProp('subtasksExpanded'),
-    !uiTreePath.subtasksExpanded,
-    uiTreePath
-  );
+export const togglePropertyFun = (property: string, uiTreePath: UiTree) => {
+  return R.set(R.lensProp(property), !R.prop(property, uiTreePath), uiTreePath);
 };
+export const toggleProperty = R.curry(togglePropertyFun);
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
@@ -132,13 +129,11 @@ const taskListsSlice = createSlice({
         sourceAndUiTree.payload.subtasksToExpand[
           sourceAndUiTree.payload.sourceId
         ];
-console.log("dispatched with uiTree", sourceAndUiTree);
-console.log("dispatched with uiTree", sourceAndUiTree.payload.uiTreePath);
-
       state.display[
         sourceAndUiTree.payload.sourceId
       ] = editUiTreeAtPathOneSource(
-        toggleExpanded,
+        'subtasks',
+        toggleProperty('subtasksExpanded'),
         sourceAndUiTree.payload.uiTreePath,
         subtasksToExpand
       );

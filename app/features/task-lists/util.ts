@@ -22,9 +22,7 @@ export interface UiTree {
 /**
  * return a UiTree model for the given yamlTaskList
  */
-export function uiTreeFromYamlTaskList(
-  yamlTaskList: Array<YamlTask>
-): UiTree {
+export function uiTreeFromYamlTaskList(yamlTaskList: Array<YamlTask>): UiTree {
   return {
     subtasksExpanded: false,
     dependentsExpanded: false,
@@ -57,9 +55,12 @@ export function areSubtasksExpanded(
 }
 
 /**
+ * linkageProperty is currently 'subtasks' or 'dependents'
+ *
  * return copy of subtasksToEditOneSource with the item at path subtaskPath edited via editFun
  */
 export function editUiTreeAtPathOneSource(
+  linkageProperty: string,
   editFun: (arg0: UiTree) => UiTree,
   uiTreePath: Array<number>,
   uiTreesToEditOneSource: UiTree
@@ -86,11 +87,11 @@ export function editUiTreeAtPathOneSource(
   const remainingPath: Array<number> = R.drop(1, uiTreePath);
   const newUiTrees: Array<UiTree> = R.adjust(
     key,
-    R.curry(editUiTreeAtPathOneSource)(editFun)(remainingPath),
-    R.clone(uiTreesToEditOneSource['subtasks'])
+    R.curry(editUiTreeAtPathOneSource)(linkageProperty)(editFun)(remainingPath),
+    R.clone(R.prop(linkageProperty, uiTreesToEditOneSource))
   );
   const result = R.set(
-    R.lensProp('subtasks'),
+    R.lensProp(linkageProperty),
     newUiTrees,
     uiTreesToEditOneSource
   );
@@ -98,12 +99,14 @@ export function editUiTreeAtPathOneSource(
 }
 
 export function editUiTreeAtPath(
+  linkageProperty: string,
   editFun: (arg0: UiTree) => UiTree,
   sourceId: string,
   uiTreePath: Array<number>,
   uiTreesToEdit: Record<string, UiTree>
 ): Record<string, UiTree> {
   uiTreesToEdit[sourceId] = editUiTreeAtPathOneSource(
+    linkageProperty,
     editFun,
     uiTreePath,
     uiTreesToEdit[sourceId]
