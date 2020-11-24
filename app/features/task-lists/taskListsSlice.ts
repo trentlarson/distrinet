@@ -22,7 +22,7 @@ import {
 import {
   SubtaskPath,
   subtaskPathFromYamlTaskList,
-  toggleSubtasksExpandedOneSource,
+  editSubtaskAtPathOneSource,
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
@@ -92,6 +92,10 @@ interface SourcePathAndExpansion {
   subtasksToExpand: Record<string, SubtaskPath>;
 }
 
+export const toggleExpanded = (subtaskPath: SubtaskPath) => {
+  return R.set(R.lensProp('expanded'), !subtaskPath.expanded, subtaskPath);
+};
+
 const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
@@ -126,7 +130,8 @@ const taskListsSlice = createSlice({
         ];
       state.display[
         sourceAndSubtaskPath.payload.sourceId
-      ] = toggleSubtasksExpandedOneSource(
+      ] = editSubtaskAtPathOneSource(
+        toggleExpanded,
         sourceAndSubtaskPath.payload.subtaskPath,
         subtasksToExpand
       );

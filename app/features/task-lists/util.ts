@@ -57,22 +57,20 @@ export function areSubtasksExpanded(
 /**
  * return copy of subtasksToExpandOneSource with the 'expanded' toggled at path subtaskPath
  */
-export function toggleSubtasksExpandedOneSource(
+export function editSubtaskAtPathOneSource(
+  editFun: (arg0: SubtaskPath) => SubtaskPath,
   subtaskPath: Array<number>,
   subtasksToExpandOneSource: SubtaskPath
 ): SubtaskPath {
   if (subtaskPath.length === 0) {
-    return {
-      expanded: !subtasksToExpandOneSource.expanded,
-      subtasks: R.clone(subtasksToExpandOneSource.subtasks),
-    };
+    return editFun(subtasksToExpandOneSource);
   }
 
   // there are more items in the subtaskPath
 
   if (R.isNil(subtaskPath[0])) {
     throw Error(
-      `Got bad path in toggleSubtasksExpanded: ${
+      `Got bad path in editSubtaskAtPath: ${
         subtaskPath[0]
       } ... for subtaskPath ${JSON.stringify(
         subtaskPath
@@ -86,7 +84,7 @@ export function toggleSubtasksExpandedOneSource(
   const remainingPath: Array<number> = R.drop(1, subtaskPath);
   const newSubtasks: Array<SubtaskPath> = R.adjust(
     key,
-    R.curry(toggleSubtasksExpandedOneSource)(remainingPath),
+    R.curry(editSubtaskAtPathOneSource)(editFun)(remainingPath),
     R.clone(subtasksToExpandOneSource.subtasks)
   );
   return {
@@ -95,12 +93,14 @@ export function toggleSubtasksExpandedOneSource(
   };
 }
 
-export function toggleSubtasksExpanded(
+export function editSubtaskAtPath(
+  editFun: (arg0: SubtaskPath) => SubtaskPath,
   sourceId: string,
   subtaskPath: Array<number>,
   subtasksToExpand: Record<string, SubtaskPath>
 ): Record<string, SubtaskPath> {
-  subtasksToExpand[sourceId] = toggleSubtasksExpandedOneSource(
+  subtasksToExpand[sourceId] = editSubtaskAtPathOneSource(
+    editFun,
     subtaskPath,
     subtasksToExpand[sourceId]
   );

@@ -69,23 +69,25 @@ tasks:
   - '20 0 read binary files id:read-binary'
   - 20 4 stop requiring semicolons in the code
 log:
-  - id: 95b1aba0-82cb-4bf2-ba61-f7e4fc63b7e6
+  - id: 24721ab5-e0c1-4ca9-a5e9-1f49ce3d7bb6
     taskId: source-with-format
     data:
       messageData:
-        comment: I volunteer to work on this.
+        comment: >-
+          I volunteer to work on this. time:4-hours
+          dateRange:2020-12-01,2021-01-31
         summary: >-
           add format (mime type?) info to the sources (for a more accurate
           indicator than just the URI "scheme:") id:source-with-format
         taskUri: 'taskyaml:trentlarson.com,2020:distrinet/tasks#source-with-format'
-        time: '2020-11-23T01:07:13.637Z'
+        time: '2020-11-23T04:35:18.365Z'
         did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
-    time: '2020-11-23T01:07:13.637Z'
+    time: '2020-11-23T04:35:18.365Z'
     publicKey: |
       -----BEGIN PUBLIC KEY-----
       ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAEMt1EKASbMuTRGM/qsmZaxygO4/FsjnGE
       PQnGph9BsYdyVJWmOQcnsi4M3xLQIYw190JpZDFd42Y=
       -----END PUBLIC KEY-----
     signature: >-
-      303d021c2a84c0ff729e971636c1933f031c7129b7cf570317e7a4db6a47f68c021d00d5f4e48daa5fea67c7541878637fa1efc0c8df8300a5afb0147692d6
+      303c021c1bb01ad3e5d39cd427a06cccb7952630e6a9617a8d2602039c31316e021c2443bc793afad856c7522e9f573334a7c7c219169c2038237d603f64
     did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
