@@ -14,9 +14,10 @@ export interface YamlTask {
 }
 
 export interface UiTree {
+  dependents: Array<UiTree>;
   dependentsExpanded: boolean;
-  subtasksExpanded: boolean;
   subtasks: Array<UiTree>;
+  subtasksExpanded: boolean;
 }
 
 export enum UiTreeProperty {
@@ -25,6 +26,7 @@ export enum UiTreeProperty {
 }
 
 export enum UiTreeLinkageProperty {
+  DEPENDENTS = 'dependents',
   SUBTASKS = 'subtasks',
 }
 
@@ -33,32 +35,38 @@ export enum UiTreeLinkageProperty {
  */
 export function uiTreeFromYamlTaskList(yamlTaskList: Array<YamlTask>): UiTree {
   return {
-    subtasksExpanded: false,
+    dependents: R.map(
+      (task) => uiTreeFromYamlTaskList(task.dependents),
+      yamlTaskList
+    ),
     dependentsExpanded: false,
     subtasks: R.map(
       (task) => uiTreeFromYamlTaskList(task.subtasks),
       yamlTaskList
     ),
+    subtasksExpanded: false,
   };
 }
 
 /**
  * return boolean value of 'subtasksExpanded' at the subtaskPath in subtasksToExpand
  */
-export function areSubtasksExpanded(
+export function areLinkedTasksExpanded(
+  linkageProperty: UiTreeLinkageProperty,
   subtaskPath: Array<number>,
   subtasksToExpand: UiTree
 ): boolean {
   if (!subtasksToExpand) {
-    console.log('Empty areSubtasksExpanded subtasksToExpand', subtasksToExpand);
+    console.log('Empty areLinkedTasksExpanded subtasksToExpand', subtasksToExpand);
     return false;
   }
   if (subtaskPath.length === 0) {
     return subtasksToExpand.subtasksExpanded;
   }
-  const result = areSubtasksExpanded(
+  const result = areLinkedTasksExpanded(
+    linkageProperty,
     R.drop(1, subtaskPath),
-    subtasksToExpand.subtasks[subtaskPath[0]]
+    subtasksToExpand[linkageProperty][subtaskPath[0]]
   );
   return result;
 }
@@ -66,16 +74,16 @@ export function areSubtasksExpanded(
 /**
  * linkageProperty is currently 'subtasks' or 'dependents'
  *
- * return copy of subtasksToEditOneSource with the item at path subtaskPath edited via editFun
+ * return copy of uiTreeToEditOneSource with the item at path subtaskPath edited via editFun
  */
 export function editUiTreeAtPathOneSource(
   linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
   uiTreePath: Array<number>,
-  uiTreesToEditOneSource: UiTree
+  uiTreeToEdit: UiTree
 ): UiTree {
   if (uiTreePath.length === 0) {
-    return editFun(uiTreesToEditOneSource);
+    return editFun(uiTreeToEdit);
   }
 
   // there are more items in the uiTreePath
@@ -86,23 +94,23 @@ export function editUiTreeAtPathOneSource(
         uiTreePath[0]
       } ... for uiTreePath ${JSON.stringify(
         uiTreePath
-      )} ... for uiTreesToEditOneSource ${JSON.stringify(
-        uiTreesToEditOneSource
+      )} ... for uiTreeToEdit ${JSON.stringify(
+        uiTreeToEdit
       )}`
     );
   }
 
   const key = uiTreePath[0];
   const remainingPath: Array<number> = R.drop(1, uiTreePath);
-  const newUiTrees: Array<UiTree> = R.adjust(
+  const newUiTree: Array<UiTree> = R.adjust(
     key,
     R.curry(editUiTreeAtPathOneSource)(linkageProperty)(editFun)(remainingPath),
-    R.clone(R.prop(linkageProperty, uiTreesToEditOneSource))
+    R.clone(R.prop(linkageProperty, uiTreeToEdit))
   );
   const result = R.set(
     R.lensProp(linkageProperty),
-    newUiTrees,
-    uiTreesToEditOneSource
+    newUiTree,
+    uiTreeToEdit
   );
   return result;
 }

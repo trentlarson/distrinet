@@ -17,7 +17,7 @@ import {
   retrieveForecast,
   dispatchToggleSubtaskExpansionUi,
 } from './taskListsSlice';
-import { areSubtasksExpanded, UiTree, YamlTask } from './util';
+import { areLinkedTasksExpanded, UiTree, YamlTask } from './util';
 import style from './style.css';
 
 const child = child_process.execFile;
@@ -211,13 +211,19 @@ function oneTaskRow(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<number>,
-  subtasksToExpand: Record<string, UiTree>,
+  uiTrees: Record<string, UiTree>,
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-  const subtasksExpanded = areSubtasksExpanded(
+  const subtasksExpanded = areLinkedTasksExpanded(
+    'subtasks',
     uiTreePath,
-    subtasksToExpand[task.sourceId]
+    uiTrees[task.sourceId]
+  );
+  const dependentsExpanded = areLinkedTasksExpanded(
+    'dependents',
+    uiTreePath,
+    uiTrees[task.sourceId]
   );
   // eslint-disable-next-line react/no-array-index-key
   return (
@@ -271,7 +277,7 @@ function oneTaskRow(
                   dispatchToggleSubtaskExpansionUi(
                     task.sourceId,
                     uiTreePath,
-                    subtasksToExpand
+                    uiTrees
                   )
                 );
               }}
@@ -289,7 +295,47 @@ function oneTaskRow(
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
                 uiTreePath,
-                subtasksToExpand,
+                uiTrees,
+                dispatch
+              )
+            ) : (
+              <span />
+            )}
+          </span>
+        ) : (
+          <span />
+        )}
+      </td>
+      <td>
+        {task.dependents.length > 0 ? (
+          <span>
+            <button
+              type="button"
+              className={style.subtask}
+              onClick={() => {
+                dispatch(
+                  dispatchToggleDependentExpansionUi(
+                    task.sourceId,
+                    uiTreePath,
+                    uiTrees
+                  )
+                );
+              }}
+            >
+              {dependentsExpanded ? '<' : '>'}
+            </button>
+            {dependentsExpanded ? (
+              // eslint-disable-next-line  @typescript-eslint/no-use-before-define
+              smallListTable(
+                [task.dependents],
+                hoursPerWeek,
+                taskSigningComment,
+                taskSources,
+                labelsToShow,
+                setListSourceIdsToShow,
+                setFocusOnTaskId,
+                uiTreePath,
+                uiTrees,
                 dispatch
               )
             ) : (
@@ -341,7 +387,7 @@ function smallListTable(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<number>,
-  subtasksToExpand: Record<string, UiTree>,
+  uiTrees: Record<string, UiTree>,
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
@@ -363,6 +409,7 @@ function smallListTable(
           ))}
           <th>Summary</th>
           <th>Sub</th>
+          <th>Dep</th>
           <th>Dep (to log)</th>
           <th>Actions</th>
         </tr>
@@ -380,7 +427,7 @@ function smallListTable(
               setListSourceIdsToShow,
               setFocusOnTaskId,
               R.concat(uiTreePath, [index]),
-              subtasksToExpand,
+              uiTrees,
               dispatch
             )
           )
@@ -401,7 +448,7 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
-  subtasksToExpand: Record<string, UiTree>,
+  uiTrees: Record<string, UiTree>,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
@@ -457,7 +504,7 @@ function bigListTable(
         setListSourceIdsToShow,
         setFocusOnTaskId,
         [],
-        subtasksToExpand,
+        uiTrees,
         dispatch
       )}
     </div>

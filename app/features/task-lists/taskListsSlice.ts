@@ -85,13 +85,13 @@ interface IdAndTaskList {
 
 interface SourceIdAndUiTree {
   sourceId: string;
-  subtasksToExpand: UiTree;
+  uiTree: UiTree;
 }
 
-interface SourcePathAndExpansion {
+interface SourceIdAndPathAndUiTrees {
   sourceId: string;
   uiTreePath: Array<number>;
-  subtasksToExpand: Record<string, UiTree>;
+  uiTrees: Record<string, UiTree>;
 }
 
 export const togglePropertyFun = (
@@ -125,14 +125,14 @@ const taskListsSlice = createSlice({
     },
     setUiForPath: (state, sourceDisplay: Payload<SourceIdAndUiTree>) => {
       state.display[sourceDisplay.payload.sourceId] =
-        sourceDisplay.payload.subtasksToExpand;
+        sourceDisplay.payload.uiTree;
     },
     toggleSubtaskInSourceExpansionUi: (
       state,
-      sourceAndUiTree: Payload<SourcePathAndExpansion>
+      sourceAndUiTree: Payload<SourceIdAndPathAndUiTrees>
     ) => {
-      const subtasksToExpand =
-        sourceAndUiTree.payload.subtasksToExpand[
+      const uiTree =
+        sourceAndUiTree.payload.uiTrees[
           sourceAndUiTree.payload.sourceId
         ];
       state.display[
@@ -141,7 +141,7 @@ const taskListsSlice = createSlice({
         UiTreeLinkageProperty.SUBTASKS,
         toggleProperty(UiTreeProperty.SUBTASKS),
         sourceAndUiTree.payload.uiTreePath,
-        subtasksToExpand
+        uiTree
       );
     },
     clearForecastData: (state) => {
@@ -552,13 +552,13 @@ export const retrieveForecast = (
 export const dispatchToggleSubtaskExpansionUi = (
   sourceId: string,
   uiTreePath: Array<number>,
-  subtasksToExpand: Record<string, UiTree>
+  uiTrees: Record<string, UiTree>
 ): AppThunk => async (dispatch) => {
   dispatch(
     toggleSubtaskInSourceExpansionUi({
       sourceId,
       uiTreePath,
-      subtasksToExpand,
+      uiTrees,
     })
   );
 };
@@ -575,7 +575,7 @@ export const dispatchLoadOneSourceIntoTasks = (
   return dispatch(
     setUiForPath({
       sourceId,
-      subtasksToExpand: uiTreeFromYamlTaskList(taskList),
+      uiTree: uiTreeFromYamlTaskList(taskList),
     })
   );
 };
@@ -597,7 +597,7 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
     dispatch(
       setUiForPath({
         sourceId: uiTreePathKeys[i],
-        subtasksToExpand: uiTreePathVals[i],
+        uiTree: uiTreePathVals[i],
       })
     );
   }
