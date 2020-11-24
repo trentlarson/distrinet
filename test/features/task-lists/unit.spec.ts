@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 
-import { taskFromString, toggleExpanded } from '../../../app/features/task-lists/taskListsSlice';
-import { editSubtaskAtPathOneSource } from '../../../app/features/task-lists/util';
+import { taskFromString, toggleSubtaskExpanded } from '../../../app/features/task-lists/taskListsSlice';
+import { editUiTreeAtPathOneSource } from '../../../app/features/task-lists/util';
 
 describe('taskFromString', () => {
   it('should parse with both priority and estimate', () => {
@@ -61,21 +61,21 @@ const sub322trueLastFalse = {
   subtasks: [ R.clone(sub21false), R.clone(sub21true), R.clone(sub1false), R.clone(sub1false) ]
 };
 
-describe('editSubtaskAtPathOneSource', () => {
+describe('editUiTreeAtPathOneSource', () => {
   it('should toggle at the right level', () => {
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1false))
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub1false))
     .toEqual(sub1true);
 
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1true))
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub1true))
     .toEqual(sub1false);
 
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub322false))
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub322false))
     .toEqual(sub322true);
 
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [3], sub322true))
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [3], sub322true))
     .toEqual(sub322trueLastFalse);
 
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [1, 1], sub322true))
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [1, 1], sub322true))
     .toEqual(sub322trueMidFalse);
   });
 });

@@ -101,6 +101,7 @@ export const togglePropertyFun = (
   return R.set(R.lensProp(property), !R.prop(property, uiTreePath), uiTreePath);
 };
 export const toggleProperty = R.curry(togglePropertyFun);
+export const toggleSubtaskExpanded = toggleProperty(UiTreeProperty.SUBTASKS);
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
