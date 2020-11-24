@@ -30,43 +30,52 @@ describe('taskFromString', () => {
   });
 });
 
-const sub1false = { expanded: false, subtasks: [] };
-const sub1true = { expanded: true, subtasks: [] };
+const sub1false = { subtasksExpanded: false, subtasks: [] };
+const sub1true = { subtasksExpanded: true, subtasks: [] };
 const sub21false = {
-  expanded: false,
+  subtasksExpanded: false,
   subtasks: [ R.clone(sub1true), R.clone(sub1true), R.clone(sub1false) ]
 };
 const sub21true = {
-  expanded: true,
+  subtasksExpanded: true,
   subtasks: [ R.clone(sub1true), R.clone(sub1true), R.clone(sub1false) ]
 };
 const sub21trueMidFalse = {
-  expanded: true,
+  subtasksExpanded: true,
   subtasks: [ R.clone(sub1true), R.clone(sub1false), R.clone(sub1false) ]
 };
 const sub322false = {
-  expanded: false,
+  subtasksExpanded: false,
   subtasks: [ R.clone(sub21false), R.clone(sub21true), R.clone(sub1false), R.clone(sub1true) ]
 };
 const sub322true = {
-  expanded: true,
+  subtasksExpanded: true,
   subtasks: [ R.clone(sub21false), R.clone(sub21true), R.clone(sub1false), R.clone(sub1true) ]
 };
 const sub322trueMidFalse = {
-  expanded: true,
+  subtasksExpanded: true,
   subtasks: [ R.clone(sub21false), R.clone(sub21trueMidFalse), R.clone(sub1false), R.clone(sub1true) ]
 };
 const sub322trueLastFalse = {
-  expanded: true,
+  subtasksExpanded: true,
   subtasks: [ R.clone(sub21false), R.clone(sub21true), R.clone(sub1false), R.clone(sub1false) ]
 };
 
 describe('editSubtaskAtPathOneSource', () => {
   it('should toggle at the right level', () => {
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1false)).toEqual(sub1true);
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1true)).toEqual(sub1false);
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub322false)).toEqual(sub322true);
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [3], sub322true)).toEqual(sub322trueLastFalse);
-    expect(editSubtaskAtPathOneSource(toggleExpanded, [1, 1], sub322true)).toEqual(sub322trueMidFalse);
+    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1false))
+    .toEqual(sub1true);
+
+    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub1true))
+    .toEqual(sub1false);
+
+    expect(editSubtaskAtPathOneSource(toggleExpanded, [], sub322false))
+    .toEqual(sub322true);
+
+    expect(editSubtaskAtPathOneSource(toggleExpanded, [3], sub322true))
+    .toEqual(sub322trueLastFalse);
+
+    expect(editSubtaskAtPathOneSource(toggleExpanded, [1, 1], sub322true))
+    .toEqual(sub322trueMidFalse);
   });
 });

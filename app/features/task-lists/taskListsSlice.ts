@@ -93,7 +93,11 @@ interface SourcePathAndExpansion {
 }
 
 export const toggleExpanded = (subtaskPath: SubtaskPath) => {
-  return R.set(R.lensProp('expanded'), !subtaskPath.expanded, subtaskPath);
+  return R.set(
+    R.lensProp('subtasksExpanded'),
+    !subtaskPath.subtasksExpanded,
+    subtaskPath
+  );
 };
 
 const taskListsSlice = createSlice({

@@ -14,7 +14,7 @@ export interface YamlTask {
 }
 
 export interface SubtaskPath {
-  expanded: boolean;
+  subtasksExpanded: boolean;
   subtasks: Array<SubtaskPath>;
 }
 
@@ -25,7 +25,7 @@ export function subtaskPathFromYamlTaskList(
   yamlTaskList: Array<YamlTask>
 ): SubtaskPath {
   return {
-    expanded: false,
+    subtasksExpanded: false,
     subtasks: R.map(
       (task) => subtaskPathFromYamlTaskList(task.subtasks),
       yamlTaskList
@@ -34,7 +34,7 @@ export function subtaskPathFromYamlTaskList(
 }
 
 /**
- * return boolean value of 'expanded' at the subtaskPath in subtasksToExpand
+ * return boolean value of 'subtasksExpanded' at the subtaskPath in subtasksToExpand
  */
 export function areSubtasksExpanded(
   subtaskPath: Array<number>,
@@ -45,7 +45,7 @@ export function areSubtasksExpanded(
     return false;
   }
   if (subtaskPath.length === 0) {
-    return subtasksToExpand.expanded;
+    return subtasksToExpand.subtasksExpanded;
   }
   const result = areSubtasksExpanded(
     R.drop(1, subtaskPath),
@@ -55,27 +55,27 @@ export function areSubtasksExpanded(
 }
 
 /**
- * return copy of subtasksToExpandOneSource with the 'expanded' toggled at path subtaskPath
+ * return copy of subtasksToEditOneSource with the item at path subtaskPath edited via editFun
  */
 export function editSubtaskAtPathOneSource(
   editFun: (arg0: SubtaskPath) => SubtaskPath,
   subtaskPath: Array<number>,
-  subtasksToExpandOneSource: SubtaskPath
+  subtasksToEditOneSource: SubtaskPath
 ): SubtaskPath {
   if (subtaskPath.length === 0) {
-    return editFun(subtasksToExpandOneSource);
+    return editFun(subtasksToEditOneSource);
   }
 
   // there are more items in the subtaskPath
 
   if (R.isNil(subtaskPath[0])) {
     throw Error(
-      `Got bad path in editSubtaskAtPath: ${
+      `Got bad subtask path in editSubtaskAtPathOneSource: ${
         subtaskPath[0]
       } ... for subtaskPath ${JSON.stringify(
         subtaskPath
-      )} ... for subtasksToExpandOneSource ${JSON.stringify(
-        subtasksToExpandOneSource
+      )} ... for subtasksToEditOneSource ${JSON.stringify(
+        subtasksToEditOneSource
       )}`
     );
   }
@@ -85,10 +85,10 @@ export function editSubtaskAtPathOneSource(
   const newSubtasks: Array<SubtaskPath> = R.adjust(
     key,
     R.curry(editSubtaskAtPathOneSource)(editFun)(remainingPath),
-    R.clone(subtasksToExpandOneSource.subtasks)
+    R.clone(subtasksToEditOneSource.subtasks)
   );
   return {
-    expanded: subtasksToExpandOneSource.expanded,
+    subtasksExpanded: subtasksToEditOneSource.subtasksExpanded,
     subtasks: newSubtasks,
   };
 }
@@ -97,12 +97,12 @@ export function editSubtaskAtPath(
   editFun: (arg0: SubtaskPath) => SubtaskPath,
   sourceId: string,
   subtaskPath: Array<number>,
-  subtasksToExpand: Record<string, SubtaskPath>
+  subtasksToEdit: Record<string, SubtaskPath>
 ): Record<string, SubtaskPath> {
-  subtasksToExpand[sourceId] = editSubtaskAtPathOneSource(
+  subtasksToEdit[sourceId] = editSubtaskAtPathOneSource(
     editFun,
     subtaskPath,
-    subtasksToExpand[sourceId]
+    subtasksToEdit[sourceId]
   );
-  return subtasksToExpand;
+  return subtasksToEdit;
 }

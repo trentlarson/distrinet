@@ -215,7 +215,7 @@ function oneTaskRow(
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-  const expanded = areSubtasksExpanded(
+  const subtasksExpanded = areSubtasksExpanded(
     subtaskPath,
     subtasksToExpand[task.sourceId]
   );
@@ -276,9 +276,9 @@ function oneTaskRow(
                 );
               }}
             >
-              {expanded ? '<' : '>'}
+              {subtasksExpanded ? '<' : '>'}
             </button>
-            {expanded ? (
+            {subtasksExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define
               smallListTable(
                 [task.subtasks],
