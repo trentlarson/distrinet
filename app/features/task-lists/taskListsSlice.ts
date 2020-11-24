@@ -88,7 +88,9 @@ interface SourceIdAndUiTree {
   uiTree: UiTree;
 }
 
-interface SourceIdAndPathAndUiTrees {
+interface SettingAndSourceIdAndPathAndUiTrees {
+  property: UiTreeProperty;
+  linkage: UiTreeLinkageProperty;
   sourceId: string;
   uiTreePath: Array<number>;
   uiTrees: Record<string, UiTree>;
@@ -101,7 +103,9 @@ export const togglePropertyFun = (
   return R.set(R.lensProp(property), !R.prop(property, uiTreePath), uiTreePath);
 };
 export const toggleProperty = R.curry(togglePropertyFun);
-export const toggleSubtaskExpanded = toggleProperty(UiTreeProperty.SUBTASKS);
+export const toggleSubtaskExpanded = toggleProperty(
+  UiTreeProperty.SUBTASKS_EXP
+);
 
 const taskListsSlice = createSlice({
   name: 'taskLists',
@@ -127,19 +131,17 @@ const taskListsSlice = createSlice({
       state.display[sourceDisplay.payload.sourceId] =
         sourceDisplay.payload.uiTree;
     },
-    toggleSubtaskInSourceExpansionUi: (
+    toggleLinkedTasksInSourceExpansionUi: (
       state,
-      sourceAndUiTree: Payload<SourceIdAndPathAndUiTrees>
+      sourceAndUiTree: Payload<SettingAndSourceIdAndPathAndUiTrees>
     ) => {
       const uiTree =
-        sourceAndUiTree.payload.uiTrees[
-          sourceAndUiTree.payload.sourceId
-        ];
+        sourceAndUiTree.payload.uiTrees[sourceAndUiTree.payload.sourceId];
       state.display[
         sourceAndUiTree.payload.sourceId
       ] = editUiTreeAtPathOneSource(
-        UiTreeLinkageProperty.SUBTASKS,
-        toggleProperty(UiTreeProperty.SUBTASKS),
+        sourceAndUiTree.payload.linkage,
+        toggleProperty(sourceAndUiTree.payload.property),
         sourceAndUiTree.payload.uiTreePath,
         uiTree
       );
@@ -159,7 +161,7 @@ export const {
   setForecastData,
   setTaskList,
   setUiForPath,
-  toggleSubtaskInSourceExpansionUi,
+  toggleLinkedTasksInSourceExpansionUi,
 } = taskListsSlice.actions;
 
 /** potentially useful
@@ -555,7 +557,25 @@ export const dispatchToggleSubtaskExpansionUi = (
   uiTrees: Record<string, UiTree>
 ): AppThunk => async (dispatch) => {
   dispatch(
-    toggleSubtaskInSourceExpansionUi({
+    toggleLinkedTasksInSourceExpansionUi({
+      property: UiTreeProperty.SUBTASKS_EXP,
+      linkage: UiTreeLinkageProperty.SUBTASKS,
+      sourceId,
+      uiTreePath,
+      uiTrees,
+    })
+  );
+};
+
+export const dispatchToggleDependentExpansionUi = (
+  sourceId: string,
+  uiTreePath: Array<number>,
+  uiTrees: Record<string, UiTree>
+): AppThunk => async (dispatch) => {
+  dispatch(
+    toggleLinkedTasksInSourceExpansionUi({
+      property: UiTreeProperty.DEPENDENTS_EXP,
+      linkage: UiTreeLinkageProperty.DEPENDENTS,
       sourceId,
       uiTreePath,
       uiTrees,

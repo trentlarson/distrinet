@@ -11,13 +11,19 @@ import {
   DEFAULT_HOURS_PER_WEEK,
   DEFAULT_TASK_COMMENT,
   dispatchLoadOneSourceIntoTasks,
+  dispatchToggleDependentExpansionUi,
+  dispatchToggleSubtaskExpansionUi,
   dispatchVolunteer,
   isTaskyamlUriScheme,
   labelValueInSummary,
   retrieveForecast,
-  dispatchToggleSubtaskExpansionUi,
 } from './taskListsSlice';
-import { areLinkedTasksExpanded, UiTree, YamlTask } from './util';
+import {
+  areLinkedTasksExpanded,
+  UiTree,
+  UiTreeLinkageProperty,
+  YamlTask,
+} from './util';
 import style from './style.css';
 
 const child = child_process.execFile;
@@ -216,12 +222,12 @@ function oneTaskRow(
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   const subtasksExpanded = areLinkedTasksExpanded(
-    'subtasks',
+    UiTreeLinkageProperty.SUBTASKS,
     uiTreePath,
     uiTrees[task.sourceId]
   );
   const dependentsExpanded = areLinkedTasksExpanded(
-    'dependents',
+    UiTreeLinkageProperty.DEPENDENTS,
     uiTreePath,
     uiTrees[task.sourceId]
   );

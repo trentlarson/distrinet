@@ -21,8 +21,8 @@ export interface UiTree {
 }
 
 export enum UiTreeProperty {
-  DEPENDENTS = 'dependentsExpanded',
-  SUBTASKS = 'subtasksExpanded',
+  DEPENDENTS_EXP = 'dependentsExpanded',
+  SUBTASKS_EXP = 'subtasksExpanded',
 }
 
 export enum UiTreeLinkageProperty {
@@ -57,7 +57,10 @@ export function areLinkedTasksExpanded(
   subtasksToExpand: UiTree
 ): boolean {
   if (!subtasksToExpand) {
-    console.log('Empty areLinkedTasksExpanded subtasksToExpand', subtasksToExpand);
+    console.log(
+      'Empty areLinkedTasksExpanded subtasksToExpand',
+      subtasksToExpand
+    );
     return false;
   }
   if (subtaskPath.length === 0) {
@@ -94,9 +97,7 @@ export function editUiTreeAtPathOneSource(
         uiTreePath[0]
       } ... for uiTreePath ${JSON.stringify(
         uiTreePath
-      )} ... for uiTreeToEdit ${JSON.stringify(
-        uiTreeToEdit
-      )}`
+      )} ... for uiTreeToEdit ${JSON.stringify(uiTreeToEdit)}`
     );
   }
 
@@ -107,11 +108,7 @@ export function editUiTreeAtPathOneSource(
     R.curry(editUiTreeAtPathOneSource)(linkageProperty)(editFun)(remainingPath),
     R.clone(R.prop(linkageProperty, uiTreeToEdit))
   );
-  const result = R.set(
-    R.lensProp(linkageProperty),
-    newUiTree,
-    uiTreeToEdit
-  );
+  const result = R.set(R.lensProp(linkageProperty), newUiTree, uiTreeToEdit);
   return result;
 }
 
