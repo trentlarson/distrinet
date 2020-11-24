@@ -17,7 +17,7 @@ import {
   retrieveForecast,
   dispatchToggleSubtaskExpansionUi,
 } from './taskListsSlice';
-import { areSubtasksExpanded, SubtaskPath, YamlTask } from './util';
+import { areSubtasksExpanded, UiTree, YamlTask } from './util';
 import style from './style.css';
 
 const child = child_process.execFile;
@@ -210,13 +210,13 @@ function oneTaskRow(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  subtaskPath: Array<number>,
-  subtasksToExpand: Record<string, SubtaskPath>,
+  uiTreePath: Array<number>,
+  subtasksToExpand: Record<string, UiTree>,
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   const subtasksExpanded = areSubtasksExpanded(
-    subtaskPath,
+    uiTreePath,
     subtasksToExpand[task.sourceId]
   );
   // eslint-disable-next-line react/no-array-index-key
@@ -270,7 +270,7 @@ function oneTaskRow(
                 dispatch(
                   dispatchToggleSubtaskExpansionUi(
                     task.sourceId,
-                    subtaskPath,
+                    uiTreePath,
                     subtasksToExpand
                   )
                 );
@@ -288,7 +288,7 @@ function oneTaskRow(
                 labelsToShow,
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
-                subtaskPath,
+                uiTreePath,
                 subtasksToExpand,
                 dispatch
               )
@@ -340,8 +340,8 @@ function smallListTable(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  subtaskPath: Array<number>,
-  subtasksToExpand: Record<string, SubtaskPath>,
+  uiTreePath: Array<number>,
+  subtasksToExpand: Record<string, UiTree>,
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
@@ -379,7 +379,7 @@ function smallListTable(
               labelsToShow,
               setListSourceIdsToShow,
               setFocusOnTaskId,
-              R.concat(subtaskPath, [index]),
+              R.concat(uiTreePath, [index]),
               subtasksToExpand,
               dispatch
             )
@@ -401,7 +401,7 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
-  subtasksToExpand: Record<string, SubtaskPath>,
+  subtasksToExpand: Record<string, UiTree>,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {

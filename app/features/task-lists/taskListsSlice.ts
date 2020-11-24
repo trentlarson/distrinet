@@ -20,9 +20,9 @@ import {
   globalUriScheme,
 } from '../distnet/uriTools';
 import {
-  SubtaskPath,
-  subtaskPathFromYamlTaskList,
-  editSubtaskAtPathOneSource,
+  UiTree,
+  uiTreeFromYamlTaskList,
+  editUiTreeAtPathOneSource,
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
@@ -81,22 +81,22 @@ interface IdAndTaskList {
   taskList: Array<YamlTask>;
 }
 
-interface SourceIdAndSubtaskPath {
+interface SourceIdAndUiTree {
   sourceId: string;
-  subtasksToExpand: SubtaskPath;
+  subtasksToExpand: UiTree;
 }
 
 interface SourcePathAndExpansion {
   sourceId: string;
-  subtaskPath: Array<number>;
-  subtasksToExpand: Record<string, SubtaskPath>;
+  uiTreePath: Array<number>;
+  subtasksToExpand: Record<string, UiTree>;
 }
 
-export const toggleExpanded = (subtaskPath: SubtaskPath) => {
+export const toggleExpanded = (uiTreePath: UiTree) => {
   return R.set(
     R.lensProp('subtasksExpanded'),
-    !subtaskPath.subtasksExpanded,
-    subtaskPath
+    !uiTreePath.subtasksExpanded,
+    uiTreePath
   );
 };
 
@@ -104,7 +104,7 @@ const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
     allLists: {} as Record<string, Array<YamlTask>>,
-    display: {} as Record<string, SubtaskPath>,
+    display: {} as Record<string, UiTree>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
@@ -120,23 +120,26 @@ const taskListsSlice = createSlice({
     setTaskList: (state, tasks: Payload<IdAndTaskList>) => {
       state.allLists[tasks.payload.sourceId] = tasks.payload.taskList;
     },
-    setUiForPath: (state, sourceDisplay: Payload<SourceIdAndSubtaskPath>) => {
+    setUiForPath: (state, sourceDisplay: Payload<SourceIdAndUiTree>) => {
       state.display[sourceDisplay.payload.sourceId] =
         sourceDisplay.payload.subtasksToExpand;
     },
     toggleSubtaskInSourceExpansionUi: (
       state,
-      sourceAndSubtaskPath: Payload<SourcePathAndExpansion>
+      sourceAndUiTree: Payload<SourcePathAndExpansion>
     ) => {
       const subtasksToExpand =
-        sourceAndSubtaskPath.payload.subtasksToExpand[
-          sourceAndSubtaskPath.payload.sourceId
+        sourceAndUiTree.payload.subtasksToExpand[
+          sourceAndUiTree.payload.sourceId
         ];
+console.log("dispatched with uiTree", sourceAndUiTree);
+console.log("dispatched with uiTree", sourceAndUiTree.payload.uiTreePath);
+
       state.display[
-        sourceAndSubtaskPath.payload.sourceId
-      ] = editSubtaskAtPathOneSource(
+        sourceAndUiTree.payload.sourceId
+      ] = editUiTreeAtPathOneSource(
         toggleExpanded,
-        sourceAndSubtaskPath.payload.subtaskPath,
+        sourceAndUiTree.payload.uiTreePath,
         subtasksToExpand
       );
     },
@@ -547,13 +550,13 @@ export const retrieveForecast = (
 
 export const dispatchToggleSubtaskExpansionUi = (
   sourceId: string,
-  subtaskPath: Array<number>,
-  subtasksToExpand: Record<string, SubtaskPath>
+  uiTreePath: Array<number>,
+  subtasksToExpand: Record<string, UiTree>
 ): AppThunk => async (dispatch) => {
   dispatch(
     toggleSubtaskInSourceExpansionUi({
       sourceId,
-      subtaskPath,
+      uiTreePath,
       subtasksToExpand,
     })
   );
@@ -571,7 +574,7 @@ export const dispatchLoadOneSourceIntoTasks = (
   return dispatch(
     setUiForPath({
       sourceId,
-      subtasksToExpand: subtaskPathFromYamlTaskList(taskList),
+      subtasksToExpand: uiTreeFromYamlTaskList(taskList),
     })
   );
 };
@@ -585,15 +588,15 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
   );
   await dispatch(setAllTaskLists(newTasks));
 
-  const subtaskPathKeys = R.keys(getState().taskLists.allLists);
-  const subtaskPathVals = R.values(getState().taskLists.allLists).map((tl) =>
-    subtaskPathFromYamlTaskList(tl)
+  const uiTreePathKeys = R.keys(getState().taskLists.allLists);
+  const uiTreePathVals = R.values(getState().taskLists.allLists).map((tl) =>
+    uiTreeFromYamlTaskList(tl)
   );
-  for (let i = 0; i < subtaskPathKeys.length; i += 1) {
+  for (let i = 0; i < uiTreePathKeys.length; i += 1) {
     dispatch(
       setUiForPath({
-        sourceId: subtaskPathKeys[i],
-        subtasksToExpand: subtaskPathVals[i],
+        sourceId: uiTreePathKeys[i],
+        subtasksToExpand: uiTreePathVals[i],
       })
     );
   }
@@ -609,7 +612,7 @@ export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
   if (R.keys(getState().taskLists.allLists).length === 0) {
     dispatch(dispatchLoadAllSourcesIntoTasks());
   }
-  ... and then do something about the SubtaskPaths for the UI
+  ... and then do something about the UiTrees for the UI
 };
  *
  */

@@ -13,21 +13,23 @@ export interface YamlTask {
   subtasks: Array<YamlTask>;
 }
 
-export interface SubtaskPath {
+export interface UiTree {
+  dependentsExpanded: boolean;
   subtasksExpanded: boolean;
-  subtasks: Array<SubtaskPath>;
+  subtasks: Array<UiTree>;
 }
 
 /**
- * return a SubtaskPath model for the given yamlTaskList
+ * return a UiTree model for the given yamlTaskList
  */
-export function subtaskPathFromYamlTaskList(
+export function uiTreeFromYamlTaskList(
   yamlTaskList: Array<YamlTask>
-): SubtaskPath {
+): UiTree {
   return {
     subtasksExpanded: false,
+    dependentsExpanded: false,
     subtasks: R.map(
-      (task) => subtaskPathFromYamlTaskList(task.subtasks),
+      (task) => uiTreeFromYamlTaskList(task.subtasks),
       yamlTaskList
     ),
   };
@@ -38,7 +40,7 @@ export function subtaskPathFromYamlTaskList(
  */
 export function areSubtasksExpanded(
   subtaskPath: Array<number>,
-  subtasksToExpand: SubtaskPath
+  subtasksToExpand: UiTree
 ): boolean {
   if (!subtasksToExpand) {
     console.log('Empty areSubtasksExpanded subtasksToExpand', subtasksToExpand);
@@ -57,52 +59,54 @@ export function areSubtasksExpanded(
 /**
  * return copy of subtasksToEditOneSource with the item at path subtaskPath edited via editFun
  */
-export function editSubtaskAtPathOneSource(
-  editFun: (arg0: SubtaskPath) => SubtaskPath,
-  subtaskPath: Array<number>,
-  subtasksToEditOneSource: SubtaskPath
-): SubtaskPath {
-  if (subtaskPath.length === 0) {
-    return editFun(subtasksToEditOneSource);
+export function editUiTreeAtPathOneSource(
+  editFun: (arg0: UiTree) => UiTree,
+  uiTreePath: Array<number>,
+  uiTreesToEditOneSource: UiTree
+): UiTree {
+  if (uiTreePath.length === 0) {
+    return editFun(uiTreesToEditOneSource);
   }
 
-  // there are more items in the subtaskPath
+  // there are more items in the uiTreePath
 
-  if (R.isNil(subtaskPath[0])) {
+  if (R.isNil(uiTreePath[0])) {
     throw Error(
-      `Got bad subtask path in editSubtaskAtPathOneSource: ${
-        subtaskPath[0]
-      } ... for subtaskPath ${JSON.stringify(
-        subtaskPath
-      )} ... for subtasksToEditOneSource ${JSON.stringify(
-        subtasksToEditOneSource
+      `Got bad uiTree path in editUiTreeAtPathOneSource: ${
+        uiTreePath[0]
+      } ... for uiTreePath ${JSON.stringify(
+        uiTreePath
+      )} ... for uiTreesToEditOneSource ${JSON.stringify(
+        uiTreesToEditOneSource
       )}`
     );
   }
 
-  const key = subtaskPath[0];
-  const remainingPath: Array<number> = R.drop(1, subtaskPath);
-  const newSubtasks: Array<SubtaskPath> = R.adjust(
+  const key = uiTreePath[0];
+  const remainingPath: Array<number> = R.drop(1, uiTreePath);
+  const newUiTrees: Array<UiTree> = R.adjust(
     key,
-    R.curry(editSubtaskAtPathOneSource)(editFun)(remainingPath),
-    R.clone(subtasksToEditOneSource.subtasks)
+    R.curry(editUiTreeAtPathOneSource)(editFun)(remainingPath),
+    R.clone(uiTreesToEditOneSource['subtasks'])
   );
-  return {
-    subtasksExpanded: subtasksToEditOneSource.subtasksExpanded,
-    subtasks: newSubtasks,
-  };
+  const result = R.set(
+    R.lensProp('subtasks'),
+    newUiTrees,
+    uiTreesToEditOneSource
+  );
+  return result;
 }
 
-export function editSubtaskAtPath(
-  editFun: (arg0: SubtaskPath) => SubtaskPath,
+export function editUiTreeAtPath(
+  editFun: (arg0: UiTree) => UiTree,
   sourceId: string,
-  subtaskPath: Array<number>,
-  subtasksToEdit: Record<string, SubtaskPath>
-): Record<string, SubtaskPath> {
-  subtasksToEdit[sourceId] = editSubtaskAtPathOneSource(
+  uiTreePath: Array<number>,
+  uiTreesToEdit: Record<string, UiTree>
+): Record<string, UiTree> {
+  uiTreesToEdit[sourceId] = editUiTreeAtPathOneSource(
     editFun,
-    subtaskPath,
-    subtasksToEdit[sourceId]
+    uiTreePath,
+    uiTreesToEdit[sourceId]
   );
-  return subtasksToEdit;
+  return uiTreesToEdit;
 }
