@@ -63,19 +63,19 @@ const sub322trueLastFalse = {
 
 describe('editUiTreeAtPathOneSource', () => {
   it('should toggle at the right level', () => {
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub1false))
-    .toEqual(sub1true);
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub1false]))
+    .toEqual([sub1true]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub1true))
-    .toEqual(sub1false);
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub1true]))
+    .toEqual([sub1false]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [], sub322false))
-    .toEqual(sub322true);
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub322false]))
+    .toEqual([sub322true]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [3], sub322true))
-    .toEqual(sub322trueLastFalse);
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0, 3], [sub322true]))
+    .toEqual([sub322trueLastFalse]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [1, 1], sub322true))
-    .toEqual(sub322trueMidFalse);
+    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0, 1, 1], [sub322true]))
+    .toEqual([sub322trueMidFalse]);
   });
 });

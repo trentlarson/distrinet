@@ -53,9 +53,11 @@ export function areLinkedTasksExpanded(
   subtaskPath: Array<number>,
   subtasksToExpand: Array<UiTree>
 ): boolean {
-  if (subtaskPath.length === 0
-      || subtasksToExpand.length === 0
-      || subtaskPath[0] > subtasksToExpand.length - 1) {
+  if (
+    subtaskPath.length === 0 ||
+    subtasksToExpand.length === 0 ||
+    subtaskPath[0] > subtasksToExpand.length - 1
+  ) {
     console.log(
       'Empty or mismatched list for areLinkedTasksExpanded:',
       subtaskPath,
@@ -65,7 +67,7 @@ export function areLinkedTasksExpanded(
   }
   const nextIndex = subtaskPath[0];
   if (subtaskPath.length === 1) {
-    return subtasksToExpand[nextIndex].subtasksExpanded
+    return subtasksToExpand[nextIndex].subtasksExpanded;
   }
   const result = areLinkedTasksExpanded(
     linkageProperty,
@@ -86,7 +88,6 @@ export function editUiTreeAtPathOneSource(
   uiTreePath: Array<number>,
   uiTreesToEdit: Array<UiTree>
 ): Array<UiTree> {
-
   if (uiTreePath.length === 0) {
     return uiTreesToEdit;
   }
