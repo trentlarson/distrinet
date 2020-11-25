@@ -33,19 +33,16 @@ export enum UiTreeLinkageProperty {
 /**
  * return a UiTree model for the given yamlTaskList
  */
-export function uiTreeFromYamlTaskList(yamlTaskList: Array<YamlTask>): UiTree {
-  return {
-    dependents: R.map(
-      (task) => uiTreeFromYamlTaskList(task.dependents),
-      yamlTaskList
-    ),
+export function uiTreeFromYamlTask(activity: YamlTask): UiTree {
+  const dependents = activity.dependents.map(uiTreeFromYamlTask);
+  const subtasks = activity.subtasks.map(uiTreeFromYamlTask);
+  const result = {
+    dependents,
     dependentsExpanded: false,
-    subtasks: R.map(
-      (task) => uiTreeFromYamlTaskList(task.subtasks),
-      yamlTaskList
-    ),
+    subtasks,
     subtasksExpanded: false,
   };
+  return result;
 }
 
 /**
@@ -54,22 +51,26 @@ export function uiTreeFromYamlTaskList(yamlTaskList: Array<YamlTask>): UiTree {
 export function areLinkedTasksExpanded(
   linkageProperty: UiTreeLinkageProperty,
   subtaskPath: Array<number>,
-  subtasksToExpand: UiTree
+  subtasksToExpand: Array<UiTree>
 ): boolean {
-  if (!subtasksToExpand) {
+  if (subtaskPath.length === 0
+      || subtasksToExpand.length === 0
+      || subtaskPath[0] > subtasksToExpand.length - 1) {
     console.log(
-      'Empty areLinkedTasksExpanded subtasksToExpand',
+      'Empty or mismatched list for areLinkedTasksExpanded:',
+      subtaskPath,
       subtasksToExpand
     );
     return false;
   }
-  if (subtaskPath.length === 0) {
-    return subtasksToExpand.subtasksExpanded;
+  const nextIndex = subtaskPath[0];
+  if (subtaskPath.length === 1) {
+    return subtasksToExpand[nextIndex].subtasksExpanded
   }
   const result = areLinkedTasksExpanded(
     linkageProperty,
     R.drop(1, subtaskPath),
-    subtasksToExpand[linkageProperty][subtaskPath[0]]
+    subtasksToExpand[nextIndex][linkageProperty]
   );
   return result;
 }
@@ -83,33 +84,39 @@ export function editUiTreeAtPathOneSource(
   linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
   uiTreePath: Array<number>,
-  uiTreeToEdit: UiTree
-): UiTree {
+  uiTreesToEdit: Array<UiTree>
+): Array<UiTree> {
+
   if (uiTreePath.length === 0) {
-    return editFun(uiTreeToEdit);
+    return uiTreesToEdit;
   }
-
-  // there are more items in the uiTreePath
-
-  if (R.isNil(uiTreePath[0])) {
-    throw Error(
-      `Got bad uiTree path in editUiTreeAtPathOneSource: ${
-        uiTreePath[0]
-      } ... for uiTreePath ${JSON.stringify(
-        uiTreePath
-      )} ... for uiTreeToEdit ${JSON.stringify(uiTreeToEdit)}`
+  if (uiTreePath[0] > uiTreesToEdit.length - 1) {
+    console.log(
+      'Empty or mismatched list for editUiTreeAtPathOneSource:',
+      uiTreePath,
+      uiTreesToEdit
+    );
+    return uiTreesToEdit;
+  }
+  const index = uiTreePath[0];
+  const remainingPath: Array<number> = R.drop(1, uiTreePath);
+  let elem: UiTree = uiTreesToEdit[index];
+  if (remainingPath.length === 0) {
+    elem = editFun(elem);
+  } else {
+    elem = R.set(
+      R.lensProp(linkageProperty),
+      editUiTreeAtPathOneSource(
+        linkageProperty,
+        editFun,
+        remainingPath,
+        elem[linkageProperty]
+      ),
+      elem
     );
   }
 
-  const key = uiTreePath[0];
-  const remainingPath: Array<number> = R.drop(1, uiTreePath);
-  const newUiTree: Array<UiTree> = R.adjust(
-    key,
-    R.curry(editUiTreeAtPathOneSource)(linkageProperty)(editFun)(remainingPath),
-    R.clone(R.prop(linkageProperty, uiTreeToEdit))
-  );
-  const result = R.set(R.lensProp(linkageProperty), newUiTree, uiTreeToEdit);
-  return result;
+  return R.update(index, elem, uiTreesToEdit);
 }
 
 export function editUiTreeAtPath(
@@ -117,8 +124,8 @@ export function editUiTreeAtPath(
   editFun: (arg0: UiTree) => UiTree,
   sourceId: string,
   uiTreePath: Array<number>,
-  uiTreesToEdit: Record<string, UiTree>
-): Record<string, UiTree> {
+  uiTreesToEdit: Record<string, Array<UiTree>>
+): Record<string, Array<UiTree>> {
   uiTreesToEdit[sourceId] = editUiTreeAtPathOneSource(
     linkageProperty,
     editFun,

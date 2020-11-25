@@ -217,19 +217,19 @@ function oneTaskRow(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<number>,
-  uiTrees: Record<string, UiTree>,
+  allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   const subtasksExpanded = areLinkedTasksExpanded(
     UiTreeLinkageProperty.SUBTASKS,
     uiTreePath,
-    uiTrees[task.sourceId]
+    allUiTrees[task.sourceId]
   );
   const dependentsExpanded = areLinkedTasksExpanded(
     UiTreeLinkageProperty.DEPENDENTS,
     uiTreePath,
-    uiTrees[task.sourceId]
+    allUiTrees[task.sourceId]
   );
   // eslint-disable-next-line react/no-array-index-key
   return (
@@ -283,7 +283,7 @@ function oneTaskRow(
                   dispatchToggleSubtaskExpansionUi(
                     task.sourceId,
                     uiTreePath,
-                    uiTrees
+                    allUiTrees
                   )
                 );
               }}
@@ -301,7 +301,7 @@ function oneTaskRow(
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
                 uiTreePath,
-                uiTrees,
+                allUiTrees,
                 dispatch
               )
             ) : (
@@ -323,7 +323,7 @@ function oneTaskRow(
                   dispatchToggleDependentExpansionUi(
                     task.sourceId,
                     uiTreePath,
-                    uiTrees
+                    allUiTrees
                   )
                 );
               }}
@@ -341,7 +341,7 @@ function oneTaskRow(
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
                 uiTreePath,
-                uiTrees,
+                allUiTrees,
                 dispatch
               )
             ) : (
@@ -393,7 +393,7 @@ function smallListTable(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<number>,
-  uiTrees: Record<string, UiTree>,
+  allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
@@ -433,7 +433,7 @@ function smallListTable(
               setListSourceIdsToShow,
               setFocusOnTaskId,
               R.concat(uiTreePath, [index]),
-              uiTrees,
+              allUiTrees,
               dispatch
             )
           )
@@ -454,7 +454,7 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
-  uiTrees: Record<string, UiTree>,
+  allUiTrees: Record<string, Array<UiTree>>,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
@@ -510,7 +510,7 @@ function bigListTable(
         setListSourceIdsToShow,
         setFocusOnTaskId,
         [],
-        uiTrees,
+        allUiTrees,
         dispatch
       )}
     </div>

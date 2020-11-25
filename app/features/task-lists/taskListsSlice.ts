@@ -23,7 +23,7 @@ import {
   UiTree,
   UiTreeProperty,
   UiTreeLinkageProperty,
-  uiTreeFromYamlTaskList,
+  uiTreeFromYamlTask,
   editUiTreeAtPathOneSource,
   YamlTask,
 } from './util';
@@ -83,9 +83,9 @@ interface IdAndTaskList {
   taskList: Array<YamlTask>;
 }
 
-interface SourceIdAndUiTree {
+interface SourceIdAndUiTrees {
   sourceId: string;
-  uiTree: UiTree;
+  uiTreeList: Array<UiTree>;
 }
 
 interface SettingAndSourceIdAndPathAndUiTrees {
@@ -93,7 +93,7 @@ interface SettingAndSourceIdAndPathAndUiTrees {
   linkage: UiTreeLinkageProperty;
   sourceId: string;
   uiTreePath: Array<number>;
-  uiTrees: Record<string, UiTree>;
+  allUiTrees: Record<string, Array<UiTree>>;
 }
 
 export const togglePropertyFun = (
@@ -111,7 +111,7 @@ const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
     allLists: {} as Record<string, Array<YamlTask>>,
-    display: {} as Record<string, UiTree>,
+    display: {} as Record<string, Array<UiTree>>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },
   reducers: {
@@ -127,23 +127,23 @@ const taskListsSlice = createSlice({
     setTaskList: (state, tasks: Payload<IdAndTaskList>) => {
       state.allLists[tasks.payload.sourceId] = tasks.payload.taskList;
     },
-    setUiForPath: (state, sourceDisplay: Payload<SourceIdAndUiTree>) => {
+    setUiForPath: (state, sourceDisplay: Payload<SourceIdAndUiTrees>) => {
       state.display[sourceDisplay.payload.sourceId] =
-        sourceDisplay.payload.uiTree;
+        sourceDisplay.payload.uiTreeList;
     },
     toggleLinkedTasksInSourceExpansionUi: (
       state,
       sourceAndUiTree: Payload<SettingAndSourceIdAndPathAndUiTrees>
     ) => {
-      const uiTree =
-        sourceAndUiTree.payload.uiTrees[sourceAndUiTree.payload.sourceId];
+      const uiTreeList =
+        sourceAndUiTree.payload.allUiTrees[sourceAndUiTree.payload.sourceId];
       state.display[
         sourceAndUiTree.payload.sourceId
       ] = editUiTreeAtPathOneSource(
         sourceAndUiTree.payload.linkage,
         toggleProperty(sourceAndUiTree.payload.property),
         sourceAndUiTree.payload.uiTreePath,
-        uiTree
+        uiTreeList
       );
     },
     clearForecastData: (state) => {
@@ -554,7 +554,7 @@ export const retrieveForecast = (
 export const dispatchToggleSubtaskExpansionUi = (
   sourceId: string,
   uiTreePath: Array<number>,
-  uiTrees: Record<string, UiTree>
+  allUiTrees: Record<string, Array<UiTree>>
 ): AppThunk => async (dispatch) => {
   dispatch(
     toggleLinkedTasksInSourceExpansionUi({
@@ -562,7 +562,7 @@ export const dispatchToggleSubtaskExpansionUi = (
       linkage: UiTreeLinkageProperty.SUBTASKS,
       sourceId,
       uiTreePath,
-      uiTrees,
+      allUiTrees,
     })
   );
 };
@@ -570,7 +570,7 @@ export const dispatchToggleSubtaskExpansionUi = (
 export const dispatchToggleDependentExpansionUi = (
   sourceId: string,
   uiTreePath: Array<number>,
-  uiTrees: Record<string, UiTree>
+  allUiTrees: Record<string, Array<UiTree>>
 ): AppThunk => async (dispatch) => {
   dispatch(
     toggleLinkedTasksInSourceExpansionUi({
@@ -578,7 +578,7 @@ export const dispatchToggleDependentExpansionUi = (
       linkage: UiTreeLinkageProperty.DEPENDENTS,
       sourceId,
       uiTreePath,
-      uiTrees,
+      allUiTrees,
     })
   );
 };
@@ -595,7 +595,7 @@ export const dispatchLoadOneSourceIntoTasks = (
   return dispatch(
     setUiForPath({
       sourceId,
-      uiTree: uiTreeFromYamlTaskList(taskList),
+      uiTreeList: taskList.map(uiTreeFromYamlTask),
     })
   );
 };
@@ -611,13 +611,13 @@ export const dispatchLoadAllSourcesIntoTasks = (): AppThunk => async (
 
   const uiTreePathKeys = R.keys(getState().taskLists.allLists);
   const uiTreePathVals = R.values(getState().taskLists.allLists).map((tl) =>
-    uiTreeFromYamlTaskList(tl)
+    tl.map(uiTreeFromYamlTask)
   );
   for (let i = 0; i < uiTreePathKeys.length; i += 1) {
     dispatch(
       setUiForPath({
         sourceId: uiTreePathKeys[i],
-        uiTree: uiTreePathVals[i],
+        uiTreeList: uiTreePathVals[i],
       })
     );
   }

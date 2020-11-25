@@ -1,4 +1,4 @@
-  - 90 0 show dependents in top list
+  - 90 0 expand dependents in top list (and avoid "Empty or mismatched" error)
   - 90 0 show labels for subtasks
   - 80 1 when browsing external lists, detect internal task URLs
   - 85 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
