@@ -433,10 +433,12 @@ function smallListTable(
               labelsToShow,
               setListSourceIdsToShow,
               setFocusOnTaskId,
-              R.concat(uiTreePath, [{
-                index,
-                path: UiTreeLinkageProperty.SUBTASKS,
-              }]),
+              R.concat(uiTreePath, [
+                {
+                  index,
+                  path: UiTreeLinkageProperty.SUBTASKS,
+                },
+              ]),
               allUiTrees,
               dispatch
             )

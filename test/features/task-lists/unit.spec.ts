@@ -1,7 +1,10 @@
 import * as R from 'ramda';
 
 import { taskFromString, toggleSubtaskExpanded } from '../../../app/features/task-lists/taskListsSlice';
-import { editUiTreeAtPathOneSource } from '../../../app/features/task-lists/util';
+import {
+  editUiTreeAtPathOneSource,
+  UiTreeLinkageProperty,
+} from '../../../app/features/task-lists/util';
 
 describe('taskFromString', () => {
   it('should parse with both priority and estimate', () => {
@@ -63,19 +66,51 @@ const sub322trueLastFalse = {
 
 describe('editUiTreeAtPathOneSource', () => {
   it('should toggle at the right level', () => {
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub1false]))
+    expect(editUiTreeAtPathOneSource(
+      'subtasks',
+      toggleSubtaskExpanded,
+      [{ index: 0, path: UiTreeLinkageProperty.SUBTASKS}],
+      [sub1false]
+    ))
     .toEqual([sub1true]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub1true]))
+    expect(editUiTreeAtPathOneSource(
+      'subtasks',
+      toggleSubtaskExpanded,
+      [{ index: 0, path: UiTreeLinkageProperty.SUBTASKS}],
+      [sub1true]
+    ))
     .toEqual([sub1false]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0], [sub322false]))
+    expect(editUiTreeAtPathOneSource(
+      'subtasks',
+      toggleSubtaskExpanded,
+      [{ index: 0, path: UiTreeLinkageProperty.SUBTASKS}],
+      [sub322false]
+    ))
     .toEqual([sub322true]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0, 3], [sub322true]))
+    expect(editUiTreeAtPathOneSource(
+      'subtasks',
+      toggleSubtaskExpanded,
+      [
+        { index: 0, path: UiTreeLinkageProperty.SUBTASKS},
+        { index: 3, path: UiTreeLinkageProperty.SUBTASKS},
+      ],
+      [sub322true]
+    ))
     .toEqual([sub322trueLastFalse]);
 
-    expect(editUiTreeAtPathOneSource('subtasks', toggleSubtaskExpanded, [0, 1, 1], [sub322true]))
+    expect(editUiTreeAtPathOneSource(
+      'subtasks',
+      toggleSubtaskExpanded,
+      [
+        { index: 0, path: UiTreeLinkageProperty.SUBTASKS},
+        { index: 1, path: UiTreeLinkageProperty.SUBTASKS},
+        { index: 1, path: UiTreeLinkageProperty.SUBTASKS},
+      ],
+      [sub322true]
+    ))
     .toEqual([sub322trueMidFalse]);
   });
 });

@@ -35,7 +35,6 @@ export interface UiTreeBranch {
   path: UiTreeLinkageProperty;
 }
 
-
 /**
  * return a UiTree model for the given yamlTaskList
  */
@@ -105,7 +104,7 @@ export function editUiTreeAtPathOneSource(
     );
     return uiTreesToEdit;
   }
-  const index = uiTreePath[0].index;
+  const { index } = uiTreePath[0];
   const remainingPath: Array<UiTreeBranch> = R.drop(1, uiTreePath);
   let elem: UiTree = uiTreesToEdit[index];
   if (remainingPath.length === 0) {
