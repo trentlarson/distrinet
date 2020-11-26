@@ -388,7 +388,7 @@ function smallListTable(
   dispatch: (arg0: AppThunk) => void
 ) {
   return (
-    <table style={{border: '1px solid'}}>
+    <table style={{ border: '1px solid' }}>
       <thead>
         <tr>
           <th>Project</th>
