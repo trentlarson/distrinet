@@ -279,8 +279,9 @@ function oneTaskRow(
           </td>
         );
       })}
-      <td>{task.summary}</td>
       <td>
+        {task.summary}
+        <br />
         {task.subtasks.length > 0 ? (
           <span>
             <button
@@ -404,7 +405,6 @@ function smallListTable(
             <th key={label}>{label}</th>
           ))}
           <th>Summary</th>
-          <th>Sub</th>
           <th>Dep</th>
           <th>Actions</th>
         </tr>
