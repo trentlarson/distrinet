@@ -21,6 +21,7 @@ import {
 } from '../distnet/uriTools';
 import {
   UiTree,
+  UiTreeBranch,
   UiTreeProperty,
   UiTreeLinkageProperty,
   uiTreeFromYamlTask,
@@ -92,7 +93,7 @@ interface SettingAndSourceIdAndPathAndUiTrees {
   property: UiTreeProperty;
   linkage: UiTreeLinkageProperty;
   sourceId: string;
-  uiTreePath: Array<number>;
+  uiTreePath: Array<UiTreeBranch>;
   allUiTrees: Record<string, Array<UiTree>>;
 }
 
@@ -553,7 +554,7 @@ export const retrieveForecast = (
 
 export const dispatchToggleSubtaskExpansionUi = (
   sourceId: string,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>
 ): AppThunk => async (dispatch) => {
   dispatch(
@@ -569,7 +570,7 @@ export const dispatchToggleSubtaskExpansionUi = (
 
 export const dispatchToggleDependentExpansionUi = (
   sourceId: string,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>
 ): AppThunk => async (dispatch) => {
   dispatch(

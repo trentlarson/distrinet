@@ -21,6 +21,7 @@ import {
 import {
   areLinkedTasksExpanded,
   UiTree,
+  UiTreeBranch,
   UiTreeLinkageProperty,
   YamlTask,
 } from './util';
@@ -216,7 +217,7 @@ function oneTaskRow(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
 ) {
@@ -392,7 +393,7 @@ function smallListTable(
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
 ) {
@@ -432,7 +433,10 @@ function smallListTable(
               labelsToShow,
               setListSourceIdsToShow,
               setFocusOnTaskId,
-              R.concat(uiTreePath, [index]),
+              R.concat(uiTreePath, [{
+                index,
+                path: UiTreeLinkageProperty.SUBTASKS,
+              }]),
               allUiTrees,
               dispatch
             )

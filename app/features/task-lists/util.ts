@@ -30,6 +30,12 @@ export enum UiTreeLinkageProperty {
   SUBTASKS = 'subtasks',
 }
 
+export interface UiTreeBranch {
+  index: number;
+  path: UiTreeLinkageProperty;
+}
+
+
 /**
  * return a UiTree model for the given yamlTaskList
  */
@@ -50,13 +56,13 @@ export function uiTreeFromYamlTask(activity: YamlTask): UiTree {
  */
 export function areLinkedTasksExpanded(
   linkageProperty: UiTreeLinkageProperty,
-  subtaskPath: Array<number>,
+  subtaskPath: Array<UiTreeBranch>,
   subtasksToExpand: Array<UiTree>
 ): boolean {
   if (
     subtaskPath.length === 0 ||
     subtasksToExpand.length === 0 ||
-    subtaskPath[0] > subtasksToExpand.length - 1
+    subtaskPath[0].index > subtasksToExpand.length - 1
   ) {
     console.log(
       'Empty or mismatched list for areLinkedTasksExpanded:',
@@ -65,7 +71,7 @@ export function areLinkedTasksExpanded(
     );
     return false;
   }
-  const nextIndex = subtaskPath[0];
+  const nextIndex = subtaskPath[0].index;
   if (subtaskPath.length === 1) {
     return subtasksToExpand[nextIndex].subtasksExpanded;
   }
@@ -85,13 +91,13 @@ export function areLinkedTasksExpanded(
 export function editUiTreeAtPathOneSource(
   linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   uiTreesToEdit: Array<UiTree>
 ): Array<UiTree> {
   if (uiTreePath.length === 0) {
     return uiTreesToEdit;
   }
-  if (uiTreePath[0] > uiTreesToEdit.length - 1) {
+  if (uiTreePath[0].index > uiTreesToEdit.length - 1) {
     console.log(
       'Empty or mismatched list for editUiTreeAtPathOneSource:',
       uiTreePath,
@@ -99,8 +105,8 @@ export function editUiTreeAtPathOneSource(
     );
     return uiTreesToEdit;
   }
-  const index = uiTreePath[0];
-  const remainingPath: Array<number> = R.drop(1, uiTreePath);
+  const index = uiTreePath[0].index;
+  const remainingPath: Array<UiTreeBranch> = R.drop(1, uiTreePath);
   let elem: UiTree = uiTreesToEdit[index];
   if (remainingPath.length === 0) {
     elem = editFun(elem);
@@ -124,7 +130,7 @@ export function editUiTreeAtPath(
   linkageProperty: UiTreeLinkageProperty,
   editFun: (arg0: UiTree) => UiTree,
   sourceId: string,
-  uiTreePath: Array<number>,
+  uiTreePath: Array<UiTreeBranch>,
   uiTreesToEdit: Record<string, Array<UiTree>>
 ): Record<string, Array<UiTree>> {
   uiTreesToEdit[sourceId] = editUiTreeAtPathOneSource(
