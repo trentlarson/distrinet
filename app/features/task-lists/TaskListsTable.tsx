@@ -298,6 +298,9 @@ function oneTaskRow(
               }}
             >
               {areSubtasksExpanded ? '<' : '>'}
+              <span className={style.tooltiptext}>
+                Subtask
+              </span>
             </button>
             {areSubtasksExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define
@@ -338,6 +341,9 @@ function oneTaskRow(
               }}
             >
               {areDependentsExpanded ? '<' : '>'}
+              <span className={style.tooltiptext}>
+                Dependent Task (which cannot be started until the previous is finished)
+              </span>
             </button>
             {areDependentsExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define

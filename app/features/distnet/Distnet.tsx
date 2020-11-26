@@ -192,7 +192,7 @@ export default function Distnet() {
           data-tclass="btn"
           type="button"
         >
-          reload source
+          reload cache
         </button>
         <div>{cacheErrorMessage}</div>
         <div>
