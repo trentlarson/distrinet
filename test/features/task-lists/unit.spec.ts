@@ -1,10 +1,15 @@
 import * as R from 'ramda';
 
-import { taskFromString, toggleSubtaskExpanded } from '../../../app/features/task-lists/taskListsSlice';
+import { taskFromString, toggleProperty } from '../../../app/features/task-lists/taskListsSlice';
 import {
   editUiTreeAtPathOneSource,
   UiTreeLinkageProperty,
+  UiTreeProperty,
 } from '../../../app/features/task-lists/util';
+
+export const toggleSubtaskExpanded = toggleProperty(
+  UiTreeProperty.SUBTASKS_EXP
+);
 
 describe('taskFromString', () => {
   it('should parse with both priority and estimate', () => {

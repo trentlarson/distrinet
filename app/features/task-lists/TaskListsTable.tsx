@@ -22,6 +22,7 @@ import {
   areLinkedTasksExpanded,
   UiTree,
   UiTreeBranch,
+  UiTreeProperty,
   UiTreeLinkageProperty,
   YamlTask,
 } from './util';
@@ -222,15 +223,23 @@ function oneTaskRow(
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-  const subtasksExpanded = areLinkedTasksExpanded(
-    UiTreeLinkageProperty.SUBTASKS,
+  const subtaskUiTreePath = R.concat(
     uiTreePath,
-    allUiTrees[task.sourceId]
+    [{ index, path: UiTreeLinkageProperty.SUBTASKS }]
   );
-  const dependentsExpanded = areLinkedTasksExpanded(
-    UiTreeLinkageProperty.DEPENDENTS,
+  const areSubtasksExpanded = areLinkedTasksExpanded(
+    subtaskUiTreePath,
+    allUiTrees[task.sourceId],
+    UiTreeProperty.SUBTASKS_EXP
+  );
+  const dependentUiTreePath = R.concat(
     uiTreePath,
-    allUiTrees[task.sourceId]
+    [{ index, path: UiTreeLinkageProperty.DEPENDENTS }]
+  );
+  const areDependentsExpanded = areLinkedTasksExpanded(
+    dependentUiTreePath,
+    allUiTrees[task.sourceId],
+    UiTreeProperty.DEPENDENTS_EXP
   );
   // eslint-disable-next-line react/no-array-index-key
   return (
@@ -283,15 +292,15 @@ function oneTaskRow(
                 dispatch(
                   dispatchToggleSubtaskExpansionUi(
                     task.sourceId,
-                    uiTreePath,
+                    subtaskUiTreePath,
                     allUiTrees
                   )
                 );
               }}
             >
-              {subtasksExpanded ? '<' : '>'}
+              {areSubtasksExpanded ? '<' : '>'}
             </button>
-            {subtasksExpanded ? (
+            {areSubtasksExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define
               smallListTable(
                 [task.subtasks],
@@ -301,7 +310,7 @@ function oneTaskRow(
                 labelsToShow,
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
-                uiTreePath,
+                subtaskUiTreePath,
                 allUiTrees,
                 dispatch
               )
@@ -323,15 +332,15 @@ function oneTaskRow(
                 dispatch(
                   dispatchToggleDependentExpansionUi(
                     task.sourceId,
-                    uiTreePath,
+                    dependentUiTreePath,
                     allUiTrees
                   )
                 );
               }}
             >
-              {dependentsExpanded ? '<' : '>'}
+              {areDependentsExpanded ? '<' : '>'}
             </button>
-            {dependentsExpanded ? (
+            {areDependentsExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define
               smallListTable(
                 [task.dependents],
@@ -341,7 +350,7 @@ function oneTaskRow(
                 labelsToShow,
                 setListSourceIdsToShow,
                 setFocusOnTaskId,
-                uiTreePath,
+                dependentUiTreePath,
                 allUiTrees,
                 dispatch
               )
@@ -433,12 +442,7 @@ function smallListTable(
               labelsToShow,
               setListSourceIdsToShow,
               setFocusOnTaskId,
-              R.concat(uiTreePath, [
-                {
-                  index,
-                  path: UiTreeLinkageProperty.SUBTASKS,
-                },
-              ]),
+              uiTreePath,
               allUiTrees,
               dispatch
             )

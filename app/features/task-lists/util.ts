@@ -54,30 +54,30 @@ export function uiTreeFromYamlTask(activity: YamlTask): UiTree {
  * return boolean value of 'subtasksExpanded' at the subtaskPath in subtasksToExpand
  */
 export function areLinkedTasksExpanded(
-  linkageProperty: UiTreeLinkageProperty,
-  subtaskPath: Array<UiTreeBranch>,
-  subtasksToExpand: Array<UiTree>
+  uiTreePath: Array<UiTreeBranch>,
+  uiTree: Array<UiTree>,
+  booleanProperty: UiTreeProperty
 ): boolean {
   if (
-    subtaskPath.length === 0 ||
-    subtasksToExpand.length === 0 ||
-    subtaskPath[0].index > subtasksToExpand.length - 1
+    uiTreePath.length === 0 ||
+    uiTree.length === 0 ||
+    uiTreePath[0].index > uiTree.length - 1
   ) {
     console.log(
       'Empty or mismatched list for areLinkedTasksExpanded:',
-      subtaskPath,
-      subtasksToExpand
+      uiTreePath,
+      uiTree
     );
     return false;
   }
-  const nextIndex = subtaskPath[0].index;
-  if (subtaskPath.length === 1) {
-    return subtasksToExpand[nextIndex].subtasksExpanded;
+  const nextNode = uiTreePath[0];
+  if (uiTreePath.length === 1) {
+    return uiTree[nextNode.index][booleanProperty];
   }
   const result = areLinkedTasksExpanded(
-    linkageProperty,
-    R.drop(1, subtaskPath),
-    subtasksToExpand[nextIndex][linkageProperty]
+    R.drop(1, uiTreePath),
+    uiTree[nextNode.index][nextNode.path],
+    booleanProperty
   );
   return result;
 }
@@ -85,7 +85,7 @@ export function areLinkedTasksExpanded(
 /**
  * linkageProperty is currently 'subtasks' or 'dependents'
  *
- * return copy of uiTreeToEditOneSource with the item at path subtaskPath edited via editFun
+ * return copy of uiTreeToEditOneSource with the item at path uiTreePath edited via editFun
  */
 export function editUiTreeAtPathOneSource(
   linkageProperty: UiTreeLinkageProperty,
@@ -104,25 +104,25 @@ export function editUiTreeAtPathOneSource(
     );
     return uiTreesToEdit;
   }
-  const { index } = uiTreePath[0];
+  const branch = uiTreePath[0];
   const remainingPath: Array<UiTreeBranch> = R.drop(1, uiTreePath);
-  let elem: UiTree = uiTreesToEdit[index];
+  let elem: UiTree = uiTreesToEdit[branch.index];
   if (remainingPath.length === 0) {
     elem = editFun(elem);
   } else {
     elem = R.set(
-      R.lensProp(linkageProperty),
+      R.lensProp(branch.path),
       editUiTreeAtPathOneSource(
         linkageProperty,
         editFun,
         remainingPath,
-        elem[linkageProperty]
+        elem[branch.path]
       ),
       elem
     );
   }
 
-  return R.update(index, elem, uiTreesToEdit);
+  return R.update(branch.index, elem, uiTreesToEdit);
 }
 
 export function editUiTreeAtPath(
