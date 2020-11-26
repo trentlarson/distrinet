@@ -299,7 +299,7 @@ function oneTaskRow(
             >
               {areSubtasksExpanded ? '<' : '>'}
               <span className={style.tooltiptext}>
-                Subtask
+                Subtasks
               </span>
             </button>
             {areSubtasksExpanded ? (
@@ -342,7 +342,7 @@ function oneTaskRow(
             >
               {areDependentsExpanded ? '<' : '>'}
               <span className={style.tooltiptext}>
-                Dependent Task (which cannot be started until the previous is finished)
+                Dependent Tasks (which cannot be started until the previous is finished)
               </span>
             </button>
             {areDependentsExpanded ? (
@@ -411,7 +411,7 @@ function smallListTable(
             <th key={label}>{label}</th>
           ))}
           <th>Summary</th>
-          <th>Dep</th>
+          <th></th>
           <th>Actions</th>
         </tr>
       </thead>
