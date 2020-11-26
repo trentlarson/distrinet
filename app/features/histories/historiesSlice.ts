@@ -117,8 +117,8 @@ const historiesSlice = createSlice({
         );
       }
     },
-    markToggleShowNextLevel: (state, uriContents: Payload<string>) => {
-      const tree = state.uriTree[uriContents.payload];
+    markToggleShowNextLevel: (state, uriContents: Payload<Array<string>>) => {
+      const tree = state.uriTree[uriContents.payload[0]];
       if (tree) {
         tree.showTree = !tree.showTree;
       } else {
@@ -296,7 +296,9 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
   }
 };
 
-export const dispatchToggleShowDir = (historyUri: string): AppThunk => async (
+export const dispatchToggleShowDir = (
+  historyUri: Array<string>
+): AppThunk => async (
   dispatch
 ) => {
   dispatch(markToggleShowNextLevel(historyUri));

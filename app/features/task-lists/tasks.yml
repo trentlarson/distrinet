@@ -9,6 +9,7 @@
   - 80 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
   - 80 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - 55 0 move 'ref' processing to parse YAML?
+  - 55 0 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
   - refactor retrieveAllTasks to return Records instead of one large list
   - 50 -1 automatically create supertask if it doesn't exist
   - >-

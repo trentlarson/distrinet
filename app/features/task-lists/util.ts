@@ -59,7 +59,9 @@ export function areLinkedTasksExpanded(
   booleanProperty: UiTreeProperty
 ): boolean {
   if (
+    !uiTreePath ||
     uiTreePath.length === 0 ||
+    !uiTree ||
     uiTree.length === 0 ||
     uiTreePath[0].index > uiTree.length - 1
   ) {

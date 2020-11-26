@@ -1,7 +1,7 @@
 import electron from 'electron';
 import path from 'path';
 import * as R from 'ramda';
-import React, { useState } from 'react';
+import React, { Dispatch, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import GridLoader from 'react-spinners/GridLoader';
@@ -9,6 +9,7 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
+import { Source } from '../distnet/distnetClasses';
 import {
   dispatchCountSearchable,
   dispatchEraseSearchResults,
@@ -29,6 +30,31 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
   return historiesIsSearching.done < historiesIsSearching.total
     ? Visibility.visible
     : Visibility.hidden;
+}
+
+function historyDir(dispatch: Dispatch<any>, source: Source, tree: FileTree) {
+  return <li key={source.id}>
+    {tree?.hasMatch ? '*' : ''}
+    &nbsp;
+    {source.name}
+    &nbsp;
+    <button
+      type="button"
+      onClick={() => {
+        dispatch(dispatchToggleShowDir([source.id]));
+      }}
+    >
+      {tree?.showTree ? '<' : '>'}
+    </button>
+    <br />
+    <ul>
+      {tree && tree.showTree
+        ? R.values(tree.fileBranches).map((file: FileTree) => (
+            <FileLine key={path.format(file.fullPath)} file={file} />
+          ))
+        : ''}
+    </ul>
+  </li>
 }
 
 export default function Histories() {
@@ -100,31 +126,7 @@ export default function Histories() {
         </div>
         <ul>
           {historySources.map((source) => (
-            <li key={source.id}>
-              {histories.uriTree[source.id]?.hasMatch ? '*' : ''}
-              &nbsp;
-              {source.name}
-              &nbsp;
-              <button
-                type="button"
-                onClick={() => {
-                  dispatch(dispatchToggleShowDir(source.id));
-                }}
-              >
-                {histories.uriTree[source.id]?.showTree ? '<' : '>'}
-              </button>
-              <br />
-              <ul>
-                {histories.uriTree[source.id] &&
-                histories.uriTree[source.id].showTree
-                  ? R.values(
-                      histories.uriTree[source.id].fileBranches
-                    ).map((file: FileTree) => (
-                      <FileLine key={path.format(file.fullPath)} file={file} />
-                    ))
-                  : ''}
-              </ul>
-            </li>
+            historyDir(dispatch, source, histories.uriTree[source.id])
           ))}
         </ul>
       </div>
