@@ -361,24 +361,6 @@ function oneTaskRow(
         )}
       </td>
       <td>
-        {task.dependents.length > 0 ? (
-          <button
-            type="button"
-            className={style.subtask}
-            onClick={() => {
-              console.log('Dependents', task.dependents);
-            }}
-          >
-            &gt;
-            <span className={style.tooltiptext}>
-              Will show dependents in console.
-            </span>
-          </button>
-        ) : (
-          <span />
-        )}
-      </td>
-      <td>
         <button
           type="button"
           onClick={() => {
@@ -424,7 +406,6 @@ function smallListTable(
           <th>Summary</th>
           <th>Sub</th>
           <th>Dep</th>
-          <th>Dep (to log)</th>
           <th>Actions</th>
         </tr>
       </thead>
