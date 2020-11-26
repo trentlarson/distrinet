@@ -223,19 +223,17 @@ function oneTaskRow(
   dispatch: (arg0: AppThunk) => void
 ) {
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
-  const subtaskUiTreePath = R.concat(
-    uiTreePath,
-    [{ index, path: UiTreeLinkageProperty.SUBTASKS }]
-  );
+  const subtaskUiTreePath = R.concat(uiTreePath, [
+    { index, path: UiTreeLinkageProperty.SUBTASKS },
+  ]);
   const areSubtasksExpanded = areLinkedTasksExpanded(
     subtaskUiTreePath,
     allUiTrees[task.sourceId],
     UiTreeProperty.SUBTASKS_EXP
   );
-  const dependentUiTreePath = R.concat(
-    uiTreePath,
-    [{ index, path: UiTreeLinkageProperty.DEPENDENTS }]
-  );
+  const dependentUiTreePath = R.concat(uiTreePath, [
+    { index, path: UiTreeLinkageProperty.DEPENDENTS },
+  ]);
   const areDependentsExpanded = areLinkedTasksExpanded(
     dependentUiTreePath,
     allUiTrees[task.sourceId],
