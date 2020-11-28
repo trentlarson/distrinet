@@ -101,18 +101,19 @@ export default function Histories() {
           {`${histories.searchProgress.done} / ${histories.searchProgress.total}`}
         </div>
         <ul>
-          {historySources.map((source) => (
-            histories.uriTree[source.id]
-            ?
+          {historySources.map((source) =>
+            histories.uriTree[source.id] ? (
               <HistoryDir
-               key={source.id}
-               name={source.name}
-               source={source}
-               tree={histories.uriTree[source.id]}
-               treePath={[source.id]}
+                key={source.id}
+                name={source.name || histories.uriTree[source.id].fullPath.base}
+                source={source}
+                tree={histories.uriTree[source.id]}
+                treePath={[source.id]}
               />
-            : <span key={source.id} />
-          ))}
+            ) : (
+              <span key={source.id} />
+            )
+          )}
         </ul>
       </div>
     </div>
@@ -120,16 +121,16 @@ export default function Histories() {
 }
 
 interface DirProps {
+  name: string;
   source: Source;
-  file: FileTree;
+  tree: FileTree;
+  treePath: Array<string>;
 }
 
 export function HistoryDir(props: DirProps) {
-  const dispatch = useDispatch();
-  let { name, source, tree, treePath } = props;
-  if (!name) {
-    name = tree.fullPath.base;
-  }
+  const dispatch: Dispatch<any> = useDispatch();
+  const { name, source, tree, treePath } = props;
+  const goodName = name || tree.fullPath.base;
 
   let dirExpandButton = <span />;
   if (tree.isDir) {
@@ -147,7 +148,8 @@ export function HistoryDir(props: DirProps) {
 
   const fileUrl = url.pathToFileURL(path.format(tree.fullPath));
 
-  let openLink = (
+  const openLink = (
+    // eslint-disable-next-line jsx-a11y/anchor-is-valid
     <a
       href="#"
       onClick={(event) => {
@@ -180,22 +182,21 @@ export function HistoryDir(props: DirProps) {
     );
   }
 
-  return <li key={source.id}>
-    {tree.hasMatch ? '*' : ''}
-    &nbsp;
-    {name}
-    &nbsp;
-    { dirExpandButton }
-    &nbsp;
-    {openLink}
-    &nbsp;
-    {viewLink}
-    <br />
-    {tree.showTree
-    ?
-      <ul>
-        {
-          R.values(tree.fileBranches).map((file: FileTree) => (
+  return (
+    <li key={source.id}>
+      {tree.hasMatch ? '*' : ''}
+      &nbsp;
+      {goodName}
+      &nbsp;
+      {dirExpandButton}
+      &nbsp;
+      {openLink}
+      &nbsp;
+      {viewLink}
+      <br />
+      {tree.showTree ? (
+        <ul>
+          {R.values(tree.fileBranches).map((file: FileTree) => (
             <HistoryDir
               key={file.fullPath.base}
               name={file.fullPath.base}
@@ -203,9 +204,11 @@ export function HistoryDir(props: DirProps) {
               tree={file}
               treePath={R.concat(treePath, [file.fullPath.base])}
             />
-          ))
-        }
-      </ul>
-    : ''}
-  </li>
+          ))}
+        </ul>
+      ) : (
+        ''
+      )}
+    </li>
+  );
 }

@@ -298,9 +298,7 @@ function oneTaskRow(
               }}
             >
               {areSubtasksExpanded ? '<' : '>'}
-              <span className={style.tooltiptext}>
-                Subtasks
-              </span>
+              <span className={style.tooltiptext}>Subtasks</span>
             </button>
             {areSubtasksExpanded ? (
               // eslint-disable-next-line  @typescript-eslint/no-use-before-define
@@ -342,7 +340,8 @@ function oneTaskRow(
             >
               {areDependentsExpanded ? '<' : '>'}
               <span className={style.tooltiptext}>
-                Dependent Tasks (which cannot be started until the previous is finished)
+                Dependent Tasks (which cannot be started until the previous is
+                finished)
               </span>
             </button>
             {areDependentsExpanded ? (
@@ -411,7 +410,7 @@ function smallListTable(
             <th key={label}>{label}</th>
           ))}
           <th>Summary</th>
-          <th></th>
+          <th>&nbsp;</th>
           <th>Actions</th>
         </tr>
       </thead>

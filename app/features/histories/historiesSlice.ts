@@ -304,9 +304,7 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
 
 export const dispatchToggleShowDir = (
   historyUri: Array<string>
-): AppThunk => async (
-  dispatch
-) => {
+): AppThunk => async (dispatch) => {
   dispatch(markToggleShowNextLevel(historyUri));
 };
 
