@@ -32,31 +32,6 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
     : Visibility.hidden;
 }
 
-function historyDir(dispatch: Dispatch<any>, source: Source, tree: FileTree) {
-  return <li key={source.id}>
-    {tree?.hasMatch ? '*' : ''}
-    &nbsp;
-    {source.name}
-    &nbsp;
-    <button
-      type="button"
-      onClick={() => {
-        dispatch(dispatchToggleShowDir([source.id]));
-      }}
-    >
-      {tree?.showTree ? '<' : '>'}
-    </button>
-    <br />
-    <ul>
-      {tree && tree.showTree
-        ? R.values(tree.fileBranches).map((file: FileTree) => (
-            <FileLine key={path.format(file.fullPath)} file={file} />
-          ))
-        : ''}
-    </ul>
-  </li>
-}
-
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
   const dispatch = useDispatch();
@@ -71,6 +46,7 @@ export default function Histories() {
   const [idInputExpanded, setIdInputExpanded] = useState(Visibility.hidden);
   const [idSearchTerm, setIdSearchTerm] = useState('');
 
+  // histories.uriTree will be empty on initial load, before the paths are built
   const histories = useSelector((state: RootState) => state.histories);
 
   return (
@@ -126,7 +102,16 @@ export default function Histories() {
         </div>
         <ul>
           {historySources.map((source) => (
-            historyDir(dispatch, source, histories.uriTree[source.id])
+            histories.uriTree[source.id]
+            ?
+              <HistoryDir
+               key={source.id}
+               name={source.name}
+               source={source}
+               tree={histories.uriTree[source.id]}
+               treePath={[source.id]}
+              />
+            : <span key={source.id} />
           ))}
         </ul>
       </div>
@@ -134,22 +119,54 @@ export default function Histories() {
   );
 }
 
-interface FileLineProps {
+interface DirProps {
+  source: Source;
   file: FileTree;
 }
 
-function FileLine(props: FileLineProps) {
-  const { file } = props;
-  const fileUrl = url.pathToFileURL(path.format(file.fullPath));
+export function HistoryDir(props: DirProps) {
+  const dispatch = useDispatch();
+  let { name, source, tree, treePath } = props;
+  if (!name) {
+    name = tree.fullPath.base;
+  }
 
-  let link = <span />;
+  let dirExpandButton = <span />;
+  if (tree.isDir) {
+    dirExpandButton = (
+      <button
+        type="button"
+        onClick={() => {
+          dispatch(dispatchToggleShowDir(treePath));
+        }}
+      >
+        {tree.showTree ? '<' : '>'}
+      </button>
+    );
+  }
+
+  const fileUrl = url.pathToFileURL(path.format(tree.fullPath));
+
+  let openLink = (
+    <a
+      href="#"
+      onClick={(event) => {
+        event.preventDefault();
+        electron.shell.openExternal(fileUrl.toString());
+      }}
+    >
+      (open)
+    </a>
+  );
+
+  let viewLink = <span />;
   if (
     // eslint-disable-next-line react/destructuring-assignment
-    props.file.fullPath.base.endsWith('htm') ||
+    tree.fullPath.base.endsWith('htm') ||
     // eslint-disable-next-line react/destructuring-assignment
-    props.file.fullPath.base.endsWith('html')
+    tree.fullPath.base.endsWith('html')
   ) {
-    link = (
+    viewLink = (
       <Link
         to={{
           pathname: routes.HISTORY,
@@ -163,26 +180,32 @@ function FileLine(props: FileLineProps) {
     );
   }
 
-  return (
-    <li>
-      {/* eslint-disable-next-line react/destructuring-assignment */}
-      {props.file.hasMatch ? '*' : '_'}
-      &nbsp;
-      {/* eslint-disable-next-line react/destructuring-assignment */}
-      {props.file.fullPath.base}
-      &nbsp;
-      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-      <a
-        href="#"
-        onClick={(event) => {
-          event.preventDefault();
-          electron.shell.openExternal(fileUrl.toString());
-        }}
-      >
-        (open)
-      </a>
-      &nbsp;
-      {link}
-    </li>
-  );
+  return <li key={source.id}>
+    {tree.hasMatch ? '*' : ''}
+    &nbsp;
+    {name}
+    &nbsp;
+    { dirExpandButton }
+    &nbsp;
+    {openLink}
+    &nbsp;
+    {viewLink}
+    <br />
+    {tree.showTree
+    ?
+      <ul>
+        {
+          R.values(tree.fileBranches).map((file: FileTree) => (
+            <HistoryDir
+              key={file.fullPath.base}
+              name={file.fullPath.base}
+              source={source}
+              tree={file}
+              treePath={R.concat(treePath, [file.fullPath.base])}
+            />
+          ))
+        }
+      </ul>
+    : ''}
+  </li>
 }

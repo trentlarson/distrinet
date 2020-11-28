@@ -30,7 +30,7 @@ export interface FileTree {
 }
 
 export interface FileMatch {
-  uri: string;
+  uri: string; // Source ID
   pathFromUri: Array<FileTree>;
 }
 
@@ -118,9 +118,15 @@ const historiesSlice = createSlice({
       }
     },
     markToggleShowNextLevel: (state, uriContents: Payload<Array<string>>) => {
-      const tree = state.uriTree[uriContents.payload[0]];
-      if (tree) {
-        tree.showTree = !tree.showTree;
+      let remainingTrees = uriContents.payload;
+      let nextTree: FileTree = state.uriTree[remainingTrees[0]];
+      remainingTrees = R.drop(1, remainingTrees);
+      if (remainingTrees.length > 0) {
+        nextTree = nextTree.fileBranches[remainingTrees[0]];
+        remainingTrees = R.drop(1, remainingTrees);
+      }
+      if (nextTree) {
+        nextTree.showTree = !nextTree.showTree;
       } else {
         // see task id:log-errors
         console.error(
