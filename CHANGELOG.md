@@ -9,8 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2020-11-27
 
-## [0.1.2] - 2020-10-11
+### Added
+
+- Show helpful errors when settings are formatted badly.
+- Histories:
+  - Expand directories recursively
+  - Make searches case-insensitive
+- Projects:
+  - Show top 3 or all projects
+  - Display subtask & dependent tasks (recursively!)
+  - Add comment to the signed message
+
+### Fixed
+
+- Show "searching" spinner immediately.
+
+
+## [0.1.2] - 2020-10-11 - 1b8712fd01cb49e096710ebc3d2bc537e9fe4523
 
 ### Added
 

@@ -55,6 +55,7 @@ export interface UrlData {
 export enum SyncMethod {
   // default method (if not set) could be some manual copy or via Distrinet
   GIT = 'GIT',
+  DROPBOX = 'DROPBOX',
 }
 
 /**
