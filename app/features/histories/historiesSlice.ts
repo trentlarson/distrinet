@@ -121,7 +121,7 @@ const historiesSlice = createSlice({
       let remainingTrees = uriContents.payload;
       let nextTree: FileTree = state.uriTree[remainingTrees[0]];
       remainingTrees = R.drop(1, remainingTrees);
-      if (remainingTrees.length > 0) {
+      while (remainingTrees.length > 0) {
         nextTree = nextTree.fileBranches[remainingTrees[0]];
         remainingTrees = R.drop(1, remainingTrees);
       }
@@ -303,9 +303,9 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
 };
 
 export const dispatchToggleShowDir = (
-  historyUri: Array<string>
+  filePath: Array<string>
 ): AppThunk => async (dispatch) => {
-  dispatch(markToggleShowNextLevel(historyUri));
+  dispatch(markToggleShowNextLevel(filePath));
 };
 
 const FILE_EXTENSIONS_FOR_SEARCH = [

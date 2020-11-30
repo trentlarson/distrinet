@@ -7,7 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+
+## [0.1.4] - 2020-11-29
+
+### Fixed
+
+- Expand directories recursively, more than 1 deep.
+
+
 
 ## [0.1.3] - 2020-11-27 - 6547ab2802f962eb96f4b04e7163aef3bc82ce70
 
@@ -27,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show "searching" spinner immediately.
 
 
+
 ## [0.1.2] - 2020-10-11 - 1b8712fd01cb49e096710ebc3d2bc537e9fe4523
 
 ### Added
@@ -40,11 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix error in settings & genealogy for packaged app (due to 'process' reference)
 
 
+
 ## [0.1.1] - 2020-09-25 - 9ce0e01da4b7b6cd1649519eff7001fdd33d7bf7
 
 ### Added
 
 - Histories: allow typing of search term
+
 
 
 ## [0.0.2] - 2020-09-21 - 3bb2906775490659f4574457276b345b3022287b
@@ -55,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Task Lists: use priiority & due dates in forecast
 - File content cache: load at home page
 - Reorganization of documentation and tasks (ie. distrinet tasks)
+
 
 
 ## [0.0.1] - 2020-09-11 - 221c0c1a784b56200147d84ec1ddc5ea737014ac
