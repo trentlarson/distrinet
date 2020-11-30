@@ -15,11 +15,18 @@ I also currently contain these sample applications:
 - [Distributed Histories](app/features/histories/README.md)
 - [Distributed Genealogy](app/features/genealogy/README.md)
 
+
+
+
 ## Plans
 
 See [tasks.yml](tasks.yml)
 
+
+
+
 ## Development
+
 
 To run:
 
@@ -27,18 +34,21 @@ To run:
 - `yarn`
 - `yarn dev`
 
+
 To test:
 
 - `yarn test-all`
 - Run [genealogy tests](app/features/genealogy/README.md).
 
+
 To package (following https://www.electron.build/auto-update ):
 
 - Edit both package.json versions (in / and /app).
 - Add to CHANGELOG.md
-- `yarn package`
-- Create a release and upload package(s) to GitHub.
+- `git push` and let GitHub build all packages before pushing anything new.
+  - Manually: `yarn package`, create a GitHub release, and upload package(s) to it.
 - Add the commit hash to CHANGELOG.md and bump the versions with "-beta".
+
 
 When developing:
 
@@ -55,10 +65,12 @@ To start in a whole new repo, do the following in the same directory where you h
 - `cp -r ../distrinet/app/features/distnet app/features`
 - ... then continue with above.
 
+
 To create that patch file:
 
 - `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/app.global.css app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json yarn.lock > patch.diff`
 - ... then look through patch.diff and remove the references to "task" stuff.
+
 
 #### Tooling
 
@@ -106,6 +118,9 @@ Current [sample app](https://github.com/trentlarson/distrinet) is built on the E
     - MetaMask.io (on Ethereum)
     - AralaPrism.io (on Cardano, not open-source)
 
+
+
+
 ## Design
 
 Types of URI -> URL relationships:
@@ -129,9 +144,15 @@ Types of URI -> URL relationships:
     - always load into memory (and watch for changes)
     - keep a local history
 
+
+
+
 ## Other
 
 To create your own URI, I recommend you use a scheme with your domain or email and the year (if you had it at the beginning of the year), such as "tag:my-email@protonmail.com,2020:stuff-for-home" following the [TagURI](http://taguri.org) [standard](http://www.faqs.org/rfcs/rfc4151.html).  It's an easy way to get started with unique IDs.
+
+
+
 
 ## Kudos
 
