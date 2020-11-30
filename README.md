@@ -37,7 +37,7 @@ To package (following https://www.electron.build/auto-update ):
 - Edit both package.json versions (in / and /app).
 - Add to CHANGELOG.md
 - `yarn package`
-- Create a release and upload to GitHub.
+- Create a release and upload package(s) to GitHub.
 - Add the commit hash to CHANGELOG.md and bump the versions with "-beta".
 
 When developing:
