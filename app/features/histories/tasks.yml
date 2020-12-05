@@ -1,4 +1,3 @@
-  - 0 expand subdirectories in display
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
   - -1 automatically focus on the search input box
   - 0 log search errors somewhere in app, available to user id:log-errors

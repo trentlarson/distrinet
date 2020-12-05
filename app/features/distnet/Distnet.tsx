@@ -21,13 +21,6 @@ import {
 } from './distnetSlice';
 import { globalUriScheme } from './uriTools';
 
-function shortenString(str: string) {
-  if (!str || str.length < 11) {
-    return str;
-  }
-  return `${str.substring(0, 4)}...${str.substring(str.length - 4)}`;
-}
-
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
@@ -164,19 +157,31 @@ export default function Distnet() {
                   </td>
                   <td>
                     {uriSource.urls &&
-                      uriSource.urls.map((inUrl) => (
-                        // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                        <a
-                          href="#"
-                          key={inUrl && inUrl.url}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            electron.shell.openExternal(inUrl.url);
-                          }}
-                        >
-                          {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                          (open&nbsp;{shortenString(inUrl && inUrl.url)})
-                        </a>
+                      uriSource.urls.map((inUrl, index) => (
+                        <span key={inUrl && inUrl.url}>
+                          {index > 0 ? `, ${index + 1}) ` : ''}
+                          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                          <a
+                            href="#"
+                            key={inUrl && inUrl.url}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              electron.shell.openExternal(inUrl.url);
+                            }}
+                          >
+                            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                            Open
+                          </a>
+                          {inUrl.url.startsWith('file:') ? (
+                            <span>
+                              ,
+                              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                              <a href={inUrl.url}>Locate</a>
+                            </span>
+                          ) : (
+                            ''
+                          )}
+                        </span>
                       ))}
                   </td>
                 </tr>
