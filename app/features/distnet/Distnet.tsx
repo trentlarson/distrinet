@@ -21,6 +21,14 @@ import {
 } from './distnetSlice';
 import { globalUriScheme } from './uriTools';
 
+function getExtension(str: string) {
+  const dotPos = str.lastIndexOf('.');
+  if (dotPos > -1) {
+    return str.substring(dotPos + 1);
+  }
+  return '';
+}
+
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
@@ -174,9 +182,12 @@ export default function Distnet() {
                           </a>
                           {inUrl.url.startsWith('file:') ? (
                             <span>
-                              ,
+                              ,&nbsp;
                               {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                              <a href={inUrl.url}>Locate</a>
+                              <a href={inUrl.url}>
+                                Drag&nbsp;
+                                {getExtension(inUrl.url)}
+                              </a>
                             </span>
                           ) : (
                             ''
