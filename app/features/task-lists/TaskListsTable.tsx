@@ -1,8 +1,11 @@
 import child_process from 'child_process';
+import Electron from 'electron';
 import * as R from 'ramda';
 import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
+import URL from 'url';
+
 import { AppThunk, RootState } from '../../store';
 import { Cache, ResourceTypes, Source } from '../distnet/distnetClasses';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
@@ -147,12 +150,25 @@ function sourceActions(
                   </button>
                 </td>
                 <td>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      Electron.shell.openExternal(
+                        URL.pathToFileURL(file).toString()
+                      );
+                    }}
+                  >
+                    Open on System
+                  </button>
+
                   {execPath ? (
                     <button
                       type="button"
                       onClick={() => execProtocolApp(execPath, [file])}
                     >
-                      Open Copy
+                      Open&nbsp;
+                      {protocol}
                     </button>
                   ) : (
                     <span />

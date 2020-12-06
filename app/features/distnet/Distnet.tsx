@@ -19,7 +19,7 @@ import {
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
 } from './distnetSlice';
-import { globalUriScheme } from './uriTools';
+import { globalUriScheme, isUrlLocal } from './uriTools';
 
 function getExtension(str: string) {
   const dotPos = str.lastIndexOf('.');
@@ -140,13 +140,16 @@ export default function Distnet() {
             <thead>
               <tr>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Name
-                </th>
-                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Scheme
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Cached Date
+                  Name
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Remote?
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  In-Memory Data Date
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Actions
@@ -156,12 +159,17 @@ export default function Distnet() {
             <tbody>
               {distnet.settings.sources.map((uriSource: Source) => (
                 <tr key={uriSource.id}>
-                  <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
                   <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
+                  <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
+                  <td>
+                    {uriSource.urls[0] && isUrlLocal(uriSource.urls[0].url)
+                      ? ''
+                      : 'Y'}
+                  </td>
                   <td>
                     {distnet.cache[uriSource.id]
                       ? distnet.cache[uriSource.id].updatedDate
-                      : '(no cached copy)'}
+                      : '(none)'}
                   </td>
                   <td>
                     {uriSource.urls &&

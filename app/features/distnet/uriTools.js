@@ -51,8 +51,20 @@
     return null;
   }
 
+  function isUrlLocal(url) {
+    return (
+      url &&
+      (url.startsWith('file:') ||
+        url.startsWith('http://localhost') ||
+        url.startsWith('https://localhost') ||
+        url.startsWith('http://127.0.0.1') ||
+        url.startsWith('https://127.0.0.1'))
+    );
+  }
+
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isGlobalUri = isGlobalUri;
+  exports.isUrlLocal = isUrlLocal;
   exports.globalUriForId = globalUriForId;
   exports.globalUriScheme = globalUriScheme;
 })(typeof exports === 'undefined' ? (this.uriTools = {}) : exports);

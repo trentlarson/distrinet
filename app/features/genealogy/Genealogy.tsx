@@ -19,7 +19,8 @@ if (electron.remote.session) {
     .set(cookie)
     .then(() => {
       // success
-      console.error("Set fssessionid cookie:", fsSessionId)
+      console.error('Set fssessionid cookie:', cookie.value);
+      return null;
     })
     .catch((error) => {
       console.error('Error setting fssessionid cookie:', error);
@@ -132,6 +133,7 @@ function GenealogyView(options: TreeOption) {
             dispatch(setRootUri(event.target.value));
           }}
         />
+        <br />
         FS Session ID
         <input
           type="text"

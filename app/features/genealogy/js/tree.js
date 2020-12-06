@@ -43,10 +43,11 @@
     markStart();
 
     if (uri.toLowerCase().startsWith("http:")
-        || uri.toLowerCase().startsWith("https:")) {
+        || uri.toLowerCase().startsWith("https:")
+        || uri.toLowerCase().startsWith("file:")) {
       // HTTP is just a special case of a URI so we can eliminate this separation someday
       var myHeaders = {
-        Accept: 'application/x-gedcomx-v1+json',
+        Accept: 'application/json, application/x-gedcomx-v1+json',
         // Without these, the API returns XML.  Why?
         'If-None-Match': '',
         'IF-Modified-Since': null
