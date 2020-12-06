@@ -152,8 +152,7 @@ function sourceActions(
                 <td>
                   <button
                     type="button"
-                    onClick={(event) => {
-                      event.preventDefault();
+                    onClick={() => {
                       Electron.shell.openExternal(
                         URL.pathToFileURL(file).toString()
                       );

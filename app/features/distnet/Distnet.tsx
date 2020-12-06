@@ -1,5 +1,6 @@
 import electron from 'electron';
 import _ from 'lodash';
+import * as R from 'ramda';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -129,7 +130,24 @@ export default function Distnet() {
         <button
           type="button"
           onClick={() => {
-            dispatch(dispatchModifySettings(generateKeyAndSet));
+            let proceed = false;
+            if (
+              distnet.settings.credentials &&
+              R.find((x) => x.id === 'privateKey', distnet.settings.credentials)
+            ) {
+              // there's already a privateKey credential
+
+              // We need to replace this with dialog.showMessageBox!
+              // eslint-disable-next-line no-restricted-globals
+              proceed = confirm(
+                'This will overwrite the current private key.  Are you sure you want to proceed?'
+              );
+            } else {
+              proceed = true;
+            }
+            if (proceed) {
+              dispatch(dispatchModifySettings(generateKeyAndSet));
+            }
           }}
         >
           Generate Key
