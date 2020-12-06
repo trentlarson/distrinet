@@ -17,12 +17,10 @@ if (electron.remote.session) {
   };
   electron.remote.session.defaultSession.cookies
     .set(cookie)
-    /**
     .then(() => {
       // success
       console.error("Set fssessionid cookie:", fsSessionId)
     })
-    */
     .catch((error) => {
       console.error('Error setting fssessionid cookie:', error);
     });

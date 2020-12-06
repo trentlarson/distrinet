@@ -45,10 +45,16 @@
     if (uri.toLowerCase().startsWith("http:")
         || uri.toLowerCase().startsWith("https:")) {
       // HTTP is just a special case of a URI so we can eliminate this separation someday
-      fetch(uri, {headers: {Accept: 'application/x-gedcomx-v1+json'}})
+      var myHeaders = {
+        Accept: 'application/x-gedcomx-v1+json',
+        // Without these, the API returns XML.  Why?
+        'If-None-Match': '',
+        'IF-Modified-Since': null
+      }
+      fetch(uri, {headers: myHeaders})
         .then(function(response) {
           if (response.ok) {
-            return response.json();
+            return response.text();
           } else if (response.status === 401) {
             let errorMessage = "Authorization failed retrieving URL " + uri;
             throw Error(errorMessage);
@@ -57,7 +63,9 @@
             throw Error(errorMessage);
           }
         })
-        .then(function(gedcomx) {
+        .then(function(body) {
+          //console.log('From uri', uri, 'got response:', body);
+          var gedcomx = JSON.parse(body);
           try {
             walkTree(uri, gedcomx, generationCount, node, 0, uri)
           } catch (e) {
