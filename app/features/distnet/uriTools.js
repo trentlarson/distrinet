@@ -25,12 +25,11 @@
    * Return null if there is no fragment.
    */
   function uriFragment(uri) {
-    var index = uri.indexOf('#');
+    const index = uri.indexOf('#');
     if (index === -1) {
       return null;
-    } else {
-      return uri.substring(index + 1);
     }
+    return uri.substring(index + 1);
   }
 
   /**
@@ -55,9 +54,9 @@
   function globalUriForResource(someUri, uriContext) {
     if (
       someUri &&
-        (someUri.startsWith('#') ||
-         someUri.startsWith('/') ||
-         someUri.startsWith('?'))
+      (someUri.startsWith('#') ||
+        someUri.startsWith('/') ||
+        someUri.startsWith('?'))
     ) {
       return uriContext + someUri;
     }
@@ -109,12 +108,11 @@
    * Return the same URI but without the fragment.
    */
   function removeFragment(uri) {
-    var index = uri.indexOf('#');
+    const index = uri.indexOf('#');
     if (index === -1) {
       return uri;
-    } else {
-      return uri.substring(0, index);
     }
+    return uri.substring(0, index);
   }
 
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
