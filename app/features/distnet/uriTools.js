@@ -6,7 +6,7 @@
    * also useful is https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
    * */
   function isGlobalUri(uri) {
-    return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]*:/));
+    return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]+:/));
   }
 
   /**
@@ -21,7 +21,21 @@
   }
 
   /**
-   * Given an ID within some context, return the URI for it (ie. including the fragment)
+   * Everything after the first '#' symbol.
+   * Return null if there is no fragment.
+   */
+  function uriFragment(uri) {
+    var index = uri.indexOf('#');
+    if (index === -1) {
+      return null;
+    } else {
+      return uri.substring(index + 1);
+    }
+  }
+
+  /**
+   * Given an ID within some context, return the URI for it with the ID as a fragment, i.e. uriContext + '#' + id).
+   * If the ID is a global URI, just return it.
    * */
   function globalUriForId(id, uriContext) {
     if (isGlobalUri(id)) {
@@ -32,6 +46,22 @@
       finalId = id.substring(1);
     }
     return `${uriContext}#${finalId}`;
+  }
+
+  /**
+   * @param someUri should be a URI or some portion, starting with "/" or "?" or "#"
+   * @param uriContext is the current document URI
+   * */
+  function globalUriForResource(someUri, uriContext) {
+    if (
+      someUri &&
+        (someUri.startsWith('#') ||
+         someUri.startsWith('/') ||
+         someUri.startsWith('?'))
+    ) {
+      return uriContext + someUri;
+    }
+    return someUri;
   }
 
   /**
@@ -62,9 +92,38 @@
     );
   }
 
+  /**
+   * Return the same URI but without the query part.
+   */
+  function removeQuery(uri) {
+    // I think this should be change to allow relative references.
+    if (isGlobalUri(uri)) {
+      const url = new URL(uri);
+      url.search = '';
+      return url.toString();
+    }
+    return uri;
+  }
+
+  /**
+   * Return the same URI but without the fragment.
+   */
+  function removeFragment(uri) {
+    var index = uri.indexOf('#');
+    if (index === -1) {
+      return uri;
+    } else {
+      return uri.substring(0, index);
+    }
+  }
+
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isGlobalUri = isGlobalUri;
   exports.isUrlLocal = isUrlLocal;
   exports.globalUriForId = globalUriForId;
+  exports.globalUriForResource = globalUriForResource;
   exports.globalUriScheme = globalUriScheme;
+  exports.removeQuery = removeQuery;
+  exports.removeFragment = removeFragment;
+  exports.uriFragment = uriFragment;
 })(typeof exports === 'undefined' ? (this.uriTools = {}) : exports);

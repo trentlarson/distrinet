@@ -19,12 +19,23 @@ Keep your own private trees, and point to public trees and browse seamlessly bet
 To test:
 
 - UI Genealogy Samples:
-  - Get `fssessionid` and start with `FSSESSIONID=... yarn dev`
+  - Get `fssessionid` and start with `FSSESSIONID=... yarn dev` or fill in on page.
+  - file:///Users/tlarson/dev/home/distrinet/test/features/genealogy/sample.json#thomas-iii
+    - Shows Thomas, and external link goes to FamilySearch with image.
   - https://api.familysearch.org/platform/tree/persons/KWHH-HSW
     - Shows Dad.
     - Shows hops to other networks (if cache is loaded).
   - https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
     - Shows Almon with images, expands up to 4 levels of expansion, collapses, and clicking network icon recenters on someone. (Profile links don't work yet.)
+
+--- not working
+  - https://familysearch.org/platform/tree/persons/KWHH-HSW
+    ... redirects to
+    https://www.familysearch.org/platform/tree/persons/KWHH-HSW
+    .. which fails
+
+
+
   - gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#KGY4-8D5
     - Shows Will.
   - gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#LZK2-LD4
@@ -32,7 +43,7 @@ To test:
   - gedcomx:trentlarson.com,2020:Norman-Larson-from-FamilySearch#KWHH-HSW
     - See two parents.
   - gedcomx:trentlarson.com,2020:Norman-Sharon-Larson-for-kids#norman
-    - See 3 external links: api has pics, 15d has 2 parents, ancestors opens window
+    - See 3 external links: api has pics, copy from Matt has 2 parents, ancestors opens window
 
 ## Kudos
 

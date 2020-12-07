@@ -42,13 +42,14 @@
 
     markStart();
 
-    if (uri.toLowerCase().startsWith("http:")
-        || uri.toLowerCase().startsWith("https:")
-        || uri.toLowerCase().startsWith("file:")) {
+    if (uriTools.isGlobalUri(uri)
+        && (uri.toLowerCase().startsWith("http:")
+            || uri.toLowerCase().startsWith("https:")
+            || uri.toLowerCase().startsWith("file:"))) {
       // HTTP is just a special case of a URI so we can eliminate this separation someday
       var myHeaders = {
         Accept: 'application/json, application/x-gedcomx-v1+json',
-        // Without these, the API returns XML.  Why?
+        // Without these, the FamilySearch API returns XML.  Why?
         'If-None-Match': '',
         'IF-Modified-Since': null
       }
@@ -67,8 +68,16 @@
         .then(function(body) {
           //console.log('From uri', uri, 'got response:', body);
           var gedcomx = JSON.parse(body);
+          var thisId = uri;
+          var thisContext = uri;
+          var fragmentId = uriTools.uriFragment(uri);
+          if (fragmentId && fragmentId.length > 0) {
+            thisId = fragmentId;
+            thisContext = uriTools.removeFragment(uri);
+          }
+          let personIndex = findIndexInGedcomxPersons(uri, thisContext, gedcomx);
           try {
-            walkTree(uri, gedcomx, generationCount, node, 0, uri)
+            walkTree(thisId, gedcomx, generationCount, node, personIndex, thisContext)
           } catch (e) {
             // An error from walkTree stops ".always" from working.
             // Marking finished inside a 'finally' doesn't always work.
@@ -85,7 +94,7 @@
 
     } else {
       if (cache[uri]) {
-        // the URI matches exactly, so the file is dedicated to this person
+        // the URI matches exactly, so we'll assume it's person 0
         if (cache[uri].contents) {
           try {
             let gedcomx = JSON.parse(cache[uri].contents)
@@ -111,13 +120,7 @@
             let gedcomx = JSON.parse(cache[prefixUri].contents)
 
             // find the person record
-            let personIndex = -1;
-            for (let i = 0; i < gedcomx.persons.length && personIndex === -1; i++) {
-              if (uriTools.globalUriForId(gedcomx.persons[i].id, prefixUri) === uri) {
-                personIndex = i;
-                break;
-              }
-            }
+            let personIndex = findIndexInGedcomxPersons(uri, prefixUri, gedcomx);
             if (personIndex > -1) {
               node.prefixUri = prefixUri;
               walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
@@ -132,6 +135,18 @@
       markFinished(node);
     }
 
+  }
+
+  /**
+   * Return the person index matching this ID, or 0 if no exact match found
+   * */
+  function findIndexInGedcomxPersons(globalUri, prefixUri, gedcomx) {
+    // find the person record
+    let personIndex = R.findIndex(
+      (person) => uriTools.globalUriForId(person.id, prefixUri) === globalUri,
+      gedcomx.persons
+    );
+    return personIndex > -1 ? personIndex : 0;
   }
 
   function markStart() {
@@ -154,7 +169,7 @@
     }
   }
 
-  function walkTree(id, gedcomx, generationCount, node, personIndex, uriContext) {
+  function walkTree(id, gedcomx, generationCount, node, personIndex, gedcomxContext) {
 
     // Root info
     if (!node.id) {
@@ -168,7 +183,7 @@
     }
 
     // Find current person in json tree (node)
-    var tmpNode = find(node, id, uriContext);
+    var tmpNode = find(node, id, gedcomxContext);
 
     if (!tmpNode.name) {
       tmpNode.name = gedcomx.persons[personIndex].display.name;
@@ -181,7 +196,7 @@
       tmpNode.portrait = gedcomx.persons[personIndex].links.portrait.href;
     }
 
-    let personGlobalId = uriTools.globalUriForId(id, uriContext)
+    let personGlobalId = uriTools.globalUriForId(id, gedcomxContext)
 
     // Get Parents
     tmpNode._parents = [];
@@ -193,11 +208,11 @@
                  && r.person1
                  && r.person2
                  && r.person2.resource
-                 && uriTools.equal(uriTools.globalUriForId(r.person2.resource, uriContext),
+                 && uriTools.equal(uriTools.globalUriForId(r.person2.resource, gedcomxContext),
                                    personGlobalId),
                  gedcomx.relationships);
       for (let i = 0; i < personsParents.length; i += 1) {
-        let nextId = uriTools.globalUriForResource(personsParents[i].person1.resource, uriContext);
+        let nextId = uriTools.globalUriForResource(personsParents[i].person1.resource, gedcomxContext);
         tmpNode._parents.push({id: nextId, _parents: []});
       }
     }
@@ -207,7 +222,7 @@
       let parents =
           getParentsFromFamiliesAsChild(gedcomx.persons[personIndex].display.familiesAsChild[0],
                                         gedcomx.persons,
-                                        uriContext);
+                                        gedcomxContext);
 
       if (parents.father) {
         tmpNode._parents.push({id: parents.father.url, name: parents.father.name, _parents: []});
@@ -232,11 +247,11 @@
                      && r.person1
                      && r.person2
                      && r.person1.resource
-                     && uriTools.equal(uriTools.globalUriForId(r.person1.resource, uriContext),
+                     && uriTools.equal(uriTools.globalUriForId(r.person1.resource, gedcomxContext),
                                        personGlobalId),
                      gedcomx.relationships);
         for (let i = 0; i < personsChildren.length; i += 1) {
-          let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, uriContext);
+          let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, gedcomxContext);
           let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
           node._children.push({id: personsChildren[i].person2.resource, name: name});
         }
@@ -251,7 +266,7 @@
           getChildrenFromFamiliesAsParent(
             gedcomx.persons[personIndex].display.familiesAsParent[0].children,
             gedcomx.persons,
-            uriContext
+            gedcomxContext
           );
       }
     }
@@ -371,7 +386,7 @@
     if (personLinks
         && personLinks.person
         && personLinks.person.href) {
-      let href = uriTools.removeQuery(personLinks.person.href);
+      let href = uriTools.removeQueryForFS(personLinks.person.href);
       personIdResources = [{
         resource: href,
         description: 'Link to FamilySearch GedcomX',

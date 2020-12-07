@@ -71,7 +71,7 @@ export default class MapperBetweenSets {
           } else if (links && links.person) {
             const thisId = uriTools.globalUriForId(content.persons[pi].id, key);
             const otherId = uriTools.globalUriForResource(
-              uriTools.removeQuery(content.persons[pi].links.person.href),
+              uriTools.removeQueryForFS(content.persons[pi].links.person.href),
               key
             );
             this.addPair(thisId, otherId);

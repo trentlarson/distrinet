@@ -135,6 +135,7 @@ const taskListsSlice = createSlice({
     ) => {
       const uiTreeList =
         sourceAndUiTree.payload.allUiTrees[sourceAndUiTree.payload.sourceId];
+      // note that this approach is unnecessary: we could do something similar to historiesSlice.markMatchInPath
       state.display[
         sourceAndUiTree.payload.sourceId
       ] = editUiTreeAtPathOneSource(

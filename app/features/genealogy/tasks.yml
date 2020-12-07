@@ -1,5 +1,7 @@
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
+    - get file:/// protocol to work with a fragment (currently only shows first)
     - add to the MapperBetweenSets when pasting in a file:///
+  - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - >-
     93 0 determine problem with parsing JSON on private, eg.
     gedcomx:b2555240-d918-11ea-b21a-5d9a954c8137#norman

@@ -14,23 +14,7 @@
 
   // gott replace all uses of these to point to distnet instead of here
   // eslint-disable-next-line global-require
-  const { globalUriForId, isGlobalUri } = require('../../distnet/uriTools');
-
-  /**
-   * @param someUri should be a URI or some portion, starting with "/" or "?" or "#"
-   * @param uriContext is the current document URI
-   * */
-  function globalUriForResource(someUri, uriContext) {
-    if (
-      someUri &&
-      (someUri.startsWith('#') ||
-        someUri.startsWith('/') ||
-        someUri.startsWith('?'))
-    ) {
-      return uriContext + someUri;
-    }
-    return someUri;
-  }
+  const uriTools = require('../../distnet/uriTools');
 
   /**
    * Return an equivalent FamilySearch URI, eg for persons/ABC-DEF and persons/ABC-DEF#ABC-DEF
@@ -53,13 +37,8 @@
   /**
    * Clean up those stupid FamilySearch URIs with ""?flag=fsh" on the end.
    */
-  function removeQuery(uri) {
-    if (isGlobalUri(uri)) {
-      const url = new URL(uri);
-      url.search = '';
-      return url.toString();
-    }
-    return uri;
+  function removeQueryForFS(uri) {
+    return uriTools.removeQuery(uri);
   }
 
   /**
@@ -78,8 +57,10 @@
   }
 
   exports.equal = equal;
-  exports.globalUriForResource = globalUriForResource;
-  exports.globalUriForId = globalUriForId;
-  exports.isGlobalUri = isGlobalUri;
-  exports.removeQuery = removeQuery;
+  exports.globalUriForResource = uriTools.globalUriForResource;
+  exports.globalUriForId = uriTools.globalUriForId;
+  exports.isGlobalUri = uriTools.isGlobalUri;
+  exports.removeQueryForFS = removeQueryForFS;
+  exports.removeFragment = uriTools.removeFragment;
+  exports.uriFragment = uriTools.uriFragment;
 })(typeof exports === 'undefined' ? (this.uriTools = {}) : exports);

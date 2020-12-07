@@ -98,7 +98,6 @@ export interface CacheData {
   sourceUrl: string;
   // local path (not URL, ie without "file://")
   localFile: string;
-  // non-null if small enough to fit all file contents in memory
   contents: string;
   // ISO-formatted date the local copy on disk was updated (when last checked)
   // (There's a possibility that it has been updated since it was checked.)
