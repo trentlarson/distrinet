@@ -28,7 +28,7 @@ export default class MapperBetweenSets {
     updateMillis: (arg0: number) => void
   ): void {
     const allMillis = R.map(
-      R.pipe(R.prop('updatedDate'), (d: string) => new Date(d).valueOf(), ),
+      R.pipe(R.prop('updatedDate'), (d: string) => new Date(d).valueOf()),
       R.values(cacheMap)
     );
     const maxMillis = R.last(R.sort(R.subtract, allMillis));

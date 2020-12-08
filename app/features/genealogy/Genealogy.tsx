@@ -76,9 +76,7 @@ export default function Genealogy() {
       </div>
 
       <div className="container">
-        <h2 className="title">
-          Decentralized Distributed Tree
-        </h2>
+        <h2 className="title">Decentralized Distributed Tree</h2>
         <hr className="hr" />
 
         <GenealogyView tree={tree} />
@@ -126,7 +124,7 @@ function GenealogyView(options: TreeOption) {
     <div>
       <div>
         URI
-        { /* Can't wait to remove this alert and make a good UI! */ }
+        {/* Can't wait to remove this alert and make a good UI! */}
         <button type="button" onClick={() => alert(help)}>
           (?)
         </button>
@@ -160,6 +158,7 @@ function GenealogyView(options: TreeOption) {
               });
           }}
         />
+        <br />
       </div>
 
       <h3 className="person_name">&nbsp;</h3>

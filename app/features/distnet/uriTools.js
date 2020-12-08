@@ -13,12 +13,11 @@
   function isUriLocalhost(uri) {
     return (
       uri &&
-        (uri.toLowerCase().startsWith('file:') ||
-         uri.toLowerCase().startsWith('http://127.0.0.1') ||
-         uri.toLowerCase().startsWith('http://localhost') ||
-         uri.toLowerCase().startsWith('https://localhost') ||
-         uri.toLowerCase().startsWith('https://127.0.0.1')
-        )
+      (uri.toLowerCase().startsWith('file:') ||
+        uri.toLowerCase().startsWith('http://127.0.0.1') ||
+        uri.toLowerCase().startsWith('http://localhost') ||
+        uri.toLowerCase().startsWith('https://localhost') ||
+        uri.toLowerCase().startsWith('https://127.0.0.1'))
     );
   }
 
