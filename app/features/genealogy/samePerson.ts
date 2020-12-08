@@ -23,16 +23,16 @@ export default class MapperBetweenSets {
    * If there are items in the cache that are are newer, update the mappings in sessionStorage.
    */
   public static refreshIfNewer(
-    updateMillis: number,
+    previousMillis: number,
     cacheMap: Cache,
-    callback: () => void
+    updateMillis: (arg0: number) => void
   ): void {
     const allMillis = R.map(
       R.pipe(R.prop('updatedDate'), (d: string) => new Date(d).valueOf(), ),
       R.values(cacheMap)
     );
     const maxMillis = R.last(R.sort(R.subtract, allMillis));
-    if (updateMillis && updateMillis >= maxMillis) {
+    if (previousMillis && previousMillis >= maxMillis) {
       // we're already up-to-date
       return;
     }
@@ -83,7 +83,7 @@ export default class MapperBetweenSets {
         }
       }
     }
-    callback();
+    updateMillis(maxMillis);
     console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
   }
 

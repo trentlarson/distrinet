@@ -77,7 +77,6 @@ export default function Genealogy() {
 
       <div className="container">
         <h2 className="title">
-          <img src="features/genealogy/images/logo.png" alt="" />
           Decentralized Distributed Tree
         </h2>
         <hr className="hr" />
@@ -100,7 +99,7 @@ function GenealogyView(options: TreeOption) {
   MapperBetweenSets.refreshIfNewer(
     correlatedIdsRefreshedMillis,
     cache,
-    () => dispatch(setCorrelatedIdsRefreshedMillis(Date.now()))
+    (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
   );
 
   options.tree.setCache(cache);
@@ -122,12 +121,12 @@ function GenealogyView(options: TreeOption) {
       https://api.familysearch.org/platform/tree/persons/KWHH-HSW
   `;
 
-  /* Can't wait to remove the alert and make a good UI! */
   /* eslint-disable no-alert */
   return (
     <div>
       <div>
         URI
+        { /* Can't wait to remove this alert and make a good UI! */ }
         <button type="button" onClick={() => alert(help)}>
           (?)
         </button>

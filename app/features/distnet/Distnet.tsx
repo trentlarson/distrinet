@@ -20,7 +20,7 @@ import {
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
 } from './distnetSlice';
-import { globalUriScheme, isUrlLocal } from './uriTools';
+import { globalUriScheme, isUriLocalhost } from './uriTools';
 
 function getExtension(str: string) {
   const dotPos = str.lastIndexOf('.');
@@ -180,7 +180,7 @@ export default function Distnet() {
                   <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
                   <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
                   <td>
-                    {uriSource.urls[0] && isUrlLocal(uriSource.urls[0].url)
+                    {uriSource.urls[0] && isUriLocalhost(uriSource.urls[0].url)
                       ? ''
                       : 'Y'}
                   </td>

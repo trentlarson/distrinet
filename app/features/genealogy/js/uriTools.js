@@ -60,6 +60,7 @@
   exports.globalUriForResource = uriTools.globalUriForResource;
   exports.globalUriForId = uriTools.globalUriForId;
   exports.isGlobalUri = uriTools.isGlobalUri;
+  exports.isUriLocalhost = uriTools.isUriLocalhost;
   exports.removeQueryForFS = removeQueryForFS;
   exports.removeFragment = uriTools.removeFragment;
   exports.uriFragment = uriTools.uriFragment;

@@ -43,10 +43,10 @@
     markStart();
 
     if (uriTools.isGlobalUri(uri)
-        && (uri.toLowerCase().startsWith("http:")
-            || uri.toLowerCase().startsWith("https:")
-            || uri.toLowerCase().startsWith("file:"))) {
-      // HTTP is just a special case of a URI so we can eliminate this separation someday
+        && (uri.toLowerCase().startsWith("file:")
+            || uri.toLowerCase().startsWith("http:")
+            || uri.toLowerCase().startsWith("https:"))) {
+      // FILE & HTTP are just special cases of URIs so we can eliminate this separation someday
       var myHeaders = {
         Accept: 'application/json, application/x-gedcomx-v1+json',
         // Sometimes the FamilySearch API returns XML when these are non-empty.  Why?
