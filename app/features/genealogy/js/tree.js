@@ -49,16 +49,18 @@
       // HTTP is just a special case of a URI so we can eliminate this separation someday
       var myHeaders = {
         Accept: 'application/json, application/x-gedcomx-v1+json',
-        // Without these, the FamilySearch API returns XML.  Why?
+        // Sometimes the FamilySearch API returns XML when these are non-empty.  Why?
         'If-None-Match': '',
-        'IF-Modified-Since': null
+        'If-Modified-Since': null
       }
       fetch(uri, {headers: myHeaders})
         .then(function(response) {
           if (response.ok) {
             return response.text();
           } else if (response.status === 401) {
-            let errorMessage = "Authorization failed retrieving URL " + uri;
+            let errorMessage = "Authorization failed retrieving URL " + uri
+            + "  This often happens when the fssessionid is lost so try pasting that in again."
+            + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";
             throw Error(errorMessage);
           } else {
             let errorMessage = "Got error status " + response.status + " retrieving URL " + uri;

@@ -1,6 +1,5 @@
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
-    - get file:/// protocol to work with a fragment (currently only shows first)
-    - add to the MapperBetweenSets when pasting in a file:///
+    - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
   - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - figure out why api.familysearch URLs work but www.familysearch URLs don't
   - >-

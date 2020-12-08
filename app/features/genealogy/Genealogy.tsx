@@ -6,7 +6,11 @@ import { Link } from 'react-router-dom';
 import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 import { Cache } from '../distnet/distnetClasses';
-import { setFsSessionId, setRootUri } from './genealogySlice';
+import {
+  setCorrelatedIdsRefreshedMillis,
+  setFsSessionId,
+  setRootUri,
+} from './genealogySlice';
 import MapperBetweenSets from './samePerson';
 
 if (electron.remote.session) {
@@ -93,7 +97,11 @@ function GenealogyView(options: TreeOption) {
     (state: RootState) => state.genealogy.correlatedIdsRefreshedMillis
   );
   // update DB if there are newer cache items
-  MapperBetweenSets.refreshIfNewer(correlatedIdsRefreshedMillis, cache);
+  MapperBetweenSets.refreshIfNewer(
+    correlatedIdsRefreshedMillis,
+    cache,
+    () => dispatch(setCorrelatedIdsRefreshedMillis(Date.now()))
+  );
 
   options.tree.setCache(cache);
 
