@@ -22,6 +22,11 @@ import {
   reloadOneSourceIntoCache,
 } from './cache';
 
+interface SettingsEditor {
+  // should clone the settings and return a new one
+  (settings: Settings): Settings;
+}
+
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
@@ -169,12 +174,12 @@ export const dispatchLoadSettingsFromFileIfEmpty = (): AppThunk => async (
   }
 };
 
-export const dispatchSaveSettingsToFile = (): AppThunk => async (
+export const dispatchSaveSettingsTextToFile = (): AppThunk => async (
   dispatch,
   getState
 ) => {
   const { settingsText } = getState().distnet;
-  if (_.isNil(settingsText)) {
+  if (R.isNil(settingsText)) {
     dispatch(
       setSettingsSaveErrorMessage(
         "Sorry, but I won't save an empty config file."
@@ -197,6 +202,14 @@ export const dispatchSaveSettingsToFile = (): AppThunk => async (
     }
   }
 };
+
+export const addSourceToSettings = (newSource: Source) => (
+  settings: Settings
+) => {
+  const newSettings = R.clone(settings);
+  newSettings.sources = R.append(newSource, newSettings.sources);
+  return newSettings
+}
 
 /**
 
@@ -270,10 +283,6 @@ export const generateKeyAndSet = (settings: Settings) => {
   return newSettings;
 };
 
-interface SettingsEditor {
-  (settings: Settings): Settings;
-}
-
 export const dispatchModifySettings = (
   settingsEditor: SettingsEditor
 ): AppThunk => async (dispatch, getState) => {
@@ -331,7 +340,7 @@ export const dispatchCacheForAll = (): AppThunk => async (
 export const dispatchLoadSettingsAndCacheIfEmpty = (
   methodsThatResetState: Array<ActionCreatorWithoutPayload<string>>
 ): AppThunk => async (dispatch, getState) => {
-  await dispatch(dispatchLoadSettingsFromFile());
+  await dispatch(dispatchLoadSettingsFromFileIfEmpty());
   if (Object.keys(getState().distnet.cache).length === 0) {
     dispatch(dispatchCacheForAll());
   }

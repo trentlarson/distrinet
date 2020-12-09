@@ -16,7 +16,7 @@ import {
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
-  dispatchSaveSettingsToFile,
+  dispatchSaveSettingsTextToFile,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
 } from './distnetSlice';
@@ -120,7 +120,7 @@ export default function Distnet() {
         <button
           className={styles.btn}
           onClick={() => {
-            dispatch(dispatchSaveSettingsToFile());
+            dispatch(dispatchSaveSettingsTextToFile());
           }}
           data-tclass="btn"
           type="button"
