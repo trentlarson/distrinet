@@ -208,8 +208,8 @@ export const addSourceToSettings = (newSource: Source) => (
 ) => {
   const newSettings = R.clone(settings);
   newSettings.sources = R.append(newSource, newSettings.sources);
-  return newSettings
-}
+  return newSettings;
+};
 
 /**
 

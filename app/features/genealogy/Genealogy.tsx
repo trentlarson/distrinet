@@ -11,7 +11,7 @@ import {
   dispatchModifySettings,
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
-import { Cache } from '../distnet/distnetClasses';
+import { Cache, Source } from '../distnet/distnetClasses';
 import uriTools from '../distnet/uriTools';
 import {
   setCorrelatedIdsRefreshedMillis,
@@ -83,9 +83,7 @@ export default function Genealogy() {
       </div>
 
       <div className="container">
-        <h2 className="title">
-          Decentralized Distributed Tree
-        </h2>
+        <h2 className="title">Decentralized Distributed Tree</h2>
         <hr className="hr" />
 
         <GenealogyView tree={tree} />
@@ -133,7 +131,7 @@ function GenealogyView(options: TreeOption) {
   // If it's local data then check against all known URIs, and
   // if it's not known then prompt user to add it to the settings
   // especially so we can add it to our known IDs and cache the contents.
-  var addToSettings = <span />;
+  let addToSettings = <span />;
   const sources: Array<Source> = useSelector(
     (state: RootState) => state.distnet.settings.sources
   );
@@ -141,33 +139,36 @@ function GenealogyView(options: TreeOption) {
     const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);
     let sourceUrlWithPrefix = null;
     if (!sourceWithPrefix) {
-      const allUrls = R.flatten(
-        sources.map((s) => s.urls.map((u) => u.url))
-      );
+      const allUrls = R.flatten(sources.map((s) => s.urls.map((u) => u.url)));
       sourceUrlWithPrefix = R.find((u) => rootUri.startsWith(u), allUrls);
     }
     if (!sourceWithPrefix && !sourceUrlWithPrefix) {
-      addToSettings = <span>
-        <br/>
-        <button
-          onClick={() => {
-            const newSource = {
-              id: settingsUrl,
-              urls: [ { url: settingsUrl } ],
-            };
-            dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-            dispatch(dispatchSaveSettingsTextToFile());
-          }}
-        >
-          Click to add this to your permanent settings:
-        </button>
-        <input
-          type="text"
-          size={100}
-          defaultValue={rootUri}
-          onChange={(event) => { setSettingsUrl(event.target.value); }}
-        />
-      </span>;
+      addToSettings = (
+        <span>
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              const newSource = {
+                id: settingsUrl,
+                urls: [{ url: settingsUrl }],
+              };
+              dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+              dispatch(dispatchSaveSettingsTextToFile());
+            }}
+          >
+            Click to add this to your permanent settings:
+          </button>
+          <input
+            type="text"
+            size={100}
+            defaultValue={rootUri}
+            onChange={(event) => {
+              setSettingsUrl(event.target.value);
+            }}
+          />
+        </span>
+      );
     }
   }
 
@@ -176,7 +177,7 @@ function GenealogyView(options: TreeOption) {
     <div>
       <div>
         URI
-        { /* Can't wait to remove this alert and make a good UI! */ }
+        {/* Can't wait to remove this alert and make a good UI! */}
         <button type="button" onClick={() => alert(help)}>
           (?)
         </button>
@@ -211,7 +212,7 @@ function GenealogyView(options: TreeOption) {
           }}
         />
         <br />
-        { addToSettings }
+        {addToSettings}
       </div>
 
       <h3 className="person_name">&nbsp;</h3>

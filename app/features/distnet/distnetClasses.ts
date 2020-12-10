@@ -45,11 +45,11 @@ enum DidDocContext {
 
 export interface UrlData {
   url: string;
-  credentials: Credential;
+  credentials?: Credential;
 
   // A folder typically has one method for synchronizing via tools.
   // In addition, it might be copied on demand manually or via Distrinet.
-  syncMethod: SyncMethod;
+  syncMethod?: SyncMethod;
 }
 
 export enum SyncMethod {
