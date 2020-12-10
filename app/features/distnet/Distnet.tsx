@@ -178,7 +178,7 @@ export default function Distnet() {
               {distnet.settings.sources.map((uriSource: Source) => (
                 <tr key={uriSource.id}>
                   <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
-                  <td>{uriSource.name ? uriSource.name : 'UNNAMED'}</td>
+                  <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
                     {uriSource.urls[0] && isUriLocalhost(uriSource.urls[0].url)
                       ? ''
