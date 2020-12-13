@@ -185,7 +185,7 @@ interface SaveOptions {
  * especially so we can add it to our known IDs and cache the contents.
  */
 function OfferToSaveIfNew(options: SaveOptions) {
-  const {rootUri} = options;
+  const { rootUri } = options;
   let addToSettings = <span />;
 
   const dispatch = useDispatch();

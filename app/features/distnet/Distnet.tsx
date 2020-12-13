@@ -33,12 +33,6 @@ function getExtension(str: string) {
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
-  const settingsNum = distnet.settings.sources
-    ? distnet.settings.sources.length
-    : 0;
-  const settingsCountText = `${settingsNum} source${
-    settingsNum === 1 ? '' : 's'
-  }`;
 
   const settingsChangedMessage = distnet.settingsChanged ? (
     <div style={{ color: 'orange' }}>
@@ -161,7 +155,10 @@ export default function Distnet() {
                   Name
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  1<sup>st</sup> URL Remote?
+                  {/* It's stupid how styles conflict. Try fix this, I dare you. */}
+                  {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                  1<sup>st</sup>
+                  URL Remote?
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   In-Memory Data Date

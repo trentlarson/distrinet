@@ -31,9 +31,6 @@ export interface Gedcomx {
  *
  */
 export default class MapperBetweenSets {
-
-
-
   /**
    * return list of all other IDs correlated with this one
    */
@@ -75,27 +72,16 @@ export default class MapperBetweenSets {
   }
 
   static searchForSamePersons(key: string, gedcomx: Gedcomx) {
-    for (
-      let pi = 0;
-      gedcomx.persons && pi < gedcomx.persons.length;
-      pi += 1
-    ) {
+    for (let pi = 0; gedcomx.persons && pi < gedcomx.persons.length; pi += 1) {
       const { links } = gedcomx.persons[pi];
       if (links && links.otherLocations) {
-        for (
-          let li = 0;
-          li < links.otherLocations.resources.length;
-          li += 1
-        ) {
+        for (let li = 0; li < links.otherLocations.resources.length; li += 1) {
           const otherRes = links.otherLocations.resources[li];
           if (
             otherRes.format === 'gedcomx' ||
             otherRes.resource.startsWith('gedcomx:')
           ) {
-            const thisId = uriTools.globalUriForId(
-              gedcomx.persons[pi].id,
-              key
-            );
+            const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, key);
             const otherId = uriTools.globalUriForResource(
               otherRes.resource,
               key
