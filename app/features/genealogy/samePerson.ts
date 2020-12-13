@@ -5,22 +5,46 @@ const R = require('./js/ramda-0.25.0.min.js');
 
 const SAME_IDENTITIES_KEY = 'SAME_IDENTITIES';
 
+export interface Gedcomx {
+  persons: [
+    {
+      id: string;
+      links: {
+        otherLocations: {
+          resources: [
+            {
+              format: string;
+              resource: string;
+            }
+          ];
+        };
+        person: {
+          href: string;
+        };
+      };
+    }
+  ];
+}
+
 /**
  * Use browser storage to maintain mappings between data sets
  *
  */
 export default class MapperBetweenSets {
+
+
+
   /**
    * return list of all other IDs correlated with this one
    */
   public static retrieveFor(key: string): Array<string> {
-    const idMapStr = sessionStorage[SAME_IDENTITIES_KEY];
+    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
     return idMap[key] || [];
   }
 
   /**
-   * If there are items in the cache that are are newer, update the mappings in sessionStorage.
+   * If there are items in the cache that are are newer, update the mappings in localStorage.
    */
   public static refreshIfNewer(
     previousMillis: number,
@@ -43,62 +67,65 @@ export default class MapperBetweenSets {
       const key = keys[ki];
       if (key.startsWith('gedcomx:')) {
         const content = JSON.parse(cache.valueFor(key).contents);
-
-        for (
-          let pi = 0;
-          content.persons && pi < content.persons.length;
-          pi += 1
-        ) {
-          const { links } = content.persons[pi];
-          if (links && links.otherLocations) {
-            for (
-              let li = 0;
-              li < links.otherLocations.resources.length;
-              li += 1
-            ) {
-              const otherRes = links.otherLocations.resources[li];
-              if (
-                otherRes.format === 'gedcomx' ||
-                otherRes.resource.startsWith('gedcomx:')
-              ) {
-                const thisId = uriTools.globalUriForId(
-                  content.persons[pi].id,
-                  key
-                );
-                const otherId = uriTools.globalUriForResource(
-                  otherRes.resource,
-                  key
-                );
-                this.addPair(thisId, otherId);
-              }
-            }
-          } else if (links && links.person) {
-            const thisId = uriTools.globalUriForId(content.persons[pi].id, key);
-            const otherId = uriTools.globalUriForResource(
-              uriTools.removeQueryForFS(content.persons[pi].links.person.href),
-              key
-            );
-            this.addPair(thisId, otherId);
-          }
-        }
+        this.searchForSamePersons(key, content);
       }
     }
     updateMillis(maxMillis);
     console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
   }
 
+  static searchForSamePersons(key: string, gedcomx: Gedcomx) {
+    for (
+      let pi = 0;
+      gedcomx.persons && pi < gedcomx.persons.length;
+      pi += 1
+    ) {
+      const { links } = gedcomx.persons[pi];
+      if (links && links.otherLocations) {
+        for (
+          let li = 0;
+          li < links.otherLocations.resources.length;
+          li += 1
+        ) {
+          const otherRes = links.otherLocations.resources[li];
+          if (
+            otherRes.format === 'gedcomx' ||
+            otherRes.resource.startsWith('gedcomx:')
+          ) {
+            const thisId = uriTools.globalUriForId(
+              gedcomx.persons[pi].id,
+              key
+            );
+            const otherId = uriTools.globalUriForResource(
+              otherRes.resource,
+              key
+            );
+            this.addPair(thisId, otherId);
+          }
+        }
+      } else if (links && links.person) {
+        const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, key);
+        const otherId = uriTools.globalUriForResource(
+          uriTools.removeQueryForFS(gedcomx.persons[pi].links.person.href),
+          key
+        );
+        this.addPair(thisId, otherId);
+      }
+    }
+  }
+
   /**
-   * Add these two ids one another's mappings in sessionStorage.
+   * Add these two ids one another's mappings in localStorage.
    */
   static addPair(id1: string, id2: string): void {
-    const idMapStr = sessionStorage[SAME_IDENTITIES_KEY];
+    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     const idMap = idMapStr ? JSON.parse(idMapStr) : {};
     const allSameIds = this.combineAllIdentities([id1, id2], idMap);
     for (let i = 0; i < allSameIds.length; i += 1) {
       const otherIds = R.without([allSameIds[i]], allSameIds);
       idMap[allSameIds[i]] = otherIds;
     }
-    sessionStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
+    localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
   }
 
   /**

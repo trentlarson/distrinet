@@ -85,9 +85,6 @@ export default function Distnet() {
         </Link>
       </div>
 
-      <div className={`distnet ${styles.distnet}`} data-tid="distnet">
-        {settingsCountText}
-      </div>
       <div className={styles.content}>
         Config file contents:
         <textarea
@@ -164,7 +161,7 @@ export default function Distnet() {
                   Name
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Remote?
+                  1<sup>st</sup> URL Remote?
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   In-Memory Data Date
