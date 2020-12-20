@@ -1,5 +1,6 @@
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
+  - otherLocations is currently inside 'links' but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
   - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - figure out why api.familysearch URLs work but www.familysearch URLs don't
   - >-
@@ -37,5 +38,6 @@
     70 2 update to newer version of d3 (currently 3.5.5, for which it's hard to
     find documentation)
   - add format (mime type?) to otherLocations (maybe)
-  - 40 0 show how the same tree-browsing code can be used in browser & in node
+  - 0 show how the same tree-browsing code can be used in browser & in node
+  - add editor? https://github.com/FamilySearch/gedcomx-viewer
   - done! prepare demo for IonRev due:2020-09-20

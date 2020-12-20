@@ -41,7 +41,7 @@ var addHoverLinks = function() {
     $.getScript(bookmarkletFilesLoc + "/js/jquery.ui.prettypiemenu.js", function() {
 
       $('span[itemtype|="http://historical-data.org/Person"]')
-        .css('border-bottom','3px dotted blue');
+        .css('border-bottom','3px dotted white');
 
       $('span[itemtype|="http://historical-data.org/Person"]')
         .each(function(personNum) {

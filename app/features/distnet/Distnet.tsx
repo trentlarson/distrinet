@@ -200,7 +200,7 @@ export default function Distnet() {
                             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
                             Open
                           </a>
-                          {inUrl.url.startsWith('file:') ? (
+                          {inUrl?.url?.startsWith('file:') ? (
                             <span>
                               ,&nbsp;
                               {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}

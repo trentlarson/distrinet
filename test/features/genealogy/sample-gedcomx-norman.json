@@ -1,0 +1,90 @@
+{
+  "id": "gedcomx:trentlarson.com,2020:distrinet-sample-norman",
+  "persons":
+  [
+    {
+      "id": "norman",
+      "gender": {
+        "type": "http://gedcomx.org/Male"
+      },
+      "display": {
+        "name": "Norman Ross Larson",
+        "gender": "Male",
+        "lifespan": "1942-2005",
+        "birthDate": "6 December 1942",
+        "birthPlace": "Provo, Utah, Utah, United States",
+        "deathDate": "26 June 2005",
+        "deathPlace": "Kansas City, Jackson, Missouri, United States",
+        "familiesAsChild":
+        [
+          {
+            "parent1": {
+              "resource": "https://ancestors.familysearch.org/en/KWCR-B7N"
+            },
+            "parent2": {
+              "resource": "#elinora"
+            },
+            "children": [
+              {
+                "resource": "#KWHH-HSW",
+                "resourceId": "KWHH-HSW"
+              }
+            ]
+          }
+        ]
+      },
+      "links": {
+        "person": {
+          "href": "https://api.familysearch.org/platform/tree/persons/KWHH-HSW"
+        },
+        "otherLocations": {
+          "resources": [
+            {
+              "resource": "https://ancestors.familysearch.org/en/KWHH-HSW",
+              "description": "FamilySearch record",
+              "format": "html"
+            },
+            {
+              "resource": "https://api.familysearch.org/platform/tree/persons/KWHH-HSW",
+              "description": "FamilySearch API GedcomX record",
+              "format": "gedcomx"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "elinora",
+      "gender": {
+        "type": "http://gedcomx.org/Female"
+      },
+      "display": {
+        "name": "Elinora Noble",
+        "birthPlace": "United States"
+      }
+    },
+    {
+      "id": "jed",
+      "gender": {
+        "type": "http://gedcomx.org/Male"
+      },
+      "display": {
+        "name": "Fake Jed Clampett",
+        "gender": "Male",
+        "lifespan": "1969-",
+        "birthDate": "1 Jan 1969",
+        "birthPlace": "Texas, United States",
+        "deathDate": "",
+        "deathPlace": ""
+      }
+    }
+  ],
+  "relationships":
+  [
+    {
+      "person1": { "resource": "#norman" },
+      "person2": { "resource": "#jed" },
+      "type": "http://gedcomx.org/ParentChild"
+    }
+  ]
+}

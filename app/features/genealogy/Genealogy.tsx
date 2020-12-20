@@ -119,22 +119,11 @@ function GenealogyView(options: TreeOption) {
   // Walk tree for ancestors and descendants
   options.tree.getTree(rootUri);
 
-  const help = `
-    Sample URIs:
-      https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
-      gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#KGY4-8D5
-      https://api.familysearch.org/platform/tree/persons/KWHH-HSW
-  `;
-
   /* eslint-disable no-alert */
   return (
     <div>
       <div>
         URI
-        {/* Can't wait to remove this alert and make a good UI! */}
-        <button type="button" onClick={() => alert(help)}>
-          (?)
-        </button>
         &nbsp;
         {rootUri}
         <br />
@@ -147,6 +136,7 @@ function GenealogyView(options: TreeOption) {
         />
         <br />
         FS Session ID
+        &nbsp;
         <input
           type="text"
           size={40}
@@ -236,6 +226,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           </button>
           <br />
           ID
+          &nbsp;
           <input
             type="text"
             size={100}
@@ -246,6 +237,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           />
           <br />
           Loc
+          &nbsp;
           <input
             type="text"
             size={100}

@@ -113,7 +113,7 @@ export const dispatchSetSettingsTextAndYaml = (
     dispatch(setSettingsStateObject(loaded));
     console.log('New distnet settings object:\n', loaded);
     // do some basic sanity checks
-    if (isSettings(loaded)) {
+    if (isSettings(loaded) && loaded.sources) {
       loaded.sources.forEach((s: Source, index: number) => {
         if (!s || !s.id) {
           throw Error(`Source #${index} or its ID is null or undefined.`);

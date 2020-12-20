@@ -10,9 +10,9 @@ body {
   height: 100vh;
   background-color: #232c39;
   background-image: linear-gradient(
-    rgba(0, 216, 255, 0.5) 10%,
-    rgba(0, 64, 192, 0.7) 70%,
-    rgba(0, 216, 255, 0.5) 90%
+    rgba(127, 255, 255, 0.5) 10%,
+    rgba(0, 127, 0, 7) 70%,
+    rgba(127, 255, 255, 0.5) 90%
   );
   font-family: Arial, Helvetica, Helvetica Neue, serif;
 }
