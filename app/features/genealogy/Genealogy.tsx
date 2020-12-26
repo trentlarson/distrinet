@@ -40,7 +40,7 @@ if (electron.remote.session) {
 
 interface TreeOption {
   tree: {
-    setCache(cache: Cache): void;
+    setSources(sources: Array<Source>): void;
     getTree(rootUri: string): void;
     getQueryParams(): Record<string, string>;
   };
@@ -107,7 +107,10 @@ function GenealogyView(options: TreeOption) {
     (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
   );
 
-  options.tree.setCache(cache);
+  const sources: Array<Source> = useSelector(
+    (state: RootState) => state.distnet.settings.sources
+  );
+  options.tree.setSources(sources);
 
   const fsSessionId: string = useSelector(
     (state: RootState) => state.genealogy.fsSessionId

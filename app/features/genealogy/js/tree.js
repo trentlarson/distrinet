@@ -1,14 +1,15 @@
 (function(exports){
 
-  const $ = require("./jquery-2.2.4.min.js");
+  const $ = require('./jquery-2.2.4.min.js');
   const R = require('./ramda-0.25.0.min.js');
-  const uriTools = require("./uriTools.js");
+  const uriTools = require('./uriTools.js');
+  const loader = require('../../distnet/cache.ts');
   const mapperModule = require('../samePerson');
   const MapperBetweenSets = mapperModule.default;
 
-  var cache = null;
-  function setCache(_cache) {
-    cache = _cache;
+  var sources = [];
+  function setSources(_sources) {
+    sources = _sources;
   }
 
   // Walk tree with getTree & walkTree
@@ -95,22 +96,26 @@
         });
 
     } else {
-      if (cache[uri]) {
-        // the URI matches exactly, so we'll assume it's person 0
-        if (cache[uri].contents) {
-          try {
-            let gedcomx = JSON.parse(cache[uri].contents)
-            walkTree(uri, gedcomx, generationCount, node, 0, uri)
-          } catch (e) {
-            console.error("Error in cached walkTree for URI", uri, e);
-          }
-        } else {
-          console.error("Found no contents in cache for source URI", uri)
-        }
 
+      const source = R.find((src) => src.id === uri, sources);
+      if (source && source.urls) {
+        loader.loadOneSourceContents(source)
+          .then((cacheData) => {
+            if (cacheData) {
+              try {
+                let gedcomx = JSON.parse(cacheData.contents)
+                walkTree(uri, gedcomx, generationCount, node, 0, uri)
+              } catch (e) {
+                console.error("Error in source walkTree for URI", uri, e);
+              }
+            }
+          })
+          .catch((err) => {
+            console.error("Got an error loading source", source, err);
+          })
       } else {
         // check if any of the cache URIs are the prefix of the given URI
-        let keys = Object.keys(cache);
+        let keys = sources.map((source) => source.id);
         let prefixUri = null;
         for (let i = 0; i < keys.length && prefixUri === null; i++) {
           if (uri.startsWith(keys[i])) {
@@ -119,16 +124,30 @@
         }
         if (prefixUri) {
           try {
-            let gedcomx = JSON.parse(cache[prefixUri].contents)
 
-            // find the person record
-            let personIndex = findIndexInGedcomxPersons(uri, prefixUri, gedcomx);
-            if (personIndex > -1) {
-              node.prefixUri = prefixUri;
-              walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
-            }
-          } catch (e) {
-            console.error("Error in cached walkTree for URI", uri, e);
+            const source = R.find((src) => src.id === prefixUri, sources);
+            loader.loadOneSourceContents(source)
+              .then((cacheData) => {
+                if (cacheData) {
+                  try {
+                    let gedcomx = JSON.parse(cacheData.contents)
+
+                    // find the person record
+                    let personIndex = findIndexInGedcomxPersons(uri, prefixUri, gedcomx);
+                    if (personIndex > -1) {
+                      node.prefixUri = prefixUri;
+                      walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
+                    }
+                  } catch (err) {
+                    console.error("Error in source walkTree for URI", uri, err);
+                  }
+                }
+              })
+              .catch((err) => {
+                console.error("Got an error loading source", source, err);
+              })
+          } catch (err) {
+            console.error("Error in cached walkTree for URI", uri, err);
           }
         } else {
           console.error("Found no cached data for source URI", uri)
@@ -436,7 +455,7 @@
   }
 
 
-  exports.setCache = setCache;
+  exports.setSources = setSources;
   exports.getTree = getTree;
   exports.getQueryParams = getQueryParams;
 

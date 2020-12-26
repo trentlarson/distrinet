@@ -33,7 +33,8 @@ export const createCacheDir: () => Promise<void> = async () => {
 };
 
 /**
- * return CacheData or null if there was an error
+ * cacheDir is directory where cached data will be saved; defaults to DEFAULT_CACHE_DIR
+ * return CacheData for the first source URL that works, or null if none work (may update local file)
  */
 export const loadOneSourceContents: Promise<CacheData | null> =
   async (source: Source, cacheDir: string) => {
@@ -117,7 +118,7 @@ export const loadOneSourceContents: Promise<CacheData | null> =
               );
             }
             const cacheFile = path.join(
-              cacheDir,
+              cacheDir || DEFAULT_CACHE_DIR,
               sourceIdToFilename(source.id)
             );
             console.log(
@@ -193,29 +194,28 @@ export const loadOneSourceContents: Promise<CacheData | null> =
 
 }
 
+export const loadOneOfTheSources: (arg0: Array<Source>, arg1: string, arg2: string) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
+  const source = _.find(sources, (src) => src.id === sourceId);
+  if (source && source.urls) {
+    return loadOneSourceContents(source, cacheDir);
+  }
+  console.error('Failed to retrieve and cache any sources for', sourceId);
+  return null;
+}
+
 /**
- * return CacheData or null if there was an error
+ * return CacheData or null if there was an error (no state change)
  */
 export const reloadOneSourceIntoCache: (
   sourceId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getState: () => any
 ) => Promise<CacheData | null> = async (sourceId: string, getState) => {
-  const source = _.find(
-    getState().distnet.settings.sources,
-    (src) => src.id === sourceId
-  );
   const cacheDir =
     (getState().distnet.settings.fileSystem &&
       getState().distnet.settings.fileSystem.cacheDir) ||
     DEFAULT_CACHE_DIR;
-
-  if (source && source.urls) {
-    return loadOneSourceContents(source, cacheDir);
-  }
-
-  console.error('Failed to retrieve and cache any sources for', sourceId);
-  return null;
+  return loadOneOfTheSources(getState().distnet.settings.sources, sourceId, cacheDir);
 };
 
 export const reloadAllSourcesIntoCache: (

@@ -24,7 +24,7 @@ To test:
 
 - UI Genealogy Samples:
   - Get `fssessionid` and start with `FSSESSIONID=... yarn dev` or fill in on page.
-  - file:///Users/tlarson/dev/home/distrinet/test/features/genealogy/sample.json#thomas-iii
+  - file:///Users/tlarson/dev/home/distrinet/test/features/genealogy/sample-gedcomx.json#thomas-iii
     - Shows Thomas, and external link goes to FamilySearch with image.
   - https://api.familysearch.org/platform/tree/persons/KWHH-HSW
     - Shows Dad.
