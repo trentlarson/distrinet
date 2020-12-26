@@ -123,8 +123,7 @@ function GenealogyView(options: TreeOption) {
   return (
     <div>
       <div>
-        URI
-        &nbsp;
+        URI &nbsp;
         {rootUri}
         <br />
         <input
@@ -135,8 +134,7 @@ function GenealogyView(options: TreeOption) {
           }}
         />
         <br />
-        FS Session ID
-        &nbsp;
+        FS Session ID &nbsp;
         <input
           type="text"
           size={40}
@@ -225,8 +223,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
             Click to add this to your permanent settings:
           </button>
           <br />
-          ID
-          &nbsp;
+          ID &nbsp;
           <input
             type="text"
             size={100}
@@ -236,8 +233,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
             }}
           />
           <br />
-          Loc
-          &nbsp;
+          Loc &nbsp;
           <input
             type="text"
             size={100}
