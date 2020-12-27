@@ -30,7 +30,7 @@ To test:
     - Shows Dad.
     - Shows hops to other networks (if cache is loaded).
   - https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
-    - Shows Almon with images, expands up to 4 levels of expansion, collapses, and clicking network icon recenters on someone. (Profile links don't work yet.)
+    - Shows Almon with images, expands up to 4 levels of expansion, collapses, and clicking network icon recenters on someone. (Profile links don't work yet.  Nor do FamilySearch non-API links.)
   - gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#KGY4-8D5
     - Shows Will.
   - gedcomx:68bcddaa-3fef-4830-af04-aa8a88781a17#LZK2-LD4

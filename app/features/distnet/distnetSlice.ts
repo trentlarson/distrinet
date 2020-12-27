@@ -27,6 +27,50 @@ interface SettingsEditor {
   (settings: Settings): Settings;
 }
 
+function isSettings(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  contents: string | object | undefined
+): contents is Settings {
+  return (
+    typeof contents !== 'undefined' &&
+    typeof contents !== 'string' &&
+    (contents as Settings).sources !== undefined
+  );
+}
+
+/**
+ * Take a settings object and do some validity checking
+ * return error message or null (if no errors)
+ */
+function checkSettings(loaded: Settings): string | null {
+  // do some basic sanity checks
+  if (isSettings(loaded) && loaded.sources) {
+    const errorsOrNulls = loaded.sources.map((s: Source, index: number) => {
+      if (!s || !s.id) {
+        return `Source #${index} or its ID is null or undefined.`;
+      } else if (!s.urls || s.urls.length === 0) {
+        return `Source #${index + 1} has no URL.`;
+      }
+      return null;
+    });
+    const errors = R.reject(R.isNil, errorsOrNulls);
+    if (errors.length > 0) {
+      return errors[0];
+    }
+    const sourcesById = R.groupBy(R.prop('id'), loaded.sources);
+    const dupsLists = R.filter((sa) => sa.length > 1, R.values(sourcesById));
+    if (dupsLists.length > 0) {
+      const ids = R.map((dups) => dups[0].id, dupsLists);
+      return `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`;
+    }
+  } else {
+    return (
+      'That settings object does not have all settings elements, ie sources'
+    );
+  }
+  return null;
+}
+
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
@@ -45,8 +89,10 @@ const distnetSlice = createSlice({
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
     },
-    setSettingsStateObject: (state, contents) => {
+    setSettingsStateObject: (state, contents: Payload<Settings>) => {
       state.settings = contents.payload;
+      console.log('New distnet settings object:\n', contents.payload);
+      state.settingsErrorMessage = checkSettings(contents.payload);
     },
     setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
       state.settingsErrorMessage = contents.payload;
@@ -83,17 +129,6 @@ const {
   setSettingsStateText,
 } = distnetSlice.actions;
 
-function isSettings(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  contents: string | object | undefined
-): contents is Settings {
-  return (
-    typeof contents !== 'undefined' &&
-    typeof contents !== 'string' &&
-    (contents as Settings).sources !== undefined
-  );
-}
-
 let resetStateMethods: Array<ActionCreatorWithoutPayload<string>> = [];
 
 export const callResetStateMethods = (): AppThunk => async (dispatch) => {
@@ -108,41 +143,20 @@ export const dispatchSetSettingsTextAndYaml = (
 ): AppThunk => (dispatch) => {
   dispatch(setSettingsStateText(contents));
   dispatch(setSettingsChanged(!sameAsFile));
+  let loadedSettings;
   try {
-    const loaded = yaml.safeLoad(contents);
-    dispatch(setSettingsStateObject(loaded));
-    console.log('New distnet settings object:\n', loaded);
-    // do some basic sanity checks
-    if (isSettings(loaded) && loaded.sources) {
-      loaded.sources.forEach((s: Source, index: number) => {
-        if (!s || !s.id) {
-          throw Error(`Source #${index} or its ID is null or undefined.`);
-        } else if (!s.urls || s.urls.length === 0) {
-          throw Error(`Source #${index + 1} has no URL.`);
-        }
-      });
-      const sourcesById = R.groupBy(R.prop('id'), loaded.sources);
-      const dupsLists = R.filter((sa) => sa.length > 1, R.values(sourcesById));
-      if (dupsLists.length > 0) {
-        const ids = R.map((dups) => dups[0].id, dupsLists);
-        throw Error(
-          `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`
-        );
-      }
+    loadedSettings = yaml.safeLoad(contents);
+    if (isSettings(loadedSettings)) {
+      dispatch(setSettingsStateObject(loadedSettings));
+      dispatch(dispatchCacheForAll());
+      dispatch(callResetStateMethods());
     } else {
-      throw Error(
-        'That settings object does not have a all settings elements, ie sources'
-      );
+      throw Error('Settings file does not match Settings format.');
     }
-    dispatch(setSettingsErrorMessage(null));
-    dispatch(callResetStateMethods());
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
-    console.error(
-      'New distnet settings failed YAML parse or sanity check:\n',
-      error.message
-    );
-    dispatch(setSettingsErrorMessage(error.message));
+    console.error('Inside TextAndYaml, got error:', error, ' ... trying to parse and set from contents:', loadedSettings);
+    dispatch(setSettingsErrorMessage(error.message))
   }
 };
 
@@ -157,7 +171,6 @@ export const dispatchLoadSettingsFromFile = (): AppThunk => async (
   dispatch
 ) => {
   const result = await loadSettingsFromFile();
-  console.log('New distnet settings text loaded:\n', result);
   if (isError(result)) {
     dispatch(setSettingsErrorMessage(result.error));
   } else {
@@ -312,7 +325,7 @@ export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
   });
   const result: CacheData | null = await reloadOneSourceIntoCache(
     sourceId,
-    getState
+    getState().distnet.settings
   );
   if (result) {
     return dispatch(setCachedStateForOne(result));
@@ -331,7 +344,7 @@ export const dispatchCacheForAll = (): AppThunk => async (
     dispatch(setCacheErrorMessage(error.toString()));
   });
   const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
-    getState
+    getState().distnet.settings
   );
   const result: Array<CacheData> = removeNulls(allCaches);
   return dispatch(setCachedStateForAll(result));
@@ -339,11 +352,8 @@ export const dispatchCacheForAll = (): AppThunk => async (
 
 export const dispatchLoadSettingsAndCacheIfEmpty = (
   methodsThatResetState: Array<ActionCreatorWithoutPayload<string>>
-): AppThunk => async (dispatch, getState) => {
+): AppThunk => async (dispatch) => {
   await dispatch(dispatchLoadSettingsFromFileIfEmpty());
-  if (Object.keys(getState().distnet.cache).length === 0) {
-    dispatch(dispatchCacheForAll());
-  }
   resetStateMethods = methodsThatResetState;
 };
 

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-import { APP_NAME, CacheData, Source, UrlData } from './distnetClasses';
+import { APP_NAME, CacheData, Settings, Source, UrlData } from './distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -36,8 +36,10 @@ export const createCacheDir: () => Promise<void> = async () => {
  * cacheDir is directory where cached data will be saved; defaults to DEFAULT_CACHE_DIR
  * return CacheData for the first source URL that works, or null if none work (may update local file)
  */
-export const loadOneSourceContents: Promise<CacheData | null> =
-  async (source: Source, cacheDir: string) => {
+export const loadOneSourceContents: (
+  arg0: Source,
+  arg1: string
+) => Promise<CacheData | null> = async (source: Source, cacheDir: string) => {
 
   let cacheInfo: CacheData | null = null;
 
@@ -207,24 +209,18 @@ export const loadOneOfTheSources: (arg0: Array<Source>, arg1: string, arg2: stri
  * return CacheData or null if there was an error (no state change)
  */
 export const reloadOneSourceIntoCache: (
-  sourceId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getState: () => any
-) => Promise<CacheData | null> = async (sourceId: string, getState) => {
-  const cacheDir =
-    (getState().distnet.settings.fileSystem &&
-      getState().distnet.settings.fileSystem.cacheDir) ||
-    DEFAULT_CACHE_DIR;
-  return loadOneOfTheSources(getState().distnet.settings.sources, sourceId, cacheDir);
+  arg0: string,
+  arg1: Settings
+) => Promise<CacheData | null> = (sourceId, settings) => {
+  return loadOneOfTheSources(settings.sources, sourceId, DEFAULT_CACHE_DIR);
 };
 
 export const reloadAllSourcesIntoCache: (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getState: () => any
-) => Promise<Array<CacheData | null>> = async (getState) => {
-  const { sources } = getState().distnet.settings;
-  const sourceReloads = _.isEmpty(sources)
-    ? [new Promise(() => Promise.resolve([] as Array<CacheData>))]
-    : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, getState));
+  settings: Settings
+) => Promise<Array<CacheData | null>> = (settings) => {
+  const { sources } = settings;
+  const sourceReloads = _.isNil(sources)
+    ? []
+    : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, settings));
   return Promise.all(sourceReloads);
 };
