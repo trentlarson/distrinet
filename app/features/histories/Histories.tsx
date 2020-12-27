@@ -128,6 +128,7 @@ interface DirProps {
 }
 
 export function HistoryDir(props: DirProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dispatch: Dispatch<any> = useDispatch();
   const { name, source, tree, treePath } = props;
   const goodName = name || tree.fullPath.base;

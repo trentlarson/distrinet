@@ -4,7 +4,13 @@ import _ from 'lodash';
 import path from 'path';
 import url from 'url';
 
-import { APP_NAME, CacheData, Settings, Source, UrlData } from './distnetClasses';
+import {
+  APP_NAME,
+  CacheData,
+  Settings,
+  Source,
+  UrlData,
+} from './distnetClasses';
 
 const fsPromises = fs.promises;
 
@@ -40,7 +46,6 @@ export const loadOneSourceContents: (
   arg0: Source,
   arg1: string
 ) => Promise<CacheData | null> = async (source: Source, cacheDir: string) => {
-
   let cacheInfo: CacheData | null = null;
 
   let index = 0;
@@ -193,17 +198,20 @@ export const loadOneSourceContents: (
   }
   console.error('Failed to retrieve and cache file for', source);
   return null;
+};
 
-}
-
-export const loadOneOfTheSources: (arg0: Array<Source>, arg1: string, arg2: string) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
+export const loadOneOfTheSources: (
+  arg0: Array<Source>,
+  arg1: string,
+  arg2: string
+) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
   const source = _.find(sources, (src) => src.id === sourceId);
   if (source && source.urls) {
     return loadOneSourceContents(source, cacheDir);
   }
   console.error('Failed to retrieve and cache any sources for', sourceId);
   return null;
-}
+};
 
 /**
  * return CacheData or null if there was an error (no state change)
