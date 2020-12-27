@@ -9,15 +9,29 @@
     return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]+:/));
   }
 
-  // detect if 'file:' or HTTP with 'localhost' or '127.0.0.1'
+  /**
+   * true if URI of 'file:' or HTTP with 'localhost' or '127.0.0.1'
+   */
   function isUriLocalhost(uri) {
     return (
       uri &&
+        (uri.toLowerCase().startsWith('file:') ||
+         uri.toLowerCase().startsWith('http://127.0.0.1') ||
+         uri.toLowerCase().startsWith('http://localhost') ||
+         uri.toLowerCase().startsWith('https://localhost') ||
+         uri.toLowerCase().startsWith('https://127.0.0.1'))
+    );
+  }
+
+  /**
+   * true if URI of 'file:' or 'http:' or 'https:'
+   */
+  function isFileOrHttpUri(uri) {
+    return (
+      uri &&
       (uri.toLowerCase().startsWith('file:') ||
-        uri.toLowerCase().startsWith('http://127.0.0.1') ||
-        uri.toLowerCase().startsWith('http://localhost') ||
-        uri.toLowerCase().startsWith('https://localhost') ||
-        uri.toLowerCase().startsWith('https://127.0.0.1'))
+        uri.toLowerCase().startsWith('http:') ||
+        uri.toLowerCase().startsWith('https:'))
     );
   }
 
@@ -117,6 +131,7 @@
   }
 
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
+  exports.isFileOrHttpUri = isFileOrHttpUri;
   exports.isGlobalUri = isGlobalUri;
   exports.isUriLocalhost = isUriLocalhost;
   exports.globalUriForId = globalUriForId;

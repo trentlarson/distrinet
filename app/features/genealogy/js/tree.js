@@ -139,18 +139,18 @@
                       walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
                     }
                   } catch (err) {
-                    console.error("Error in source walkTree for URI", uri, err);
+                    console.error("Error in prefixed source walkTree for URI", uri, err);
                   }
                 }
               })
               .catch((err) => {
-                console.error("Got an error loading source", source, err);
+                console.error("Got an error loading prefixed source", source, err);
               })
           } catch (err) {
-            console.error("Error in cached walkTree for URI", uri, err);
+            console.error("Error in prefixed source walkTree for URI", uri, err);
           }
         } else {
-          console.error("Found no cached data for source URI", uri)
+          console.error("Found no data for prefixed source for URI", uri)
         }
       }
       markFinished(node);
@@ -167,7 +167,13 @@
       (person) => uriTools.globalUriForId(person.id, prefixUri) === globalUri,
       gedcomx.persons
     );
-    return personIndex > -1 ? personIndex : 0;
+    if (personIndex == -1) {
+      personIndex = 0;
+      if (!globalUri.endsWith(gedcomx.persons[personIndex].id)) {
+        console.log("Couldn't find", globalUri, "so using person", personIndex, "with ID", gedcomx.persons[personIndex].id)
+      }
+    }
+    return personIndex;
   }
 
   function markStart() {

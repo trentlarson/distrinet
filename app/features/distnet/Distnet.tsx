@@ -185,6 +185,7 @@ export default function Distnet() {
                   </td>
                   <td>
                     {uriSource.urls &&
+                      Array.isArray(uriSource.urls) && // can fail with malformed settings
                       uriSource.urls.map((inUrl, index) => (
                         <span key={inUrl && inUrl.url}>
                           {index > 0 ? `, ${index + 1}) ` : ''}

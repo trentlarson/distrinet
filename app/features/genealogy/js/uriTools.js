@@ -59,6 +59,7 @@
   exports.equal = equal;
   exports.globalUriForResource = uriTools.globalUriForResource;
   exports.globalUriForId = uriTools.globalUriForId;
+  exports.isFileOrHttpUri = uriTools.isFileOrHttpUri;
   exports.isGlobalUri = uriTools.isGlobalUri;
   exports.isUriLocalhost = uriTools.isUriLocalhost;
   exports.removeQueryForFS = removeQueryForFS;
