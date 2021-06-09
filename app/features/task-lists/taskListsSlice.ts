@@ -783,11 +783,15 @@ export const dispatchVolunteer = (
       }
     } else {
       alert(
-        'You have not set a "privateKey" in your settings, which is necessary' +
+        'You have not set a "credentials.privateKey" in your settings, which is necessary' +
           ' to submit a task.  To fix, go to the settings and click' +
           ' "Generate Key".'
       );
     }
+  } else {
+    alert(
+      'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
+    );
   }
 };
 
