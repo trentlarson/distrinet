@@ -125,7 +125,7 @@ Current [sample app](https://github.com/trentlarson/distrinet) is built on the E
 
 Types of URI -> URL relationships:
 
-- For "sources.urLs":
+- For "sources.urls":
   - The first URL is preferred.  If that's a remote URL:
     - You might have a local copy (eg. a git clone), and that "file:///" URL would be what to put as the second URL.
     - If there is no local copy, a copy will be downloaded and stored by this app.
