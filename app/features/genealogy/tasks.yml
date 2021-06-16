@@ -1,3 +1,4 @@
+  - show example with public & private data (eg. Misbach & Larson)
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
   - otherLocations is currently inside 'links' but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
@@ -16,9 +17,6 @@
     fails
   - 85 1 parse through local RootsMagic file (after adding matching URIs)
   - 85 0 enable the link to the person's profile page
-  - >-
-    80 0 bug - Matt's example from raw.githubusercontent renders external links
-    that don't work
   - >-
     80 0 bug - Matt's example from raw.githubusercontent renders external links
     that don't work

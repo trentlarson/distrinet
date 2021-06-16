@@ -322,7 +322,7 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
   const encnumbasisBuf: Buffer = Buffer.concat([multicodecBuf, numAlgoBuf]);
   const encnumbasis: string = bs58.encode(encnumbasisBuf);
 
-  const peerDid = `did:peer:1z${encnumbasis}`;
+  const peerDid = `did:peer:0z${encnumbasis}`;
   return peerDid;
 }
 

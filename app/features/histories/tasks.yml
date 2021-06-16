@@ -1,4 +1,5 @@
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
+    - be sure not to lock the main thread (useEffect?)
   - -1 automatically focus on the search input box
   - 0 log search errors somewhere in app, available to user id:log-errors
   - 1 load history file from list & show relationship +histories

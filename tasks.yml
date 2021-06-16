@@ -82,7 +82,7 @@ log:
           indicator than just the URI "scheme:") id:source-with-format
         taskUri: 'taskyaml:trentlarson.com,2020:distrinet/tasks#source-with-format'
         time: '2020-11-23T04:35:18.365Z'
-        did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
+        did: 'did:peer:0zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
     time: '2020-11-23T04:35:18.365Z'
     publicKey: |
       -----BEGIN PUBLIC KEY-----
@@ -91,4 +91,4 @@ log:
       -----END PUBLIC KEY-----
     signature: >-
       303c021c1bb01ad3e5d39cd427a06cccb7952630e6a9617a8d2602039c31316e021c2443bc793afad856c7522e9f573334a7c7c219169c2038237d603f64
-    did: 'did:peer:1zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
+    did: 'did:peer:0zQmTF3teo6hFisauy72rQGPzpJMmYkTR5G7NDhoH6hK9o56'
