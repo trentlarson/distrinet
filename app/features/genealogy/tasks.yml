@@ -12,6 +12,7 @@
   - >-
     90 1 bug - sometimes the graph doesn't show after pasting the URL (after
     cache reload?)
+  - for fragments, in getTree2 only make another file/API call if looking into a different base URI (since the data will already be in the current context)
   - >-
     90 1 bug - clicking on otherLocationResource in the same page (repeatedly?)
     fails

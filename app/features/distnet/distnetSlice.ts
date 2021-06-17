@@ -300,7 +300,7 @@ Uncaught (in promise) TypeError: semver__WEBPACK_IMPORTED_MODULE_3__.gte is not 
  */
 
 /**
- * @param publicKey: KeyObject (and it's only "any" because I can't find "KeyObject" anywhere)
+ * @param publicKey: KeyObject
  *
  * This may be wrong: it uses the DER bytes as SHA256 import.
  * I don't think the DER format accurately gives the underlying bytes that make

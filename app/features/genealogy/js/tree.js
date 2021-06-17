@@ -223,7 +223,13 @@
       tmpNode.portrait = gedcomx.persons[personIndex].links.portrait.href;
     }
 
+    tmpNode.lifespan = gedcomx.persons[personIndex].display.lifespan;
+    tmpNode.birthPlace = gedcomx.persons[personIndex].display.birthPlace;
+
     let personGlobalId = uriTools.globalUriForId(id, gedcomxContext)
+
+    tmpNode.otherLocations =
+      gatherOtherLocations(gedcomx, gedcomx.persons[personIndex].links, personGlobalId);
 
     // Get Parents
     tmpNode._parents = [];
@@ -259,52 +265,50 @@
       }
     }
 
-    tmpNode.lifespan = gedcomx.persons[personIndex].display.lifespan;
-    tmpNode.birthPlace = gedcomx.persons[personIndex].display.birthPlace;
-
-    // Get children of root person only
-    // TODO Get multiple generations of descendants
-    if (generationCount == 0) {
-      node._children = []
-      // first look for "relationship" links
-      if (gedcomx.relationships) {
-        let personsChildren =
-            R.filter(r =>
-                     r.type === 'http://gedcomx.org/ParentChild'
-                     && r.person1
-                     && r.person2
-                     && r.person1.resource
-                     && uriTools.equal(uriTools.globalUriForId(r.person1.resource, gedcomxContext),
-                                       personGlobalId),
-                     gedcomx.relationships);
-        for (let i = 0; i < personsChildren.length; i += 1) {
-          let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, gedcomxContext);
-          let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
-          node._children.push({id: personsChildren[i].person2.resource, name: name});
-        }
-      }
-      // if that didn't work, try the familiesAsParent
-      if (node._children.length === 0
-          && gedcomx.persons[personIndex].display
-          && gedcomx.persons[personIndex].display.familiesAsParent
-          && gedcomx.persons[personIndex].display.familiesAsParent[0].children
-          && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
-        node._children =
-          getChildrenFromFamiliesAsParent(
-            gedcomx.persons[personIndex].display.familiesAsParent[0].children,
-            gedcomx.persons,
-            gedcomxContext
-          );
+    // Get Children
+    tmpNode._children = [];
+    // first look for "relationship" links
+    if (gedcomx.relationships) {
+      let personsChildren =
+          R.filter(r =>
+                   r.type === 'http://gedcomx.org/ParentChild'
+                   && r.person1
+                   && r.person2
+                   && r.person1.resource
+                   && uriTools.equal(uriTools.globalUriForId(r.person1.resource, gedcomxContext),
+                                     personGlobalId),
+                   gedcomx.relationships);
+      for (let i = 0; i < personsChildren.length; i += 1) {
+        let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, gedcomxContext);
+        let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
+        tmpNode._children.push({id: personsChildren[i].person2.resource, name: name});
       }
     }
+    // if that didn't work, try the familiesAsParent
+    if (tmpNode._children.length === 0
+        && gedcomx.persons[personIndex].display
+        && gedcomx.persons[personIndex].display.familiesAsParent
+        && gedcomx.persons[personIndex].display.familiesAsParent[0].children
+        && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
+      tmpNode._children =
+        getChildrenFromFamiliesAsParent(
+          gedcomx.persons[personIndex].display.familiesAsParent[0].children,
+          gedcomx.persons,
+          gedcomxContext
+        );
+    }
 
-    tmpNode.otherLocations =
-      gatherOtherLocations(gedcomx, gedcomx.persons[personIndex].links, personGlobalId);
 
-    // Stop after 4 generations
-    if (generationCount < 5) {
+    // Only proceed with parents for base person up to 4 generations
+    if (-1 < generationCount && generationCount < 5) {
       for (let i = 0; i < tmpNode._parents.length; i += 1) {
         getTree2(tmpNode._parents[i].id, generationCount + 1, node);
+      }
+    }
+    // Only proceed with children for base person down 1 generation
+    if (-2 < generationCount && generationCount < 1) {
+      for (let i = 0; i < tmpNode._children.length; i += 1) {
+        getTree2(tmpNode._children[i].id, generationCount - 1, node);
       }
     }
   }
@@ -313,8 +317,12 @@
   function find(obj, id, uriContext) {
     if (uriTools.globalUriForId(id, uriContext) === uriTools.globalUriForId(obj.id, uriContext)
         || uriTools.globalUriForId(id, uriContext) === obj.fullUri) return obj;
-    for (let i = 0; i < obj._parents.length; i ++) {
+    for (let i = 0; obj._parents && i < obj._parents.length; i ++) {
       var result = find(obj._parents[i], id, uriContext);
+      if (result) return result;
+    }
+    for (let i = 0; obj._children && i < obj._children.length; i ++) {
+      var result = find(obj._children[i], id, uriContext);
       if (result) return result;
     }
     return null;
