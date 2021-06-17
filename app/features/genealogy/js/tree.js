@@ -253,15 +253,17 @@
     if (tmpNode._parents.length === 0
         && gedcomx.persons[personIndex].display.familiesAsChild) {
       let parents =
-          getParentsFromFamiliesAsChild(gedcomx.persons[personIndex].display.familiesAsChild[0],
-                                        gedcomx.persons,
-                                        gedcomxContext);
+        getParentsFromFamiliesAsChild(
+          gedcomx.persons[personIndex].display.familiesAsChild[0],
+          gedcomx.persons,
+          gedcomxContext
+        );
 
       if (parents.father) {
-        tmpNode._parents.push({id: parents.father.url, name: parents.father.name, _parents: []});
+        tmpNode._parents.push({id: parents.father.url, name: parents.father.name});
       }
       if (parents.mother) {
-        tmpNode._parents.push({id: parents.mother.url, name: parents.mother.name, _parents: []});
+        tmpNode._parents.push({id: parents.mother.url, name: parents.mother.name});
       }
     }
 
@@ -279,9 +281,9 @@
                                      personGlobalId),
                    gedcomx.relationships);
       for (let i = 0; i < personsChildren.length; i += 1) {
-        let nextId = uriTools.globalUriForResource(personsChildren[i].person2.resource, gedcomxContext);
-        let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
-        tmpNode._children.push({id: personsChildren[i].person2.resource, name: name});
+        // This is a way to get the ID of the person if the name isn't available.
+        //let name = "(" + new URL(personsChildren[i].person2.resource).pathname.split('/').pop() + ")";
+        tmpNode._children.push({id: personsChildren[i].person2.resource});
       }
     }
     // if that didn't work, try the familiesAsParent
