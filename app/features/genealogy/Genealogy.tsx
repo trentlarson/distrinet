@@ -1,7 +1,7 @@
 import electron from 'electron';
 import process from 'process';
 import * as R from 'ramda';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -156,9 +156,9 @@ function ChangeRootUriInput() {
   const [rootUriInputExpanded, setRootUriInputExpanded] = useState(false);
   const [rootUriInput, setRootUriInput] = useState('');
 
-  const inputRef = useRef();
+  const inputRef = React.useRef<HTMLInputElement>(null);
   useEffect(() => {
-    inputRef.current.focus();
+    if (inputRef.current) inputRef.current.focus();
   });
 
   return (
