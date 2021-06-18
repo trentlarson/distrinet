@@ -128,7 +128,8 @@ function GenealogyView(options: TreeOption) {
     <div>
       <div>
         Source: &nbsp;
-        {rootUri} &nbsp;
+        {rootUri}
+        &nbsp;
         <ChangeRootUriInput />
         <br />
         <OfferToSaveIfNew rootUri={rootUri} />
@@ -145,21 +146,20 @@ enum Visibility {
   hidden = 'hidden',
 }
 
-const getVisibility = (isVisible: boolean) => {
+function getVisibility(isVisible: boolean) {
   return isVisible ? Visibility.visible : Visibility.hidden;
 }
 
-function ChangeRootUriInput(options) {
-
+function ChangeRootUriInput() {
   const dispatch = useDispatch();
 
-  const [rootUriInputExpanded, setRootUriInputExpanded] = useState(false)
+  const [rootUriInputExpanded, setRootUriInputExpanded] = useState(false);
   const [rootUriInput, setRootUriInput] = useState('');
 
-  const inputRef = useRef()
+  const inputRef = useRef();
   useEffect(() => {
     inputRef.current.focus();
-  })
+  });
 
   return (
     <span>
@@ -172,10 +172,11 @@ function ChangeRootUriInput(options) {
           }}
         >
           Change
-        </button> &nbsp;
+        </button>
       </span>
       <span style={{ visibility: getVisibility(rootUriInputExpanded) }}>
         <br />
+        URI &nbsp;
         <input
           type="text"
           size={32}
@@ -186,14 +187,12 @@ function ChangeRootUriInput(options) {
           onKeyUp={(event) => {
             if (event.keyCode === 13) {
               // 13 = enter key
-console.log("hit enter")
               setRootUriInputExpanded(false);
               if (rootUriInput.length > 0) {
                 dispatch(setRootUri(rootUriInput));
               }
             } else if (event.keyCode === 27) {
               // 27 = escape
-console.log("hit escape")
               setRootUriInputExpanded(false);
             }
           }}
