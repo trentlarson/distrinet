@@ -1,7 +1,7 @@
 import electron from 'electron';
 import process from 'process';
 import * as R from 'ramda';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -18,6 +18,10 @@ import uriTools from '../distnet/uriTools';
 import { setCorrelatedIdsRefreshedMillis, setRootUri } from './genealogySlice';
 import MapperBetweenSets from './samePerson';
 
+require('features/genealogy/js/d3.min.js'); // v 3.5.5
+const treeDs = require('features/genealogy/js/tree_ds.js');
+const tree = require('features/genealogy/js/tree.js');
+
 interface TreeOption {
   tree: {
     setSources(sources: Array<Source>): void;
@@ -25,10 +29,6 @@ interface TreeOption {
     getQueryParams(): Record<string, string>;
   };
 }
-
-require('features/genealogy/js/d3.min.js'); // v 3.5.5
-const treeDs = require('features/genealogy/js/tree_ds.js');
-const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
   const fsSessionId: string = useSelector(
@@ -127,16 +127,9 @@ function GenealogyView(options: TreeOption) {
   return (
     <div>
       <div>
-        URI &nbsp;
-        {rootUri}
-        <br />
-        <input
-          type="text"
-          size={100}
-          onChange={(event) => {
-            dispatch(setRootUri(event.target.value));
-          }}
-        />
+        Source: &nbsp;
+        {rootUri} &nbsp;
+        <ChangeRootUriInput />
         <br />
         <OfferToSaveIfNew rootUri={rootUri} />
       </div>
@@ -144,6 +137,70 @@ function GenealogyView(options: TreeOption) {
       <h3 className="person_name">&nbsp;</h3>
       <div className="viewer" />
     </div>
+  );
+}
+
+enum Visibility {
+  visible = 'visible',
+  hidden = 'hidden',
+}
+
+const getVisibility = (isVisible: boolean) => {
+  return isVisible ? Visibility.visible : Visibility.hidden;
+}
+
+function ChangeRootUriInput(options) {
+
+  const dispatch = useDispatch();
+
+  const [rootUriInputExpanded, setRootUriInputExpanded] = useState(false)
+  const [rootUriInput, setRootUriInput] = useState('');
+
+  const inputRef = useRef()
+  useEffect(() => {
+    inputRef.current.focus();
+  })
+
+  return (
+    <span>
+      <span style={{ visibility: getVisibility(!rootUriInputExpanded) }}>
+        <button
+          type="button"
+          onClick={() => {
+            setRootUriInput('');
+            setRootUriInputExpanded(true);
+          }}
+        >
+          Change
+        </button> &nbsp;
+      </span>
+      <span style={{ visibility: getVisibility(rootUriInputExpanded) }}>
+        <br />
+        <input
+          type="text"
+          size={32}
+          ref={inputRef}
+          onChange={(event) => {
+            setRootUriInput(event.target.value);
+          }}
+          onKeyUp={(event) => {
+            if (event.keyCode === 13) {
+              // 13 = enter key
+console.log("hit enter")
+              setRootUriInputExpanded(false);
+              if (rootUriInput.length > 0) {
+                dispatch(setRootUri(rootUriInput));
+              }
+            } else if (event.keyCode === 27) {
+              // 27 = escape
+console.log("hit escape")
+              setRootUriInputExpanded(false);
+            }
+          }}
+        />
+        &nbsp;(hit Enter)
+      </span>
+    </span>
   );
 }
 
