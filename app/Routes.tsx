@@ -111,7 +111,10 @@ export default function Routes() {
         <Route path={routes.COUNTER} component={CounterPage} />
         <Route path={routes.DISTNET} component={DistnetPage} />
         <Route path={routes.GENEALOGY} component={GenealogyPage} />
-        <Route path={routes.GENEALOGY_SETTINGS} component={GenealogySettingsPage} />
+        <Route
+          path={routes.GENEALOGY_SETTINGS}
+          component={GenealogySettingsPage}
+        />
         <Route path={routes.HELP} component={HelpPage} />
         <Route path={routes.HISTORIES} component={HistoriesPage} />
         <Route path={routes.HISTORY} component={HistoryPage} />
