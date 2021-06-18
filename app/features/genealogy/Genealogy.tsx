@@ -4,6 +4,8 @@ import * as R from 'ramda';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+
+// imports for this app
 import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
 import {
@@ -13,30 +15,8 @@ import {
 } from '../distnet/distnetSlice';
 import { Cache, Source } from '../distnet/distnetClasses';
 import uriTools from '../distnet/uriTools';
-import {
-  setCorrelatedIdsRefreshedMillis,
-  setFsSessionId,
-  setRootUri,
-} from './genealogySlice';
+import { setCorrelatedIdsRefreshedMillis, setRootUri } from './genealogySlice';
 import MapperBetweenSets from './samePerson';
-
-if (electron.remote.session) {
-  const cookie = {
-    url: 'https://api.familysearch.org',
-    name: 'fssessionid',
-    value: process.env.FSSESSIONID,
-  };
-  electron.remote.session.defaultSession.cookies
-    .set(cookie)
-    .then(() => {
-      // success
-      console.error('Set fssessionid cookie:', cookie.value);
-      return null;
-    })
-    .catch((error) => {
-      console.error('Error setting fssessionid cookie:', error);
-    });
-}
 
 interface TreeOption {
   tree: {
@@ -51,6 +31,30 @@ const treeDs = require('features/genealogy/js/tree_ds.js');
 const tree = require('features/genealogy/js/tree.js');
 
 export default function Genealogy() {
+  const fsSessionId: string = useSelector(
+    (state: RootState) => state.genealogy.fsSessionId
+  );
+
+  // if we see problems with 'remote', maybe fix deprecation: https://www.electronjs.org/docs/api/remote
+  if (electron.remote.session) {
+    const cookie = {
+      url: 'https://api.familysearch.org',
+      name: 'fssessionid',
+      value: fsSessionId || process.env.FSSESSIONID,
+    };
+    // if we see problems with 'remote', maybe fix deprecation: https://www.electronjs.org/docs/api/remote
+    electron.remote.session.defaultSession.cookies
+      .set(cookie)
+      .then(() => {
+        // success
+        // console.log('Set fssessionid cookie:', cookie.value);
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error setting fssessionid cookie:', error);
+      });
+  }
+
   treeDs.addListener({
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
@@ -113,10 +117,6 @@ function GenealogyView(options: TreeOption) {
   );
   options.tree.setSources(sources);
 
-  const fsSessionId: string = useSelector(
-    (state: RootState) => state.genealogy.fsSessionId
-  );
-
   const rootUri: string = useSelector(
     (state: RootState) => state.genealogy.rootUri
   );
@@ -135,26 +135,6 @@ function GenealogyView(options: TreeOption) {
           size={100}
           onChange={(event) => {
             dispatch(setRootUri(event.target.value));
-          }}
-        />
-        <br />
-        FS Session ID &nbsp;
-        <input
-          type="text"
-          size={40}
-          value={fsSessionId}
-          onChange={(event) => {
-            dispatch(setFsSessionId(event.target.value));
-            const cookie = {
-              url: 'https://api.familysearch.org',
-              name: 'fssessionid',
-              value: event.target.value,
-            };
-            electron.remote.session.defaultSession.cookies
-              .set(cookie)
-              .catch((error) => {
-                console.error('Error setting fssessionid cookie:', error);
-              });
           }}
         />
         <br />
