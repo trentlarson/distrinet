@@ -26,18 +26,34 @@ export interface Gedcomx {
   ];
 }
 
+type IdAndFormat = string;
+
 /**
  * Use browser storage to maintain mappings between data sets
  *
  */
 export default class MapperBetweenSets {
+
   /**
+   * Retrieve the DB of all duplicate IDs.
+   *
+   * Beware! This is expensive (so use sparingly).
+   *
+   * @param idKey is an ID for an individual
    * return list of all other IDs correlated with this one
    */
-  public static retrieveFor(key: string): Array<string> {
+  public static retrieveAllIdRecords(): Record<string,Array<IdAndFormat>> {
     const idMapStr = localStorage[SAME_IDENTITIES_KEY];
-    const idMap = idMapStr ? JSON.parse(idMapStr) : {};
-    return idMap[key] || [];
+    return idMapStr ? JSON.parse(idMapStr) : {};
+  }
+
+  /**
+   * @param idKey is an ID for an individual
+   * @param idMap is a record of idKey
+   * return list of all other IDs correlated with this one
+   */
+  public static retrieveForIdFrom(idKey: string, idMap: Record<string,Array<IdAndFormat>>): Array<IdAndFormat> {
+    return idMap[idKey] || [];
   }
 
   /**
@@ -71,7 +87,12 @@ export default class MapperBetweenSets {
     console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
   }
 
-  static searchForSamePersons(key: string, gedcomx: Gedcomx) {
+  /**
+   * Search through all the gedcomx persons and add to localStorage a correlation between each person and:
+   * - any 'otherLocation' links that are 'gedcomx' URLs
+   * - any 'person' links
+   */
+  static searchForSamePersons(repoId: string, gedcomx: Gedcomx): void {
     for (let pi = 0; gedcomx.persons && pi < gedcomx.persons.length; pi += 1) {
       const { links } = gedcomx.persons[pi];
       if (links && links.otherLocations) {
@@ -81,19 +102,20 @@ export default class MapperBetweenSets {
             otherRes.format === 'gedcomx' ||
             otherRes.resource.startsWith('gedcomx:')
           ) {
-            const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, key);
+            const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
             const otherId = uriTools.globalUriForResource(
               otherRes.resource,
-              key
+              repoId
             );
             this.addPair(thisId, otherId);
           }
         }
       } else if (links && links.person) {
-        const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, key);
+        // these are gedcomx data by default
+        const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
         const otherId = uriTools.globalUriForResource(
           uriTools.removeQueryForFS(gedcomx.persons[pi].links.person.href),
-          key
+          repoId
         );
         this.addPair(thisId, otherId);
       }
@@ -115,7 +137,7 @@ export default class MapperBetweenSets {
   }
 
   /**
-   * Add initialIds to the allIdMappings
+   * return Array<string> of initialIds with addition of allIdMappings values with same IDs
    */
   static combineAllIdentities(
     initialIds: Array<string>,
@@ -126,7 +148,7 @@ export default class MapperBetweenSets {
     while (remainingIds.length > 0) {
       const additions = allIdMappings[remainingIds[0]] || [];
       const newIds = R.difference(additions, collectedIds);
-      collectedIds = R.union(collectedIds, newIds);
+      collectedIds = R.union(collectedIds, additions);
       remainingIds = R.drop(1, remainingIds);
       remainingIds = R.union(remainingIds, newIds);
     }

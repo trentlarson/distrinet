@@ -71,6 +71,11 @@ export default function Distnet() {
     <div />
   );
 
+  let localStorageLength = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    localStorageLength += localStorage[localStorage.key(i)].length;
+  }
+
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -234,9 +239,14 @@ export default function Distnet() {
         <div>{cacheErrorMessage}</div>
         <div>
           <ul>
-            {distnet.cache &&
-              _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-            &nbsp;characters of cached data
+            <li>
+              {distnet.cache &&
+                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+              &nbsp;characters of cached data
+            </li>
+            <li>
+              {localStorageLength} characters of local storage data
+            </li>
           </ul>
         </div>
       </div>

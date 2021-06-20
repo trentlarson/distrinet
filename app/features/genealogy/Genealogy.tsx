@@ -20,7 +20,7 @@ import MapperBetweenSets from './samePerson';
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
-const tree = require('features/genealogy/js/tree.js');
+const treeFun = require('features/genealogy/js/tree.js');
 
 interface TreeOption {
   tree: {
@@ -68,7 +68,7 @@ export default function Genealogy() {
     // but I couldn't get anything to actually set the existingpage to the new URL.
   });
 
-  const pageUri = tree.getQueryParams().id || '';
+  const pageUri = treeFun.getQueryParams().id || '';
   const dispatch = useDispatch();
   if (pageUri) {
     // This causes the following error:
@@ -91,7 +91,7 @@ export default function Genealogy() {
         <Link to={routes.GENEALOGY_SETTINGS}>Settings</Link>
         <hr className="hr" />
 
-        <GenealogyView tree={tree} />
+        <GenealogyView tree={treeFun} />
       </div>
     </div>
   );

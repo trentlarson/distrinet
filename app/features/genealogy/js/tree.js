@@ -17,6 +17,7 @@
   // let's remove these globals and pass around explicitly for thread safety (& more clarity)
   // (treeObj is an app global... can we fix that?)
   var asyncCount = 0;
+  var fullTree = {};
   /**
    * @param uri URI of the individual (null and '' will be ignored)
    */
@@ -25,6 +26,7 @@
       return;
     }
     asyncCount = 0;
+    fullTree = MapperBetweenSets.retrieveAllIdRecords();
     getTree2(uri, 0, null);
   }
 
@@ -60,7 +62,7 @@
             return response.text();
           } else if (response.status === 401) {
             let errorMessage = "Authorization failed retrieving URL " + uri
-            + "  This often happens when the fssessionid is lost so try pasting that in again."
+            + "  This often happens when the fssessionid is lost so try pasting that in again (under Settings on this page)."
             + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";
             throw Error(errorMessage);
           } else {
@@ -438,7 +440,7 @@
       otherIdResources = personLinks.otherLocations.resources;
     }
     // now include any other gedcomx IDs already known, possibly from reverse pointers
-    let knownIds = MapperBetweenSets.retrieveFor(personGlobalId);
+    let knownIds = MapperBetweenSets.retrieveForIdFrom(personGlobalId, fullTree);
     let knownIdResources = knownIds
         ? R.map(uri => ({resource: uri,
                          description: 'Known (maybe private) GedcomX',

@@ -1,6 +1,7 @@
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
     - be sure not to lock the main thread (useEffect?)
   - -1 automatically focus on the search input box
+  - 2 add to viewer & parse semantic tags
   - 0 log search errors somewhere in app, available to user id:log-errors
   - 1 load history file from list & show relationship +histories
   - 1 load the right local copy (because it might not be element 0) id:uri-local-version

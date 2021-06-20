@@ -1,7 +1,7 @@
 import envPaths from 'env-paths';
 import fs from 'fs';
-import _ from 'lodash';
 import path from 'path';
+import * as R from 'ramda';
 import url from 'url';
 
 import {
@@ -22,12 +22,14 @@ const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
  */
 function sourceIdToFilename(sourceId: string) {
   // Remove all non-alphanumeric characters from the string.
-  return _.filter(
-    Array.from(sourceId),
-    (c) =>
+  return R.map(
+    c =>
       (c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57) ||
       (c.charCodeAt(0) >= 65 && c.charCodeAt(0) <= 90) ||
       (c.charCodeAt(0) >= 97 && c.charCodeAt(0) <= 122)
+      ? c
+      : '_',
+    Array.from(sourceId)
   ).join('');
 }
 
@@ -205,7 +207,7 @@ export const loadOneOfTheSources: (
   arg1: string,
   arg2: string
 ) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
-  const source = _.find(sources, (src) => src.id === sourceId);
+  const source = R.find(src => src.id === sourceId, sources);
   if (source && source.urls) {
     return loadOneSourceContents(source, cacheDir);
   }
@@ -227,7 +229,7 @@ export const reloadAllSourcesIntoCache: (
   settings: Settings
 ) => Promise<Array<CacheData | null>> = (settings) => {
   const { sources } = settings;
-  const sourceReloads = _.isNil(sources)
+  const sourceReloads = R.isNil(sources)
     ? []
     : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, settings));
   return Promise.all(sourceReloads);
