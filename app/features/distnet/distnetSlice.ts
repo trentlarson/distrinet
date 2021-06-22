@@ -366,13 +366,17 @@ export const dispatchModifySettings = (
 export const createSettingsYaml = () => {
   const testSettings = {};
 
-  const sourcePath = path.join(electron.remote.app.getAppPath(), '..', 'test', 'features');
+  const basePath = path.join(electron.remote.app.getAppPath(), '..');
+  const sourcePath = path.join(basePath, 'test', 'features');
+  const tasksPath = path.join(basePath, 'tasks.yml');
   const genealogyPath = 'file://' + path.join(sourcePath, 'genealogy', 'sample-gedcomx-norman.json');
   const historiesPath = 'file://' + path.join(sourcePath, 'histories', 'sample-histories');
+  const tasksUrl = 'file://' + tasksPath;
 
   testSettings.sources = [
     { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
     { name: 'Sample Histories', id: 'histories:local-test-files:test-sample', urls: [ { url: historiesPath } ] },
+    { name: 'Sample Project', id: 'taskyaml:local-test-project', urls: [ { url: tasksUrl } ] },
   ];
 
   let newYaml = yaml.safeDump(testSettings);
