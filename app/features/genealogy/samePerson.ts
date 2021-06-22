@@ -100,17 +100,12 @@ export default class MapperBetweenSets {
       if (links && links.otherLocations) {
         for (let li = 0; li < links.otherLocations.resources.length; li += 1) {
           const otherRes = links.otherLocations.resources[li];
-          if (
-            otherRes.format === 'gedcomx' ||
-            otherRes.resource.startsWith('gedcomx:')
-          ) {
-            const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
-            const otherId = uriTools.globalUriForResource(
-              otherRes.resource,
-              repoId
-            );
-            this.addPair(thisId, otherId, idMap);
-          }
+          const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
+          const otherId = uriTools.globalUriForResource(
+            otherRes.resource,
+            repoId
+          );
+          this.addPair(thisId, otherId, idMap);
         }
       } else if (links && links.person) {
         // these are gedcomx data by default
