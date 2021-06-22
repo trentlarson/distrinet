@@ -1,8 +1,10 @@
 import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
-import nodeCrypto, { KeyObject } from 'crypto';
 import bs58 from 'bs58';
+import nodeCrypto, { KeyObject } from 'crypto';
+import electron from 'electron';
 import yaml from 'js-yaml';
 import _ from 'lodash';
+import path from 'path';
 import * as R from 'ramda';
 
 // eslint-disable-next-line import/no-cycle
@@ -360,5 +362,21 @@ export const dispatchModifySettings = (
   const settingsYaml = yaml.safeDump(newSettings);
   dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, false));
 };
+
+export const createSettingsYaml = () => {
+  const testSettings = {};
+
+  const sourcePath = path.join(electron.remote.app.getAppPath(), '..', 'test', 'features');
+  const genealogyPath = 'file://' + path.join(sourcePath, 'genealogy', 'sample-gedcomx-norman.json');
+  const historiesPath = 'file://' + path.join(sourcePath, 'histories', 'sample-histories');
+
+  testSettings.sources = [
+    { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
+    { name: 'Sample Histories', id: 'histories:local-test-files:test-sample', urls: [ { url: historiesPath } ] },
+  ];
+
+  let newYaml = yaml.safeDump(testSettings);
+  return newYaml;
+}
 
 export default distnetSlice.reducer;

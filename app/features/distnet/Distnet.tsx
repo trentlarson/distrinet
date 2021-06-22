@@ -13,6 +13,7 @@ import { Source } from './distnetClasses';
 import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
+  createSettingsYaml,
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
@@ -31,6 +32,7 @@ function getExtension(str: string) {
 }
 
 export default function Distnet() {
+
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
 
@@ -122,31 +124,6 @@ export default function Distnet() {
           type="button"
         >
           save config
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            let proceed = false;
-            if (
-              distnet.settings.credentials &&
-              R.find((x) => x.id === 'privateKey', distnet.settings.credentials)
-            ) {
-              // there's already a privateKey credential
-
-              // We need to replace this with dialog.showMessageBox!
-              // eslint-disable-next-line no-restricted-globals
-              proceed = confirm(
-                'This will overwrite the current private key.  Are you sure you want to proceed?'
-              );
-            } else {
-              proceed = true;
-            }
-            if (proceed) {
-              dispatch(dispatchModifySettings(generateKeyAndSet));
-            }
-          }}
-        >
-          Generate Key
         </button>
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (
@@ -249,6 +226,49 @@ export default function Distnet() {
             </li>
           </ul>
         </div>
+
+        <div>
+          Advanced&nbsp;
+          <button
+            type="button"
+            onClick={() => {
+              let proceed = false;
+              if (
+                distnet.settings.credentials &&
+                R.find((x) => x.id === 'privateKey', distnet.settings.credentials)
+              ) {
+                // there's already a privateKey credential
+
+                // We need to replace this with dialog.showMessageBox!
+                // eslint-disable-next-line no-restricted-globals
+                proceed = confirm(
+                  'This will overwrite the current private key.  Are you sure you want to proceed?'
+                );
+              } else {
+                proceed = true;
+              }
+              if (proceed) {
+                dispatch(dispatchModifySettings(generateKeyAndSet));
+              }
+            }}
+          >
+            Generate Key
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (distnet.settingsChanged) {
+                alert('You have changes in the current settings, so save or undo those first.')
+              } else {
+                dispatch(dispatchSetSettingsTextAndYaml(createSettingsYaml(), false));
+                alert('You will have to save this new config if you want it permanently.')
+              }
+            }}
+          >
+            Use Test Settings
+          </button>
+        </div>
+
       </div>
     </div>
   );
