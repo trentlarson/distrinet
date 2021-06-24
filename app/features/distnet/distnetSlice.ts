@@ -366,12 +366,19 @@ export const dispatchModifySettings = (
 export const createSettingsYaml = () => {
   const testSettings = {};
 
+  /* eslint-disable prettier/prettier */
+  /* eslint-disable prefer-template */
+
   const basePath = path.join(electron.remote.app.getAppPath(), '..');
-  const sourcePath = path.join(basePath, 'test', 'features');
-  const tasksPath = path.join(basePath, 'tasks.yml');
-  const genealogyPath = 'file://' + path.join(sourcePath, 'genealogy', 'sample-gedcomx-norman.json');
-  const historiesPath = 'file://' + path.join(sourcePath, 'histories', 'sample-histories');
-  const tasksUrl = 'file://' + tasksPath;
+  const genealogyPath =
+    'file://' +
+    path.join(basePath, 'test', 'features', 'genealogy', 'sample-gedcomx-norman.json');
+  const historiesPath =
+    'file://' +
+    path.join(basePath, 'test', 'features', 'histories', 'sample-histories');
+  const tasksUrl = 'file://' + path.join(basePath, 'tasks.yml');
+
+  /* eslint-enable prefer-template */
 
   testSettings.sources = [
     { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
@@ -379,8 +386,10 @@ export const createSettingsYaml = () => {
     { name: 'Sample Project', id: 'taskyaml:local-test-project', urls: [ { url: tasksUrl } ] },
   ];
 
-  let newYaml = yaml.safeDump(testSettings);
+  /* eslint-enable prettier/prettier */
+
+  const newYaml = yaml.safeDump(testSettings);
   return newYaml;
-}
+};
 
 export default distnetSlice.reducer;

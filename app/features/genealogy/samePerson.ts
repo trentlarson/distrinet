@@ -32,7 +32,6 @@ export interface Gedcomx {
  * We currently allow pointers to records with arbitrary formats.
  */
 export default class MapperBetweenSets {
-
   /**
    * Retrieve the DB of all duplicate IDs.
    *
@@ -41,7 +40,7 @@ export default class MapperBetweenSets {
    * @param idKey is an ID for an individual
    * return list of all other IDs correlated with this one
    */
-  public static retrieveAllIdRecords(): Record<string,Array<string>> {
+  public static retrieveAllIdRecords(): Record<string, Array<string>> {
     const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     return idMapStr ? JSON.parse(idMapStr) : {};
   }
@@ -51,7 +50,10 @@ export default class MapperBetweenSets {
    * @param idMap is a record of idKey
    * return list of all other IDs correlated with this one
    */
-  public static retrieveForIdFrom(idKey: string, idMap: Record<string,Array<string>>): Array<string> {
+  public static retrieveForIdFrom(
+    idKey: string,
+    idMap: Record<string, Array<string>>
+  ): Array<string> {
     return idMap[idKey] || [];
   }
 
@@ -94,12 +96,17 @@ export default class MapperBetweenSets {
    * - any 'otherLocation' links that are 'gedcomx' URLs
    * - any 'person' links
    */
-  static searchForSamePersons(repoId: string, gedcomx: Gedcomx, idMap: Record<string,Array<string>>): void {
+  static searchForSamePersons(
+    repoId: string,
+    gedcomx: Gedcomx,
+    idMap: Record<string, Array<string>>
+  ): void {
     for (let pi = 0; gedcomx.persons && pi < gedcomx.persons.length; pi += 1) {
       const { links } = gedcomx.persons[pi];
       if (links && links.otherLocations) {
         for (let li = 0; li < links.otherLocations.resources.length; li += 1) {
           const otherRes = links.otherLocations.resources[li];
+          // eslint-disable-next-line prettier/prettier
           const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
           const otherId = uriTools.globalUriForResource(
             otherRes.resource,
@@ -122,7 +129,11 @@ export default class MapperBetweenSets {
   /**
    * Add these two ids one another's mappings in localStorage.
    */
-  static addPair(id1: string, id2: string, idMap: Record<string,Array<IdAndFormat>>): void {
+  static addPair(
+    id1: string,
+    id2: string,
+    idMap: Record<string, Array<IdAndFormat>>
+  ): void {
     const allSameIds = this.combineAllIdentities([id1, id2], idMap);
     for (let i = 0; i < allSameIds.length; i += 1) {
       const otherIds = R.without([allSameIds[i]], allSameIds);

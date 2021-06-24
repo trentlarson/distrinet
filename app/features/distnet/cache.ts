@@ -23,12 +23,12 @@ const DEFAULT_CACHE_DIR = path.join(paths.config, 'cache');
 function sourceIdToFilename(sourceId: string) {
   // Remove all non-alphanumeric characters from the string.
   return R.map(
-    c =>
+    (c) =>
       (c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57) ||
       (c.charCodeAt(0) >= 65 && c.charCodeAt(0) <= 90) ||
       (c.charCodeAt(0) >= 97 && c.charCodeAt(0) <= 122)
-      ? c
-      : '_',
+        ? c
+        : '_',
     Array.from(sourceId)
   ).join('');
 }
@@ -207,7 +207,7 @@ export const loadOneOfTheSources: (
   arg1: string,
   arg2: string
 ) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
-  const source = R.find(src => src.id === sourceId, sources);
+  const source = R.find((src) => src.id === sourceId, sources);
   if (source && source.urls) {
     return loadOneSourceContents(source, cacheDir);
   }

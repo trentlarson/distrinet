@@ -32,10 +32,8 @@ function getExtension(str: string) {
 }
 
 export default function Distnet() {
-
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
-
   const settingsChangedMessage = distnet.settingsChanged ? (
     <div style={{ color: 'orange' }}>
       Settings have been changed and not yet saved.
@@ -74,7 +72,7 @@ export default function Distnet() {
   );
 
   let localStorageLength = 0;
-  for (let i = 0; i < localStorage.length; i++) {
+  for (let i = 0; i < localStorage.length; i += 1) {
     localStorageLength += localStorage[localStorage.key(i)].length;
   }
 
@@ -221,12 +219,10 @@ export default function Distnet() {
                 _.sum(_.map(distnet.cache, (value) => value.contents.length))}
               &nbsp;characters of cached data
             </li>
-            <li>
-              {localStorageLength} characters of local storage data
-            </li>
+            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+            <li>{localStorageLength} characters of local storage data</li>
           </ul>
         </div>
-
         <div>
           Advanced&nbsp;
           <button
@@ -235,7 +231,10 @@ export default function Distnet() {
               let proceed = false;
               if (
                 distnet.settings.credentials &&
-                R.find((x) => x.id === 'privateKey', distnet.settings.credentials)
+                R.find(
+                  (x) => x.id === 'privateKey',
+                  distnet.settings.credentials
+                )
               ) {
                 // there's already a privateKey credential
 
@@ -258,17 +257,22 @@ export default function Distnet() {
             type="button"
             onClick={() => {
               if (distnet.settingsChanged) {
-                alert('You have changes in the current settings, so save or undo those first.')
+                alert(
+                  'You have changes in the current settings, so save or undo those first.'
+                );
               } else {
-                dispatch(dispatchSetSettingsTextAndYaml(createSettingsYaml(), false));
-                alert('You will have to save this new config if you want it permanently.')
+                dispatch(
+                  dispatchSetSettingsTextAndYaml(createSettingsYaml(), false)
+                );
+                alert(
+                  'You will have to save this new config if you want it permanently.'
+                );
               }
             }}
           >
             Use Test Settings
           </button>
         </div>
-
       </div>
     </div>
   );
