@@ -132,7 +132,7 @@ export default class MapperBetweenSets {
   static addPair(
     id1: string,
     id2: string,
-    idMap: Record<string, Array<IdAndFormat>>
+    idMap: Record<string, Array<string>>
   ): void {
     const allSameIds = this.combineAllIdentities([id1, id2], idMap);
     for (let i = 0; i < allSameIds.length; i += 1) {

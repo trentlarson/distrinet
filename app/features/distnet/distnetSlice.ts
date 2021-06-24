@@ -364,7 +364,11 @@ export const dispatchModifySettings = (
 };
 
 export const createSettingsYaml = () => {
-  const testSettings = {};
+  const testSettings: Settings = {
+    sources: [],
+    resourceTypes: {},
+    credentials: [],
+  };
 
   /* eslint-disable prettier/prettier */
   /* eslint-disable prefer-template */

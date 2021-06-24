@@ -73,7 +73,10 @@ export default function Distnet() {
 
   let localStorageLength = 0;
   for (let i = 0; i < localStorage.length; i += 1) {
-    localStorageLength += localStorage[localStorage.key(i)].length;
+    const key = localStorage.key(i);
+    if (key) {
+      localStorageLength += localStorage[key].length;
+    }
   }
 
   return (
