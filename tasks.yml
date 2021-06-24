@@ -1,5 +1,4 @@
 tasks:
-  - back-up files (eg. publishing personal tasks)
   - 90 1 create list-source directory file that points at other lists of sources
   - 90 2 change internal settings format = sources & credentials into objects
   - >-
