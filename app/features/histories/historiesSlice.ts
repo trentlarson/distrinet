@@ -4,8 +4,15 @@ import path, { ParsedPath } from 'path';
 import * as R from 'ramda';
 import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
+import * as uuid from 'uuid';
+
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
+import {
+  addSourceToSettings,
+  dispatchModifySettings,
+  dispatchSaveSettingsTextToFile,
+} from '../distnet/distnetSlice';
 
 interface Payload<T> {
   type: string;
@@ -446,4 +453,25 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   R.mapObjIndexed((tree: FileTree, uri: string) => {
     searchFileOrDir(uri, [], tree, term, dispatch);
   }, getState().histories.uriTree);
+};
+
+export const dispatchAddHistoryToSettings = (filePath: string): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  const fileUrl = 'file://' + filePath
+  const alreadyInSource: Source | undefined =
+    R.find((s) => R.contains(fileUrl, s.urls.map((u) => u.url)), getState().distnet.settings.sources);
+  if (alreadyInSource) {
+    alert('That path already exists in source ' + alreadyInSource.id)
+  } else {
+    const newId = uuid.v4();
+    const newSource = {
+      id: 'histories:' + newId,
+      urls: [{ url: fileUrl }],
+    };
+    dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+    dispatch(dispatchSaveSettingsTextToFile());
+    alert('Added that source.');
+  }
 };

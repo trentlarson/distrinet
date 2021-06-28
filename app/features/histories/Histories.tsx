@@ -11,6 +11,7 @@ import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
+  dispatchAddHistoryToSettings,
   dispatchCountSearchable,
   dispatchEraseSearchResults,
   dispatchLoadHistoryDirsIfEmpty,
@@ -32,6 +33,40 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
     : Visibility.hidden;
 }
 
+// I usually see this code fire twice (and I've even see it dozens of time with one drag).
+// So these are to guard against those possibilities.
+let timestampOfLastDrop = 0;
+let lastFile = '';
+const addDragDropListeners = (dispatch: Dispatch<any>) => {
+  // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
+
+  document.addEventListener('drop', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer.files.length !== 1) {
+      // Technically there's no problem adding more, but we should add more confirmations if they do this
+      // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
+      alert('We only support adding one folder at a time.');
+    } else {
+      const filePath = event.dataTransfer.files[0].path
+      if (filePath === lastFile && new Date().getTime() - timestampOfLastDrop < 5000) {
+        console.log('Got a duplicate event: ', event);
+      } else {
+        timestampOfLastDrop = new Date().getTime();
+        lastFile = filePath;
+        dispatch(dispatchAddHistoryToSettings(filePath));
+      }
+    }
+  });
+
+  document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
+}
+
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
   const dispatch = useDispatch();
@@ -48,6 +83,8 @@ export default function Histories() {
 
   // histories.uriTree will be empty on initial load, before the paths are built
   const histories = useSelector((state: RootState) => state.histories);
+
+  addDragDropListeners(dispatch);
 
   return (
     <div>

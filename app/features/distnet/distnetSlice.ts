@@ -374,12 +374,8 @@ export const createSettingsYaml = () => {
   /* eslint-disable prefer-template */
 
   const basePath = path.join(electron.remote.app.getAppPath(), '..');
-  const genealogyPath =
-    'file://' +
-    path.join(basePath, 'test', 'features', 'genealogy', 'sample-gedcomx-norman.json');
-  const historiesPath =
-    'file://' +
-    path.join(basePath, 'test', 'features', 'histories', 'sample-histories');
+  const genealogyPath = 'file://' + path.join(basePath, 'test', 'features', 'genealogy', 'sample-gedcomx-norman.json');
+  const historiesPath = 'file://' + path.join(basePath, 'test', 'features', 'histories', 'sample-histories');
   const tasksUrl = 'file://' + path.join(basePath, 'tasks.yml');
 
   /* eslint-enable prefer-template */
