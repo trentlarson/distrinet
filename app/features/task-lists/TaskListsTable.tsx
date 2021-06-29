@@ -33,26 +33,127 @@ import style from './style.css';
 
 const child = child_process.execFile;
 
-function execProtocolApp(execPath: string, args: Array<string>) {
-  child(execPath, args, (err, data) => {
-    // This runs after the app is closed.
-    console.log('Executable data:', data);
-    console.error('Executable error:', err);
-  });
-}
+export default function TaskListsTable() {
+  const dispatch = useDispatch();
+  const taskLists = useSelector((state: RootState) => state.taskLists);
+  const distnet = useSelector((state: RootState) => state.distnet);
+  const resourceTypes = useSelector(
+    (state: RootState) => state.distnet.settings.resourceTypes
+  );
+  const [listSourceIdsToShow, setListSourceIdsToShow] = useState(
+    [] as Array<string>
+  );
+  const [hoursPerWeek, setHoursPerWeek] = useState(DEFAULT_HOURS_PER_WEEK);
+  const [focusOnTaskId, setFocusOnTaskId] = useState('');
+  const [taskSigningComment, setTaskSigningComment] = useState(
+    DEFAULT_TASK_COMMENT
+  );
+  const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
+  const [showOnlyTop3, setShowOnlyTop3] = useState(false);
 
-/**
- * return a button for "copy" labels; otherwise, the non-null value or ''
- */
-/** I don't know what this is for.  (Note that return type is "Element | string".)
-function labelValueRendering(label: string, summary: string) {
-  const value = labelValueInSummary(label, summary);
-  if (label === 'copy' && value && value.length > 0) {
-    return <button type="button">{value}</button>;
+  let allLabels: Array<string> = [];
+
+  let showLists = {} as Record<string, Array<YamlTask>>;
+  if (taskLists) {
+    if (taskLists.allLists && R.keys(taskLists.allLists).length > 0) {
+      showLists = R.pick(listSourceIdsToShow, taskLists.allLists);
+
+      // loop through and post-process, eg. to find all the labels
+      const oneBigList = R.flatten(R.values(showLists));
+      for (let i = 0; i < oneBigList.length; i += 1) {
+        const pairs = R.filter(
+          R.test(/:/),
+          R.split(' ', oneBigList[i].summary)
+        );
+        if (pairs.length > 0) {
+          const validKeys = R.filter(
+            R.test(/^[A-Za-z0-9_-]*$/),
+            R.map((item) => R.split(':', item)[0], pairs)
+          );
+          allLabels = R.union(allLabels, validKeys).sort();
+        }
+      }
+      // Since it's possible that a source got removed,
+      // ensure that all showing labels are only ones found in allLabels.
+      if (!R.all((label) => R.any(R.equals(label), allLabels), labelsToShow)) {
+        // only doing it conditionally to avoid (infinite?) rerenders
+        setLabelsToShow(R.intersection(labelsToShow, allLabels));
+      }
+    }
   }
-  return R.isNil(value) ? '' : value;
+
+  const taskSources: Array<Source> = R.filter(
+    (s) => isTaskyamlUriScheme(s.id),
+    distnet.settings.sources
+  );
+
+  return (
+    <div>
+      <br />
+      <br />
+      <br />
+      <div>
+        {sourceActions(
+          dispatch,
+          distnet.cache,
+          taskSources,
+          resourceTypes,
+          hoursPerWeek,
+          setHoursPerWeek,
+          focusOnTaskId,
+          setFocusOnTaskId,
+          taskSigningComment,
+          setTaskSigningComment,
+          listSourceIdsToShow,
+          setListSourceIdsToShow
+        )}
+      </div>
+      <div>
+        {taskLists.forecastData.html.length > 0 ? (
+          <div>
+            <hr />
+            <h4>
+              {
+                R.find(
+                  (s) => s.id === taskLists.forecastData.sourceId,
+                  taskSources
+                )?.name
+              }
+              &nbsp;Forecast
+            </h4>
+            <button
+              type="button"
+              onClick={() => {
+                setFocusOnTaskId('');
+                dispatch(clearForecastData());
+              }}
+            >
+              Remove
+            </button>
+            {ReactHtmlParser(taskLists.forecastData.html)}
+          </div>
+        ) : (
+          ''
+        )}
+      </div>
+      {bigListTable(
+        dispatch,
+        taskSources,
+        hoursPerWeek,
+        taskSigningComment,
+        setFocusOnTaskId,
+        setListSourceIdsToShow,
+        labelsToShow,
+        setLabelsToShow,
+        showOnlyTop3,
+        setShowOnlyTop3,
+        taskLists.display,
+        showLists,
+        allLabels
+      )}
+    </div>
+  );
 }
-* */
 
 function sourceActions(
   dispatch: (arg0: AppThunk) => void,
@@ -224,6 +325,145 @@ function sourceActions(
   );
 }
 
+function execProtocolApp(execPath: string, args: Array<string>) {
+  child(execPath, args, (err, data) => {
+    // This runs after the app is closed.
+    console.log('Executable data:', data);
+    console.error('Executable error:', err);
+  });
+}
+
+function bigListTable(
+  dispatch: (arg0: AppThunk) => void,
+  taskSources: Array<Source>,
+  hoursPerWeek: number,
+  taskSigningComment: string,
+  setFocusOnTaskId: (arg0: string) => void,
+  setListSourceIdsToShow: (arg0: Array<string>) => void,
+  labelsToShow: Array<string>,
+  setLabelsToShow: (arg0: Array<string>) => void,
+  showOnlyTop3: boolean,
+  setShowOnlyTop3: (arg0: boolean) => void,
+  allUiTrees: Record<string, Array<UiTree>>,
+  showLists: Record<string, Array<YamlTask>>,
+  allLabels: Array<string>
+) {
+  return R.keys(showLists).length === 0 ? (
+    <span />
+  ) : (
+    <div>
+      <hr />
+      <h4>All Activities</h4>
+      <input
+        type="checkbox"
+        checked={showOnlyTop3}
+        onChange={() => {
+          setShowOnlyTop3(!showOnlyTop3);
+        }}
+      />
+      Show only the top 3 of each list.
+      <br />
+      Labels:
+      {allLabels.map((label) => (
+        <button
+          type="button"
+          key={label}
+          onClick={() => {
+            if (R.any(R.equals(label), labelsToShow)) {
+              // remove it from the labels we're showing
+              setLabelsToShow(R.without([label], labelsToShow));
+            } else {
+              // add it to the labels we're showing
+              setLabelsToShow(R.union(labelsToShow, [label]));
+            }
+          }}
+          style={{
+            backgroundColor: R.any(R.equals(label), labelsToShow)
+              ? 'grey'
+              : 'white',
+          }}
+        >
+          {label}
+        </button>
+      ))}
+      {smallListTable(
+        R.keys(showLists).map((sourceId) =>
+          R.take(
+            showOnlyTop3 ? 3 : showLists[sourceId].length,
+            showLists[sourceId]
+          )
+        ),
+        hoursPerWeek,
+        taskSigningComment,
+        taskSources,
+        labelsToShow,
+        setListSourceIdsToShow,
+        setFocusOnTaskId,
+        [],
+        allUiTrees,
+        dispatch
+      )}
+    </div>
+  );
+}
+
+function smallListTable(
+  activityLists: Array<Array<YamlTask>>,
+  hoursPerWeek: number,
+  taskSigningComment: string,
+  taskSources: Array<Source>,
+  labelsToShow: Array<string>,
+  setListSourceIdsToShow: (arg0: Array<string>) => void,
+  setFocusOnTaskId: (arg0: string) => void,
+  uiTreePath: Array<UiTreeBranch>,
+  allUiTrees: Record<string, Array<UiTree>>,
+  dispatch: (arg0: AppThunk) => void
+) {
+  return (
+    <table style={{ border: '1px solid' }}>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Prty</th>
+          <th>
+            Est
+            <br />
+            <sub>
+              log
+              <sub>2</sub>
+            </sub>
+          </th>
+          {labelsToShow.map((label) => (
+            <th key={label}>{label}</th>
+          ))}
+          <th>Summary</th>
+          <th>&nbsp;</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {activityLists.map((activityList) =>
+          activityList.map((task: YamlTask, index: number) =>
+            oneTaskRow(
+              task,
+              index,
+              hoursPerWeek,
+              taskSigningComment,
+              taskSources,
+              labelsToShow,
+              setListSourceIdsToShow,
+              setFocusOnTaskId,
+              uiTreePath,
+              allUiTrees,
+              dispatch
+            )
+          )
+        )}
+      </tbody>
+    </table>
+  );
+}
+
 function oneTaskRow(
   task: YamlTask,
   index: number,
@@ -392,258 +632,5 @@ function oneTaskRow(
         </button>
       </td>
     </tr>
-  );
-}
-
-function smallListTable(
-  activityLists: Array<Array<YamlTask>>,
-  hoursPerWeek: number,
-  taskSigningComment: string,
-  taskSources: Array<Source>,
-  labelsToShow: Array<string>,
-  setListSourceIdsToShow: (arg0: Array<string>) => void,
-  setFocusOnTaskId: (arg0: string) => void,
-  uiTreePath: Array<UiTreeBranch>,
-  allUiTrees: Record<string, Array<UiTree>>,
-  dispatch: (arg0: AppThunk) => void
-) {
-  return (
-    <table style={{ border: '1px solid' }}>
-      <thead>
-        <tr>
-          <th>Project</th>
-          <th>Prty</th>
-          <th>
-            Est
-            <br />
-            <sub>
-              log
-              <sub>2</sub>
-            </sub>
-          </th>
-          {labelsToShow.map((label) => (
-            <th key={label}>{label}</th>
-          ))}
-          <th>Summary</th>
-          <th>&nbsp;</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {activityLists.map((activityList) =>
-          activityList.map((task: YamlTask, index: number) =>
-            oneTaskRow(
-              task,
-              index,
-              hoursPerWeek,
-              taskSigningComment,
-              taskSources,
-              labelsToShow,
-              setListSourceIdsToShow,
-              setFocusOnTaskId,
-              uiTreePath,
-              allUiTrees,
-              dispatch
-            )
-          )
-        )}
-      </tbody>
-    </table>
-  );
-}
-
-function bigListTable(
-  dispatch: (arg0: AppThunk) => void,
-  taskSources: Array<Source>,
-  hoursPerWeek: number,
-  taskSigningComment: string,
-  setFocusOnTaskId: (arg0: string) => void,
-  setListSourceIdsToShow: (arg0: Array<string>) => void,
-  labelsToShow: Array<string>,
-  setLabelsToShow: (arg0: Array<string>) => void,
-  showOnlyTop3: boolean,
-  setShowOnlyTop3: (arg0: boolean) => void,
-  allUiTrees: Record<string, Array<UiTree>>,
-  showLists: Record<string, Array<YamlTask>>,
-  allLabels: Array<string>
-) {
-  return R.keys(showLists).length === 0 ? (
-    <span />
-  ) : (
-    <div>
-      <hr />
-      <h4>All Activities</h4>
-      <input
-        type="checkbox"
-        checked={showOnlyTop3}
-        onChange={() => {
-          setShowOnlyTop3(!showOnlyTop3);
-        }}
-      />
-      Show only the top 3 of each list.
-      <br />
-      Labels:
-      {allLabels.map((label) => (
-        <button
-          type="button"
-          key={label}
-          onClick={() => {
-            if (R.any(R.equals(label), labelsToShow)) {
-              // remove it from the labels we're showing
-              setLabelsToShow(R.without([label], labelsToShow));
-            } else {
-              // add it to the labels we're showing
-              setLabelsToShow(R.union(labelsToShow, [label]));
-            }
-          }}
-          style={{
-            backgroundColor: R.any(R.equals(label), labelsToShow)
-              ? 'grey'
-              : 'white',
-          }}
-        >
-          {label}
-        </button>
-      ))}
-      {smallListTable(
-        R.keys(showLists).map((sourceId) =>
-          R.take(
-            showOnlyTop3 ? 3 : showLists[sourceId].length,
-            showLists[sourceId]
-          )
-        ),
-        hoursPerWeek,
-        taskSigningComment,
-        taskSources,
-        labelsToShow,
-        setListSourceIdsToShow,
-        setFocusOnTaskId,
-        [],
-        allUiTrees,
-        dispatch
-      )}
-    </div>
-  );
-}
-
-export default function TaskListsTable() {
-  const dispatch = useDispatch();
-  const taskLists = useSelector((state: RootState) => state.taskLists);
-  const distnet = useSelector((state: RootState) => state.distnet);
-  const resourceTypes = useSelector(
-    (state: RootState) => state.distnet.settings.resourceTypes
-  );
-  const [listSourceIdsToShow, setListSourceIdsToShow] = useState(
-    [] as Array<string>
-  );
-  const [hoursPerWeek, setHoursPerWeek] = useState(DEFAULT_HOURS_PER_WEEK);
-  const [focusOnTaskId, setFocusOnTaskId] = useState('');
-  const [taskSigningComment, setTaskSigningComment] = useState(
-    DEFAULT_TASK_COMMENT
-  );
-  const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
-  const [showOnlyTop3, setShowOnlyTop3] = useState(false);
-
-  let allLabels: Array<string> = [];
-
-  let showLists = {} as Record<string, Array<YamlTask>>;
-  if (taskLists) {
-    if (taskLists.allLists && R.keys(taskLists.allLists).length > 0) {
-      showLists = R.pick(listSourceIdsToShow, taskLists.allLists);
-
-      // loop through and post-process, eg. to find all the labels
-      const oneBigList = R.flatten(R.values(showLists));
-      for (let i = 0; i < oneBigList.length; i += 1) {
-        const pairs = R.filter(
-          R.test(/:/),
-          R.split(' ', oneBigList[i].summary)
-        );
-        if (pairs.length > 0) {
-          const validKeys = R.filter(
-            R.test(/^[A-Za-z0-9_-]*$/),
-            R.map((item) => R.split(':', item)[0], pairs)
-          );
-          allLabels = R.union(allLabels, validKeys).sort();
-        }
-      }
-      // Since it's possible that a source got removed,
-      // ensure that all showing labels are only ones found in allLabels.
-      if (!R.all((label) => R.any(R.equals(label), allLabels), labelsToShow)) {
-        // only doing it conditionally to avoid (infinite?) rerenders
-        setLabelsToShow(R.intersection(labelsToShow, allLabels));
-      }
-    }
-  }
-
-  const taskSources: Array<Source> = R.filter(
-    (s) => isTaskyamlUriScheme(s.id),
-    distnet.settings.sources
-  );
-
-  return (
-    <div>
-      <br />
-      <br />
-      <br />
-      <div>
-        {sourceActions(
-          dispatch,
-          distnet.cache,
-          taskSources,
-          resourceTypes,
-          hoursPerWeek,
-          setHoursPerWeek,
-          focusOnTaskId,
-          setFocusOnTaskId,
-          taskSigningComment,
-          setTaskSigningComment,
-          listSourceIdsToShow,
-          setListSourceIdsToShow
-        )}
-      </div>
-      <div>
-        {taskLists.forecastData.html.length > 0 ? (
-          <div>
-            <hr />
-            <h4>
-              {
-                R.find(
-                  (s) => s.id === taskLists.forecastData.sourceId,
-                  taskSources
-                )?.name
-              }
-              &nbsp;Forecast
-            </h4>
-            <button
-              type="button"
-              onClick={() => {
-                setFocusOnTaskId('');
-                dispatch(clearForecastData());
-              }}
-            >
-              Remove
-            </button>
-            {ReactHtmlParser(taskLists.forecastData.html)}
-          </div>
-        ) : (
-          ''
-        )}
-      </div>
-      {bigListTable(
-        dispatch,
-        taskSources,
-        hoursPerWeek,
-        taskSigningComment,
-        setFocusOnTaskId,
-        setListSourceIdsToShow,
-        labelsToShow,
-        setLabelsToShow,
-        showOnlyTop3,
-        setShowOnlyTop3,
-        taskLists.display,
-        showLists,
-        allLabels
-      )}
-    </div>
   );
 }

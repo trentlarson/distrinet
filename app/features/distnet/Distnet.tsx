@@ -23,14 +23,6 @@ import {
 } from './distnetSlice';
 import { globalUriScheme, isUriLocalhost } from './uriTools';
 
-function getExtension(str: string) {
-  const dotPos = str.lastIndexOf('.');
-  if (dotPos > -1) {
-    return str.substring(dotPos + 1);
-  }
-  return '';
-}
-
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
@@ -279,4 +271,12 @@ export default function Distnet() {
       </div>
     </div>
   );
+}
+
+function getExtension(str: string) {
+  const dotPos = str.lastIndexOf('.');
+  if (dotPos > -1) {
+    return str.substring(dotPos + 1);
+  }
+  return '';
 }
