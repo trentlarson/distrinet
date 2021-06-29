@@ -1,4 +1,5 @@
 tasks:
+  - 90 -1 bug: make drag-drop only work on the histories page
   - 90 1 create list-source directory file that points at other lists of sources
   - 90 2 change internal settings format = sources & credentials into objects
   - >-

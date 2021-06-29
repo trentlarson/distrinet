@@ -8,7 +8,7 @@ import GridLoader from 'react-spinners/GridLoader';
 import url, { URLSearchParams, fileURLToPath } from 'url';
 
 import routes from '../../constants/routes.json';
-import { RootState } from '../../store';
+import { RootState } from '../../store'; // eslint-disable-line import/no-cycle
 import { Source } from '../distnet/distnetClasses';
 import {
   dispatchAddHistoryToSettings,
@@ -37,19 +37,23 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 // So these are to guard against those possibilities.
 let timestampOfLastDrop = 0;
 let lastFile = '';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addDragDropListeners = (dispatch: Dispatch<any>) => {
   // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
 
   document.addEventListener('drop', (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (event.dataTransfer.files.length !== 1) {
+    if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
       // Technically there's no problem adding more, but we should add more confirmations if they do this
       // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
       alert('We only support adding one folder at a time.');
     } else {
-      const filePath = event.dataTransfer.files[0].path
-      if (filePath === lastFile && new Date().getTime() - timestampOfLastDrop < 5000) {
+      const filePath = event.dataTransfer.files[0].path;
+      if (
+        filePath === lastFile &&
+        new Date().getTime() - timestampOfLastDrop < 5000
+      ) {
         console.log('Got a duplicate event: ', event);
       } else {
         timestampOfLastDrop = new Date().getTime();
@@ -65,7 +69,7 @@ const addDragDropListeners = (dispatch: Dispatch<any>) => {
   });
 
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
-}
+};
 
 export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
