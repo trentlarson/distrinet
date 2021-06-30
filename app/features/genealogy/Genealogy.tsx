@@ -182,7 +182,7 @@ function ChangeRootUriInput() {
           size={32}
           ref={inputRef}
           onChange={(event) => {
-            setRootUriInput(event.target.value);
+            setRootUriInput(event.target.value.trim());
           }}
           onKeyUp={(event) => {
             if (event.keyCode === 13) {

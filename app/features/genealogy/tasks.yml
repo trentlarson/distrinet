@@ -1,8 +1,17 @@
   - show example with public & private data (eg. Misbach & Larson)
+    - use data we've sync'd - click on Matt or Grant to recenter, expand parents
+  - release for Matt
+
+  - remove 'View Profile' link & icons
+  - allow drag-and-drop for genealogy
+  - release for Sharon & Janell
+
   - get sample to work for gedcomx:my-local-test:test-sample-norman#elinora
+  - add a "clear cached identities" button for testing; may want to export identities
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
-  - otherLocations is currently inside 'links' but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
+  - otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
+
   - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - figure out why api.familysearch URLs work but www.familysearch URLs don't
   - >-
@@ -27,10 +36,7 @@
     URIs are now permissioned)
   - 80 1 click on a 4th-gen person and force further expansion
   - 80 1 give example of gedcomx protocol
-  - 75 1 demo to Janell due:2020-12-27
-  - 75 0 add FamilySearch session ID in the UI somewhere id:fssession-entry :
-    - create a bookmarklet that shows the session ID cookie when logged in
-  - 1 allow direct login to FamilySearch API to retrieve a token,  awaits:[fssession-entry]
+  - 1 allow direct login to FamilySearch API to retrieve a token
   - >-
     70 1 change family lookup to work from "relationsips" not "display" (or fix
     the latter because "familiesAs..." are arrays)
@@ -40,4 +46,4 @@
   - add format (mime type?) to otherLocations (maybe)
   - 0 show how the same tree-browsing code can be used in browser & in node
   - add editor? https://github.com/FamilySearch/gedcomx-viewer
-  - done! prepare demo for IonRev due:2020-09-20
+  - done! prepare demo for IonRev dued:2020-09-20

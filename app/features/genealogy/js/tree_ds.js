@@ -24,6 +24,8 @@
 
     document.addEventListener('treeComplete', function (e) {
 
+      const treeObj = e.detail
+
       var boxWidth = 200,
           boxHeight = 70,
           nodeWidth = 200,
@@ -332,6 +334,7 @@
             .append("svg:title")
             .text(function(person) { return person.id });
 
+        /** We don't have this view yet.
         // Go to profile view
         nodeEnter.append("a")
           //.attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + d.id})
@@ -342,6 +345,7 @@
             .attr("x", -100)
             .attr("y", 40)
             .attr("fill-opacity", .5);
+        **/
 
         /**
          * Create Links to Other Locations

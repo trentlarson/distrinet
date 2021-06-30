@@ -14,10 +14,9 @@
 
   // Walk tree with getTree & walkTree
 
-  // let's remove these globals and pass around explicitly for thread safety (& more clarity)
-  // (treeObj is an app global... can we fix that?)
+  // let's remove this global and pass around explicitly for thread safety (& more clarity)
   var asyncCount = 0;
-  var fullTree = {};
+  var allSameIds = {};
   /**
    * @param uri URI of the individual (null and '' will be ignored)
    */
@@ -26,7 +25,7 @@
       return;
     }
     asyncCount = 0;
-    fullTree = MapperBetweenSets.retrieveAllIdRecords();
+    allSameIds = MapperBetweenSets.retrieveAllIdRecords();
     getTree2(uri, 0, null);
   }
 
@@ -186,11 +185,11 @@
     asyncCount--;
     // Detect when finished
     if (asyncCount == 0 ) {
-      treeObj = node;
+      var treeObj = node;
       console.log("treeObj", treeObj);
       // Notify D3 to render the tree
       if (treeObj.id) {
-        document.dispatchEvent(new Event('treeComplete'));
+        document.dispatchEvent(new CustomEvent('treeComplete', { detail: treeObj }));
       } else {
         console.error("Found no valid treeObj data so will not draw on canvas.");
         // Should dispatch an event that shows a "not found" message.
@@ -206,7 +205,7 @@
     }
     if (!node.name) {
       // timeout is for React-type frameworks where this runs before the HTML has rendered (ugly)
-      setTimeout(() => $('.person_name').html(gedcomx.persons[personIndex].display.name+' - <a href="person.html?id='+id+'">View Profile</a>'), 500);
+      setTimeout(() => $('.person_name').html(gedcomx.persons[personIndex].display.name), 500);
 
       // will set the tmpNode name below (because it's the same for all nodes)
     }
@@ -440,7 +439,7 @@
       otherIdResources = personLinks.otherLocations.resources;
     }
     // now include any other gedcomx IDs already known, possibly from reverse pointers
-    let knownIds = MapperBetweenSets.retrieveForIdFrom(personGlobalId, fullTree);
+    let knownIds = MapperBetweenSets.retrieveForIdFrom(personGlobalId, allSameIds);
     let knownIdResources = knownIds
         ? R.map(uri => ({resource: uri,
                          description: 'Known (maybe private) GedcomX',
