@@ -26,7 +26,11 @@
     }
     asyncCount = 0;
     allSameIds = MapperBetweenSets.retrieveAllIdRecords();
-    getTree2(uri, 0, null);
+    getTree2(
+      uri,
+      0,
+      { id: null, prefixUri: "", fullUri: uri, name: null, _parents: [], _children: [], portrait: null }
+    );
   }
 
   /**
@@ -36,10 +40,6 @@
   function getTree2(uri, generationCount, node) {
     if (!uri) {
       return;
-    }
-
-    if (!node) {
-      node = { id: null, prefixUri: "", fullUri: uri, name: null, _parents: [], _children: [], portrait: null }
     }
 
     markStart();
@@ -136,7 +136,6 @@
                     // find the person record
                     let personIndex = findIndexInGedcomxPersons(uri, prefixUri, gedcomx);
                     if (personIndex > -1) {
-                      node.prefixUri = prefixUri;
                       walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
                     }
                   } catch (err) {
@@ -203,12 +202,6 @@
     if (!node.id) {
       node.id = gedcomx.persons[personIndex].id;
     }
-    if (!node.name) {
-      // timeout is for React-type frameworks where this runs before the HTML has rendered (ugly)
-      setTimeout(() => $('.person_name').html(gedcomx.persons[personIndex].display.name), 500);
-
-      // will set the tmpNode name below (because it's the same for all nodes)
-    }
 
     // Find current person in json tree (node)
     var tmpNode = find(node, id, gedcomxContext);
@@ -216,6 +209,8 @@
     if (!tmpNode.name) {
       tmpNode.name = gedcomx.persons[personIndex].display.name;
     }
+    // timeout is for React-type frameworks where this runs before the HTML has rendered (ugly)
+    setTimeout(() => $('.person_name').html(node.name), 500);
 
     // Set the portrait picture
     if (gedcomx.persons[personIndex].links
