@@ -318,7 +318,7 @@
           .attr('class', 'birth_place')
           .text(function(d) { return d.birthPlace; });
 
-        // Navigate Tree Link
+        // Tree Link - focus on this person
         nodeEnter.append("a")
           .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
           .append("svg:image")
@@ -328,6 +328,11 @@
             .attr("x", -80)
             .attr("y", 40)
             .attr("fill-opacity", .5)
+            .attr("visibility", (person) =>
+                  person.id !== treeObj.id
+                  ? "visible"
+                  : "hidden"
+                 )
             .on("click", function(person) {
               refreshWindow(treeUrlPrefix + "?id=" + person.id);
             })
