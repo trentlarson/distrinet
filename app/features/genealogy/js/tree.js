@@ -245,7 +245,7 @@
         tmpNode._parents.push({id: nextId, _parents: []});
       }
     }
-    // if that doesn't exist, try the display info
+    // if that doesn't exist, try the 'display' info
     if (tmpNode._parents.length === 0
         && gedcomx.persons[personIndex].display.familiesAsChild) {
       let parents =
@@ -256,10 +256,10 @@
         );
 
       if (parents.father) {
-        tmpNode._parents.push({id: parents.father.url, name: parents.father.name});
+        tmpNode._parents.push({id: parents.father.id, name: parents.father.name});
       }
       if (parents.mother) {
-        tmpNode._parents.push({id: parents.mother.url, name: parents.mother.name});
+        tmpNode._parents.push({id: parents.mother.id, name: parents.mother.name});
       }
     }
 
@@ -347,65 +347,56 @@
     return children;
   }
 
-  // Get the parents: Get their IDs from the display->familiesAsChild object. Get their names from the persons array.
+  /**
+   * Get the parents: Get IDs from the family object & get names from the persons array.
+   * @param family is an object of { parent: ..., parent2: ..., children: [...]}
+   * @param persons is all the persons in the file
+   */
   function getParentsFromFamiliesAsChild(family, persons, uriContext) {
 
     var parents = {father: null, mother: null};
 
     // Iterate all persons
     for (let i=1; i<persons.length; i++) {
-      let uriForNextPerson = uriTools.globalUriForId(persons[i].id, uriContext);
+      let uriForPerson = uriTools.globalUriForId(persons[i].id, uriContext);
 
       // Look for first parent
       const parent1ResourceUri = uriTools.globalUriForResource(family.parent1.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-
-      if (uriForNextPerson == parent1ResourceUri
+      if (uriForPerson == parent1ResourceUri
           || (family.parent1
               && family.parent1.resourceId
-              && uriForNextPerson
+              && uriForPerson
                  == uriTools.globalUriForId(family.parent1.resourceId, uriContext))) {
+        const parent = {
+          id: uriTools.globalUriForId(persons[i].id, uriContext),
+          name: persons[i].display.name,
+        }
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          let id = uriTools.globalUriForId(persons[i].id, uriContext)
-          parents.father = {
-            id: id,
-            name: persons[i].display.name,
-            url: uriTools.globalUriForResource(family.parent1.resource, uriContext)
-          };
+          parents.father = parent;
         } else {
-          let id = uriTools.globalUriForId(persons[i].id, uriContext)
-          parents.mother = {
-            id: id,
-            name: persons[i].display.name,
-            url: uriTools.globalUriForResource(family.parent1.resource, uriContext)
-          };
+          parents.mother = parent;
         }
       }
 
       // Look for second parent
       const parent2ResourceUri = uriTools.globalUriForResource(family.parent2.resource, uriContext);
       // only testing for resourceId because the other fails on FamilySearch and this might be in the same file
-      if (uriForNextPerson == parent2ResourceUri
+      if (uriForPerson == parent2ResourceUri
           || (family.parent2
               && family.parent2.resourceId
-              && uriForNextPerson
+              && uriForPerson
                  == uriTools.globalUriForId(family.parent2.resourceId, uriContext))) {
         // Detect Father/Mother by gender
+        const parent = {
+          id: uriTools.globalUriForId(persons[i].id, uriContext),
+          name: persons[i].display.name,
+        }
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
-          let id = uriTools.globalUriForId(persons[i].id, uriContext)
-          parents.father = {
-            id: id,
-            name: persons[i].display.name,
-            url: uriTools.globalUriForResource(family.parent2.resource, uriContext)
-          };
+          parents.father = parent
         } else {
-          let id = uriTools.globalUriForId(persons[i].id, uriContext)
-          parents.mother = {
-            id: id,
-            name: persons[i].display.name,
-            url: uriTools.globalUriForResource(family.parent2.resource, uriContext)
-          };
+          parents.mother = parent
         }
       }
 

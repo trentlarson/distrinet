@@ -102,7 +102,7 @@ export default class MapperBetweenSets {
     idMap: Record<string, Array<string>>
   ): void {
     for (let pi = 0; gedcomx.persons && pi < gedcomx.persons.length; pi += 1) {
-      const { links } = gedcomx.persons[pi];
+      const { links, identifiers } = gedcomx.persons[pi];
       if (links && links.otherLocations) {
         for (let li = 0; li < links.otherLocations.resources.length; li += 1) {
           const otherRes = links.otherLocations.resources[li];
@@ -114,7 +114,8 @@ export default class MapperBetweenSets {
           );
           this.addPair(thisId, otherId, idMap);
         }
-      } else if (links && links.person) {
+      }
+      if (links && links.person) {
         // these are gedcomx data by default
         const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
         const otherId = uriTools.globalUriForResource(
@@ -122,6 +123,13 @@ export default class MapperBetweenSets {
           repoId
         );
         this.addPair(thisId, otherId, idMap);
+      }
+      if (identifiers && identifiers['http://gedcomx.org/Persistent']) {
+        const persists = identifiers['http://gedcomx.org/Persistent']
+        const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
+        for (let pindex = 0; pindex < persists.length; pindex += 1) {
+          this.addPair(thisId, persists[pindex], idMap)
+        }
       }
     }
   }
