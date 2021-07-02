@@ -1,22 +1,21 @@
-  - check why focusing on other local Mary Hall doesn't work
 
-  - show example with public & private data (eg. Misbach & Larson)
-    - use data we've sync'd - click on Matt or Grant to recenter, expand parents
+  - show auth error to user
   - release for Matt
 
-  - remove 'View Profile' link & icons
   - allow drag-and-drop for genealogy
   - release for Sharon & Janell
 
-  - get sample to work for gedcomx:my-local-test:test-sample-norman#elinora
+  - get test data to show children with gedcomx:my-local-test:test-sample-norman#elinora
 
+  - otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
+
+  - -1 make all HTTP links open a separate window by default, just like www.familysearch.com
   - 2 work on a real GedcomX (ZIP) file https://github.com/FamilySearch/gedcomx/blob/master/specifications/file-format-specification.md
   - refactor getParentsFromFamiliesAsChild to work like getChildrenFromFamiliesAsParent (ie retrieve the local URI and find that person)
+  - figure out why local display no longer shows swoop links after half-a-dozen expansions
   - add a "clear cached identities" button for testing; may want to export identities
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
-  - otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
-
   - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - figure out why api.familysearch URLs work but www.familysearch URLs don't
   - >-

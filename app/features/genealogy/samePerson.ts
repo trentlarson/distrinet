@@ -9,6 +9,7 @@ export interface Gedcomx {
   persons: [
     {
       id: string;
+      identifiers: Record<string, Array<string>>,
       links: {
         otherLocations: {
           resources: [

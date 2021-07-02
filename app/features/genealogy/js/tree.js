@@ -63,6 +63,7 @@
             let errorMessage = "Authorization failed retrieving URL " + uri
             + "  This often happens when the fssessionid is lost so try pasting that in again (under Settings on this page)."
             + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";
+            alert('Authentication Error \n If this is a FamilySearch link, set your session ID under "Settings" on this page. See "Help" for more info.')
             throw Error(errorMessage);
           } else {
             let errorMessage = "Got error status " + response.status + " retrieving URL " + uri;
