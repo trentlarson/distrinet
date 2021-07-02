@@ -1,7 +1,7 @@
 import electron from 'electron';
 import path from 'path';
 import * as R from 'ramda';
-import React, { Dispatch, useState } from 'react';
+import React, { Dispatch, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import GridLoader from 'react-spinners/GridLoader';
@@ -28,6 +28,7 @@ enum Visibility {
 }
 
 export default function Histories() {
+
   const distnet = useSelector((state: RootState) => state.distnet);
   const dispatch = useDispatch();
 
@@ -38,16 +39,20 @@ export default function Histories() {
     distnet.settings.sources
   );
 
+  const droppableRef = useRef()
+
   const [idInputExpanded, setIdInputExpanded] = useState(Visibility.hidden);
   const [idSearchTerm, setIdSearchTerm] = useState('');
 
   // histories.uriTree will be empty on initial load, before the paths are built
   const histories = useSelector((state: RootState) => state.histories);
 
-  addDragDropListeners(dispatch);
+  useEffect(() => {
+    addDragDropListeners(dispatch, droppableRef.current);
+  });
 
   return (
-    <div>
+    <div ref={droppableRef}>
       <div className={styles.backButton} data-tid="backButton">
         <Link to={routes.HOME}>
           <i className="fa fa-arrow-left fa-3x" />
@@ -123,15 +128,16 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
     : Visibility.hidden;
 }
 
-// I usually see this code fire twice (and I've even see it dozens of time with one drag).
+// I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
 // So these are to guard against those possibilities.
 let timestampOfLastDrop = 0;
 let lastFile = '';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addDragDropListeners = (dispatch: Dispatch<any>) => {
+const addDragDropListeners = (dispatch: Dispatch<any>, elem: HTMLElement) => {
   // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
 
-  document.addEventListener('drop', (event) => {
+  elem.addEventListener('drop', (event) => {
     event.preventDefault();
     event.stopPropagation();
     if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
@@ -159,6 +165,7 @@ const addDragDropListeners = (dispatch: Dispatch<any>) => {
   });
 
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
+
 };
 
 interface DirProps {
