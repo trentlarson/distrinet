@@ -331,16 +331,15 @@
     var children = [];
     // Iterate all children
     for (let j=0; j < childResources.length; j++) {
-      // Get name of child: Assume living if person not found in persons array
-      for (let i=1; i<persons.length; i++) {
-        if (uriTools.globalUriForResource(childResources[j].resource, uriContext)
-            === uriTools.globalUriForId(persons[i].id, uriContext)) {
-          let id = uriTools.globalUriForResource(childResources[j].resource, uriContext)
-          children.push({ id: id, name: persons[i].display.name });
-        } else if (uriTools.globalUriForId(childResources[j].resourceId, uriContext)
-                   === uriTools.globalUriForId(persons[i].id, uriContext)) {
-          let id = uriTools.globalUriForResource(childResources[j].resource, uriContext)
-          children.push({ id: id, name: persons[i].display.name });
+      const childUri = uriTools.globalUriForResource(childResources[j].resource, uriContext);
+      const knownIds = MapperBetweenSets.retrieveForIdFrom(childUri, allSameIds);
+      const matchInThisRepo = R.find(id => id.startsWith(uriContext), knownIds)
+      if (matchInThisRepo) {
+        for (let i=0; i<persons.length; i++) {
+          let uriForPerson = uriTools.globalUriForId(persons[i].id, uriContext);
+          if (uriForPerson == matchInThisRepo) {
+            children.push({ id: uriForPerson, name: persons[i].display.name });
+          }
         }
       }
     }
@@ -357,8 +356,12 @@
     var parents = {father: null, mother: null};
 
     // Iterate all persons
-    for (let i=1; i<persons.length; i++) {
+    for (let i=0; i<persons.length; i++) {
       let uriForPerson = uriTools.globalUriForId(persons[i].id, uriContext);
+      const parent = {
+        id: uriForPerson,
+        name: persons[i].display.name,
+      }
 
       // Look for first parent
       const parent1ResourceUri = uriTools.globalUriForResource(family.parent1.resource, uriContext);
@@ -368,10 +371,6 @@
               && family.parent1.resourceId
               && uriForPerson
                  == uriTools.globalUriForId(family.parent1.resourceId, uriContext))) {
-        const parent = {
-          id: uriTools.globalUriForId(persons[i].id, uriContext),
-          name: persons[i].display.name,
-        }
         // Detect Father/Mother by gender
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
           parents.father = parent;
@@ -389,10 +388,6 @@
               && uriForPerson
                  == uriTools.globalUriForId(family.parent2.resourceId, uriContext))) {
         // Detect Father/Mother by gender
-        const parent = {
-          id: uriTools.globalUriForId(persons[i].id, uriContext),
-          name: persons[i].display.name,
-        }
         if (persons[i].gender.type == "http://gedcomx.org/Male") {
           parents.father = parent
         } else {

@@ -1,4 +1,4 @@
-  - fix children-focus link
+  - check why focusing on other local Mary Hall doesn't work
 
   - show example with public & private data (eg. Misbach & Larson)
     - use data we've sync'd - click on Matt or Grant to recenter, expand parents
@@ -11,6 +11,7 @@
   - get sample to work for gedcomx:my-local-test:test-sample-norman#elinora
 
   - 2 work on a real GedcomX (ZIP) file https://github.com/FamilySearch/gedcomx/blob/master/specifications/file-format-specification.md
+  - refactor getParentsFromFamiliesAsChild to work like getChildrenFromFamiliesAsParent (ie retrieve the local URI and find that person)
   - add a "clear cached identities" button for testing; may want to export identities
   - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
