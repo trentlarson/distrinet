@@ -37,7 +37,7 @@
    * @param uri URI of the individual, non-null
    * @param node container for the derived info to display
    */
-  function getTree2(uri, generationCount, node) {
+  async function getTree2(uri, generationCount, node) {
     if (!uri) {
       return;
     }
@@ -55,7 +55,7 @@
         'If-None-Match': '',
         'If-Modified-Since': null
       }
-      fetch(uri, {headers: myHeaders})
+      await fetch(uri, {headers: myHeaders})
         .then(function(response) {
           if (response.ok) {
             return response.text();
@@ -69,7 +69,7 @@
             throw Error(errorMessage);
           }
         })
-        .then(function(body) {
+        .then(async function(body) {
           //console.log('From uri', uri, 'got response:', body);
           var gedcomx = JSON.parse(body);
           var thisId = uri;
@@ -81,7 +81,7 @@
           }
           let personIndex = findIndexInGedcomxPersons(uri, thisContext, gedcomx);
           try {
-            walkTree(thisId, gedcomx, generationCount, node, personIndex, thisContext)
+            await walkTree(thisId, gedcomx, generationCount, node, personIndex, thisContext)
           } catch (e) {
             // An error from walkTree stops ".always" from working.
             // Marking finished inside a 'finally' doesn't always work.
@@ -100,7 +100,7 @@
 
       const source = R.find((src) => src.id === uri, sources);
       if (source && source.urls) {
-        loader.loadOneSourceContents(source)
+        await loader.loadOneSourceContents(source)
           .then((cacheData) => {
             if (cacheData) {
               try {
@@ -127,7 +127,7 @@
           try {
 
             const source = R.find((src) => src.id === prefixUri, sources);
-            loader.loadOneSourceContents(source)
+            await loader.loadOneSourceContents(source)
               .then((cacheData) => {
                 if (cacheData) {
                   try {
@@ -285,17 +285,22 @@
     // if that didn't work, try the familiesAsParent
     if (tmpNode._children.length === 0
         && gedcomx.persons[personIndex].display
-        && gedcomx.persons[personIndex].display.familiesAsParent
-        && gedcomx.persons[personIndex].display.familiesAsParent[0].children
-        && gedcomx.persons[personIndex].display.familiesAsParent[0].children.length > 0) {
-      tmpNode._children =
-        getChildrenFromFamiliesAsParent(
-          gedcomx.persons[personIndex].display.familiesAsParent[0].children,
-          gedcomx.persons,
-          gedcomxContext
-        );
+        && gedcomx.persons[personIndex].display.familiesAsParent) {
+      let allChildren = []
+      for (let i = 0; i < gedcomx.persons[personIndex].display.familiesAsParent.length; i++) {
+        const thisChildren = gedcomx.persons[personIndex].display.familiesAsParent[i].children
+        for (let j = 0; thisChildren && j < thisChildren.length; j++) {
+          const retrievedChildren =
+            getChildrenFromFamiliesAsParent(
+              gedcomx.persons[personIndex].display.familiesAsParent[0].children,
+              gedcomx.persons,
+              gedcomxContext
+            );
+          allChildren = R.union(allChildren, retrievedChildren)
+        }
+      }
+      tmpNode._children = allChildren
     }
-
 
     // Only proceed with parents for base person up to 4 generations
     if (-1 < generationCount && generationCount < 5) {
