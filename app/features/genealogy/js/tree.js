@@ -287,17 +287,11 @@
         && gedcomx.persons[personIndex].display
         && gedcomx.persons[personIndex].display.familiesAsParent) {
       let allChildren = []
-      for (let i = 0; i < gedcomx.persons[personIndex].display.familiesAsParent.length; i++) {
-        const thisChildren = gedcomx.persons[personIndex].display.familiesAsParent[i].children
-        for (let j = 0; thisChildren && j < thisChildren.length; j++) {
+      for (let fam = 0; fam < gedcomx.persons[personIndex].display.familiesAsParent.length; fam++) {
+        const thisChildren = gedcomx.persons[personIndex].display.familiesAsParent[fam].children;
           const retrievedChildren =
-            getChildrenFromFamiliesAsParent(
-              gedcomx.persons[personIndex].display.familiesAsParent[0].children,
-              gedcomx.persons,
-              gedcomxContext
-            );
+            getChildrenFromFamiliesAsParent(thisChildren, gedcomx.persons, gedcomxContext);
           allChildren = R.union(allChildren, retrievedChildren)
-        }
       }
       tmpNode._children = allChildren
     }
