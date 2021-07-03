@@ -23,6 +23,8 @@ import {
 } from './distnetSlice';
 import { globalUriScheme, isUriLocalhost } from './uriTools';
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 export default function Distnet() {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);

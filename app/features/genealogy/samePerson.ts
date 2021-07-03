@@ -9,7 +9,7 @@ export interface Gedcomx {
   persons: [
     {
       id: string;
-      identifiers: Record<string, Array<string>>,
+      identifiers: Record<string, Array<string>>;
       links: {
         otherLocations: {
           resources: [
@@ -126,10 +126,10 @@ export default class MapperBetweenSets {
         this.addPair(thisId, otherId, idMap);
       }
       if (identifiers && identifiers['http://gedcomx.org/Persistent']) {
-        const persists = identifiers['http://gedcomx.org/Persistent']
+        const persists = identifiers['http://gedcomx.org/Persistent'];
         const thisId = uriTools.globalUriForId(gedcomx.persons[pi].id, repoId);
         for (let pindex = 0; pindex < persists.length; pindex += 1) {
-          this.addPair(thisId, persists[pindex], idMap)
+          this.addPair(thisId, persists[pindex], idMap);
         }
       }
     }

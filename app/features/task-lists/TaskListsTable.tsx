@@ -33,6 +33,8 @@ import style from './style.css';
 
 const child = child_process.execFile;
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 export default function TaskListsTable() {
   const dispatch = useDispatch();
   const taskLists = useSelector((state: RootState) => state.taskLists);

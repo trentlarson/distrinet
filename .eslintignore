@@ -57,10 +57,14 @@ package.json
 # yarn additions (with large files)
 .yarn
 
+
+
+
 # custom distnet additions
-# This one is especially annoying because lint changes the YAML semantics!
+# This one is especially annoying because lint makes changes that break the YAML semantics!
 tasks.yml
 test
+app/features/distnet/HelpPage.tsx
 app/features/genealogy/js/d3.min.js
 app/features/genealogy/js/jquery-2.2.4.min.js
 app/features/genealogy/js/ramda-0.25.0.min.js

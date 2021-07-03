@@ -44,8 +44,11 @@ export default function HelpPage(): JSX.Element {
       <li>Create a bookmark in your browser with this as the address / URL:<br/>
         <pre>javascript: var pos = document.cookie.indexOf("fssessionid")+"fssessionid=".length; var id=document.cookie.substring(pos, pos+41); console.log(id); alert(id);</pre>
       </li>
-      <li>Go to <a href="#" onClick={() => require('electron').shell.openExternal('https://familysearch.org')}>FamilySearch.org</a>, log in, and click that bookmark to see your session ID and copy it for use in the genealogy page.</li>
-      </ul>
+
+      <li>Go to <a href="#" onClick={() =>
+      require('electron').shell.openExternal('https://familysearch.org')}>FamilySearch.org</a>,
+      log in, and click that bookmark to see your session ID and copy it for use
+      in the genealogy page.</li> </ul>
 
       <h3>Advanced Help</h3>
       <button

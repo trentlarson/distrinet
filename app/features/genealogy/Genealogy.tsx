@@ -123,9 +123,12 @@ function GenealogyView(options: TreeOption) {
   // Walk tree for ancestors and descendants
   options.tree.getTree(rootUri);
 
-  const droppableRef = useRef()
+  const droppableRef = useRef(null);
   useEffect(() => {
-    addDragDropListeners(droppableRef.current, dispatch, setRootUri);
+    const element = droppableRef.current; // all to make typechecking pass
+    if (element) {
+      addDragDropListeners(element, dispatch); // eslint-disable-line @typescript-eslint/no-use-before-define
+    }
   });
 
   /* eslint-disable no-alert */
@@ -154,7 +157,7 @@ let timestampOfLastDrop = 0;
 let lastFile = '';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addDragDropListeners = (elem: HTMLElement, dispatch, setRootUri) => {
+const addDragDropListeners = (elem: HTMLElement, dispatch: any) => {
   // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
 
   elem.addEventListener('drop', (event) => {
@@ -174,7 +177,7 @@ const addDragDropListeners = (elem: HTMLElement, dispatch, setRootUri) => {
       } else {
         timestampOfLastDrop = new Date().getTime();
         lastFile = filePath;
-        dispatch(setRootUri('file://' + filePath))
+        dispatch(setRootUri(`file://${filePath}`));
       }
     }
   });
@@ -185,7 +188,6 @@ const addDragDropListeners = (elem: HTMLElement, dispatch, setRootUri) => {
   });
 
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
-
 };
 
 enum Visibility {
@@ -276,7 +278,8 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrlText = newUrl.toString();
   }
   const newId = R.replace(/^file:\/\//, 'gedcomx:', newUrlText);
-  const newName = 'Local ' + newUrlText.replace(/[\/\\]/g, ' ')
+  const replaced = newUrlText.replace(/[/\\]/g, ' ');
+  const newName = `Local ${replaced}`;
 
   const [settingsId, setSettingsId] = useState(newId);
   if (settingsId === '' && newId !== '') {
@@ -313,9 +316,9 @@ function OfferToSaveIfNew(options: SaveOptions) {
               dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
               dispatch(dispatchSaveSettingsTextToFile());
               dispatch(setRootUri(settingsId));
-              setSettingsId('')
-              setSettingsName('')
-              setSettingsUrl('')
+              setSettingsId('');
+              setSettingsName('');
+              setSettingsUrl('');
             }}
           >
             Click to add this to your permanent settings:
@@ -354,11 +357,12 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <button
             type="button"
             onClick={() => {
-              dispatch(setRootUri(''))
-              setSettingsId('')
-              setSettingsName('')
-              setSettingsUrl('')
-            }}>
+              dispatch(setRootUri(''));
+              setSettingsId('');
+              setSettingsName('');
+              setSettingsUrl('');
+            }}
+          >
             Cancel
           </button>
         </span>

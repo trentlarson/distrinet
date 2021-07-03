@@ -27,8 +27,9 @@ enum Visibility {
   hidden = 'hidden',
 }
 
-export default function Histories() {
+/* eslint-disable @typescript-eslint/no-use-before-define */
 
+export default function Histories() {
   const distnet = useSelector((state: RootState) => state.distnet);
   const dispatch = useDispatch();
 
@@ -39,7 +40,7 @@ export default function Histories() {
     distnet.settings.sources
   );
 
-  const droppableRef = useRef()
+  const droppableRef = useRef<HTMLDivElement>(null);
 
   const [idInputExpanded, setIdInputExpanded] = useState(Visibility.hidden);
   const [idSearchTerm, setIdSearchTerm] = useState('');
@@ -48,7 +49,10 @@ export default function Histories() {
   const histories = useSelector((state: RootState) => state.histories);
 
   useEffect(() => {
-    addDragDropListeners(dispatch, droppableRef.current);
+    const element = droppableRef.current;
+    if (element) {
+      addDragDropListeners(dispatch, element);
+    }
   });
 
   return (
@@ -167,7 +171,6 @@ const addDragDropListeners = (dispatch: Dispatch<any>, elem: HTMLElement) => {
   });
 
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
-
 };
 
 interface DirProps {
