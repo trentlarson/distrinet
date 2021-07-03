@@ -1,8 +1,7 @@
 
-  - show auth error to user
   - release for Matt
 
-  - allow drag-and-drop for genealogy
+  - after drag-drop for Matt's local, we get an error in the parent tree
   - release for Sharon & Janell
 
   - get test data to show children with gedcomx:my-local-test:test-sample-norman#elinora

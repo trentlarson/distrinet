@@ -128,6 +128,8 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
     : Visibility.hidden;
 }
 
+// Drag & Drop a repo (similar code found in genealogy feature)
+
 // I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
 // So these are to guard against those possibilities.
 let timestampOfLastDrop = 0;
@@ -159,7 +161,7 @@ const addDragDropListeners = (dispatch: Dispatch<any>, elem: HTMLElement) => {
     }
   });
 
-  document.addEventListener('dragover', (e) => {
+  elem.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.stopPropagation();
   });

@@ -1,7 +1,7 @@
 import electron from 'electron';
 import process from 'process';
 import * as R from 'ramda';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -123,9 +123,14 @@ function GenealogyView(options: TreeOption) {
   // Walk tree for ancestors and descendants
   options.tree.getTree(rootUri);
 
+  const droppableRef = useRef()
+  useEffect(() => {
+    addDragDropListeners(droppableRef.current, dispatch, setRootUri);
+  });
+
   /* eslint-disable no-alert */
   return (
-    <div>
+    <div ref={droppableRef}>
       <div>
         Source: &nbsp;
         {rootUri}
@@ -140,6 +145,48 @@ function GenealogyView(options: TreeOption) {
     </div>
   );
 }
+
+// Drag & Drop a repo (similar code found in histories feature)
+
+// I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
+// So these are to guard against those possibilities.
+let timestampOfLastDrop = 0;
+let lastFile = '';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addDragDropListeners = (elem: HTMLElement, dispatch, setRootUri) => {
+  // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
+
+  elem.addEventListener('drop', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
+      // Technically there's no problem adding more, but we should add more confirmations if they do this
+      // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
+      alert('We only support adding one folder at a time.');
+    } else {
+      const filePath = event.dataTransfer.files[0].path;
+      if (
+        filePath === lastFile &&
+        new Date().getTime() - timestampOfLastDrop < 5000
+      ) {
+        console.log('Got a duplicate event: ', event);
+      } else {
+        timestampOfLastDrop = new Date().getTime();
+        lastFile = filePath;
+        dispatch(setRootUri('file://' + filePath))
+      }
+    }
+  });
+
+  elem.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
+
+};
 
 enum Visibility {
   visible = 'visible',
@@ -214,6 +261,7 @@ interface SaveOptions {
  */
 function OfferToSaveIfNew(options: SaveOptions) {
   const { rootUri } = options;
+
   let addToSettings = <span />;
 
   const dispatch = useDispatch();
@@ -227,11 +275,16 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrl.hash = '';
     newUrlText = newUrl.toString();
   }
-  const newId = R.replace(/^file:/, 'gedcomx:file:', newUrlText);
+  const newId = R.replace(/^file:\/\//, 'gedcomx:', newUrlText);
+  const newName = 'Local ' + newUrlText.replace(/[\/\\]/g, ' ')
 
   const [settingsId, setSettingsId] = useState(newId);
   if (settingsId === '' && newId !== '') {
     setSettingsId(newId);
+  }
+  const [settingsName, setSettingsName] = useState(newName);
+  if (settingsName === '' && newName !== '') {
+    setSettingsName(newName);
   }
   const [settingsUrl, setSettingsUrl] = useState(newUrlText);
   if (settingsUrl === '' && newUrlText !== '') {
@@ -254,14 +307,29 @@ function OfferToSaveIfNew(options: SaveOptions) {
             onClick={() => {
               const newSource = {
                 id: settingsId,
+                name: settingsName,
                 urls: [{ url: settingsUrl }],
               };
               dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
               dispatch(dispatchSaveSettingsTextToFile());
+              dispatch(setRootUri(settingsId));
+              setSettingsId('')
+              setSettingsName('')
+              setSettingsUrl('')
             }}
           >
             Click to add this to your permanent settings:
           </button>
+          <br />
+          Name &nbsp;
+          <input
+            type="text"
+            size={100}
+            defaultValue={settingsName}
+            onChange={(event) => {
+              setSettingsName(event.target.value);
+            }}
+          />
           <br />
           ID &nbsp;
           <input
@@ -282,6 +350,17 @@ function OfferToSaveIfNew(options: SaveOptions) {
               setSettingsUrl(event.target.value);
             }}
           />
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              dispatch(setRootUri(''))
+              setSettingsId('')
+              setSettingsName('')
+              setSettingsUrl('')
+            }}>
+            Cancel
+          </button>
         </span>
       );
     }
