@@ -8,11 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.6] - 2021-07-02
+
+### Added
+
+- Add button to create test settings.
+- Genealogy:
+  - Offer to save new source into settings, both manually and drag-and-drop.
+  - Load children of the person in focus.
+- Histories:
+  - Drag-and-drop a folder into histories to add to settings.
+
+### Fixed
+
+- Genealogy:
+  - Do better at loading local data and using IDs correctly.
+
+
+
 ## [0.1.5] - 2020-11-29 - fa2b33da009f6362b97d4d8b106dbc7cc21d8427
 
 ### Fixed
 
-- Expand directories recursively, more than 1 deep.
+- Histories:
+  - Expand directories recursively, more than 1 deep.
 
 
 

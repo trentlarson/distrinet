@@ -47,7 +47,7 @@ To package (following https://www.electron.build/auto-update ):
 - Add to CHANGELOG.md
 - `git push` and let GitHub build all packages before pushing anything new.
   - Manually: `yarn package`, create a GitHub release, and upload package(s) to it.
-- Add the commit hash to CHANGELOG.md and bump the versions with "-beta".
+- Add the commit hash to CHANGELOG.md.  Bump the versions and add "-beta".
 
 
 When developing:
