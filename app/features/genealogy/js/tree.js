@@ -25,7 +25,7 @@
       return;
     }
     asyncCount = 0;
-    allSameIds = MapperBetweenSets.retrieveAllIdRecords();
+    allSameIds = MapperBetweenSets.retrieveAllIdRecordsFromLocalStorage();
     getTree2(
       uri,
       0,
@@ -330,7 +330,7 @@
   function getChildrenFromFamiliesAsParent(childResources, persons, uriContext) {
     var children = [];
     // Iterate all children
-    for (let j=0; j < childResources.length; j++) {
+    for (let j=0; childResources && j < childResources.length; j++) {
       const childUri = uriTools.globalUriForResource(childResources[j].resource, uriContext);
       const knownIds = MapperBetweenSets.retrieveForIdFrom(childUri, allSameIds);
       const matchInThisRepo = R.find(id => id.startsWith(uriContext), knownIds)

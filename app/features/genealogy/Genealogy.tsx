@@ -15,8 +15,12 @@ import {
 } from '../distnet/distnetSlice';
 import { Cache, Source } from '../distnet/distnetClasses';
 import uriTools from '../distnet/uriTools';
-import { setCorrelatedIdsRefreshedMillis, setRootUri } from './genealogySlice';
-import MapperBetweenSets from './samePerson';
+import {
+  updateCachesForDispatch,
+  refreshIdMapperForDispatch,
+  setCorrelatedIdsRefreshedMillis,
+  setRootUri,
+} from './genealogySlice';
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
@@ -88,9 +92,7 @@ export default function Genealogy() {
 
       <div className="container">
         <h2 className="title">Decentralized Tree</h2>
-        <Link to={routes.GENEALOGY_SETTINGS}>Settings</Link>
         <hr className="hr" />
-
         <GenealogyView tree={treeFun} />
       </div>
     </div>
@@ -100,17 +102,7 @@ export default function Genealogy() {
 function GenealogyView(options: TreeOption) {
   const dispatch = useDispatch();
 
-  const cache: Cache = useSelector((state: RootState) => state.distnet.cache);
-
-  const correlatedIdsRefreshedMillis: number = useSelector(
-    (state: RootState) => state.genealogy.correlatedIdsRefreshedMillis
-  );
-  // update DB if there are newer cache items
-  MapperBetweenSets.refreshIfNewer(
-    correlatedIdsRefreshedMillis,
-    cache,
-    (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
-  );
+  dispatch(refreshIdMapperForDispatch());
 
   const sources: Array<Source> = useSelector(
     (state: RootState) => state.distnet.settings.sources
@@ -141,6 +133,8 @@ function GenealogyView(options: TreeOption) {
         <ChangeRootUriInput />
         <br />
         <OfferToSaveIfNew rootUri={rootUri} />
+        <br />
+        <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
       </div>
 
       <h3 className="person_name">&nbsp;</h3>
@@ -267,6 +261,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
   let addToSettings = <span />;
 
   const dispatch = useDispatch();
+  const cache: Cache = useSelector((state: RootState) => state.distnet.cache);
   const sources: Array<Source> = useSelector(
     (state: RootState) => state.distnet.settings.sources
   );
@@ -305,26 +300,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
       addToSettings = (
         <span>
           <br />
-          <button
-            type="button"
-            onClick={() => {
-              const newSource = {
-                id: settingsId,
-                name: settingsName,
-                urls: [{ url: settingsUrl }],
-              };
-              dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-              dispatch(dispatchSaveSettingsTextToFile());
-              dispatch(setRootUri(settingsId));
-              setSettingsId('');
-              setSettingsName('');
-              setSettingsUrl('');
-            }}
-          >
-            Click to add this to your permanent settings:
-          </button>
-          <br />
-          Name &nbsp;
+          Description &nbsp;
           <input
             type="text"
             size={100}
@@ -334,7 +310,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
             }}
           />
           <br />
-          ID &nbsp;
+          URI &nbsp;
           <input
             type="text"
             size={100}
@@ -344,7 +320,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
             }}
           />
           <br />
-          Loc &nbsp;
+          Location &nbsp;
           <input
             type="text"
             size={100}
@@ -357,13 +333,35 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <button
             type="button"
             onClick={() => {
+              const newSource = {
+                id: settingsId,
+                name: settingsName,
+                urls: [{ url: settingsUrl }],
+              };
+              dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+              dispatch(dispatchSaveSettingsTextToFile());
+              dispatch(setRootUri(settingsId));
+
+              dispatch(updateCachesForDispatch(settingsId));
+
+              setSettingsId('');
+              setSettingsName('');
+              setSettingsUrl('');
+            }}
+          >
+            Add to your permanent settings & search for same IDs.
+          </button>
+          <br />
+          <button
+            type="button"
+            onClick={() => {
               dispatch(setRootUri(''));
               setSettingsId('');
               setSettingsName('');
               setSettingsUrl('');
             }}
           >
-            Cancel
+            Nevermind! Cancel.
           </button>
         </span>
       );

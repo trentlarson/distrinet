@@ -41,7 +41,7 @@ export default class MapperBetweenSets {
    * @param idKey is an ID for an individual
    * return list of all other IDs correlated with this one
    */
-  public static retrieveAllIdRecords(): Record<string, Array<string>> {
+  public static retrieveAllIdRecordsFromLocalStorage(): Record<string, Array<string>> {
     const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     return idMapStr ? JSON.parse(idMapStr) : {};
   }
@@ -77,14 +77,13 @@ export default class MapperBetweenSets {
     }
     console.log('Map of IDs-spanning-data-sets is out-of-date.  Refreshing...');
     const cache = new CacheWrapper(cacheMap);
-    const keys = cache.getKeys();
-    const idMapStr = localStorage[SAME_IDENTITIES_KEY];
-    const idMap = idMapStr ? JSON.parse(idMapStr) : {};
-    for (let ki = 0; ki < keys.length; ki += 1) {
-      const key = keys[ki];
-      if (key.startsWith('gedcomx:')) {
-        const content = JSON.parse(cache.valueFor(key).contents);
-        this.searchForSamePersons(key, content, idMap);
+    const cacheKeys = cache.getKeys();
+    const idMap = this.retrieveAllIdRecordsFromLocalStorage();
+    for (let ki = 0; ki < cacheKeys.length; ki += 1) {
+      const cacheKey = cacheKeys[ki];
+      if (cacheKey.startsWith('gedcomx:')) {
+        const content = JSON.parse(cache.valueFor(cacheKey).contents);
+        this.findAndSaveSameGedcomxPersons(cacheKey, content, idMap);
       }
     }
     localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
@@ -92,12 +91,39 @@ export default class MapperBetweenSets {
     console.log('... refreshed.  Map of IDs-spanning-data-sets is up-to-date.');
   }
 
+  public static forceOneRefresh(
+    cacheMap: Cache,
+    cacheId: string,
+    previousMillis: number,
+    updateMillis: (arg0: number) => void
+  ): void {
+    if (cacheId.startsWith('gedcomx:')) {
+      const cache = new CacheWrapper(cacheMap);
+      const idMap = this.retrieveAllIdRecordsFromLocalStorage();
+      const content = JSON.parse(cache.valueFor(cacheId).contents);
+      this.findAndSaveSameGedcomxPersons(cacheId, content, idMap);
+      localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
+
+      const allMillis = R.map(
+        R.pipe(R.prop('updatedDate'), (d: string) => new Date(d).valueOf()),
+        R.values(cacheMap)
+      );
+      const maxMillis = R.last(R.sort(R.subtract, allMillis));
+      console.log('Updated IDs-spanning-data-sets for', cacheId, ' Updating millis?', !previousMillis || previousMillis < maxMillis);
+      if (!previousMillis || previousMillis < maxMillis) {
+        updateMillis(maxMillis);
+      }
+    }
+  }
+
   /**
-   * Search through all the gedcomx persons and add to localStorage a correlation between each person and:
+   * Search through all the gedcomx persons and add to idMap a correlation between each person and:
    * - any 'otherLocation' links that are 'gedcomx' URLs
    * - any 'person' links
+   *
+   * Side-effects: updates idMap with matches
    */
-  static searchForSamePersons(
+  static findAndSaveSameGedcomxPersons(
     repoId: string,
     gedcomx: Gedcomx,
     idMap: Record<string, Array<string>>
@@ -136,7 +162,7 @@ export default class MapperBetweenSets {
   }
 
   /**
-   * Add these two ids one another's mappings in localStorage.
+   * Add these two ids one another's mappings in the idMap.
    */
   static addPair(
     id1: string,

@@ -25,7 +25,7 @@ export default function GenealogySettings() {
       <div className="container">
         <h2 className="title">Settings</h2>
         <hr className="hr" />
-        FS Session ID: &nbsp;
+        FamilySearch Session ID: &nbsp;
         {fsSessionId}
         <br />
         ... set: &nbsp;
