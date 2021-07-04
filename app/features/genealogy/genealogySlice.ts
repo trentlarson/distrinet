@@ -52,7 +52,7 @@ export const refreshIdMapperForDispatch = (): AppThunk => async(
   }
 }
 
-export const updateCachesForDispatch = (sourceId: string): AppThunk => async (
+export const updateSettingsAndIdMapperForDispatch = (sourceId: string): AppThunk => async (
   dispatch,
   getState
 ): void => {

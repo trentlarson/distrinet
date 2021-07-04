@@ -1,4 +1,5 @@
 import electron from 'electron';
+import path from 'path';
 import process from 'process';
 import * as R from 'ramda';
 import React, { useEffect, useRef, useState } from 'react';
@@ -16,10 +17,10 @@ import {
 import { Cache, Source } from '../distnet/distnetClasses';
 import uriTools from '../distnet/uriTools';
 import {
-  updateCachesForDispatch,
   refreshIdMapperForDispatch,
   setCorrelatedIdsRefreshedMillis,
   setRootUri,
+  updateSettingsAndIdMapperForDispatch,
 } from './genealogySlice';
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
@@ -272,15 +273,25 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrl.hash = '';
     newUrlText = newUrl.toString();
   }
+  const newNamePrefix = newUrlText.startsWith('file:') ? 'Local ' : '';
   const newId = R.replace(/^file:\/\//, 'gedcomx:', newUrlText);
-  // pull out the very last file/folder name
-  const replaced = newUrlText.split('/').slice(-1)[0].split('\\').slice(-1)[0]
-console.log('replacing', newUrlText.split('/'), newUrlText.split('/').slice(-1)[0].split('\\'), replaced)
-  const newName = `Local ${replaced}`;
+  // pull out the very last few file/folder names
+  const replaced = newUrlText.split(path.sep).slice(-2).join(' ');
+  const newName = `${newNamePrefix}${replaced}`;
 
+  // Why doesn't it work to set these defaults and I have to set them later in a useEffect?
   const [settingsId, setSettingsId] = useState(newId);
   const [settingsName, setSettingsName] = useState(newName);
   const [settingsUrl, setSettingsUrl] = useState(newUrlText);
+
+  // Why do I freaking have to set these later because the earlier useState defaults don't work?
+  useEffect(() => {
+    // Guard with tests to ensure that we don't reset back to original if user changes them.
+    if (!settingsId) { setSettingsId(newId); }
+    if (!settingsName) { setSettingsName(newName); }
+    if (!settingsUrl) { setSettingsUrl(newUrlText); }
+  });
+
 
   if (uriTools.isUriLocalhost(rootUri)) {
     const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);
@@ -333,9 +344,9 @@ console.log('replacing', newUrlText.split('/'), newUrlText.split('/').slice(-1)[
               };
               dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
               dispatch(dispatchSaveSettingsTextToFile());
-              dispatch(setRootUri(settingsId));
+              dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
 
-              dispatch(updateCachesForDispatch(settingsId));
+              dispatch(setRootUri(settingsId));
 
               setSettingsId('');
               setSettingsName('');
