@@ -261,9 +261,6 @@ export default function Distnet() {
                 dispatch(
                   dispatchSetSettingsTextAndYaml(createSettingsYaml(), false)
                 );
-                alert(
-                  'You will have to save this new config if you want it permanently.'
-                );
               }
             }}
           >
