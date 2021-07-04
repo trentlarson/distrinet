@@ -273,21 +273,14 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrlText = newUrl.toString();
   }
   const newId = R.replace(/^file:\/\//, 'gedcomx:', newUrlText);
-  const replaced = newUrlText.replace(/[/\\]/g, ' ');
+  // pull out the very last file/folder name
+  const replaced = newUrlText.split('/').slice(-1)[0].split('\\').slice(-1)[0]
+console.log('replacing', newUrlText.split('/'), newUrlText.split('/').slice(-1)[0].split('\\'), replaced)
   const newName = `Local ${replaced}`;
 
   const [settingsId, setSettingsId] = useState(newId);
-  if (settingsId === '' && newId !== '') {
-    setSettingsId(newId);
-  }
   const [settingsName, setSettingsName] = useState(newName);
-  if (settingsName === '' && newName !== '') {
-    setSettingsName(newName);
-  }
   const [settingsUrl, setSettingsUrl] = useState(newUrlText);
-  if (settingsUrl === '' && newUrlText !== '') {
-    setSettingsUrl(newUrlText);
-  }
 
   if (uriTools.isUriLocalhost(rootUri)) {
     const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);
@@ -304,7 +297,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <input
             type="text"
             size={100}
-            defaultValue={settingsName}
+            defaultValue={newName}
             onChange={(event) => {
               setSettingsName(event.target.value);
             }}
@@ -314,7 +307,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <input
             type="text"
             size={100}
-            defaultValue={settingsId}
+            defaultValue={newId}
             onChange={(event) => {
               setSettingsId(event.target.value);
             }}
@@ -324,7 +317,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <input
             type="text"
             size={100}
-            defaultValue={settingsUrl}
+            defaultValue={newUrlText}
             onChange={(event) => {
               setSettingsUrl(event.target.value);
             }}
