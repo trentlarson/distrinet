@@ -1,5 +1,4 @@
 
-  - type:bug on drag-drop, initial data set doesn't put test norman in ID mapping
   - show error on page when treeObj failed to load
 
   - type:bug distrinet broke cache retrieval? ("Failed to retrieve and cache file for" sample histories on fresh test settings)

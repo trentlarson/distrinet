@@ -43,13 +43,11 @@ export const refreshIdMapperForDispatch = (): AppThunk => async(
   dispatch,
   getState
 ) => {
-  if (getState().genealogy.cache) {
-    MapperBetweenSets.refreshIfNewer(
-      getState().genealogy.correlatedIdsRefreshedMillis,
-      getState().genealogy.cache,
-      (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
-    );
-  }
+  MapperBetweenSets.refreshIfNewer(
+    getState().genealogy.correlatedIdsRefreshedMillis,
+    getState().distnet.cache,
+    (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
+  );
 }
 
 export const updateSettingsAndIdMapperForDispatch = (sourceId: string): AppThunk => async (
