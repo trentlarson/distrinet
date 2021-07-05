@@ -459,7 +459,9 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   }, getState().histories.uriTree);
 };
 
-export const dispatchAddHistoryToSettings = (filePath: string): AppThunk => async (dispatch, getState) => { // eslint-disable-line prettier/prettier
+export const dispatchAddHistoryToSettings = (
+  filePath: string
+): AppThunk => async (dispatch, getState) => {
   const fileUrl = `file://${filePath}`;
   const alreadyInSource: Source | undefined = R.find(
     (s) =>

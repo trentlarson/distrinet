@@ -198,7 +198,11 @@ export const loadOneSourceContents: (
     );
     return cacheInfo;
   }
-  console.log('Failed to retrieve and cache file for', source, '. This is expected if it is a directory.');
+  console.log(
+    'Failed to retrieve and cache file for',
+    source,
+    '. This is expected if it is a directory.'
+  );
   return null;
 };
 

@@ -137,8 +137,10 @@ function GenealogyView(options: TreeOption) {
         <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
       </div>
 
-      <br/>
-      <span id="error_message" style={{ color: 'orange' }}>&nbsp;</span>
+      <br />
+      <span id="error_message" style={{ color: 'orange' }}>
+        &nbsp;
+      </span>
 
       <h3 className="person_name">&nbsp;</h3>
       <div className="viewer" />
@@ -288,11 +290,10 @@ function OfferToSaveIfNew(options: SaveOptions) {
   // Why do I freaking have to set these later because the earlier useState defaults don't work?
   useEffect(() => {
     // Guard with tests to ensure that we don't reset back to original if user changes them.
-    if (!settingsId) { setSettingsId(newId); }
-    if (!settingsName) { setSettingsName(newName); }
-    if (!settingsUrl) { setSettingsUrl(newUrlText); }
-  });
-
+    if (!settingsId) { setSettingsId(newId); } // eslint-disable-line prettier/prettier
+    if (!settingsName) { setSettingsName(newName); } // eslint-disable-line prettier/prettier
+    if (!settingsUrl) { setSettingsUrl(newUrlText); } // eslint-disable-line prettier/prettier
+  }, [newId, newName, newUrlText, settingsId, settingsName, settingsUrl]);
 
   if (uriTools.isUriLocalhost(rootUri)) {
     const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);

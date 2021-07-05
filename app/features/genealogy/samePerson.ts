@@ -41,6 +41,7 @@ export default class MapperBetweenSets {
    * @param idKey is an ID for an individual
    * return list of all other IDs correlated with this one
    */
+  // eslint-disable-next-line prettier/prettier
   public static retrieveAllIdRecordsFromLocalStorage(): Record<string, Array<string>> {
     const idMapStr = localStorage[SAME_IDENTITIES_KEY];
     return idMapStr ? JSON.parse(idMapStr) : {};
@@ -109,7 +110,12 @@ export default class MapperBetweenSets {
         R.values(cacheMap)
       );
       const maxMillis = R.last(R.sort(R.subtract, allMillis));
-      console.log('Updated IDs-spanning-data-sets for', cacheId, ' Updating millis?', !previousMillis || previousMillis < maxMillis);
+      console.log(
+        'Updated IDs-spanning-data-sets for',
+        cacheId,
+        ' Updating millis?',
+        !previousMillis || previousMillis < maxMillis
+      );
       if (!previousMillis || previousMillis < maxMillis) {
         updateMillis(maxMillis);
       }

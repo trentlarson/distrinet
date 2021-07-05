@@ -141,7 +141,7 @@ const callResetStateMethods = (): AppThunk => async (dispatch) => {
 export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
   dispatch,
   getState
-) => {
+): Promise<void> => {
   await createCacheDir().catch((error) => {
     dispatch(setCacheErrorMessage(error.toString()));
   });
@@ -150,7 +150,7 @@ export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
     getState().distnet.settings
   );
   if (result) {
-    return dispatch(setCachedStateForOne(result));
+    dispatch(setCachedStateForOne(result));
   }
   console.error(
     `Failed to load source ${sourceId} into cache because it was not found in sources.`
