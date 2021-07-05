@@ -14,6 +14,7 @@ import { Source } from '../distnet/distnetClasses';
 import {
   addSourceToSettings,
   dispatchModifySettings,
+  dispatchReloadCacheForId,
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
 
@@ -458,8 +459,7 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   }, getState().histories.uriTree);
 };
 
-// eslint-disable-next-line prettier/prettier
-export const dispatchAddHistoryToSettings = (filePath: string): AppThunk => async (dispatch, getState) => {
+export const dispatchAddHistoryToSettings = (filePath: string): AppThunk => async (dispatch, getState) => { // eslint-disable-line prettier/prettier
   const fileUrl = `file://${filePath}`;
   const alreadyInSource: Source | undefined = R.find(
     (s) =>
@@ -479,6 +479,7 @@ export const dispatchAddHistoryToSettings = (filePath: string): AppThunk => asyn
     };
     dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
     dispatch(dispatchSaveSettingsTextToFile());
+    dispatch(dispatchReloadCacheForId(newId));
     alert('Added that source.');
   }
 };

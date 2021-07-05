@@ -1,10 +1,5 @@
 
-  - show error on page when treeObj failed to load
-
-  - type:bug distrinet broke cache retrieval? ("Failed to retrieve and cache file for" sample histories on fresh test settings)
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
-
-  - add one-cache force refresh in history (just like genealogy?)
 
   - after drag-drop for Matt's local, we get an error in the parent tree
   - release for Sharon & Janell
