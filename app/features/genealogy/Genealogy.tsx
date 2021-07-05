@@ -138,6 +138,9 @@ function GenealogyView(options: TreeOption) {
         <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
       </div>
 
+      <br/>
+      <span id="error_message" style={{ color: 'orange' }}>&nbsp;</span>
+
       <h3 className="person_name">&nbsp;</h3>
       <div className="viewer" />
     </div>

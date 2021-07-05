@@ -17,10 +17,12 @@
   // let's remove this global and pass around explicitly for thread safety (& more clarity)
   var asyncCount = 0;
   var allSameIds = {};
+  var userMessage = '';
   /**
    * @param uri URI of the individual (null and '' will be ignored)
    */
   function getTree(uri) {
+    userMessage = '';
     if (!uri) {
       return;
     }
@@ -60,14 +62,14 @@
           if (response.ok) {
             return response.text();
           } else if (response.status === 401) {
-            let errorMessage = "Authorization failed retrieving URL " + uri
-            + "  This often happens when the fssessionid is lost so try pasting that in again (under Settings on this page)."
-            + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";
-            alert('Authentication Error \n If this is a FamilySearch link, set your session ID under "Settings" on this page. See "Help" for more info.')
-            throw Error(errorMessage);
+            userMessage = 'Authentication Error \n If this is a FamilySearch link, set your session ID under "Settings" on this page. See "Help" for more info.';
+            const consoleMessage = "Authorization failed retrieving URL " + uri
+                  + "  This often happens when the fssessionid is lost so try pasting that in again (under Settings on this page)."
+                  + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";
+            console.log(consoleMessage);
           } else {
-            let errorMessage = "Got error status " + response.status + " retrieving URL " + uri;
-            throw Error(errorMessage);
+            const consoleMessage = "Got error status " + response.status + " retrieving URL " + uri;
+            throw Error(consoleMessage);
           }
         })
         .then(async function(body) {
@@ -87,10 +89,16 @@
             // An error from walkTree stops ".always" from working.
             // Marking finished inside a 'finally' doesn't always work.
             // Reproduce with https://raw.githubusercontent.com/misbach/familytree/master/people/KWCJ-RN4/KWCJ-RN4.json
+            if (!userMessage) {
+              userMessage = 'Something went wrong reading a record.';
+            }
             console.error("Error in walkTree for URL", uri, e)
           }
         })
         .catch((error) => {
+          if (!userMessage) {
+            userMessage = 'Something went wrong retrieving or reading a record.';
+          }
           console.error("Error retrieving or parsing results from URL:", uri, error);
         })
         .finally(() => {
@@ -108,11 +116,13 @@
                 let gedcomx = JSON.parse(cacheData.contents)
                 walkTree(uri, gedcomx, generationCount, node, 0, uri)
               } catch (e) {
+                userMessage = 'Something went wrong parsing the record for ' + uri;
                 console.error("Error in source walkTree for URI", uri, e);
               }
             }
           })
           .catch((err) => {
+            userMessage = 'Something went wrong loading source ' + uri;
             console.error("Got an error loading source", source, err);
           })
       } else {
@@ -140,17 +150,21 @@
                       walkTree(gedcomx.persons[personIndex].id, gedcomx, generationCount, node, personIndex, prefixUri)
                     }
                   } catch (err) {
+                    userMessage = 'Something went wrong parsing the tree for ' + uri;
                     console.error("Error in prefixed source walkTree for URI", uri, err);
                   }
                 }
               })
               .catch((err) => {
+                userMessage = 'Something went wrong loading the source ' + prefixUri;
                 console.error("Got an error loading prefixed source", source, err);
               })
           } catch (err) {
+            userMessage = 'Something went wrong looking up the source for ' + uri;
             console.error("Error in prefixed source walkTree for URI", uri, err);
           }
         } else {
+          userMessage = 'Could not find the source for ' + uri;
           console.error("Found no data for prefixed source for URI", uri)
         }
       }
@@ -190,7 +204,12 @@
       // Notify D3 to render the tree
       if (treeObj.id) {
         document.dispatchEvent(new CustomEvent('treeComplete', { detail: treeObj }));
+        $('#error_message').html('');
       } else {
+        if (!userMessage) {
+          userMessage = 'Something went wrong creating the tree';
+        }
+        $('#error_message').html(userMessage);
         console.error("Found no valid treeObj data so will not draw on canvas.");
         // Should dispatch an event that shows a "not found" message.
       }
