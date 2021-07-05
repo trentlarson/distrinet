@@ -52,24 +52,11 @@ To package (following https://www.electron.build/auto-update ):
 
 When developing:
 
-- Note that it will run some tests before allowing merging to master, eg. `node_modules/.bin/tsc`. Make sure those work because we enforce TypeScript.
-- Note that it will also run some pre-commit hooks, eg. `yarn lint`, which can be annoying if you're just trying to commit some temporary work on a branch; if you need to bypass it temporarily, remove the "pre-commit" line from package.json.
-
-To start in a whole new repo, do the following in the same directory where you have distrinet cloned:
-
-- `git clone --depth 1 --single-branch https://github.com/electron-react-boilerplate/electron-react-boilerplate.git your-project-name`
-- `cd your-project-name`
-- `rm -rf .git`
-- Now if you want to save this as the baseline in git, `git init` and `git add .` and `git commit`
-- `git apply ../distrinet/patch.diff`
-- `cp -r ../distrinet/app/features/distnet app/features`
-- ... then continue with above.
-
-
-To create that patch file:
-
-- `git diff e0aafdd21835b6d0515f5008174d9264c9848e42 app/Routes.tsx app/app.global.css app/components/Home.tsx app/constants/routes.json app/rootReducer.ts package.json yarn.lock > patch.diff`
-- ... then look through patch.diff and remove the references to "task" stuff.
+- Continuously test with 'yarn test-all', which will run tests & type checks & lint checks.
+- To start with new data:
+  - Go to "distrinet settings" and click on "Use Test Settings" and save that.
+  - Clear out the identity mappings: in the console, run 'localStorage.removeItem("SAME_IDENTITIES")'
+  - If you've made code changes, go to the main screen and refresh (eg. CTRL-R).  The auto-load works pretty well but not always well.
 
 
 #### Tooling

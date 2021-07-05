@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // imports in this app
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../../store';
+import { AppThunk } from '../../store';
 import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
 import MapperBetweenSets from './samePerson';
 
@@ -39,10 +39,11 @@ export const {
 
 export default genealogySlice.reducer;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const refreshIdMapperForDispatch = (): AppThunk => async(
   dispatch,
   getState
-) => {
+): Promise<void> => {
   MapperBetweenSets.refreshIfNewer(
     getState().genealogy.correlatedIdsRefreshedMillis,
     getState().distnet.cache,
@@ -50,18 +51,18 @@ export const refreshIdMapperForDispatch = (): AppThunk => async(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const updateSettingsAndIdMapperForDispatch = (sourceId: string): AppThunk => async (
   dispatch,
   getState
-): void => {
+): Promise<void> => {
   // Two caches... let's hope we never have any more!
-  dispatch(dispatchReloadCacheForId(sourceId)).then(() => {
-    const cache = getState().distnet.cache;
-    MapperBetweenSets.forceOneRefresh(
-      cache,
-      sourceId,
-      getState().genealogy.correlatedIdsRefreshedMillis,
-      (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
-    );
-  });
+  await dispatch(dispatchReloadCacheForId(sourceId));
+  const cache = getState().distnet.cache;
+  MapperBetweenSets.forceOneRefresh(
+    cache,
+    sourceId,
+    getState().genealogy.correlatedIdsRefreshedMillis,
+    (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
+  );
 }

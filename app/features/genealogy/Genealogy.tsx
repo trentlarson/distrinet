@@ -7,18 +7,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 // imports for this app
-import { RootState } from '../../store';
 import routes from '../../constants/routes.json';
+import { RootState } from '../../store';
 import {
   addSourceToSettings,
   dispatchModifySettings,
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
-import { Cache, Source } from '../distnet/distnetClasses';
+import { Source } from '../distnet/distnetClasses';
 import uriTools from '../distnet/uriTools';
 import {
   refreshIdMapperForDispatch,
-  setCorrelatedIdsRefreshedMillis,
   setRootUri,
   updateSettingsAndIdMapperForDispatch,
 } from './genealogySlice';
@@ -265,7 +264,6 @@ function OfferToSaveIfNew(options: SaveOptions) {
   let addToSettings = <span />;
 
   const dispatch = useDispatch();
-  const cache: Cache = useSelector((state: RootState) => state.distnet.cache);
   const sources: Array<Source> = useSelector(
     (state: RootState) => state.distnet.settings.sources
   );
