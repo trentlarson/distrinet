@@ -60,7 +60,7 @@ export default class MapperBetweenSets {
   }
 
   public static clear() {
-    localStorage.removeItem("SAME_IDENTITIES");
+    localStorage.removeItem('SAME_IDENTITIES');
   }
 
   /**

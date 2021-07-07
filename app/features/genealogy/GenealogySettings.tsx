@@ -41,7 +41,9 @@ export default function GenealogySettings() {
         <br />
         <br />
         <button
-          onClick={() => { dispatch(resetIdMappings()); }}
+          onClick={() => {
+            dispatch(resetIdMappings());
+          }}
           data-tclass="btn"
           type="button"
         >

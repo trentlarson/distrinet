@@ -40,13 +40,11 @@ export const {
 
 export default genealogySlice.reducer;
 
-export const resetIdMappings = (): AppThunk => async (
-  dispatch,
-  getState
-): Promise<void> => {
+// This could take 'dispatch' and 'getState' on the Promise function.
+export const resetIdMappings = (): AppThunk => async (): Promise<void> => {
   MapperBetweenSets.clear();
   setCorrelatedIdsRefreshedMillis(0);
-  console.log('Cache cleared.')
+  console.log('Cache cleared.');
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

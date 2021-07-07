@@ -275,7 +275,13 @@ function OfferToSaveIfNew(options: SaveOptions) {
   const replaced = newUrlText.split(path.sep).slice(-2).join(' ');
   const newName = `${newNamePrefix}${replaced}`;
 
-  return SourceInputs({ id: newId, name: newName, rootUri: rootUri, url: newUrlText });
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return SourceInputs({
+    id: newId,
+    name: newName,
+    rootUri,
+    url: newUrlText,
+  });
 }
 
 interface NewSourceOptions {
@@ -286,7 +292,6 @@ interface NewSourceOptions {
 }
 
 function SourceInputs(sourceOptions: NewSourceOptions) {
-
   // Why doesn't it work to set these defaults and I have to set them later in a useEffect?
   // see https://matthewdaly.co.uk/blog/2019/10/27/input-components-with-the-usestate-and-useeffect-hooks-in-react/
   const [settingsId, setSettingsId] = useState(sourceOptions.id);
@@ -295,9 +300,9 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
   const { rootUri } = sourceOptions;
 
   useEffect(() => {
-    setSettingsId(sourceOptions.id)
-    setSettingsName(sourceOptions.name)
-    setSettingsUrl(sourceOptions.url)
+    setSettingsId(sourceOptions.id);
+    setSettingsName(sourceOptions.name);
+    setSettingsUrl(sourceOptions.url);
   }, [sourceOptions.id, sourceOptions.name, sourceOptions.url]);
 
   const dispatch = useDispatch();

@@ -111,7 +111,7 @@ const distnetSlice = createSlice({
     },
     setCachedStateForOne: (state, result: Payload<CacheData>) => {
       state.cache[result.payload.sourceId] = result.payload;
-      console.log('Cached into memory the payload for', result.payload.sourceId);
+      console.log('Cached to memory the payload for', result.payload.sourceId);
     },
     setCacheErrorMessage: (state, result: Payload<string>) => {
       state.cacheErrorMessage = result.payload;
@@ -156,7 +156,6 @@ export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
   console.error(
     `Failed to load source ${sourceId} into cache because it was not found in sources.`
   );
-  return dispatch(() => {});
 };
 
 function removeNulls<T>(array: Array<T | null>): Array<T> {
