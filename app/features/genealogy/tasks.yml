@@ -12,7 +12,7 @@
   - refactor getParentsFromFamiliesAsChild to work like getChildrenFromFamiliesAsParent (ie retrieve the local URI and find that person)
   - figure out why local display no longer shows swoop links after half-a-dozen expansions
   - add a "clear cached identities" button for testing; may want to export identities
-  - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate'
+  - '95 1 make it so that directory URIs work id:#dir-path-uris +genealogy +collaborate' :
     - on a file:///, want to see a link back from the public so add to the MapperBetweenSets when pasting it in
   - pass gedcomx & gedcomxContext to getTrees2 to avoid duplicate parsing
   - figure out why api.familysearch URLs work but www.familysearch URLs don't
