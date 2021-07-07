@@ -1,11 +1,10 @@
+  - 0 show number of results
+  - -1 fix multiple alerts when multiple searches don't find results
+  - -1 change drag-drop source addition to use file path as ID (not random UUID)
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
     - be sure not to lock the main thread (useEffect?)
   - -1 automatically focus on the search input box
-  - 2 add to viewer & parse semantic tags
   - 0 log search errors somewhere in app, available to user id:log-errors
+  - 0 pass the search term from the histories onto a history page for quicker finding
   - 1 load history file from list & show relationship +histories
   - 1 load the right local copy (because it might not be element 0) id:uri-local-version
-  - '0 package app for Martin id:package':
-    - fix problem loading process on packaged app (eg. settings & genealogy pages)
-    - ref:taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#package
-    - ref:taskyaml:trentlarson.com,2020:dist-task-lists-app/tasks#dir-path-uris
