@@ -40,6 +40,15 @@ export const {
 
 export default genealogySlice.reducer;
 
+export const resetIdMappings = (): AppThunk => async (
+  dispatch,
+  getState
+): Promise<void> => {
+  MapperBetweenSets.clear();
+  setCorrelatedIdsRefreshedMillis(0);
+  console.log('Cache cleared.')
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const refreshIdMapperForDispatch = (): AppThunk => async (
   dispatch,

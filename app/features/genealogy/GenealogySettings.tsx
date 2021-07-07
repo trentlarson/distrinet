@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 // imports for this app
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
-import { setFsSessionId } from './genealogySlice';
+import { resetIdMappings, setFsSessionId } from './genealogySlice';
 
 export default function GenealogySettings() {
   const dispatch = useDispatch();
@@ -37,6 +37,16 @@ export default function GenealogySettings() {
             dispatch(setFsSessionId(event.target.value));
           }}
         />
+        <br />
+        <br />
+        <br />
+        <button
+          onClick={() => { dispatch(resetIdMappings()); }}
+          data-tclass="btn"
+          type="button"
+        >
+          Clear ID cache
+        </button>
       </div>
     </div>
   );

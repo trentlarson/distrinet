@@ -59,6 +59,10 @@ export default class MapperBetweenSets {
     return idMap[idKey] || [];
   }
 
+  public static clear() {
+    localStorage.removeItem("SAME_IDENTITIES");
+  }
+
   /**
    * If there are items in the cache that are are newer, update the mappings in localStorage.
    */
@@ -99,9 +103,9 @@ export default class MapperBetweenSets {
     updateMillis: (arg0: number) => void
   ): void {
     if (cacheId.startsWith('gedcomx:')) {
-      const cache = new CacheWrapper(cacheMap);
+      const cacheWrap = new CacheWrapper(cacheMap);
       const idMap = this.retrieveAllIdRecordsFromLocalStorage();
-      const content = JSON.parse(cache.valueFor(cacheId).contents);
+      const content = JSON.parse(cacheWrap.valueFor(cacheId).contents);
       this.findAndSaveSameGedcomxPersons(cacheId, content, idMap);
       localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
 

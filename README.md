@@ -55,7 +55,7 @@ When developing:
 - Continuously test with 'yarn test-all', which will run tests & type checks & lint checks.
 - To start with new data:
   - Go to "distrinet settings" and click on "Use Test Settings" and save that.
-  - Clear out the identity mappings: in the console, run 'localStorage.removeItem("SAME_IDENTITIES")'
+  - Go to "genealogy" and "Genealogy Settings" and click the "clear" button.
   - If you've made code changes, go to the main screen and refresh (eg. CTRL-R).  The auto-load works pretty well but not always well.
 
 

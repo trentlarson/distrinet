@@ -92,6 +92,7 @@ export default function Genealogy() {
 
       <div className="container">
         <h2 className="title">Decentralized Tree</h2>
+        <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
         <hr className="hr" />
         <GenealogyView tree={treeFun} />
       </div>
@@ -133,8 +134,6 @@ function GenealogyView(options: TreeOption) {
         <ChangeRootUriInput />
         <br />
         <OfferToSaveIfNew rootUri={rootUri} />
-        <br />
-        <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
       </div>
 
       <br />
@@ -172,7 +171,7 @@ const addDragDropListeners = (elem: HTMLElement, dispatch: any) => {
         filePath === lastFile &&
         new Date().getTime() - timestampOfLastDrop < 5000
       ) {
-        console.log('Got a duplicate event: ', event);
+        console.log('Got a duplicate event: ', event, '... so ignoring it.');
       } else {
         timestampOfLastDrop = new Date().getTime();
         lastFile = filePath;
@@ -263,12 +262,6 @@ interface SaveOptions {
 function OfferToSaveIfNew(options: SaveOptions) {
   const { rootUri } = options;
 
-  let addToSettings = <span />;
-
-  const dispatch = useDispatch();
-  const sources: Array<Source> = useSelector(
-    (state: RootState) => state.distnet.settings.sources
-  );
   let newUrlText = rootUri;
   if (rootUri && uriTools.isGlobalUri(rootUri)) {
     const newUrl = new URL(rootUri);
@@ -282,18 +275,37 @@ function OfferToSaveIfNew(options: SaveOptions) {
   const replaced = newUrlText.split(path.sep).slice(-2).join(' ');
   const newName = `${newNamePrefix}${replaced}`;
 
-  // Why doesn't it work to set these defaults and I have to set them later in a useEffect?
-  const [settingsId, setSettingsId] = useState(newId);
-  const [settingsName, setSettingsName] = useState(newName);
-  const [settingsUrl, setSettingsUrl] = useState(newUrlText);
+  return SourceInputs({ id: newId, name: newName, rootUri: rootUri, url: newUrlText });
+}
 
-  // Why do I freaking have to set these later because the earlier useState defaults don't work?
+interface NewSourceOptions {
+  id: string;
+  name: string;
+  url: string;
+  rootUri: string;
+}
+
+function SourceInputs(sourceOptions: NewSourceOptions) {
+
+  // Why doesn't it work to set these defaults and I have to set them later in a useEffect?
+  // see https://matthewdaly.co.uk/blog/2019/10/27/input-components-with-the-usestate-and-useeffect-hooks-in-react/
+  const [settingsId, setSettingsId] = useState(sourceOptions.id);
+  const [settingsName, setSettingsName] = useState(sourceOptions.name);
+  const [settingsUrl, setSettingsUrl] = useState(sourceOptions.url);
+  const { rootUri } = sourceOptions;
+
   useEffect(() => {
-    // Guard with tests to ensure that we don't reset back to original if user changes them.
-    if (!settingsId) { setSettingsId(newId); } // eslint-disable-line prettier/prettier
-    if (!settingsName) { setSettingsName(newName); } // eslint-disable-line prettier/prettier
-    if (!settingsUrl) { setSettingsUrl(newUrlText); } // eslint-disable-line prettier/prettier
-  }, [newId, newName, newUrlText, settingsId, settingsName, settingsUrl]);
+    setSettingsId(sourceOptions.id)
+    setSettingsName(sourceOptions.name)
+    setSettingsUrl(sourceOptions.url)
+  }, [sourceOptions.id, sourceOptions.name, sourceOptions.url]);
+
+  const dispatch = useDispatch();
+  const sources: Array<Source> = useSelector(
+    (state: RootState) => state.distnet.settings.sources
+  );
+
+  let addToSettings = <span />;
 
   if (uriTools.isUriLocalhost(rootUri)) {
     const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);
@@ -305,12 +317,13 @@ function OfferToSaveIfNew(options: SaveOptions) {
     if (!sourceWithPrefix && !sourceUrlWithPrefix) {
       addToSettings = (
         <span>
+          This is a new source that you can save:
           <br />
           Description &nbsp;
           <input
             type="text"
             size={100}
-            defaultValue={newName}
+            value={settingsName}
             onChange={(event) => {
               setSettingsName(event.target.value);
             }}
@@ -320,7 +333,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <input
             type="text"
             size={100}
-            defaultValue={newId}
+            value={settingsId}
             onChange={(event) => {
               setSettingsId(event.target.value);
             }}
@@ -330,7 +343,7 @@ function OfferToSaveIfNew(options: SaveOptions) {
           <input
             type="text"
             size={100}
-            defaultValue={newUrlText}
+            value={settingsUrl}
             onChange={(event) => {
               setSettingsUrl(event.target.value);
             }}

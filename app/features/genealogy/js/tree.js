@@ -185,7 +185,7 @@
     if (personIndex == -1) {
       personIndex = 0;
       if (!globalUri.endsWith(gedcomx.persons[personIndex].id)) {
-        console.log("Couldn't find", globalUri, "so using person", personIndex, "with ID", gedcomx.persons[personIndex].id)
+        console.log("Couldn't find person", globalUri, "so using person", personIndex, "with ID", gedcomx.persons[personIndex].id)
       }
     }
     return personIndex;
