@@ -148,12 +148,18 @@ interface ResourceTypeAndPosition {
 /**
  * @return all the resourceType info for the given URIs, in order of preference
  */
-export const resourceTypesForUris = (uris: Array<string>, resourceTypes: Array<ResourceType>): Array<ResourceType> => {
+export const resourceTypesForUris = (
+  uris: Array<string>,
+  resourceTypes: Array<ResourceType>
+): Array<ResourceType> => {
   // fill this array with arrays of { fullType: ResourceType, pos: number position in resourceTypes }
   let resourceTypesAndPositions: Array<ResourceTypeAndPosition> = [];
-  for (let i = 0; resourceTypes && i < uris.length; i++) {
+  for (let i = 0; resourceTypes && i < uris.length; i += 1) {
     const scheme = uris[i].substring(0, uris[i].indexOf(':')).toLowerCase();
-    const resourceTypeIndex = R.findIndex((t) => t.matcher.toLowerCase() === scheme, resourceTypes);
+    const resourceTypeIndex = R.findIndex(
+      (t) => t.matcher.toLowerCase() === scheme,
+      resourceTypes
+    );
     if (resourceTypeIndex > -1) {
       resourceTypesAndPositions = R.append(
         { fullType: resourceTypes[resourceTypeIndex], pos: resourceTypeIndex },
@@ -161,18 +167,26 @@ export const resourceTypesForUris = (uris: Array<string>, resourceTypes: Array<R
       );
     }
 
-    const extension = uris[i].substring(uris[i].lastIndexOf('.') + 1).toLowerCase();
-    const extensionTypeIndex = R.findIndex((t) => t.matcher.toLowerCase() === extension, resourceTypes);
+    const extension = uris[i]
+      .substring(uris[i].lastIndexOf('.') + 1)
+      .toLowerCase();
+    const extensionTypeIndex = R.findIndex(
+      (t) => t.matcher.toLowerCase() === extension,
+      resourceTypes
+    );
     if (extensionTypeIndex > -1) {
       resourceTypesAndPositions = R.append(
-        { fullType: resourceTypes[extensionTypeIndex], pos: extensionTypeIndex },
+        {
+          fullType: resourceTypes[extensionTypeIndex],
+          pos: extensionTypeIndex,
+        },
         resourceTypesAndPositions
       );
     }
   }
   const inOrder = R.sortBy(R.prop('pos'), resourceTypesAndPositions);
   return R.map(R.prop('fullType'), inOrder);
-}
+};
 
 export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
   dispatch,

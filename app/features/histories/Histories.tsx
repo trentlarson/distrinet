@@ -220,7 +220,7 @@ export function HistoryDir(props: DirProps) {
   );
 
   let viewLink = <span />;
-  let { base } = tree.fullPath;
+  const { base } = tree.fullPath;
   if (base.endsWith('htm') || base.endsWith('html')) {
     viewLink = (
       <Link
@@ -236,24 +236,27 @@ export function HistoryDir(props: DirProps) {
     );
   }
 
-  const resourceTypes = useSelector((state: RootState) => state.distnet.settings.resourceTypes);
-  const resources = resourceTypesForUris([name], resourceTypes)
+  const resourceTypes = useSelector(
+    (state: RootState) => state.distnet.settings.resourceTypes
+  );
+  const resources = resourceTypesForUris([name], resourceTypes);
   const moreLinks = (
     <span>
-    {
-      resources.map((res) => (
+      {resources.map((res) => (
+        // eslint-disable-next-line jsx-a11y/anchor-is-valid
         <a
           href="#"
-          key={ res.matcher }
+          key={res.matcher}
           onClick={(event) => {
             event.preventDefault();
-            execProtocolApp(res.executablePath, [fileURLToPath(fileUrl)])
+            execProtocolApp(res.executablePath, [fileURLToPath(fileUrl)]);
           }}
         >
-          ({ res.executablePath.split(path.sep).slice(-1) })
+          {/* This is funny... or stupid: try taking off this eslint-disable and fix and you'll get into an infinite loop. */}
+          {/* eslint-disable-next-line react/jsx-one-expression-per-line, prettier/prettier */}
+          ({res.executablePath.split(path.sep).slice(-1)})
         </a>
-      ))
-    }
+      ))}
     </span>
   );
 

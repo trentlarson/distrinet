@@ -30,7 +30,7 @@ export default function HistoryPage(props: Record<string, any>) {
         }
       });
     }
-  }, []);
+  });
 
   useEffect(() => {
     // run script to highlight results
