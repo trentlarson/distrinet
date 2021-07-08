@@ -1,3 +1,4 @@
+import electron from 'electron';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -14,6 +15,8 @@ export default function GenealogySettings() {
     (state: RootState) => state.genealogy.fsSessionId
   );
 
+  const { shell } = electron;
+
   return (
     <div>
       <div data-tid="backButton">
@@ -25,10 +28,28 @@ export default function GenealogySettings() {
       <div className="container">
         <h2 className="title">Settings</h2>
         <hr className="hr" />
-        FamilySearch Session ID: &nbsp;
-        {fsSessionId}
+        {fsSessionId ? (
+          <span>
+            FamilySearch Session ID: &nbsp;
+            {fsSessionId}
+          </span>
+        ) : (
+          <span />
+        )}
         <br />
-        ... set: &nbsp;
+        <span>
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+          <a
+            onClick={() =>
+              shell.openExternal('https://www.familysearch.org/platform/')
+            } // eslint-disable-line react/jsx-curly-newline
+            // ... and I have no idea how to fix that eslint.
+          >
+            Click here to get a new FamilySearch Session ID
+          </a>
+        </span>
+        <br />
+        ... and paste it here:&nbsp;
         <input
           type="text"
           size={40}

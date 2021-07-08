@@ -62,7 +62,7 @@
           if (response.ok) {
             return response.text();
           } else if (response.status === 401) {
-            userMessage = 'Authentication Error \n If this is a FamilySearch link, set your session ID under "Settings" on this page. See "Help" for more info.';
+            userMessage = 'Got an error authenticating. If this is a FamilySearch link, set your session ID under "Genealogy Settings" on this page. See "Help" for more info.';
             const consoleMessage = "Authorization failed retrieving URL " + uri
                   + "  This often happens when the fssessionid is lost so try pasting that in again (under Settings on this page)."
                   + "  It also happens with familysearch.org or www.familysearch.org URLs, even though api.familysearch.org URLs work.  Frustrating!";

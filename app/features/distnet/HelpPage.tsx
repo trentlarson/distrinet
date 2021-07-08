@@ -38,7 +38,7 @@ export default function HelpPage(): JSX.Element {
       Some data sets require authentication, such as FamilySearch. To browse
       FamilySearch, you need to get your Session ID and paste it in on the
       genealogy-specific "Settings". To get your FamilySearch session ID, go to&nbsp;
-      <a href="#" onClick={() =>
+      <a onClick={() =>
       require('electron').shell.openExternal('https://www.familysearch.org/platform/')}>
       the token page at FamilySearch.org</a>, log in, copy the token, and paste
       it in the <Link to={routes.GENEALOGY_SETTINGS}>"Settings" for the

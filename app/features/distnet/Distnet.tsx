@@ -165,10 +165,9 @@ export default function Distnet() {
                     Array.isArray(uriSource.urls) && // can fail with malformed settings
                       uriSource.urls.map((inUrl, index) => (
                         <span key={inUrl && inUrl.url}>
+                          {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                           {index > 0 ? `, ${index + 1}) ` : ''}
-                          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                           <a
-                            href="#"
                             key={inUrl && inUrl.url}
                             onClick={(event) => {
                               event.preventDefault();
@@ -181,7 +180,6 @@ export default function Distnet() {
                           {inUrl?.url?.startsWith('file:') ? (
                             <span>
                               ,&nbsp;
-                              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                               <a href={inUrl.url}>
                                 Drag&nbsp;
                                 {getExtension(inUrl.url)}
@@ -190,6 +188,7 @@ export default function Distnet() {
                           ) : (
                             ''
                           )}
+                          {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                         </span>
                       ))}
                   </td>
