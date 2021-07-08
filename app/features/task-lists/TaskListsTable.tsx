@@ -31,7 +31,7 @@ import {
 } from './util';
 import style from './style.css';
 
-const child = child_process.execFile;
+const { execFile } = child_process;
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
@@ -332,7 +332,7 @@ function sourceActions(
 }
 
 function execProtocolApp(execPath: string, args: Array<string>) {
-  child(execPath, args); // accepts third arg as callback after app is closed: (err, data) => {...}
+  execFile(execPath, args); // accepts third arg as callback after app is closed: (err, data) => {...}
 }
 
 function bigListTable(

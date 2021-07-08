@@ -1,4 +1,5 @@
 
+  - put the hrefs back and event.preventDefault();
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
 
   - release for Sharon & Janell

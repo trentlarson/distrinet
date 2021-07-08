@@ -1,3 +1,4 @@
+import child_process from 'child_process';
 import electron from 'electron';
 import path from 'path';
 import * as R from 'ramda';
@@ -10,6 +11,7 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store'; // eslint-disable-line import/no-cycle
 import { Source } from '../distnet/distnetClasses';
+import { resourceTypesForUris } from '../distnet/distnetSlice';
 import {
   dispatchAddHistoryToSettings,
   dispatchCountSearchable,
@@ -21,6 +23,8 @@ import {
   SearchProgress,
 } from './historiesSlice';
 import styles from './style.css';
+
+const { execFile } = child_process;
 
 enum Visibility {
   visible = 'visible',
@@ -216,12 +220,8 @@ export function HistoryDir(props: DirProps) {
   );
 
   let viewLink = <span />;
-  if (
-    // eslint-disable-next-line react/destructuring-assignment
-    tree.fullPath.base.endsWith('htm') ||
-    // eslint-disable-next-line react/destructuring-assignment
-    tree.fullPath.base.endsWith('html')
-  ) {
+  let { base } = tree.fullPath;
+  if (base.endsWith('htm') || base.endsWith('html')) {
     viewLink = (
       <Link
         to={{
@@ -231,10 +231,31 @@ export function HistoryDir(props: DirProps) {
           }).toString(),
         }}
       >
-        (view)
+        (view here)
       </Link>
     );
   }
+
+  const resourceTypes = useSelector((state: RootState) => state.distnet.settings.resourceTypes);
+  const resources = resourceTypesForUris([name], resourceTypes)
+  const moreLinks = (
+    <span>
+    {
+      resources.map((res) => (
+        <a
+          href="#"
+          key={ res.matcher }
+          onClick={(event) => {
+            event.preventDefault();
+            execProtocolApp(res.executablePath, [fileURLToPath(fileUrl)])
+          }}
+        >
+          ({ res.executablePath.split(path.sep).slice(-1) })
+        </a>
+      ))
+    }
+    </span>
+  );
 
   return (
     <li key={source.id}>
@@ -247,6 +268,8 @@ export function HistoryDir(props: DirProps) {
       {openLink}
       &nbsp;
       {viewLink}
+      &nbsp;
+      {moreLinks}
       <br />
       {tree.showTree ? (
         <ul>
@@ -265,4 +288,8 @@ export function HistoryDir(props: DirProps) {
       )}
     </li>
   );
+}
+
+function execProtocolApp(execPath: string, args: Array<string>) {
+  execFile(execPath, args); // accepts third arg as callback after app is closed: (err, data) => {...}
 }
