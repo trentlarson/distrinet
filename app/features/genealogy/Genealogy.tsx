@@ -128,9 +128,8 @@ function GenealogyView(options: TreeOption) {
   return (
     <div ref={droppableRef}>
       <div>
-        Source: &nbsp;
-        {rootUri}
-        &nbsp;
+        <span>{rootUri}</span>
+        <br />
         <ChangeRootUriInput />
         <br />
         <OfferToSaveIfNew rootUri={rootUri} />
@@ -218,7 +217,7 @@ function ChangeRootUriInput() {
             setRootUriInputExpanded(true);
           }}
         >
-          Change
+          Change Source
         </button>
       </span>
       <span style={{ visibility: getVisibility(rootUriInputExpanded) }}>
