@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import URL from 'url';
 
 import { AppThunk, RootState } from '../../store';
-import { Cache, ResourceTypes, Source } from '../distnet/distnetClasses';
+import { Cache, ResourceType, Source } from '../distnet/distnetClasses';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
   clearForecastData,
@@ -161,7 +161,7 @@ function sourceActions(
   dispatch: (arg0: AppThunk) => void,
   cache: Cache,
   taskSources: Array<Source>,
-  resourceTypes: ResourceTypes,
+  resourceTypes: Array<ResourceType>,
   hoursPerWeek: number,
   setHoursPerWeek: (arg0: number) => void,
   focusOnTaskId: string,
@@ -197,9 +197,13 @@ function sourceActions(
           {taskSources.map((source) => {
             const protocol = source.id.substring(0, source.id.indexOf(':'));
             const execPath =
-              resourceTypes && resourceTypes[protocol]?.executablePath;
+              resourceTypes &&
+              R.find(
+                (type) => source.id.startsWith(`${type.matcher}:`),
+                resourceTypes
+              )?.executablePath;
             const file = cache[source.id]?.localFile;
-            /** I cannot figure out how to fix this stupid error. */
+            /** I cannot figure out how to fix this stupid linting error. */
             /** eslint-disable-next-line react/jsx-curly-newline */
             return (
               <tr key={source.id}>
@@ -328,11 +332,7 @@ function sourceActions(
 }
 
 function execProtocolApp(execPath: string, args: Array<string>) {
-  child(execPath, args, (err, data) => {
-    // This runs after the app is closed.
-    console.log('Executable data:', data);
-    console.error('Executable error:', err);
-  });
+  child(execPath, args); // accepts third arg as callback after app is closed: (err, data) => {...}
 }
 
 function bigListTable(

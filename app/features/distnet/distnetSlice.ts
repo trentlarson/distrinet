@@ -1,4 +1,3 @@
-import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 import bs58 from 'bs58';
 import nodeCrypto, { KeyObject } from 'crypto';
 import electron from 'electron';
@@ -6,6 +5,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 import path from 'path';
 import * as R from 'ramda';
+import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
@@ -75,7 +75,7 @@ function checkSettings(loaded: Settings): string | null {
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
-    settings: { sources: [], resourceTypes: {}, credentials: [] },
+    settings: { sources: [], resourceTypes: [], credentials: [] },
     settingsChanged: false,
     settingsErrorMessage: null,
     settingsText: null,
@@ -366,7 +366,7 @@ export const dispatchModifySettings = (
 export const createSettingsYaml = () => {
   const testSettings: Settings = {
     sources: [],
-    resourceTypes: {},
+    resourceTypes: [],
     credentials: [],
   };
 

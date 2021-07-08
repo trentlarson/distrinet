@@ -19,7 +19,7 @@ export interface DistnetState {
 
 export interface Settings {
   sources: Array<Source>;
-  resourceTypes: ResourceTypes;
+  resourceTypes: Array<ResourceType>;
   credentials: Array<Credential>;
 }
 
@@ -77,11 +77,8 @@ export enum CredentialType {
   PRIVATE_KEY = 'PRIVATE_KEY',
 }
 
-export interface ResourceTypes {
-  [sourceProtocol: string]: Executable;
-}
-
-export interface Executable {
+export interface ResourceType {
+  matcher: string; // string found before first ':' (eg. 'gedcomx') or after last '.' (eg. 'html')
   executablePath: string;
 }
 
