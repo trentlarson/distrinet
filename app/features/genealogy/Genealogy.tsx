@@ -129,6 +129,27 @@ function GenealogyView(options: TreeOption) {
     <div ref={droppableRef}>
       <div>
         <span>{rootUri}</span>
+        &nbsp;
+        {rootUri ? (
+          <span>
+            {/* eslint-disable no-new */}
+            {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
+            <a
+              className="fa fa-copy"
+              role="button"
+              onClick={() => {
+                electron.clipboard.writeText(rootUri);
+                new Notification('Copied', {
+                  body: `Added this to your clipboard: ${rootUri}`,
+                  silent: true,
+                });
+              }}
+            />
+            {/* eslint-enable no-new */}
+          </span>
+        ) : (
+          <span />
+        )}
         <br />
         <ChangeRootUriInput />
         <br />

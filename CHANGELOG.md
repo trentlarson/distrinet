@@ -6,7 +6,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.7] - 2021-07-09
+
+
+## [0.1.8] - 2021-07-09
+
+### Added
+
+Genealogy:
+- Add button to copy selected URI to the clipboard.
+
+
+
+## [0.1.7] - 2021-07-09 - d78ae5b4706ea7c26b573be351382478f444bfa3
 
 ### Added
 
