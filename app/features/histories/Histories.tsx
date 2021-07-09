@@ -206,19 +206,6 @@ export function HistoryDir(props: DirProps) {
 
   const fileUrl = url.pathToFileURL(path.format(tree.fullPath));
 
-  const openLink = (
-    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a
-      href="#"
-      onClick={(event) => {
-        event.preventDefault();
-        electron.shell.openExternal(fileUrl.toString());
-      }}
-    >
-      (open)
-    </a>
-  );
-
   let viewLink = <span />;
   const { base } = tree.fullPath;
   if (base.endsWith('htm') || base.endsWith('html')) {
@@ -235,6 +222,25 @@ export function HistoryDir(props: DirProps) {
       </Link>
     );
   }
+
+  const openLink = (
+    // eslint-disable-next-line jsx-a11y/anchor-is-valid
+    <a
+      href="#"
+      onClick={(event) => {
+        event.preventDefault();
+        electron.shell.openExternal(fileUrl.toString());
+      }}
+    >
+      (open)
+    </a>
+  );
+
+  const dragLink = (
+    <a href={fileUrl.toString()}>
+      (drag)
+    </a>
+  );
 
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
@@ -268,9 +274,11 @@ export function HistoryDir(props: DirProps) {
       &nbsp;
       {dirExpandButton}
       &nbsp;
+      {viewLink}
+      &nbsp;
       {openLink}
       &nbsp;
-      {viewLink}
+      {dragLink}
       &nbsp;
       {moreLinks}
       <br />
