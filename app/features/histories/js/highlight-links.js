@@ -1,5 +1,7 @@
 // Original is here: http://familyhistories.info/tools/activate-links-bookmarklet/setup.js
 
+// v2: modified microdata to use schema.org & link & href (rather than historical-data.org & meta & content) a la https://schema.org/docs/gs.html#schemaorg_expected
+
 // To run this on a fully local setup (ie. without a network connection):
 // - change the bookmarkletFilesLoc to point to your location
 // - change the '$.getScript' calls into 'localScript' calls (to get around the OPTION call and CORS)
@@ -40,27 +42,27 @@ var addHoverLinks = function() {
   $.getScript(bookmarkletFilesLoc + "/js/jquery-ui-1.8.8.custom.min.js", function() {
     $.getScript(bookmarkletFilesLoc + "/js/jquery.ui.prettypiemenu.js", function() {
 
-      $('span[itemtype|="http://historical-data.org/Person"]')
+      $('span[itemtype|="https://schema.org/Person"]')
         .css('border-bottom','3px dotted white');
 
-      $('span[itemtype|="http://historical-data.org/Person"]')
+      $('span[itemtype|="https://schema.org/Person"]')
         .each(function(personNum) {
-          var urls = $('meta[itemprop|=url]', this);
+          var urls = $('link[itemprop|=url]', this);
           if (urls.length === 0) {
-            console.log("Found a historical-data.org/Person with no meta URLs inside.  Ignoring it.");
+            console.log("Found a schema.org/Person with no link URLs inside.  Ignoring it.");
           } else {
             var buttonInfo = [];
             var urlInfo = [];
             var urlPieces, domain;
             for (var i = 0; i < urls.length; i++) {
-              urlPieces = urls[i].content.split("/");
+              urlPieces = urls[i].href.split("/");
               // it's probably either element 2 or 3 (from http://xyz or file:///xyz)
               domain = urlPieces[2];
               if (domain === "") {
                 domain = urlPieces[3];
               }
               buttonInfo.push({img:'ui-icon-check', title:domain});
-              urlInfo.push(urls[i].content);
+              urlInfo.push(urls[i].href);
             }
             var openUrlFun = function(urls) {
               var result = function(itemNum) { console.log("opening " + urls[itemNum]); window.open(urls[itemNum], "_linkWindow"); };
