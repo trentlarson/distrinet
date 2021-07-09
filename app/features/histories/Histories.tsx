@@ -218,7 +218,7 @@ export function HistoryDir(props: DirProps) {
           }).toString(),
         }}
       >
-        (view here)
+        (inspect)
       </Link>
     );
   }
@@ -236,11 +236,7 @@ export function HistoryDir(props: DirProps) {
     </a>
   );
 
-  const dragLink = (
-    <a href={fileUrl.toString()}>
-      (drag)
-    </a>
-  );
+  const dragLink = <a href={fileUrl.toString()}>(drag)</a>;
 
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
