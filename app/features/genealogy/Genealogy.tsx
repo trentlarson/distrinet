@@ -289,15 +289,22 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrl.hash = '';
     newUrlText = newUrl.toString();
   }
+
+  let uriText = newUrlText;
+  if (newUrlText.startsWith('file://')) {
+    // guess at a better URI & assume GedcomX
+    const nonFileUri = newUrlText.substring('file://'.length);
+    const remainingPath = uriTools.bestGuessAtGoodUriPath(nonFileUri);
+    uriText = `gedcomx:${remainingPath}`;
+  }
+
   const newNamePrefix = newUrlText.startsWith('file:') ? 'Local ' : '';
-  const newId = R.replace(/^file:\/\//, 'gedcomx:', newUrlText);
-  // pull out the very last few file/folder names
   const replaced = newUrlText.split(path.sep).slice(-2).join(' ');
   const newName = `${newNamePrefix}${replaced}`;
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   return SourceInputs({
-    id: newId,
+    id: uriText,
     name: newName,
     rootUri,
     url: newUrlText,

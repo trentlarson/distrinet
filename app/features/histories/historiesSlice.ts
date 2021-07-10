@@ -4,7 +4,6 @@ import path, { ParsedPath } from 'path';
 import * as R from 'ramda';
 import { Readable } from 'stream';
 import { fileURLToPath } from 'url';
-import * as uuid from 'uuid';
 
 // imports in this app
 // eslint-disable-next-line import/no-cycle
@@ -17,6 +16,7 @@ import {
   dispatchReloadCacheForId,
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
+import uriTools from '../distnet/uriTools';
 
 interface Payload<T> {
   type: string;
@@ -474,9 +474,10 @@ export const dispatchAddHistoryToSettings = (
   if (alreadyInSource) {
     alert(`That path already exists in source ${alreadyInSource.id}`);
   } else {
-    const newId = uuid.v4();
+    const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
+    const newId = `histories:${newPath}`;
     const newSource = {
-      id: `histories:${newId}`,
+      id: newId,
       urls: [{ url: fileUrl }],
     };
     dispatch(dispatchModifySettings(addSourceToSettings(newSource)));

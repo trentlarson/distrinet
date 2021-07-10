@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.9] - 2021-07-09
+
+### Added
+
+- In Histories and Genealogy: use a relative path for the default URI
+
+
+
 ## [0.1.8] - 2021-07-09 - eb8075ead0fdd1a209e146b6f994a98bf6914e76
 
 ### Added

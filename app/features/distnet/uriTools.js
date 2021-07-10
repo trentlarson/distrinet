@@ -1,3 +1,6 @@
+const os = require('os');
+const path = require('path');
+
 // This wrapper is to allow this to work as a module in both node and browser.
 // eslint-disable-next-line func-names
 (function (exports) {
@@ -130,6 +133,40 @@
     return uri.substring(0, index);
   }
 
+  /**
+   * Guess at the path that is shared by the group.
+   * - If it's under the person's home directory, subtract that plus one level.
+   * - Otherwise, subtract two levels for the volume and the one under that (if exists).
+   *
+   * @param homeDir is optional and defaults to os.homedir()
+   */
+  function bestGuessAtGoodUriPath(dirPath, homeDir = undefined) {
+    const finalHomeDir = homeDir || os.homedir();
+    let newPath;
+    if (dirPath.startsWith(finalHomeDir)) {
+      newPath = dirPath.substring(finalHomeDir.length + 1); // remove ending '/' as well
+      const split = newPath.split(path.sep);
+      if (split.length > 1) {
+        newPath = split.slice(1).join(path.sep);
+      }
+    } else {
+      // it must be a path outside the user's home directory
+      newPath = dirPath.substring(1); // remove starting '/'
+      const split = newPath.split(path.sep);
+      if (split.length >= 3) {
+        // assume the first is volume and second is the sync dir
+        newPath = split.slice(2).join(path.sep);
+      } else if (split.length === 2) {
+        // assume the first is volume
+        newPath = split[1]; // eslint-disable-line prefer-destructuring
+      } else {
+        // must be length 1, so gotta just use original newPath
+      }
+    }
+    return newPath;
+  }
+
+  exports.bestGuessAtGoodUriPath = bestGuessAtGoodUriPath;
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isFileOrHttpUri = isFileOrHttpUri;
   exports.isGlobalUri = isGlobalUri;
