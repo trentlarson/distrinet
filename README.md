@@ -7,7 +7,6 @@ Here's what this does:
 
 - Given a URI, provide the content (and/or a URL).
   - This is currently code inside the app; we could also make this a local HTTP server that gives up the content (and/or a URL).
-  - This may eventually be replaced by DID Resolvers.
 
 This also currently contains these sample applications:
 
@@ -34,9 +33,14 @@ To run:
 - `yarn dev`
 
 
-To experiment:
+To add the tasks for this project:
 
-- Go to the "distnet settings" on the first page and click 'Use Test Settings' at the bottom.
+- Go to the "distnet settings" and click 'Add Distrinet Project Source' at the bottom.
+
+
+To experiment with test data:
+
+- Go to the "distnet settings" and click 'Use Test Settings' at the bottom.
 
 
 To run tests:

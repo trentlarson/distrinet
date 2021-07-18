@@ -13,7 +13,8 @@ import { Source } from './distnetClasses';
 import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
-  createSettingsYaml,
+  addDistrinetTaskSource,
+  createTestSettingsYaml,
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
@@ -258,13 +259,27 @@ export default function Distnet() {
                   'You have changes in the current settings, so save or undo those first.'
                 );
               } else {
+                dispatch(dispatchModifySettings(addDistrinetTaskSource));
+              }
+            }}
+          >
+            Add Distrinet Project Source
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (distnet.settingsChanged) {
+                alert(
+                  'You have changes in the current settings, so save or undo those first.'
+                );
+              } else {
                 dispatch(
-                  dispatchSetSettingsTextAndYaml(createSettingsYaml(), false)
+                  dispatchSetSettingsTextAndYaml(createTestSettingsYaml(), false)
                 );
               }
             }}
           >
-            Use Test Settings
+            Reset to Test Settings
           </button>
         </div>
       </div>

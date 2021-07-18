@@ -413,7 +413,32 @@ export const dispatchModifySettings = (
   dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, false));
 };
 
-export const createSettingsYaml = () => {
+export const addDistrinetTaskSource = (settings: Settings) => {
+  const newSettings = _.cloneDeep(settings);
+  const baseTasksPath = path.join(
+    electron.remote.app.getAppPath(),
+    '..',
+    'tasks.yml'
+  );
+  const newSource: Source = {
+    id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
+    name: 'Distrinet Project',
+    urls: [
+      { url: `file://${baseTasksPath}` },
+      {
+        url: 'https://raw.githubusercontent.com/trentlarson/distrinet/master/tasks.yml',
+      },
+    ]
+  };
+  newSettings.sources = _.unionWith(
+    [newSource],
+    newSettings.sources,
+    (c1, c2) => c1.id === c2.id
+  );
+  return newSettings;
+}
+
+export const createTestSettingsYaml = () => {
   const testSettings: Settings = {
     sources: [],
     resourceTypes: [],
