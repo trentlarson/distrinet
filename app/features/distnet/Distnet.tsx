@@ -168,6 +168,7 @@ export default function Distnet() {
                           {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                           {index > 0 ? `, ${index + 1}) ` : ''}
                           <a
+                            href="#"
                             key={inUrl && inUrl.url}
                             onClick={(event) => {
                               event.preventDefault();

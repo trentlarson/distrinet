@@ -1,6 +1,5 @@
   - 0 show number of results
   - -1 fix multiple alerts when multiple searches don't find results
-  - -1 change drag-drop source addition to use file path as ID (not random UUID)
   - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
     - be sure not to lock the main thread (useEffect?)
   - -1 automatically focus on the search input box
