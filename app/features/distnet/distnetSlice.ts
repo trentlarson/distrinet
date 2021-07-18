@@ -423,17 +423,21 @@ export const createSettingsYaml = () => {
   /* eslint-disable prettier/prettier */
   /* eslint-disable prefer-template */
 
-  const basePath = path.join(electron.remote.app.getAppPath(), '..');
-  const genealogyPath = 'file://' + path.join(basePath, 'test', 'features', 'genealogy', 'sample-gedcomx-norman.json');
-  const historiesPath = 'file://' + path.join(basePath, 'test', 'features', 'histories', 'sample-histories');
-  const tasksUrl = 'file://' + path.join(basePath, 'tasks.yml');
+  const basePath = path.join(electron.remote.app.getAppPath(), '..', 'test', 'features');
+  const genealogyPath = 'file://' + path.join(basePath, 'genealogy', 'sample-gedcomx-norman.json');
+  const historiesPath = 'file://' + path.join(basePath, 'histories', 'sample-histories');
+  const businessTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-business.yml');
+  const campingTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-camping.yml');
+  const workweekTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-workweek.yml');
 
   /* eslint-enable prefer-template */
 
   testSettings.sources = [
     { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
     { name: 'Sample Histories', id: 'histories:local-test-files:test-sample', urls: [ { url: historiesPath } ] },
-    { name: 'Sample Project', id: 'taskyaml:local-test-project', urls: [ { url: tasksUrl } ] },
+    { name: 'Sample Business Project', id: 'taskyaml:local-business-test-project', urls: [ { url: businessTasksUrl } ] },
+    { name: 'Sample Camping Project', id: 'taskyaml:local-camping-test-project', urls: [ { url: campingTasksUrl } ] },
+    { name: 'Sample Workweek Project', id: 'taskyaml:local-workweek-test-project', urls: [ { url: workweekTasksUrl } ] },
   ];
 
   /* eslint-enable prettier/prettier */
