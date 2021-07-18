@@ -3,13 +3,13 @@
 
 Code for [Distrinet](https://trentlarson.gitlab.io/distrinet-doc)
 
-Here's what I do:
+Here's what this does:
 
 - Given a URI, provide the content (and/or a URL).
   - This is currently code inside the app; we could also make this a local HTTP server that gives up the content (and/or a URL).
   - This may eventually be replaced by DID Resolvers.
 
-I also currently contain these sample applications:
+This also currently contains these sample applications:
 
 - [Distributed Task Lists](app/features/task-lists/README.md)
 - [Distributed Histories](app/features/histories/README.md)
@@ -30,12 +30,16 @@ See [tasks.yml](tasks.yml)
 
 To run:
 
-- Go to the "distnet settings" on the first page and copy settings into the text field, eg. [sample-sources.yml](resources/sample-sources.yml)
 - `yarn`
 - `yarn dev`
 
 
-To test:
+To experiment:
+
+- Go to the "distnet settings" on the first page and click 'Use Test Settings' at the bottom.
+
+
+To run tests:
 
 - `yarn test-all`
 - Run [genealogy tests](app/features/genealogy/README.md).
