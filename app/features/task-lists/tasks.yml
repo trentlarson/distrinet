@@ -1,14 +1,18 @@
-  - 90 0 expand dependents in top list (and avoid "Empty or mismatched" error)
-  - 90 0 show labels for subtasks
-  - 80 1 when browsing external lists, detect internal task URLs
-  - 85 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
-  - 80 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
-  - 80 0 show where a task fits in with the rest (ie. focus on it in the forecast)
-  - 80 1 handle when subtasks/dependents are missing
-  - 80 -1 change well-known "key:value" keys to constants
-  - 80 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
-  - 80 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
+  - 70 1 add markdown parsing id:markdown:
+    blocks: joplin
+  - 70 1 test with Joplin id:joplin
+  - 70 0 expand dependents in top list (and avoid "Empty or mismatched" error)
+  - 70 0 show labels for subtasks
+  - 70 0 show something different than ID for dependent tasks
+  - 65 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
+  - 60 1 when browsing external lists, detect internal task URLs
+  - 60 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
+  - 60 0 show where a task fits in with the rest (ie. focus on it in the forecast)
+  - 60 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
+  - 60 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - Add parsing of a global tag for the, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
+  - 55 1 handle when subtasks/dependents are missing
+  - 55 -1 change well-known "key:value" keys to constants
   - 55 0 move 'ref' processing to parse YAML?
   - 55 0 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
   - refactor retrieveAllTasks to return Records instead of one large list
