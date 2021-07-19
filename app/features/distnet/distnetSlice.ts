@@ -426,9 +426,10 @@ export const addDistrinetTaskSource = (settings: Settings) => {
     urls: [
       { url: `file://${baseTasksPath}` },
       {
-        url: 'https://raw.githubusercontent.com/trentlarson/distrinet/master/tasks.yml',
+        url:
+          'https://raw.githubusercontent.com/trentlarson/distrinet/master/tasks.yml',
       },
-    ]
+    ],
   };
   newSettings.sources = _.unionWith(
     [newSource],
@@ -436,9 +437,9 @@ export const addDistrinetTaskSource = (settings: Settings) => {
     (c1, c2) => c1.id === c2.id
   );
   return newSettings;
-}
+};
 
-export const createTestSettingsYaml = () => {
+export const testSettingsYaml = () => {
   const testSettings: Settings = {
     sources: [],
     resourceTypes: [],
@@ -460,9 +461,9 @@ export const createTestSettingsYaml = () => {
   testSettings.sources = [
     { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
     { name: 'Sample Histories', id: 'histories:local-test-files:test-sample', urls: [ { url: historiesPath } ] },
-    { name: 'Sample Business Project', id: 'taskyaml:local-business-test-project', urls: [ { url: businessTasksUrl } ] },
+    { name: 'Sample Business Project', id: 'taskyaml:local-business-test-project', urls: [ { url: businessTasksUrl } ] }, // eslint-disable-line max-len
     { name: 'Sample Camping Project', id: 'taskyaml:local-camping-test-project', urls: [ { url: campingTasksUrl } ] },
-    { name: 'Sample Workweek Project', id: 'taskyaml:local-workweek-test-project', urls: [ { url: workweekTasksUrl } ] },
+    { name: 'Sample Workweek Project', id: 'taskyaml:local-workweek-test-project', urls: [ { url: workweekTasksUrl } ] }, // eslint-disable-line max-len
   ];
 
   /* eslint-enable prettier/prettier */

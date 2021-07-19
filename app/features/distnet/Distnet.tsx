@@ -14,13 +14,13 @@ import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
   addDistrinetTaskSource,
-  createTestSettingsYaml,
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
   dispatchSaveSettingsTextToFile,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
+  testSettingsYaml,
 } from './distnetSlice';
 import { globalUriScheme, isUriLocalhost } from './uriTools';
 
@@ -274,7 +274,7 @@ export default function Distnet() {
                 );
               } else {
                 dispatch(
-                  dispatchSetSettingsTextAndYaml(createTestSettingsYaml(), false)
+                  dispatchSetSettingsTextAndYaml(testSettingsYaml(), false)
                 );
               }
             }}
