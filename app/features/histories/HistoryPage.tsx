@@ -3,6 +3,8 @@ import fs from 'fs';
 import React, { useEffect } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useHistory } from 'react-router-dom';
+
+import getStatic from '../../utils/getStatic';
 import styles from './style.css';
 
 const { BrowserWindow } = electron.remote;
@@ -35,7 +37,10 @@ export default function HistoryPage(props: Record<string, any>) {
   useEffect(() => {
     // run script to highlight results
     const script = document.createElement('script');
-    script.src = 'features/histories/js/highlight-links.js';
+    // Setting script.src to a relative path points just under the 'app' directory on dev but it's not in packaged apps.
+    // script.src = 'features/histories/js/highlight-links.js'; // works on dev
+    // script.src = getStatic('/Users/tlarson/dev/home/distrinet/app/features/histories/js/highlight-links.js'); // works on dev
+    script.src = getStatic('highlight-links.js'); // works on dev
     script.async = true;
     document.body.appendChild(script);
     return () => {
