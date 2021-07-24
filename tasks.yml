@@ -49,7 +49,6 @@ tasks:
   - 70 1 show indicator if settings file has been changed
   - 70 2 save a preference for loading cache on app start
   - 65 3 package for mobile
-  - '-1 add sample-sources.yml to test suite'
   - >-
     65 0 add format (mime type?) info to the sources (for a more accurate
     indicator than just the URI "scheme:") id:source-with-format

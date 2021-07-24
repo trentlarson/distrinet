@@ -1,4 +1,5 @@
   - 95 1 fix load of script for link creation on histories due:2021-07-24
+  - 90 0 test Google Drive share from Mom works on my computer, get instructions for Google Drive
   - 60 1 find a way on Windows to pull a file into Notepad (or any semantic editor)
   - 50 0 show number of results
   - -1 fix multiple alerts when multiple searches don't find results
