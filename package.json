@@ -1,7 +1,7 @@
 {
   "name": "Distrinet",
   "productName": "distrinet",
-  "version": "0.1.10-beta-4",
+  "version": "0.1.10-beta-5",
   "description": "Utilities to support and share private data references, with sample applications.",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -54,6 +54,10 @@
   "build": {
     "productName": "distrinet",
     "appId": "com.trentlarson.distrinet",
+    "extraResources": {
+      "from": "app/static",
+      "to": "static"
+    },
     "files": [
       "dist/",
       "node_modules/",
