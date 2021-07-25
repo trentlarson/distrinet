@@ -56,6 +56,8 @@ To package (following https://www.electron.build/auto-update ):
 - `git push` and let GitHub build all packages before pushing anything new.
   - Manually: `yarn package`, create a GitHub release, and upload package(s) to it.
 - Add the commit hash to CHANGELOG.md.  Bump the versions and add "-beta".
+- Sometimes GitHub builds will fail when accessing a repository (eg. with a timeout) and bumping the version often fixes it.
+- To test the packaging locally on a mac without signing: `CSC_IDENTITY_AUTO_DISCOVERY=false yarn package-mac`
 
 
 When developing:

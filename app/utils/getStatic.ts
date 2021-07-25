@@ -1,7 +1,9 @@
 // from https://github.com/loopmode/electron-webpack-static-examples/blob/master/src/renderer/utils/getStatic.ts
+import electron from 'electron';
 import path from 'path';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment =
+  process.env.NODE_ENV !== 'production' && !electron.remote.app.isPackaged;
 
 // see https://github.com/electron-userland/electron-webpack/issues/241#issuecomment-582920906
 export default function getStatic(relativePath = '') {
