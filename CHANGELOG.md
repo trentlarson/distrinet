@@ -8,7 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [0.1.9] - 2021-07-09
+## [0.1.10] - 2021-07-25
+
+### Fixed
+
+Histories:
+- Fixed lack of highlighting semantically tagged items (in packaged releases due to problem accessing static files).
+
+
+
+## [0.1.9] - 2021-07-09 - cbd58595a5ae2292c63777d697005d6b3cc1b119
 
 ### Added
 
