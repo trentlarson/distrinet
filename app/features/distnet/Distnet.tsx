@@ -1,6 +1,7 @@
 import electron from 'electron';
 import _ from 'lodash';
 import * as R from 'ramda';
+import path from 'path';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -288,9 +289,10 @@ export default function Distnet() {
 }
 
 function getExtension(str: string) {
-  const dotPos = str.lastIndexOf('.');
+  const nameStr = str.substring(str.lastIndexOf(path.sep) + 1)
+  const dotPos = nameStr.lastIndexOf('.');
   if (dotPos > -1) {
-    return str.substring(dotPos + 1);
+    return nameStr.substring(dotPos + 1);
   }
   return '';
 }
