@@ -289,7 +289,7 @@ export default function Distnet() {
 }
 
 function getExtension(str: string) {
-  const nameStr = str.substring(str.lastIndexOf(path.sep) + 1)
+  const nameStr = str.substring(str.lastIndexOf(path.sep) + 1);
   const dotPos = nameStr.lastIndexOf('.');
   if (dotPos > -1) {
     return nameStr.substring(dotPos + 1);
