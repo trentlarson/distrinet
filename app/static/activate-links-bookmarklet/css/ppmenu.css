@@ -1,0 +1,6 @@
+.pieBg {
+  background-color: transparent;
+  background: url(../images/radial_bg.png) center center no-repeat;
+  background: -moz-radial-gradient(center 45deg, circle closest-corner, rgba(245, 245, 255, 0.8) 40%, rgba(255, 255, 255, 0) 75%);
+  background: -webkit-gradient(radial, center center, 0, center center, 70, from(rgba(245, 245, 255, 0.8)), to(rgba(255, 255, 255, 0)));
+}

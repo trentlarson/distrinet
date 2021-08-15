@@ -40,7 +40,7 @@ export default function HistoryPage(props: Record<string, any>) {
     // Setting script.src to a relative path points just under the 'app' directory on dev but it's not in packaged apps.
     // script.src = 'features/histories/js/highlight-links.js'; // works on dev
     // script.src = getStatic('/Users/tlarson/dev/home/distrinet/app/features/histories/js/highlight-links.js'); // works on dev
-    script.src = getStatic('highlight-links.js'); // works on dev
+    script.src = getStatic('activate-links-bookmarklet/setup.js'); // works on dev
     script.async = true;
     document.body.appendChild(script);
     return () => {

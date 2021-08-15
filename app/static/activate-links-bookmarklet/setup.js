@@ -1,4 +1,6 @@
-// Original is here: http://familyhistories.info/tools/activate-links-bookmarklet/setup.js
+// Original is here: http://familyhistories.info/static/tools/activate-links-bookmarklet/setup.js
+
+// Tool to highlight microdata-tagged text
 
 // v2: modified microdata to use schema.org & link & href (rather than historical-data.org & meta & content) a la https://schema.org/docs/gs.html#schemaorg_expected
 
@@ -30,7 +32,15 @@ function loadScript( url, callback ) {
 
 
 
-var bookmarkletFilesLoc = "http://familyhistories.info/tools/activate-links-bookmarklet";
+var bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
+//
+// You can use this approach by running an http server from the root of the repo:
+//var bookmarkletFilesLoc = "http://localhost:8080/static/tools/activate-links-bookmarklet";
+//
+// Local file:/// URLs no longer work due to new CORS restrictions:
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSRequestNotHttp
+// I couldn't even get them to work with the security turned off in Firefox & Chrome.
+
 var jqueryScriptLoc = bookmarkletFilesLoc + "/js/jquery-1.5.min.js";
 
 var addHoverLinks = function() {
@@ -43,7 +53,7 @@ var addHoverLinks = function() {
     $.getScript(bookmarkletFilesLoc + "/js/jquery.ui.prettypiemenu.js", function() {
 
       $('span[itemtype|="https://schema.org/Person"]')
-        .css('border-bottom','3px dotted white');
+        .css('border-bottom','3px dotted blue');
 
       $('span[itemtype|="https://schema.org/Person"]')
         .each(function(personNum) {

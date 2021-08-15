@@ -1,4 +1,6 @@
 tasks:
+  - fix location of highlight-links references
+  - documentation: Google Drive vs Backup
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - encrypt private key
   - 90 1 create list-source directory file that points at other lists of sources
