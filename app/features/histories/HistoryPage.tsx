@@ -35,16 +35,26 @@ export default function HistoryPage(props: Record<string, any>) {
   });
 
   useEffect(() => {
-    // run script to highlight results
+
+    // Set the bookmarkletFilesLoc because it's different on dev vs prod (and I don't know a better wa to inject it).
+    const varScript = document.createElement('script');
+    const varText = 'var bookmarkletFilesLoc = "' + getStatic('activate-links-bookmarklet') + '";';
+    varScript.appendChild(document.createTextNode(varText));
+    document.body.appendChild(varScript);
+
+    // We're hoping that finishes and the variable is recognized before the next part runs.
+
+    // Run script to highlight results.
     const script = document.createElement('script');
     // Setting script.src to a relative path points just under the 'app' directory on dev but it's not in packaged apps.
     // script.src = 'features/histories/js/highlight-links.js'; // works on dev
     // script.src = getStatic('/Users/tlarson/dev/home/distrinet/app/features/histories/js/highlight-links.js'); // works on dev
-    script.src = getStatic('activate-links-bookmarklet/setup.js'); // works on dev
+    script.src = getStatic('activate-links-bookmarklet/setup.js');
     script.async = true;
     document.body.appendChild(script);
     return () => {
       document.body.removeChild(script);
+      document.body.removeChild(varScript);
     };
   }, []);
 

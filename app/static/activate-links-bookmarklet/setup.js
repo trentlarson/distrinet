@@ -32,7 +32,8 @@ function loadScript( url, callback ) {
 
 
 
-var bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
+// This is set in the HistoryPage script because the derived electron reference is different from references in this file.
+//var bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
 //
 // You can use this approach by running an http server from the root of the repo:
 //var bookmarkletFilesLoc = "http://localhost:8080/static/tools/activate-links-bookmarklet";
