@@ -1,6 +1,5 @@
 tasks:
-  - fix location of highlight-links references
-  - documentation: Google Drive vs Backup
+  - documentation - Google Drive vs Backup
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - encrypt private key
   - 90 1 create list-source directory file that points at other lists of sources
@@ -23,6 +22,7 @@ tasks:
   - -1 type:bug fix where there is still data in the cache after all sources are removed
   - 80 2 mark myself & save my URIs and build functions to relate-to-me
   - 80 0 add the otherLocations to children (so they can show links in the UI)
+  - 80 fix the getStatic to work correctly with the 'app' (via ipcRenderer?) and avoid 'remote'
   - '80 1 tests - missing settings dir & file, empty settings, missing cache dir, missing URLs, multiple OK files':
       - 90 1 handle when load success after save failure or vice versa
   - 80 0 load only smaller (eg. < 5 MB) local files into cache
