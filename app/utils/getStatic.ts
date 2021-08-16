@@ -17,7 +17,6 @@ const STATIC_PARENT = path.parse(APP_PATH).dir;
 console.log('getStatic STATIC_PARENT', STATIC_PARENT);
 
 export default function getStatic(relativePath = '') {
-
   // Alternative: a path under the top level of the source (when running 'yarn dev')
   // ... but when packaged it always has a value of '/'
   // I think __dirname is from https://nodejs.org/api/modules.html#modules_dirname

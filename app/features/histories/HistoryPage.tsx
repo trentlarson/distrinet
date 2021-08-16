@@ -35,10 +35,10 @@ export default function HistoryPage(props: Record<string, any>) {
   });
 
   useEffect(() => {
-
     // Set the bookmarkletFilesLoc because it's different on dev vs prod (and I don't know a better wa to inject it).
     const varScript = document.createElement('script');
-    const varText = 'var bookmarkletFilesLoc = "' + getStatic('activate-links-bookmarklet') + '";';
+    const staticLoc = getStatic('activate-links-bookmarklet');
+    const varText = `var bookmarkletFilesLoc = "${staticLoc}";`;
     varScript.appendChild(document.createTextNode(varText));
     document.body.appendChild(varScript);
 

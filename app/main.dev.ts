@@ -60,8 +60,8 @@ const createWindow = async () => {
     height: 728,
     webPreferences:
       (process.env.NODE_ENV === 'development' ||
-       process.env.E2E_BUILD === 'true') &&
-       process.env.ERB_SECURE !== 'true'
+        process.env.E2E_BUILD === 'true') &&
+      process.env.ERB_SECURE !== 'true'
         ? {
             nodeIntegration: true,
           }
