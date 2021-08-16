@@ -1,7 +1,7 @@
 {
   "name": "Distrinet",
   "productName": "distrinet",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Utilities to support and share private data references, with sample applications.",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
