@@ -39,9 +39,8 @@ export default function HistoryPage(props: Record<string, any>) {
     const varScript = document.createElement('script');
     const staticLoc = getStatic('activate-links-bookmarklet');
     // We lose all backslash separators when putting in a string, so let's fix that.
-    // (Replacing '\\' with '\\\\' makes more sense but didn't work.)
     console.log('Static location is', staticLoc);
-    const staticLocAny = staticLoc.replace('\\', '/');
+    const staticLocAny = staticLoc.replace(/\\/g, '\\\\');
     console.log('... so static loc any is', staticLocAny);
     const varText = `var bookmarkletFilesLoc = "${staticLocAny}";`;
     console.log('... so the var text is', varText);
