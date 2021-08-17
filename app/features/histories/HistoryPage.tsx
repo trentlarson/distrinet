@@ -38,9 +38,13 @@ export default function HistoryPage(props: Record<string, any>) {
     // Set the bookmarkletFilesLoc because it's different on dev vs prod (and I don't know a better wa to inject it).
     const varScript = document.createElement('script');
     const staticLoc = getStatic('activate-links-bookmarklet');
-    // We lose any backslash separators when putting in a string, so let's duplicate them
+    // We lose all backslash separators when putting in a string, so let's fix that.
+    // (Replacing '\\' with '\\\\' makes more sense but didn't work.)
+    console.log('Static location is', staticLoc)
     const staticLocAny = staticLoc.replace('\\', '/');
+    console.log('... so static loc any is', staticLocAny)
     const varText = `var bookmarkletFilesLoc = "${staticLocAny}";`;
+    console.log('... so the var text is', varText)
     varScript.appendChild(document.createTextNode(varText));
     document.body.appendChild(varScript);
 
