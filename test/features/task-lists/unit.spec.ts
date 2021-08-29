@@ -20,31 +20,46 @@ describe('position in array with smaller estimate', () => {
   it('should be 0 in empty array', () => {
     expect(posOfFirstEstimateSmallerThan(-1, [])).toBe(0);
     expect(posOfFirstEstimateSmallerThan(3, [])).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(null, [])).toBe(0);
   });
 
   const a = [{ estimate: 4 }];
   const b = [{ estimate: 4 }, { estimate: 3 }];
-  const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: -1 }];
+  const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, {}];
+  const d = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, {}];
+  const e = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, { estimate: -1 }];
 
   it('should be correct in these arrays', () => {
     expect(posOfFirstEstimateSmallerThan(5, a)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(4, a)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3, a)).toBe(1);
+    expect(posOfFirstEstimateSmallerThan(null, a)).toBe(1);
+    expect(posOfFirstEstimateSmallerThan(undefined, a)).toBe(1);
 
     expect(posOfFirstEstimateSmallerThan(5, b)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(4, b)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3.5, b)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3, b)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(undefined, b)).toBe(2);
 
-    expect(posOfFirstEstimateSmallerThan(100, c)).toBe(0);
-    expect(posOfFirstEstimateSmallerThan(5, c)).toBe(0);
-    expect(posOfFirstEstimateSmallerThan(4, c)).toBe(1);
-    expect(posOfFirstEstimateSmallerThan(3, c)).toBe(2);
-    expect(posOfFirstEstimateSmallerThan(2, c)).toBe(2);
     expect(posOfFirstEstimateSmallerThan(1, c)).toBe(3);
     expect(posOfFirstEstimateSmallerThan(0, c)).toBe(3);
-    expect(posOfFirstEstimateSmallerThan(-1, c)).toBe(4);
-    expect(posOfFirstEstimateSmallerThan(-33, c)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(undefined, c)).toBe(4);
+
+    expect(posOfFirstEstimateSmallerThan(100, d)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(5, d)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(4, d)).toBe(1);
+    expect(posOfFirstEstimateSmallerThan(3, d)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(2, d)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(1, d)).toBe(3);
+    expect(posOfFirstEstimateSmallerThan(0, d)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(-1, d)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(-33, d)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(undefined, d)).toBe(5);
+
+    expect(posOfFirstEstimateSmallerThan(-1, e)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(-33, e)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(undefined, e)).toBe(5);
 
   });
 });

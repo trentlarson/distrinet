@@ -144,9 +144,17 @@ export function editUiTreeAtPath(
 }
 
 /**
-  Return the index of the first in `tasks` that has an estimate smaller than `est`, or the length of the array if none exists.
+  Return the index of the first in `tasks` that has an estimate smaller than `est`, or the length of the array if none exists or `est` is null or undefined.
  */
-export function posOfFirstEstimateSmallerThan(est: number, tasks: Array<TaskYaml>) {
-  let pos = R.findIndex((task) => task.estimate < est, tasks);
+export function posOfFirstEstimateSmallerThan(est: number | undefined, tasks: Array<TaskYaml>) {
+  if (R.isNil(est)) {
+    // null or undefined should go after everything (and there's no use distinguishing between them)
+    return tasks.length;
+  }
+  // est is not null/undefined
+  let pos = R.findIndex(
+    (task) => R.isNil(task.estimate) || task.estimate < est,
+    tasks
+  );
   return pos > -1 ? pos : tasks.length;
 }
