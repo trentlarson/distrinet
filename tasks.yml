@@ -1,5 +1,6 @@
 tasks:
   - get version call that works
+  - add link to download release
   - documentation - Google Drive vs Backup
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - encrypt private key

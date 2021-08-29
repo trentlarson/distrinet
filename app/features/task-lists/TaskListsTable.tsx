@@ -19,6 +19,7 @@ import {
   dispatchVolunteer,
   isTaskyamlUriScheme,
   labelValueInSummary,
+  onlyBiggest5,
   retrieveForecast,
 } from './taskListsSlice';
 import {
@@ -52,6 +53,7 @@ export default function TaskListsTable() {
   );
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
+  const [showOnlyBiggest5, setShowOnlyBiggest5] = useState(false);
 
   let allLabels: Array<string> = [];
 
@@ -149,6 +151,8 @@ export default function TaskListsTable() {
         setLabelsToShow,
         showOnlyTop3,
         setShowOnlyTop3,
+        showOnlyBiggest5,
+        setShowOnlyBiggest5,
         taskLists.display,
         showLists,
         allLabels
@@ -346,6 +350,8 @@ function bigListTable(
   setLabelsToShow: (arg0: Array<string>) => void,
   showOnlyTop3: boolean,
   setShowOnlyTop3: (arg0: boolean) => void,
+  showOnlyBiggest5: boolean,
+  setShowOnlyBiggest5: (arg0: boolean) => void,
   allUiTrees: Record<string, Array<UiTree>>,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
@@ -364,6 +370,15 @@ function bigListTable(
         }}
       />
       Show only the top 3 of each list.
+      <br />
+      <input
+        type="checkbox"
+        checked={showOnlyBiggest5}
+        onChange={() => {
+          setShowOnlyBiggest5(!showOnlyBiggest5);
+        }}
+      />
+      Show only the biggest 5 of each list.
       <br />
       Labels:
       {allLabels.map((label) => (
@@ -390,9 +405,11 @@ function bigListTable(
       ))}
       {smallListTable(
         R.keys(showLists).map((sourceId) =>
-          R.take(
-            showOnlyTop3 ? 3 : showLists[sourceId].length,
-            showLists[sourceId]
+          // selectively apply these functions to the list
+          (showOnlyBiggest5 ? onlyBiggest5 : R.identity)(
+            (showOnlyTop3 ? R.take(3) : R.identity)(
+              showLists[sourceId]
+            )
           )
         ),
         hoursPerWeek,
