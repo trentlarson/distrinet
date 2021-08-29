@@ -147,13 +147,14 @@ export function editUiTreeAtPath(
   Return the index of the first in `tasks` that has an estimate smaller than `est`, or the length of the array if none exists or `est` is null or undefined.
  */
 export function posOfFirstEstimateSmallerThan(est: number | undefined, tasks: Array<TaskYaml>) {
-  if (R.isNil(est)) {
+  if (R.isNil(est) || isNaN(est)) {
     // null or undefined should go after everything (and there's no use distinguishing between them)
+    // Thank heavens Infinity works.  Hopefully there are no other special numbers!
     return tasks.length;
   }
-  // est is not null/undefined
+  // est is not NaN nor null/undefined
   let pos = R.findIndex(
-    (task) => R.isNil(task.estimate) || task.estimate < est,
+    (task) => R.isNil(task.estimate) || isNaN(task.estimate) || task.estimate < est,
     tasks
   );
   return pos > -1 ? pos : tasks.length;

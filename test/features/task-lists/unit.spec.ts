@@ -23,29 +23,50 @@ describe('position in array with smaller estimate', () => {
     expect(posOfFirstEstimateSmallerThan(null, [])).toBe(0);
   });
 
-  const a = [{ estimate: 4 }];
-  const b = [{ estimate: 4 }, { estimate: 3 }];
-  const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, {}];
-  const d = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, {}];
-  const e = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, { estimate: -1 }];
-
   it('should be correct in these arrays', () => {
+
+    const y = [{}, { estimate: NaN}];
+    expect(posOfFirstEstimateSmallerThan(5, y)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(Infinity, y)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, y)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(null, y)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(undefined, y)).toBe(2);
+
+    const z = [{ estimate: NaN}, {}];
+    expect(posOfFirstEstimateSmallerThan(0, z)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(Infinity, z)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, z)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(null, z)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(undefined, z)).toBe(2);
+
+    const a = [{ estimate: 4 }];
     expect(posOfFirstEstimateSmallerThan(5, a)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(4, a)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3, a)).toBe(1);
+    expect(posOfFirstEstimateSmallerThan(Infinity, a)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, a)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(null, a)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(undefined, a)).toBe(1);
 
+    const b = [{ estimate: 4 }, { estimate: 3 }];
     expect(posOfFirstEstimateSmallerThan(5, b)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(4, b)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3.5, b)).toBe(1);
     expect(posOfFirstEstimateSmallerThan(3, b)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(Infinity, b)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, b)).toBe(2);
+    expect(posOfFirstEstimateSmallerThan(null, b)).toBe(2);
     expect(posOfFirstEstimateSmallerThan(undefined, b)).toBe(2);
 
+    const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: NaN }, {}];
     expect(posOfFirstEstimateSmallerThan(1, c)).toBe(3);
     expect(posOfFirstEstimateSmallerThan(0, c)).toBe(3);
-    expect(posOfFirstEstimateSmallerThan(undefined, c)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(Infinity, c)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, c)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(null, c)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(undefined, c)).toBe(5);
 
+    const d = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, {}];
     expect(posOfFirstEstimateSmallerThan(100, d)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(5, d)).toBe(0);
     expect(posOfFirstEstimateSmallerThan(4, d)).toBe(1);
@@ -55,10 +76,17 @@ describe('position in array with smaller estimate', () => {
     expect(posOfFirstEstimateSmallerThan(0, d)).toBe(4);
     expect(posOfFirstEstimateSmallerThan(-1, d)).toBe(4);
     expect(posOfFirstEstimateSmallerThan(-33, d)).toBe(4);
+    expect(posOfFirstEstimateSmallerThan(Infinity, d)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, d)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(null, d)).toBe(5);
     expect(posOfFirstEstimateSmallerThan(undefined, d)).toBe(5);
 
+    const e = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 0 }, { estimate: -1 }];
     expect(posOfFirstEstimateSmallerThan(-1, e)).toBe(5);
     expect(posOfFirstEstimateSmallerThan(-33, e)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(Infinity, e)).toBe(0);
+    expect(posOfFirstEstimateSmallerThan(NaN, e)).toBe(5);
+    expect(posOfFirstEstimateSmallerThan(null, e)).toBe(5);
     expect(posOfFirstEstimateSmallerThan(undefined, e)).toBe(5);
 
   });
@@ -72,20 +100,28 @@ describe('onlyBiggest5', () => {
 
   const a = [{ estimate: 4 }];
   const b = [{ estimate: 4 }, { estimate: 3 }];
-  const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 2 }];
-  const cTop = [{ estimate: 4 }, { estimate: 3 }, { estimate: 2 }, { estimate: 1 }];
 
   it('should get same list', () => {
     expect(onlyBiggest5(a)).toEqual(a);
     expect(onlyBiggest5(b)).toEqual(b);
-    expect(onlyBiggest5(c)).toEqual(cTop);
   });
 
-  const d = [{ estimate: 0 }, { estimate: 4 }, { estimate: 10 }, { estimate: 3 }, { estimate: 100 }, { estimate: -1 }, { estimate: 1 }, { estimate: 3, last: true }]; // the 'last' is just to distinguish from the earlier element
+  const c = [{ estimate: 4 }, { estimate: 3 }, { estimate: 1 }, { estimate: 2 }];
+  const cTop = [{ estimate: 4 }, { estimate: 3 }, { estimate: 2 }, { estimate: 1 }];
+
+  // this one is all in order
+  const d = [{ estimate: 100 }, { estimate: 10 }, { estimate: 4 }, { estimate: 3 }, { estimate: 3, last: true }, { estimate: 1}, { estimate: 0 }, { estimate: -1 }]; // the 'last' is just to distinguish from the earlier element
   const dTop = [{ estimate: 100 }, { estimate: 10 }, { estimate: 4 }, { estimate: 3 }, { estimate: 3, last: true }];
 
+  // this one is out of order
+  const e = [{ estimate: 0 }, { estimate: 4 }, { estimate: 10 }, { estimate: 3 }, { estimate: 100 }, { estimate: -1 }, { estimate: 1 }, { estimate: 3, last: true }]; // the 'last' is just to distinguish from the earlier element
+  const eTop = [{ estimate: 100 }, { estimate: 10 }, { estimate: 4 }, { estimate: 3 }, { estimate: 3, last: true }];
+
+
   it('should get a subset', () => {
+    expect(onlyBiggest5(c)).toEqual(cTop);
     expect(onlyBiggest5(d)).toEqual(dTop);
+    expect(onlyBiggest5(e)).toEqual(eTop);
   });
 });
 
