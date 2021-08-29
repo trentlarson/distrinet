@@ -142,3 +142,11 @@ export function editUiTreeAtPath(
   );
   return uiTreesToEdit;
 }
+
+/**
+  Return the index of the first in `tasks` that has an estimate smaller than `est`, or the length of the array if none exists.
+ */
+export function posOfFirstEstimateSmallerThan(est: number, tasks: Array<TaskYaml>) {
+  let pos = R.findIndex((task) => task.estimate < est, tasks);
+  return pos > -1 ? pos : tasks.length;
+}

@@ -1,4 +1,5 @@
 tasks:
+  - get version call that works
   - documentation - Google Drive vs Backup
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - encrypt private key
@@ -38,6 +39,7 @@ tasks:
   - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
   - '80 -1 in settings, rename source.id to source.uri'
   - 80 1 change all alerts into on-page errors
+  - 80 upgrade electron version
   - >-
     75 2 start an HTTP server for file access (rather than direct library
     access)

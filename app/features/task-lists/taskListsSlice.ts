@@ -21,12 +21,13 @@ import {
   globalUriScheme,
 } from '../distnet/uriTools';
 import {
+  editUiTreeAtPathOneSource,
+  posOfFirstEstimateSmallerThan,
   UiTree,
   UiTreeBranch,
   UiTreeProperty,
   UiTreeLinkageProperty,
   uiTreeFromYamlTask,
-  editUiTreeAtPathOneSource,
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
@@ -795,5 +796,20 @@ export const dispatchVolunteer = (
     );
   }
 };
+
+export const onlyBiggest5 = (taskList: Array<TaskYaml>): Array<TaskYaml> => {
+  let result = [];
+  for (let i = 0; i < taskList.length; i++) {
+    let task = taskList[i];
+    let pos = posOfFirstEstimateSmallerThan(task.estimate, result)
+    if (pos < 5) {
+      result = R.insert(pos, task, result);
+      if (result.length > 5) {
+        result = R.remove(5, 1, result);
+      }
+    }
+  }
+  return result;
+}
 
 export default taskListsSlice.reducer;
