@@ -19,11 +19,11 @@ import {
   dispatchVolunteer,
   isTaskyamlUriScheme,
   labelValueInSummary,
-  onlyBiggest5,
   retrieveForecast,
 } from './taskListsSlice';
 import {
   areLinkedTasksExpanded,
+  onlyBiggest5,
   UiTree,
   UiTreeBranch,
   UiTreeProperty,
@@ -339,6 +339,11 @@ function execProtocolApp(execPath: string, args: Array<string>) {
   execFile(execPath, args); // accepts third arg as callback after app is closed: (err, data) => {...}
 }
 
+/**
+  a function to please TypeScript
+ */
+const sameArray: <T>(arr: Array<T>) => Array<T> = R.identity;
+
 function bigListTable(
   dispatch: (arg0: AppThunk) => void,
   taskSources: Array<Source>,
@@ -406,9 +411,9 @@ function bigListTable(
       {smallListTable(
         R.keys(showLists).map((sourceId) =>
           // selectively apply these functions to the list
-          (showOnlyBiggest5 ? onlyBiggest5 : R.identity)(
-            (showOnlyTop3 ? R.take(3) : R.identity)(
-              showLists[sourceId]
+          (showOnlyBiggest5 ? onlyBiggest5 : sameArray)(
+            (showOnlyTop3 ? R.take(3) : sameArray)(
+              showLists[sourceId] // eslint-disable-line prettier/prettier
             )
           )
         ),

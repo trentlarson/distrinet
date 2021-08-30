@@ -146,16 +146,37 @@ export function editUiTreeAtPath(
 /**
   Return the index of the first in `tasks` that has an estimate smaller than `est`, or the length of the array if none exists or `est` is null or undefined.
  */
-export function posOfFirstEstimateSmallerThan(est: number | undefined, tasks: Array<TaskYaml>) {
-  if (R.isNil(est) || isNaN(est)) {
+export function posOfFirstEstimateSmallerThan(
+  est: number | null | undefined,
+  tasks: Array<YamlTask>
+): number {
+  if (R.isNil(est) || Number.isNaN(est)) {
     // null or undefined should go after everything (and there's no use distinguishing between them)
     // Thank heavens Infinity works.  Hopefully there are no other special numbers!
     return tasks.length;
   }
   // est is not NaN nor null/undefined
-  let pos = R.findIndex(
-    (task) => R.isNil(task.estimate) || isNaN(task.estimate) || task.estimate < est,
+  const pos = R.findIndex(
+    (task) =>
+      R.isNil(task.estimate) ||
+      Number.isNaN(task.estimate) ||
+      task.estimate < est,
     tasks
   );
   return pos > -1 ? pos : tasks.length;
+}
+
+export function onlyBiggest5(taskList: Array<YamlTask>): Array<YamlTask> {
+  let result: Array<YamlTask> = [];
+  for (let i = 0; i < taskList.length; i += 1) {
+    const task = taskList[i];
+    const pos = posOfFirstEstimateSmallerThan(task.estimate, result);
+    if (pos < 5) {
+      result = R.insert(pos, task, result);
+      if (result.length > 5) {
+        result = R.remove(5, 1, result);
+      }
+    }
+  }
+  return result;
 }

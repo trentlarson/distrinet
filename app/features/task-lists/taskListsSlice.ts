@@ -22,7 +22,6 @@ import {
 } from '../distnet/uriTools';
 import {
   editUiTreeAtPathOneSource,
-  posOfFirstEstimateSmallerThan,
   UiTree,
   UiTreeBranch,
   UiTreeProperty,
@@ -796,20 +795,5 @@ export const dispatchVolunteer = (
     );
   }
 };
-
-export const onlyBiggest5 = (taskList: Array<TaskYaml>): Array<TaskYaml> => {
-  let result = [];
-  for (let i = 0; i < taskList.length; i++) {
-    let task = taskList[i];
-    let pos = posOfFirstEstimateSmallerThan(task.estimate, result)
-    if (pos < 5) {
-      result = R.insert(pos, task, result);
-      if (result.length > 5) {
-        result = R.remove(5, 1, result);
-      }
-    }
-  }
-  return result;
-}
 
 export default taskListsSlice.reducer;

@@ -1,12 +1,12 @@
 import * as R from 'ramda';
 
 import {
-  onlyBiggest5,
   taskFromString,
   toggleProperty
 } from '../../../app/features/task-lists/taskListsSlice';
 import {
   editUiTreeAtPathOneSource,
+  onlyBiggest5,
   posOfFirstEstimateSmallerThan,
   UiTreeLinkageProperty,
   UiTreeProperty,
