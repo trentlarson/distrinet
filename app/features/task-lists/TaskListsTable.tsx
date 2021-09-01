@@ -207,6 +207,8 @@ function sourceActions(
                 resourceTypes
               )?.executablePath;
             const file = cache[source.id]?.localFile;
+            const localFirst = cache[source.id]?.sourceUrl.endsWith(file);
+            const dragMessage = `Drag${localFirst ? '' : ' Local'}`;
             /** I cannot figure out how to fix this stupid linting error. */
             /** eslint-disable-next-line react/jsx-curly-newline */
             return (
@@ -283,6 +285,8 @@ function sourceActions(
                   ) : (
                     <span />
                   )}
+
+                  <a href={file}>{dragMessage}</a>
                 </td>
                 <td>
                   {cache[source.id]
