@@ -33,6 +33,7 @@ import {
 import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
 
 const TASKYAML_SCHEME = 'taskyaml';
+const DEFAULT_FORECAST_SERVER = 'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
 
 const fsPromises = fs.promises;
 
@@ -525,29 +526,34 @@ export const retrieveForecast = (
     createPreferences,
     displayPreferences,
   };
-  const urlString = 'http://localhost:8090/display';
+  const urlString = `${DEFAULT_FORECAST_SERVER}/display`;
   fetch(urlString, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(forecastRequest),
   })
     .then((forecastResponse) => {
-      if (!forecastResponse.ok) {
-        throw Error(
-          `Failed to get forecast from ${urlString} due to response code ${forecastResponse.status}`
-        );
-      }
-      return forecastResponse.text();
+      return forecastResponse.text()
+        .then((forecastString) => {
+          if (!forecastResponse.ok) {
+            throw new Error(`Failed to get forecast from ${urlString} due to response code ${forecastResponse.status}. ${forecastString}`);
+          } else {
+            return forecastString;
+          }
+        });
     })
     .then((forecastString) => {
       return dispatch(setForecastData({ sourceId, html: forecastString }));
     })
     .catch((err) => {
       console.error(
-        "Got error retrieving forecast.  Maybe that service isn't running.",
+        "Got error retrieving forecast. (Maybe that service isn't running.)",
         err
       );
-      throw err;
+      new Notification('Error', {
+        body: `Got an error trying to retrieve the forecast.`,
+        silent: true,
+      });
     });
 };
 
