@@ -33,7 +33,8 @@ import {
 import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
 
 const TASKYAML_SCHEME = 'taskyaml';
-const DEFAULT_FORECAST_SERVER = 'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
+const DEFAULT_FORECAST_SERVER =
+  'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
 
 const fsPromises = fs.promises;
 
@@ -533,23 +534,23 @@ export const retrieveForecast = (
     body: JSON.stringify(forecastRequest),
   })
     .then((forecastResponse) => {
-      return forecastResponse.text()
-        .then((forecastString) => {
-          if (!forecastResponse.ok) {
-            throw new Error(`Failed to get forecast from ${urlString} due to response code ${forecastResponse.status}. ${forecastString}`);
-          } else {
-            return forecastString;
-          }
-        });
+      return forecastResponse.text().then((forecastString) => {
+        if (!forecastResponse.ok) {
+          // eslint-disable-next-line max-len
+          throw new Error(
+            `Failed to get forecast from ${urlString}, with response code ${forecastResponse.status}. ${forecastString}`
+          );
+        } else {
+          return forecastString;
+        }
+      });
     })
     .then((forecastString) => {
       return dispatch(setForecastData({ sourceId, html: forecastString }));
     })
     .catch((err) => {
-      console.error(
-        "Got error retrieving forecast. (Maybe that service isn't running.)",
-        err
-      );
+      console.error('Got error retrieving forecast.', err);
+      // eslint-disable-next-line no-new
       new Notification('Error', {
         body: `Got an error trying to retrieve the forecast.`,
         silent: true,
