@@ -15,6 +15,7 @@ import {
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
 import { Source } from '../distnet/distnetClasses';
+import { addDragDropListeners } from '../distnet/distnetSlice';
 import uriTools from '../distnet/uriTools';
 import {
   refreshIdMapperForDispatch,
@@ -117,10 +118,12 @@ function GenealogyView(options: TreeOption) {
   options.tree.getTree(rootUri);
 
   const droppableRef = useRef(null);
+  const callbackToDispatch =
+    (filePath: string) => setRootUri(`file://${filePath}`);
   useEffect(() => {
     const element = droppableRef.current; // all to make typechecking pass
     if (element) {
-      addDragDropListeners(element, dispatch); // eslint-disable-line @typescript-eslint/no-use-before-define
+      addDragDropListeners(element, callbackToDispatch, dispatch);
     }
   });
 
@@ -166,47 +169,6 @@ function GenealogyView(options: TreeOption) {
     </div>
   );
 }
-
-// Drag & Drop a repo (similar code found in histories feature)
-
-// I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
-// So these are to guard against those possibilities.
-let timestampOfLastDrop = 0;
-let lastFile = '';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addDragDropListeners = (elem: HTMLElement, dispatch: any) => {
-  // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
-
-  elem.addEventListener('drop', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
-      // Technically there's no problem adding more, but we should add more confirmations if they do this
-      // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
-      alert('We only support adding one folder at a time.');
-    } else {
-      const filePath = event.dataTransfer.files[0].path;
-      if (
-        filePath === lastFile &&
-        new Date().getTime() - timestampOfLastDrop < 5000
-      ) {
-        console.log('Got a duplicate event: ', event, '... so ignoring it.');
-      } else {
-        timestampOfLastDrop = new Date().getTime();
-        lastFile = filePath;
-        dispatch(setRootUri(`file://${filePath}`));
-      }
-    }
-  });
-
-  elem.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  });
-
-  // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
-};
 
 enum Visibility {
   visible = 'visible',

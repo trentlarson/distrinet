@@ -459,6 +459,7 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   }, getState().histories.uriTree);
 };
 
+// This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
 export const dispatchAddHistoryToSettings = (
   filePath: string
 ): AppThunk => async (dispatch, getState) => {

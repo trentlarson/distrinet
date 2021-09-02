@@ -1,6 +1,8 @@
 tasks:
   - get version call that works
   - add link to download release
+  - remove the "urls" arrays & just make a single url (because the rare case of preserving my copy different from some external copy can be modeled differently) :
+    - migrate existing settings for current users
   - documentation - Google Drive vs Backup
   - distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - encrypt private key

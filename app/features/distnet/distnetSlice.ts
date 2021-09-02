@@ -11,6 +11,11 @@ import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 import {
+  createCacheDir,
+  reloadAllSourcesIntoCache,
+  reloadOneSourceIntoCache,
+} from './cache';
+import {
   CacheData,
   CredentialType,
   DistnetState,
@@ -20,11 +25,6 @@ import {
   Source,
 } from './distnetClasses';
 import { loadSettingsFromFile, saveSettingsToFile } from './settings';
-import {
-  createCacheDir,
-  reloadAllSourcesIntoCache,
-  reloadOneSourceIntoCache,
-} from './cache';
 
 interface SettingsEditor {
   // should clone the settings and return a new one
@@ -470,6 +470,56 @@ export const testSettingsYaml = () => {
 
   const newYaml = yaml.safeDump(testSettings);
   return newYaml;
+};
+
+
+////////////////////////////////////////////////////////////////
+// Drag & Drop a repo
+
+// I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
+// So these are to guard against those possibilities.
+let timestampOfLastDrop = 0;
+let lastFile = '';
+
+/**
+ param fileOp takes a file path and adds it to settings the right way
+ **/
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const addDragDropListeners = (
+  elem: HTMLElement,
+  callbackToDispatch,
+  dispatch: Dispatch<any>
+) => {
+  // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
+
+  elem.addEventListener('drop', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
+      // Technically there's no problem adding more, but we should add more confirmations if they do this
+      // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
+      alert('We only support adding one folder at a time.');
+    } else {
+      const filePath = event.dataTransfer.files[0].path;
+      if (
+        filePath === lastFile &&
+        new Date().getTime() - timestampOfLastDrop < 5000
+      ) {
+        console.log('Got a duplicate event: ', event, '... so ignoring it.');
+      } else {
+        timestampOfLastDrop = new Date().getTime();
+        lastFile = filePath;
+        dispatch(callbackToDispatch(filePath));
+      }
+    }
+  });
+
+  elem.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
 export default distnetSlice.reducer;

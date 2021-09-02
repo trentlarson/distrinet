@@ -55,7 +55,7 @@ export default function Histories() {
   useEffect(() => {
     const element = droppableRef.current;
     if (element) {
-      addDragDropListeners(dispatch, element);
+      addDragDropListeners(element, dispatch);
     }
   });
 
@@ -143,8 +143,11 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 let timestampOfLastDrop = 0;
 let lastFile = '';
 
+/**
+ param operation takes a file path and adds it to settings the right way
+ **/
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addDragDropListeners = (dispatch: Dispatch<any>, elem: HTMLElement) => {
+const addDragDropListeners = (elem: HTMLElement, dispatch: Dispatch<any>) => {
   // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
 
   elem.addEventListener('drop', (event) => {
