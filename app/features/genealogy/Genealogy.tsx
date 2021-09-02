@@ -345,6 +345,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
           <button
             type="button"
             onClick={() => {
+              // This is similar to the process in historySlice.dispatchAddHistoryToSettings
               const newSource = {
                 id: settingsId,
                 name: settingsName,

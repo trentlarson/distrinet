@@ -9,14 +9,6 @@ import { fileURLToPath } from 'url';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 import { Source } from '../distnet/distnetClasses';
-// eslint-disable-next-line import/no-cycle
-import {
-  addSourceToSettings,
-  dispatchModifySettings,
-  dispatchReloadCacheForId,
-  dispatchSaveSettingsTextToFile,
-} from '../distnet/distnetSlice';
-import uriTools from '../distnet/uriTools';
 
 interface Payload<T> {
   type: string;
@@ -457,33 +449,4 @@ export const dispatchTextSearch = (term: string): AppThunk => async (
   R.mapObjIndexed((tree: FileTree, uri: string) => {
     searchFileOrDir(uri, [], tree, term, dispatch);
   }, getState().histories.uriTree);
-};
-
-// This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
-export const dispatchAddHistoryToSettings = (
-  filePath: string
-): AppThunk => async (dispatch, getState) => {
-  const fileUrl = `file://${filePath}`;
-  const alreadyInSource: Source | undefined = R.find(
-    (s) =>
-      R.contains(
-        fileUrl,
-        s.urls.map((u) => u.url)
-      ),
-    getState().distnet.settings.sources
-  );
-  if (alreadyInSource) {
-    alert(`That path already exists in source ${alreadyInSource.id}`);
-  } else {
-    const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
-    const newId = `histories:${newPath}`;
-    const newSource = {
-      id: newId,
-      urls: [{ url: fileUrl }],
-    };
-    dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-    dispatch(dispatchSaveSettingsTextToFile());
-    dispatch(dispatchReloadCacheForId(newId));
-    alert('Added that source.');
-  }
 };

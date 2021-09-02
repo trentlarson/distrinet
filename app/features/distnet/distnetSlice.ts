@@ -25,6 +25,7 @@ import {
   Source,
 } from './distnetClasses';
 import { loadSettingsFromFile, saveSettingsToFile } from './settings';
+import uriTools from './uriTools';
 
 interface SettingsEditor {
   // should clone the settings and return a new one
@@ -520,6 +521,35 @@ export const addDragDropListeners = (
   });
 
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
+};
+
+// This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
+export const dispatchAddHistoryToSettings = (
+  filePath: string
+): AppThunk => async (dispatch, getState) => {
+  const fileUrl = `file://${filePath}`;
+  const alreadyInSource: Source | undefined = R.find(
+    (s) =>
+      R.contains(
+        fileUrl,
+        s.urls.map((u) => u.url)
+      ),
+    getState().distnet.settings.sources
+  );
+  if (alreadyInSource) {
+    alert(`That path already exists in source ${alreadyInSource.id}`);
+  } else {
+    const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
+    const newId = `histories:${newPath}`;
+    const newSource = {
+      id: newId,
+      urls: [{ url: fileUrl }],
+    };
+    dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+    dispatch(dispatchSaveSettingsTextToFile());
+    dispatch(dispatchReloadCacheForId(newId));
+    alert('Added that source.');
+  }
 };
 
 export default distnetSlice.reducer;
