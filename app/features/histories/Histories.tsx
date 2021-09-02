@@ -55,7 +55,8 @@ export default function Histories() {
   // histories.uriTree will be empty on initial load, before the paths are built
   const histories = useSelector((state: RootState) => state.histories);
 
-  const addCallback = (filePath) => dispatchAddHistoryToSettings(filePath);
+  const addCallback = (filePath: string) =>
+    dispatchAddHistoryToSettings(filePath);
   useEffect(() => {
     const element = droppableRef.current;
     if (element) {
@@ -139,13 +140,6 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
     ? Visibility.visible
     : Visibility.hidden;
 }
-
-// Drag & Drop a repo (similar code found in genealogy feature)
-
-// I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
-// So these are to guard against those possibilities.
-let timestampOfLastDrop = 0;
-let lastFile = '';
 
 interface DirProps {
   name: string;

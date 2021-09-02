@@ -9,13 +9,13 @@ import { Link } from 'react-router-dom';
 // imports for this app
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
+import { Source } from '../distnet/distnetClasses';
 import {
+  addDragDropListeners,
   addSourceToSettings,
   dispatchModifySettings,
   dispatchSaveSettingsTextToFile,
 } from '../distnet/distnetSlice';
-import { Source } from '../distnet/distnetClasses';
-import { addDragDropListeners } from '../distnet/distnetSlice';
 import uriTools from '../distnet/uriTools';
 import {
   refreshIdMapperForDispatch,

@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 import path from 'path';
 import * as R from 'ramda';
+import { Dispatch } from 'react';
 import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 
 // imports in this app
@@ -473,8 +474,7 @@ export const testSettingsYaml = () => {
   return newYaml;
 };
 
-
-////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////
 // Drag & Drop a repo
 
 // I usually see the drag-drop code fire twice (and I've even see it dozens of time with one drag).
@@ -484,11 +484,14 @@ let lastFile = '';
 
 /**
  param callbackToDispatch takes a file path string, then a (dispatch, getState), meant for 'dispatch'
- **/
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ */
 export const addDragDropListeners = (
   elem: HTMLElement,
-  callbackToDispatch,
+  // The type of this should probably be (string)=>AppThunk because that matches code in histories & task-lists
+  // however it does not match the setRootUri in the genealogy.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callbackToDispatch: (filePath: string) => any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dispatch: Dispatch<any>
 ) => {
   // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
@@ -523,12 +526,6 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
-export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchAddToSettings('histories', filePath);
-
-export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchAddToSettings('taskyaml', filePath);
-
 // This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
 const dispatchAddToSettings = (
   prefix: string,
@@ -558,5 +555,11 @@ const dispatchAddToSettings = (
     alert('Added that source.');
   }
 };
+
+export const dispatchAddHistoryToSettings = (filePath: string) =>
+  dispatchAddToSettings('histories', filePath);
+
+export const dispatchAddTaskListToSettings = (filePath: string) =>
+  dispatchAddToSettings('taskyaml', filePath);
 
 export default distnetSlice.reducer;

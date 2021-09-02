@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 // imports in this app
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-import { Source } from '../distnet/distnetClasses';
 
 interface Payload<T> {
   type: string;

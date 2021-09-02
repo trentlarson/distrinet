@@ -1,5 +1,5 @@
-  - 1 allow drag of project file to add to settings
-  - 1 allow selection of units for estimates (eg. 2^x, hours, days
+  - 0 figure out why endorser.ch project forecast shows very small estimate
+  - -1 allow selection of units for estimates (eg. 2^x, hours, days
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
   - 70 1 add markdown parsing id:markdown:
     blocks: joplin

@@ -10,7 +10,7 @@ import { AppThunk, RootState } from '../../store';
 import { Cache, ResourceType, Source } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
-  dispatchAddTaskListToSettings
+  dispatchAddTaskListToSettings,
 } from '../distnet/distnetSlice';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
