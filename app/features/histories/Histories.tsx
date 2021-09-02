@@ -11,7 +11,11 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store'; // eslint-disable-line import/no-cycle
 import { Source } from '../distnet/distnetClasses';
-import { addDragDropListeners, dispatchAddHistoryToSettings, resourceTypesForUris } from '../distnet/distnetSlice';
+import {
+  addDragDropListeners,
+  dispatchAddHistoryToSettings,
+  resourceTypesForUris,
+} from '../distnet/distnetSlice';
 import {
   dispatchCountSearchable,
   dispatchEraseSearchResults,

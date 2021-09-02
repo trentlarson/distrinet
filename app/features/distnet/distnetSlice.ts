@@ -523,8 +523,15 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
+export const dispatchAddHistoryToSettings = (filePath: string) =>
+  dispatchAddToSettings('histories', filePath);
+
+export const dispatchAddTaskListToSettings = (filePath: string) =>
+  dispatchAddToSettings('taskyaml', filePath);
+
 // This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
-export const dispatchAddHistoryToSettings = (
+const dispatchAddToSettings = (
+  prefix: string,
   filePath: string
 ): AppThunk => async (dispatch, getState) => {
   const fileUrl = `file://${filePath}`;
@@ -540,7 +547,7 @@ export const dispatchAddHistoryToSettings = (
     alert(`That path already exists in source ${alreadyInSource.id}`);
   } else {
     const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
-    const newId = `histories:${newPath}`;
+    const newId = `${prefix}:${newPath}`;
     const newSource = {
       id: newId,
       urls: [{ url: fileUrl }],

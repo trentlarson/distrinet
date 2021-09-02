@@ -68,6 +68,14 @@ When developing:
   - Go to "genealogy" and "Genealogy Settings" and click the "clear" button.
   - If you've made code changes, go to the main screen and refresh (eg. CTRL-R).  The auto-load works pretty well but not always well.
 
+Development tips:
+
+- There are two good ways to show a quick message to the users:
+  - 'alert' that shows on the screen and forces a click on "OK".
+  - 'new Notification' that shows an OS notification that disappears on it's own.
+
+
+
 
 #### Tooling
 

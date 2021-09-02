@@ -1,13 +1,17 @@
 import child_process from 'child_process';
 import Electron from 'electron';
 import * as R from 'ramda';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
 import URL from 'url';
 
 import { AppThunk, RootState } from '../../store';
 import { Cache, ResourceType, Source } from '../distnet/distnetClasses';
+import {
+  addDragDropListeners,
+  dispatchAddTaskListToSettings
+} from '../distnet/distnetSlice';
 import { findClosestUriForGlobalUri } from '../distnet/uriTools';
 import {
   clearForecastData,
@@ -91,12 +95,22 @@ export default function TaskListsTable() {
     distnet.settings.sources
   );
 
+  const droppableRef = useRef(null);
+  const addCallback = (filePath: string) =>
+    dispatchAddTaskListToSettings(filePath);
+  useEffect(() => {
+    const element = droppableRef.current; // all to make typechecking pass
+    if (element) {
+      addDragDropListeners(element, addCallback, dispatch);
+    }
+  });
+
   return (
     <div>
       <br />
       <br />
       <br />
-      <div>
+      <div ref={droppableRef}>
         {sourceActions(
           dispatch,
           distnet.cache,

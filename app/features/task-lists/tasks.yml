@@ -1,5 +1,6 @@
   - 1 allow drag of project file to add to settings
   - 1 allow selection of units for estimates (eg. 2^x, hours, days
+  - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
   - 70 1 add markdown parsing id:markdown:
     blocks: joplin
   - 70 1 test with Joplin id:joplin
