@@ -11,7 +11,7 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store'; // eslint-disable-line import/no-cycle
 import { Source } from '../distnet/distnetClasses';
-import { resourceTypesForUris } from '../distnet/distnetSlice';
+import { addDragDropListeners, resourceTypesForUris } from '../distnet/distnetSlice';
 import {
   dispatchAddHistoryToSettings,
   dispatchCountSearchable,
@@ -52,10 +52,11 @@ export default function Histories() {
   // histories.uriTree will be empty on initial load, before the paths are built
   const histories = useSelector((state: RootState) => state.histories);
 
+  const addCallback = (filePath) => dispatchAddHistoryToSettings(filePath);
   useEffect(() => {
     const element = droppableRef.current;
     if (element) {
-      addDragDropListeners(element, dispatch);
+      addDragDropListeners(element, addCallback, dispatch);
     }
   });
 
@@ -142,43 +143,6 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 // So these are to guard against those possibilities.
 let timestampOfLastDrop = 0;
 let lastFile = '';
-
-/**
- param operation takes a file path and adds it to settings the right way
- **/
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addDragDropListeners = (elem: HTMLElement, dispatch: Dispatch<any>) => {
-  // from https://www.geeksforgeeks.org/drag-and-drop-files-in-electronjs/
-
-  elem.addEventListener('drop', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!event.dataTransfer || event.dataTransfer.files.length !== 1) {
-      // Technically there's no problem adding more, but we should add more confirmations if they do this
-      // because the typical case is to only have one ID per repo. I worry about people dragging files by mistake.
-      alert('We only support adding one folder at a time.');
-    } else {
-      const filePath = event.dataTransfer.files[0].path;
-      if (
-        filePath === lastFile &&
-        new Date().getTime() - timestampOfLastDrop < 5000
-      ) {
-        console.log('Got a duplicate event: ', event);
-      } else {
-        timestampOfLastDrop = new Date().getTime();
-        lastFile = filePath;
-        dispatch(dispatchAddHistoryToSettings(filePath));
-      }
-    }
-  });
-
-  elem.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  });
-
-  // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
-};
 
 interface DirProps {
   name: string;

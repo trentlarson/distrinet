@@ -482,7 +482,7 @@ let timestampOfLastDrop = 0;
 let lastFile = '';
 
 /**
- param fileOp takes a file path and adds it to settings the right way
+ param callbackToDispatch takes a file path string, then a (dispatch, getState), meant for 'dispatch'
  **/
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addDragDropListeners = (

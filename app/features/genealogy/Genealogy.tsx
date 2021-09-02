@@ -118,12 +118,11 @@ function GenealogyView(options: TreeOption) {
   options.tree.getTree(rootUri);
 
   const droppableRef = useRef(null);
-  const callbackToDispatch =
-    (filePath: string) => setRootUri(`file://${filePath}`);
+  const addCallback = (filePath: string) => setRootUri(`file://${filePath}`);
   useEffect(() => {
     const element = droppableRef.current; // all to make typechecking pass
     if (element) {
-      addDragDropListeners(element, callbackToDispatch, dispatch);
+      addDragDropListeners(element, addCallback, dispatch);
     }
   });
 
