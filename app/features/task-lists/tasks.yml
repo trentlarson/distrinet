@@ -1,11 +1,16 @@
+  - 2 ask if they'd like to share on a search service :
+    - Kibana? Solr?
+    - server that only accepts IDs & public URLs, then loads that into file for search (check for yaml? size?)
+    - modal upon drag-drop to send data to server
   - 0 figure out why endorser.ch project forecast shows very small estimate
   - -1 allow selection of units for estimates (eg. 2^x, hours, days
+  - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
-  - 70 1 add markdown parsing id:markdown:
+  - 70 1 add markdown parsing id:markdown :
     blocks: joplin
   - 70 1 test with Joplin id:joplin
   - 70 0 expand dependents in top list (and avoid "Empty or mismatched" error)
-  - 70 0 show labels for subtasks
+  - 70 -1 look into subtasks for labels to make available
   - 70 0 show something different than ID for dependent tasks
   - 65 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
   - 60 1 when browsing external lists, detect internal task URLs
@@ -15,6 +20,7 @@
   - 60 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
   - 1 Add parsing of a global tag for the, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - 1 show items with the biggest estimates that include subtask estimates
+  - domains - Project Search, Forecast Generation
   - 55 1 handle when subtasks/dependents are missing
   - 55 -1 change well-known "key:value" keys to constants
   - 55 0 move 'ref' processing to parse YAML?

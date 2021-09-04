@@ -131,13 +131,13 @@ export default function TaskListsTable() {
           <div>
             <hr />
             <h4>
+              Forecast for&nbsp;
               {
                 R.find(
                   (s) => s.id === taskLists.forecastData.sourceId,
                   taskSources
                 )?.name
               }
-              &nbsp;Forecast
             </h4>
             <button
               type="button"
@@ -559,7 +559,6 @@ function oneTaskRow(
                 onClick={() => {
                   setListSourceIdsToShow([newUri]);
                   setFocusOnTaskId('');
-                  dispatch(retrieveForecast(newUri, hoursPerWeek, ''));
                 }}
               >
                 (visit)
@@ -594,7 +593,7 @@ function oneTaskRow(
                 );
               }}
             >
-              {areSubtasksExpanded ? '<' : '>'}
+              {areSubtasksExpanded ? '^' : 'V'}
               <span className={style.tooltiptext}>Subtasks</span>
             </button>
             {areSubtasksExpanded ? (
