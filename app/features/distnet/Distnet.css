@@ -11,10 +11,13 @@
 }
 
 .content {
+  padding-bottom: 50px;
+  padding-left: 20px;
+  padding-right: 20px;
   position: relative;
-  top: 200px;
-  width: 800px;
-  margin: 0 auto;
+  top: 50px;
+  width: 0 auto;
+  margin: 50 auto;
 }
 
 .btn {

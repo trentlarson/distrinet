@@ -79,19 +79,6 @@ Development tips:
 
 #### Tooling
 
-Current [sample app](https://github.com/trentlarson/distrinet) is built on the Electron framework.
-
-- Rejected frameworks:
-  - Node & React Native
-    - good because we use it for other projects
-    - unable to get it working for macos
-  - Flutter & Dart - immature, deskop for Mac in alpha
-    - final nail: my exception doesn't show the main.dart line (eg. when the config.yml file doesn't exist)
-    - Flutter & Kotlin?
-  - Node & Electron - doesn't target mobile
-  - Ionic - requires an account
-  - Local server via browser - not designed for mobile (most tools just serve files or PHP)
-
 - For delivery/connectivity
   - [Syncthing](syncthing.net), [Resilio](resilio.com), [BitTorrent](bittorrent.com), [Dropbox](dropbox.com), [Google Drive](www.google.com/drive), [Box](box.com), [OneDrive](onedrive.live.com), [Lightstreams](https://docs.lightstreams.network/products/smart-vault/getting-started/share-private-file-p2p)
   - [remoteStorage](https://remotestorage.io/)
@@ -122,6 +109,22 @@ Current [sample app](https://github.com/trentlarson/distrinet) is built on the E
     - connect.me (on Sovrin)
     - MetaMask.io (on Ethereum)
     - AralaPrism.io (on Cardano, not open-source)
+
+## Frameworks
+
+Electron
+
+Not:
+- Node & React Native
+  - good because we use it for other projects
+  - unable to get it working for macos
+- Flutter & Dart - immature, deskop for Mac in alpha
+  - final nail: my exception doesn't show the main.dart line (eg. when the config.yml file doesn't exist)
+  - Flutter & Kotlin?
+- Node & Electron - doesn't target mobile
+- Ionic - requires an account
+- Local server via browser - not designed for mobile (most tools just serve files or PHP)
+
 
 
 

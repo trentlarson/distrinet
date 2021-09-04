@@ -84,44 +84,7 @@ export default function Distnet() {
       </div>
 
       <div className={styles.content}>
-        Config file contents:
-        <textarea
-          rows={10}
-          cols={80}
-          value={distnet.settingsText || ''}
-          onChange={(event) => {
-            dispatch(dispatchSetSettingsTextAndYaml(event.target.value, false));
-          }}
-        />
-        <br />
-        Config file is located here:&nbsp;
-        <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
-          {SETTINGS_FILE}
-        </a>
-        <br />
-        <div>{settingsChangedMessage}</div>
-        <div>{settingsFullErrorMessage}</div>
-        <div>{settingsFullSaveErrorMessage}</div>
-        <button
-          className={styles.btn}
-          onClick={() => {
-            dispatch(dispatchLoadSettingsFromFile());
-          }}
-          data-tclass="btn"
-          type="button"
-        >
-          reload config
-        </button>
-        <button
-          className={styles.btn}
-          onClick={() => {
-            dispatch(dispatchSaveSettingsTextToFile());
-          }}
-          data-tclass="btn"
-          type="button"
-        >
-          save config
-        </button>
+
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (
           <table>
@@ -221,6 +184,45 @@ export default function Distnet() {
             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
             <li>{localStorageLength} characters of local storage data</li>
           </ul>
+
+          Config file contents:
+          <textarea
+            rows={10}
+            cols={80}
+            value={distnet.settingsText || ''}
+            onChange={(event) => {
+              dispatch(dispatchSetSettingsTextAndYaml(event.target.value, false));
+            }}
+          />
+          <br />
+          Config file is located here:&nbsp;
+          <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
+            {SETTINGS_FILE}
+          </a>
+          <br />
+          <div>{settingsChangedMessage}</div>
+          <div>{settingsFullErrorMessage}</div>
+          <div>{settingsFullSaveErrorMessage}</div>
+          <button
+            className={styles.btn}
+            onClick={() => {
+              dispatch(dispatchLoadSettingsFromFile());
+            }}
+            data-tclass="btn"
+            type="button"
+          >
+            reload config
+          </button>
+          <button
+            className={styles.btn}
+            onClick={() => {
+              dispatch(dispatchSaveSettingsTextToFile());
+            }}
+            data-tclass="btn"
+            type="button"
+          >
+            save config
+          </button>
         </div>
         <div>
           Advanced&nbsp;

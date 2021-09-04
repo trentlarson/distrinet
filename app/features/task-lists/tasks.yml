@@ -15,6 +15,7 @@
   - 65 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
   - 60 1 when browsing external lists, detect internal task URLs
   - 60 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
+  - 60 0 make forecast load async (and see why it reloads on project screen exit and reentry)
   - 60 0 show where a task fits in with the rest (ie. focus on it in the forecast)
   - 60 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
   - 60 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
