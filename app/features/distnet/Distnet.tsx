@@ -84,7 +84,6 @@ export default function Distnet() {
       </div>
 
       <div className={styles.content}>
-
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (
           <table>
@@ -100,7 +99,9 @@ export default function Distnet() {
                   {/* It's stupid how styles conflict. Try fix this, I dare you. */}
                   {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
                   1<sup>st</sup>
-                  URL Remote?
+                  &nbsp;URL
+                  <br />
+                  Remote?
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   In-Memory Data Date
@@ -171,7 +172,7 @@ export default function Distnet() {
           data-tclass="btn"
           type="button"
         >
-          reload cache
+          reload mem
         </button>
         <div>{cacheErrorMessage}</div>
         <div>
@@ -179,19 +180,20 @@ export default function Distnet() {
             <li>
               {distnet.cache &&
                 _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-              &nbsp;characters of cached data
+              &nbsp;characters in memory
             </li>
             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
             <li>{localStorageLength} characters of local storage data</li>
           </ul>
-
           Config file contents:
           <textarea
             rows={10}
             cols={80}
             value={distnet.settingsText || ''}
             onChange={(event) => {
-              dispatch(dispatchSetSettingsTextAndYaml(event.target.value, false));
+              dispatch(
+                dispatchSetSettingsTextAndYaml(event.target.value, false)
+              );
             }}
           />
           <br />
