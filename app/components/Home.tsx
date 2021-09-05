@@ -20,7 +20,7 @@ export default function Home(): JSX.Element {
       <br />
       <Link to={routes.TASK_LISTS}>to projects</Link>
       <br />
-      <Link to={routes.HELP}>help</Link>
+      <Link to={routes.HELP}>get helpful advice</Link>
       {/*
       <br />
       <Link to={routes.COUNTER}>to Counter</Link>

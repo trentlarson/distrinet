@@ -28,12 +28,20 @@ export default function HelpPage(): JSX.Element {
       <br />
       <h2>Help</h2>
 
+      <h3>What sync tools do you recommend?</h3>
+
+      There is a helpful <a onClick={() =>
+      require('electron').shell.openExternal('http://familyhistories.info/src-pages-sharing')}>
+      decision tree at FamilyHistories.info
+      </a>.
+
       <h3>Why isn't my data updating?</h3>
+
       Caching is on by default, so you might see old data. To refresh the cache,
       go to "distrinet settings" and click on "reload source", and if that fails
       then restart this whole app.
 
-      <h3>Why do I get the authentication error?</h3>
+      <h3>Why do I get the authentication error (especially in genealogies)?</h3>
 
       Some data sets require authentication, such as FamilySearch. To browse
       FamilySearch, you need to get your Session ID and paste it in on the
@@ -43,6 +51,14 @@ export default function HelpPage(): JSX.Element {
       the token page at FamilySearch.org</a>, log in, copy the token, and paste
       it in the <Link to={routes.GENEALOGY_SETTINGS}>"Settings" for the
       genealogy page</Link>.
+
+      <h3>Where do I find this app online?</h3>
+
+      <a onClick={() =>
+      require('electron').shell.openExternal('https://github.com/trentlarson/distrinet/')}>
+      Source code is here</a> with <a onClick={() =>
+      require('electron').shell.openExternal('https://github.com/trentlarson/distrinet/releases')}>
+      release builds here</a>.
 
       <h3>Advanced Help</h3>
       <button
