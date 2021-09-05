@@ -534,6 +534,8 @@ export const retrieveForecast = (
     body: JSON.stringify(forecastRequest),
   })
     .then((forecastResponse) => {
+      // Lint complains about nested promises but I don't know a better way to use the response body for either success or error.
+      // eslint-disable-next-line promise/no-nesting
       return forecastResponse.text().then((forecastString) => {
         if (!forecastResponse.ok) {
           // eslint-disable-next-line max-len

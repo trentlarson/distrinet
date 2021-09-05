@@ -74,6 +74,8 @@ export const loadOneSourceContents: (
           .readFile(sourceUrl, { encoding: 'utf8' })
           .then((contents) => {
             return (
+              // Lint complains about nested promises but I don't know a better way to work with contents.
+              // eslint-disable-next-line promise/no-nesting
               fsPromises
                 .stat(sourceUrl)
                 .then((stats) => {
