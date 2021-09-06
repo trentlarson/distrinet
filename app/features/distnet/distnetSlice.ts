@@ -380,6 +380,9 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
   return peerDid;
 }
 
+/**
+ Note that we've got this as a function
+ */
 export const generateKeyAndSet = (settings: Settings) => {
   const newSettings = _.cloneDeep(settings);
   const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
@@ -441,7 +444,7 @@ export const addDistrinetTaskSource = (settings: Settings) => {
   return newSettings;
 };
 
-export const testSettingsYaml = () => {
+export const testSettingsYaml = (appPath: string) => {
   const testSettings: Settings = {
     sources: [],
     resourceTypes: [],
@@ -451,7 +454,7 @@ export const testSettingsYaml = () => {
   /* eslint-disable prettier/prettier */
   /* eslint-disable prefer-template */
 
-  const basePath = path.join(electron.remote.app.getAppPath(), '..', 'test', 'features');
+  const basePath = path.join(appPath, '..', 'test', 'features');
   const genealogyPath = 'file://' + path.join(basePath, 'genealogy', 'sample-gedcomx-norman.json');
   const historiesPath = 'file://' + path.join(basePath, 'histories', 'sample-histories');
   const businessTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-business.yml');

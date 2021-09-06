@@ -27,7 +27,8 @@ import { globalUriScheme, isUriLocalhost } from './uriTools';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
-export default function Distnet() {
+export default function Distnet(options) {
+
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
   const settingsChangedMessage = distnet.settingsChanged ? (
@@ -90,7 +91,7 @@ export default function Distnet() {
             <thead>
               <tr>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Scheme
+                  IRI
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Name
@@ -114,7 +115,7 @@ export default function Distnet() {
             <tbody>
               {distnet.settings.sources.map((uriSource: Source) => (
                 <tr key={uriSource.id}>
-                  <td>{uriSource.id ? globalUriScheme(uriSource.id) : '?'}</td>
+                  <td>{uriSource.id || '?'}</td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
                     {uriSource.urls[0] && isUriLocalhost(uriSource.urls[0].url)
@@ -194,7 +195,7 @@ export default function Distnet() {
           <div>{settingsFullErrorMessage}</div>
           <div>{settingsFullSaveErrorMessage}</div>
           <button
-            className={styles.btn}
+            className={ styles.btn }
             onClick={() => {
               dispatch(dispatchLoadSettingsFromFile());
             }}
@@ -204,7 +205,7 @@ export default function Distnet() {
             reload config
           </button>
           <button
-            className={styles.btn}
+            className={ styles.btn }
             onClick={() => {
               dispatch(dispatchSaveSettingsTextToFile());
             }}
@@ -223,7 +224,7 @@ export default function Distnet() {
             <li>{localStorageLength} characters of local storage data</li>
           </ul>
           <button
-            className={styles.btn}
+            className={ styles.btn }
             onClick={() => dispatch(dispatchCacheForAll())}
             data-tclass="btn"
             type="button"
@@ -233,6 +234,7 @@ export default function Distnet() {
         </div>
         <div>
           <button
+            className='generateKeyButton'
             type="button"
             onClick={() => {
               let proceed = false;
@@ -283,7 +285,7 @@ export default function Distnet() {
                 );
               } else {
                 dispatch(
-                  dispatchSetSettingsTextAndYaml(testSettingsYaml(), false)
+                  dispatchSetSettingsTextAndYaml(testSettingsYaml(options.appPath), false)
                 );
               }
             }}
