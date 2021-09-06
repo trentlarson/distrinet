@@ -41,7 +41,7 @@ export const createCacheDir: () => Promise<void> = async () => {
 };
 
 /**
- * cacheDir is directory where cached data will be saved; defaults to DEFAULT_CACHE_DIR
+ * cacheDir is directory where cached data will be saved; it defaults to DEFAULT_CACHE_DIR
  * return CacheData for the first source URL that works, or null if none work (may update local file)
  */
 export const loadOneSourceContents: (

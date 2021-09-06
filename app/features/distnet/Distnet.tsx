@@ -101,7 +101,7 @@ export default function Distnet() {
                   1<sup>st</sup>
                   &nbsp;URL
                   <br />
-                  Remote?
+                  Remote
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   In-Memory Data Date
@@ -166,25 +166,13 @@ export default function Distnet() {
         ) : (
           <span />
         )}
-        <button
-          className={styles.btn}
-          onClick={() => dispatch(dispatchCacheForAll())}
-          data-tclass="btn"
-          type="button"
-        >
-          reload mem
-        </button>
         <div>{cacheErrorMessage}</div>
         <div>
-          <ul>
-            <li>
-              {distnet.cache &&
-                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-              &nbsp;characters in memory
-            </li>
-            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-            <li>{localStorageLength} characters of local storage data</li>
-          </ul>
+          <hr />
+          <h2>Advanced</h2>
+          <br />
+          <br />
+          <br />
           Config file contents:
           <textarea
             rows={10}
@@ -225,9 +213,25 @@ export default function Distnet() {
           >
             save config
           </button>
+          <ul>
+            <li>
+              {distnet.cache &&
+                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+              &nbsp;characters in memory
+            </li>
+            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+            <li>{localStorageLength} characters of local storage data</li>
+          </ul>
+          <button
+            className={styles.btn}
+            onClick={() => dispatch(dispatchCacheForAll())}
+            data-tclass="btn"
+            type="button"
+          >
+            reload mem
+          </button>
         </div>
         <div>
-          Advanced&nbsp;
           <button
             type="button"
             onClick={() => {
