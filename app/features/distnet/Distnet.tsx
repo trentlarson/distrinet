@@ -23,12 +23,15 @@ import {
   generateKeyAndSet,
   testSettingsYaml,
 } from './distnetSlice';
-import { globalUriScheme, isUriLocalhost } from './uriTools';
+import { isUriLocalhost } from './uriTools';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
-export default function Distnet(options) {
+interface AppInfo {
+  appPath: string;
+}
 
+export default function Distnet(options: AppInfo) {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
   const settingsChangedMessage = distnet.settingsChanged ? (
@@ -195,7 +198,7 @@ export default function Distnet(options) {
           <div>{settingsFullErrorMessage}</div>
           <div>{settingsFullSaveErrorMessage}</div>
           <button
-            className={ styles.btn }
+            className={styles.btn}
             onClick={() => {
               dispatch(dispatchLoadSettingsFromFile());
             }}
@@ -205,7 +208,7 @@ export default function Distnet(options) {
             reload config
           </button>
           <button
-            className={ styles.btn }
+            className={styles.btn}
             onClick={() => {
               dispatch(dispatchSaveSettingsTextToFile());
             }}
@@ -224,7 +227,7 @@ export default function Distnet(options) {
             <li>{localStorageLength} characters of local storage data</li>
           </ul>
           <button
-            className={ styles.btn }
+            className={styles.btn}
             onClick={() => dispatch(dispatchCacheForAll())}
             data-tclass="btn"
             type="button"
@@ -234,7 +237,7 @@ export default function Distnet(options) {
         </div>
         <div>
           <button
-            className='generateKeyButton'
+            className="generateKeyButton"
             type="button"
             onClick={() => {
               let proceed = false;
@@ -285,7 +288,10 @@ export default function Distnet(options) {
                 );
               } else {
                 dispatch(
-                  dispatchSetSettingsTextAndYaml(testSettingsYaml(options.appPath), false)
+                  dispatchSetSettingsTextAndYaml(
+                    testSettingsYaml(options.appPath),
+                    false
+                  )
                 );
               }
             }}
