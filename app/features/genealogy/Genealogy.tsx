@@ -353,6 +353,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
               };
               dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
               dispatch(dispatchSaveSettingsTextToFile());
+
               dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
 
               dispatch(setRootUri(settingsId));

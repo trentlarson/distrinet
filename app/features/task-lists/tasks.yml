@@ -1,10 +1,6 @@
-  - 2 ask if they'd like to share on a search service :
-    - Kibana? Solr?
-    - server that only accepts IDs & public URLs, then loads that into file for search (check for yaml? size?)
-    - modal upon drag-drop to send data to server
-  - 0 figure out why endorser.ch project forecast shows very small estimate
   - -1 allow selection of units for estimates (eg. 2^x, hours, days
   - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
+  - 1 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
   - 70 1 add markdown parsing id:markdown :
     blocks: joplin
@@ -19,14 +15,17 @@
   - 60 0 show where a task fits in with the rest (ie. focus on it in the forecast)
   - 60 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
   - 60 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
-  - 1 Add parsing of a global tag for the, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - 1 show items with the biggest estimates that include subtask estimates
   - domains - Project Search, Forecast Generation
   - 55 1 handle when subtasks/dependents are missing
   - 55 -1 change well-known "key:value" keys to constants
   - 55 0 move 'ref' processing to parse YAML?
   - 55 0 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
-  - refactor retrieveAllTasks to return Records instead of one large list
+  - 2 ask if they'd like to share on a search service :
+    - Kibana? Solr?
+    - server that only accepts IDs & public URLs, then loads that into file for search (check for yaml? size?)
+    - modal upon drag-drop to send data to server
+  - -1 refactor retrieveAllTasks to return Records instead of one large list
   - 50 -1 automatically create supertask if it doesn't exist
   - >-
     50 1 write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects
@@ -38,4 +37,4 @@
   - 45 1 work off SQLite
   - 40 2 Make an edit to a task list and ensure a collaborator can see it.
 
-  - 93 1 parse Orlin's project supertasks:supertasks
+  - 1 parse Orlin's project supertasks:supertasks
