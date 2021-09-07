@@ -12,9 +12,7 @@ import { RootState } from '../../store';
 import { Source } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
-  addSourceToSettings,
-  dispatchModifySettings,
-  dispatchSaveSettingsTextToFile,
+  dispatchAddGenealogyToSettings,
 } from '../distnet/distnetSlice';
 import uriTools from '../distnet/uriTools';
 import {
@@ -345,14 +343,12 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
           <button
             type="button"
             onClick={() => {
-              // This is similar to the process in historySlice.dispatchAddHistoryToSettings
               const newSource = {
                 id: settingsId,
                 name: settingsName,
                 urls: [{ url: settingsUrl }],
               };
-              dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-              dispatch(dispatchSaveSettingsTextToFile());
+              dispatch(dispatchAddGenealogyToSettings(newSource));
 
               dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
 

@@ -529,7 +529,7 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
-const dispatchCreateSourceAndAddToSettings = (
+const dispatchBuildSourceAndAddToSettings = (
   prefix: string,
   filePath: string
 ): AppThunk => async (dispatch, getState) => {
@@ -561,14 +561,20 @@ const dispatchAddToSettings = (
     dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
     dispatch(dispatchSaveSettingsTextToFile());
     dispatch(dispatchReloadCacheForId(newSource.id));
-    alert('Added that source.');
+    new Notification('Added', {
+      body: `Added that source.`,
+      silent: true,
+    });
   }
 };
 
+export const dispatchAddGenealogyToSettings = (newSource: Source) =>
+  dispatchAddToSettings(newSource);
+
 export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchCreateSourceAndAddToSettings('histories', filePath);
+  dispatchBuildSourceAndAddToSettings('histories', filePath);
 
 export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchCreateSourceAndAddToSettings('taskyaml', filePath);
+  dispatchBuildSourceAndAddToSettings('taskyaml', filePath);
 
 export default distnetSlice.reducer;
