@@ -100,7 +100,7 @@ export default function TaskListsTable() {
   const addCallback = async (filePath: string) => {
     await dispatch(dispatchAddTaskListToSettings(filePath));
     await dispatch(dispatchLoadAllSourcesIntoTasks());
-  }
+  };
   useEffect(() => {
     const element = droppableRef.current; // all to make typechecking pass
     if (element) {

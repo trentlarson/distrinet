@@ -529,24 +529,11 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
-const dispatchBuildSourceAndAddToSettings = (
-  prefix: string,
-  filePath: string
-): AppThunk => async (dispatch, _2) => {
-  const fileUrl = `file://${filePath}`;
-  const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
-  const newId = `${prefix}:${newPath}`;
-  const newSource = {
-    id: newId,
-    urls: [{ url: fileUrl }],
-  };
-  await dispatch(dispatchAddToSettings(newSource));
-}
-
 // This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
-const dispatchAddToSettings = (
-  newSource: Source
-): AppThunk => async (dispatch, getState) => {
+const dispatchAddToSettings = (newSource: Source): AppThunk => async (
+  dispatch,
+  getState
+) => {
   const alreadyInSource: Source | undefined = R.find(
     (s) =>
       R.contains(
@@ -561,11 +548,26 @@ const dispatchAddToSettings = (
     await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
     await dispatch(dispatchSaveSettingsTextToFile());
     await dispatch(dispatchReloadCacheForId(newSource.id));
+    // eslint-disable-next-line no-new
     new Notification('Added', {
       body: `Added that source.`,
       silent: true,
     });
   }
+};
+
+const dispatchBuildSourceAndAddToSettings = (
+  prefix: string,
+  filePath: string
+): AppThunk => async (dispatch) => {
+  const fileUrl = `file://${filePath}`;
+  const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
+  const newId = `${prefix}:${newPath}`;
+  const newSource = {
+    id: newId,
+    urls: [{ url: fileUrl }],
+  };
+  await dispatch(dispatchAddToSettings(newSource));
 };
 
 export const dispatchAddGenealogyToSettings = (newSource: Source) =>

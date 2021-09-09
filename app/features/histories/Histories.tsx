@@ -133,9 +133,7 @@ export default function Histories() {
             )
           )}
         </ul>
-        <div>
-          * = found results
-        </div>
+        <div>* = found results</div>
       </div>
     </div>
   );
