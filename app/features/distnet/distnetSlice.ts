@@ -532,7 +532,7 @@ export const addDragDropListeners = (
 const dispatchBuildSourceAndAddToSettings = (
   prefix: string,
   filePath: string
-): AppThunk => async (dispatch, getState) => {
+): AppThunk => async (dispatch, _2) => {
   const fileUrl = `file://${filePath}`;
   const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
   const newId = `${prefix}:${newPath}`;
@@ -540,7 +540,7 @@ const dispatchBuildSourceAndAddToSettings = (
     id: newId,
     urls: [{ url: fileUrl }],
   };
-  dispatch(dispatchAddToSettings(newSource));
+  await dispatch(dispatchAddToSettings(newSource));
 }
 
 // This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
@@ -558,9 +558,9 @@ const dispatchAddToSettings = (
   if (alreadyInSource) {
     alert(`That path already exists in source ${alreadyInSource.id}`);
   } else {
-    dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-    dispatch(dispatchSaveSettingsTextToFile());
-    dispatch(dispatchReloadCacheForId(newSource.id));
+    await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+    await dispatch(dispatchSaveSettingsTextToFile());
+    await dispatch(dispatchReloadCacheForId(newSource.id));
     new Notification('Added', {
       body: `Added that source.`,
       silent: true,

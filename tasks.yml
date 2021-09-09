@@ -1,16 +1,47 @@
-tasks:
-  - get version call that works
-  - add link to download release
-  - remove the "urls" arrays & just make a single url (because the rare case of preserving my copy different from some external copy can be modeled differently) :
+tasks :
+
+  - 0 set to test settings, refresh on main page, drag-drop on task-lists, click 'show', don't see list
+  - -1 drag-drop of misbach after a test settings file throws error
+  - -2 move genealogy/history/task-list-specific code out of distnet
+
+  - 2 move the settings IDs to a .well-known directory id:well-known :
+    - on settings creation, write to the .well-known dir, with a .iri file
+    - on settings read, read from the .well-known dir for the localUrl
+    - on settings change
+    - when a diff is detected, make sure there are big warnings if the .iri is changed.
+    - remove 'id' from settings
+    - backup the .well-known directory in history ref:#history
+  - 1 rename the "urls" arrays to "otherUrls" :
     - migrate existing settings for current users
-  - documentation - Google Drive vs Backup
-  - distrinet write tests for many setting new settings (to ensure we don't erase settings)
-  - encrypt private key
+
+  - 2 save another local copy of files to track what is most recently seen id:#history
+    - one file first
+      - for git & Syncthing, don't copy but rather look into .stfolder for history
+        - ... except for the .well-known/*.iri file(s), if ref:#well-known is done
+      - create directory (with any name, maybe based on name of the IRI)
+      - store that local directory name in settings in the app "history" directory
+    - when parsing, ensure IRIs are unique
+    - add a column to show if there's a difference from last seen
+    - add a button to update the most recent (ie. mark as seen)
+    - add a diff function for history
+
+  - 1 save the local copy (for a given remote URL) only... on setting? :
+    - show if there's a difference in the local copy
+    - if we ever edit local copy :
+      - we retrieve latest from remote & compare to remote
+
+  - 0 get version call that works for packaged app
+
+  - -1 documentation - Google Drive vs Backup
+  - -1 distrinet write tests for many setting new settings (to ensure we don't erase settings)
+  - 0 encrypt private key
   - 90 1 create list-source directory file that points at other lists of sources
+  - 1 button to show memory used by copies (and sources)
   - '90 0 show cached time, both file & memory'
   - >-
     90 0 write version of reloadOneSourceIntoCache that only loads local files
     if the timestamp has changed
+  - 1 show tasks as bubbles to visualize the biggest
   - '85 1 define a place for backups, including settings.yml'
   - 80 2 change internal settings format = sources & credentials into objects
   - '80 -1 more settings sanity-checking, eg. no duplicate IDs, valid URLs'

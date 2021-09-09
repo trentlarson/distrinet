@@ -17,6 +17,7 @@ import {
   clearForecastData,
   DEFAULT_HOURS_PER_WEEK,
   DEFAULT_TASK_COMMENT,
+  dispatchLoadAllSourcesIntoTasks,
   dispatchLoadOneSourceIntoTasks,
   dispatchToggleDependentExpansionUi,
   dispatchToggleSubtaskExpansionUi,
@@ -96,8 +97,10 @@ export default function TaskListsTable() {
   );
 
   const droppableRef = useRef(null);
-  const addCallback = (filePath: string) =>
-    dispatchAddTaskListToSettings(filePath);
+  const addCallback = async (filePath: string) => {
+    await dispatch(dispatchAddTaskListToSettings(filePath));
+    await dispatch(dispatchLoadAllSourcesIntoTasks());
+  }
   useEffect(() => {
     const element = droppableRef.current; // all to make typechecking pass
     if (element) {
