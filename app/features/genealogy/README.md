@@ -22,7 +22,13 @@ The goal, of course, is to read many genealogy formats, but the first examples a
 
 To test:
 
-- UI Genealogy Samples:
+- Start from a known state:
+  - Go to "genealogy" and "Genealogy Settings" and click the "clear" button.
+
+- Then use test settings:
+  - gedcomx:my-local-test:test-sample-norman#KWHH-HSW
+
+- UI Genealogy Samples (from our programmers' private data):
   - Get `fssessionid` and start with `FSSESSIONID=... yarn dev` or fill in on page.
   - file:///Users/tlarson/dev/home/distrinet/test/features/genealogy/sample-gedcomx.json#thomas-iii
     - Shows Thomas, and external link goes to FamilySearch with image.

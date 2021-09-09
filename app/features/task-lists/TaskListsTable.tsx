@@ -113,6 +113,11 @@ export default function TaskListsTable() {
       <br />
       <br />
       <br />
+      <div className="container">
+        <h2 className="title">Shared Projects</h2>
+      </div>
+      <br />
+      <br />
       <div ref={droppableRef}>
         {sourceActions(
           dispatch,

@@ -1,7 +1,5 @@
 tasks :
 
-  - 0 set to test settings, refresh on main page, drag-drop on task-lists, click 'show', don't see list
-  - -1 drag-drop of misbach after a test settings file throws error
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 2 move the settings IDs to a .well-known directory id:well-known :

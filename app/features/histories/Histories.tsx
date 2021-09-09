@@ -71,8 +71,11 @@ export default function Histories() {
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
       </div>
-      <div className={styles.sign} data-tid="sign">
-        Histories
+      <div className="container">
+        <br />
+        <br />
+        <br />
+        <h2>Shared Histories</h2>
       </div>
       <div className={styles.histories}>
         <div>
@@ -130,6 +133,9 @@ export default function Histories() {
             )
           )}
         </ul>
+        <div>
+          * = found results
+        </div>
       </div>
     </div>
   );

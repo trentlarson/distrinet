@@ -112,6 +112,7 @@ const taskListsSlice = createSlice({
   name: 'taskLists',
   initialState: {
     allLists: {} as Record<string, Array<YamlTask>>,
+    // 'display' is a record of which tasks have expanded subtasks or dependent tasks
     display: {} as Record<string, Array<UiTree>>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
   },

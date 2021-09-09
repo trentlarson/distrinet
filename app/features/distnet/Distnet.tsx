@@ -85,6 +85,7 @@ export default function Distnet(options: AppInfo) {
         <Link to={routes.HOME}>
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
+        <h2>Settings</h2>
       </div>
 
       <div className={styles.content}>

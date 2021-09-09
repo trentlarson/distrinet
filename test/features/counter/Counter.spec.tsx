@@ -38,7 +38,7 @@ function setup(
 }
 
 describe('Counter component', () => {
-  it('should should display count', () => {
+  it('should display count', () => {
     const { p } = setup();
     expect(p.text()).toMatch(/^1$/);
   });

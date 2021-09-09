@@ -90,7 +90,7 @@ export default function Genealogy() {
       </div>
 
       <div className="container">
-        <h2 className="title">Decentralized Tree</h2>
+        <h2 className="title">Shared Tree</h2>
         <Link to={routes.GENEALOGY_SETTINGS}>Genealogy Settings</Link>
         <hr className="hr" />
         <GenealogyView tree={treeFun} />
