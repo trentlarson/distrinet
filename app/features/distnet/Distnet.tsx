@@ -207,7 +207,7 @@ export default function Distnet(options: AppInfo) {
             data-tclass="btn"
             type="button"
           >
-            reload config
+            load from file
           </button>
           <button
             className={styles.btn}
@@ -219,7 +219,11 @@ export default function Distnet(options: AppInfo) {
             data-tclass="btn"
             type="button"
           >
-            apply config
+            &nbsp;
+            <br />
+            apply
+            <br />
+            &nbsp;
           </button>
           <button
             className={styles.btn}
@@ -229,24 +233,11 @@ export default function Distnet(options: AppInfo) {
             data-tclass="btn"
             type="button"
           >
-            apply & save
-          </button>
-          <ul>
-            <li>
-              {distnet.cache &&
-                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
-              &nbsp;characters in memory
-            </li>
-            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-            <li>{localStorageLength} characters of local storage data</li>
-          </ul>
-          <button
-            className={styles.btn}
-            onClick={() => dispatch(dispatchCacheForAll())}
-            data-tclass="btn"
-            type="button"
-          >
-            reload mem
+            apply
+            <br />
+            &
+            <br />
+            save
           </button>
         </div>
         <div>
@@ -311,6 +302,25 @@ export default function Distnet(options: AppInfo) {
             }}
           >
             Reset to Test Settings
+          </button>
+        </div>
+        <div>
+          <ul>
+            <li>
+              {distnet.cache &&
+                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+              &nbsp;characters in memory
+            </li>
+            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+            <li>{localStorageLength} characters of local storage data</li>
+          </ul>
+          <button
+            className={styles.btn}
+            onClick={() => dispatch(dispatchCacheForAll())}
+            data-tclass="btn"
+            type="button"
+          >
+            reload mem
           </button>
         </div>
       </div>
