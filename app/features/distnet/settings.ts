@@ -69,15 +69,18 @@ export async function saveIriToWellKnownDir(
       if (s.isDirectory()) {
         wellKnownDirExists = true;
       } else {
-        throw Error(`The .well-known location exists but is not a directory here: ${containingDir}`)
+        throw Error(
+          `The .well-known location exists but is not a directory here: ${containingDir}`
+        );
       }
+      return null;
     })
     .catch((err) => {
       // just continue, expecting that it doesn't exist and we should create it
       if (err.message && err.message.startsWith('ENOENT')) {
         // it doesn't exist, so we're good to continue
       } else {
-        throw err
+        throw err;
       }
     });
   if (!wellKnownDirExists) {
@@ -86,12 +89,13 @@ export async function saveIriToWellKnownDir(
   const iriFullPath = path.join(wellKnownDir, finalIriFile);
   await fsPromises
     .stat(iriFullPath)
-    .then((s) => {
+    .then(() => {
       // something already exists, so that's not good
-      throw Error(`The IRI file already exists here: ${iriFullPath}`)
+      throw Error(`The IRI file already exists here: ${iriFullPath}`);
     })
-    .catch((err) => {
+    .catch(() => {
       // continue, knowing that we'll create it
     });
   await fsPromises.writeFile(iriFullPath, iri);
+  return null;
 }

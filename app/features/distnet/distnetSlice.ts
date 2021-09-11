@@ -28,7 +28,7 @@ import {
 import {
   loadSettingsFromFile,
   saveSettingsToFile,
-  saveIriToWellKnownDir
+  saveIriToWellKnownDir,
 } from './settings';
 import uriTools from './uriTools';
 
@@ -541,10 +541,10 @@ export const addDragDropListeners = (
  param newSource must have unique location
  param iri (optional) must be unique, will be written to a file in the repo
  */
-const dispatchAddToSettings = (newSource: Source, iri: string): AppThunk => async (
-  dispatch,
-  getState
-) => {
+const dispatchAddToSettings = (
+  newSource: Source,
+  iri: string
+): AppThunk => async (dispatch, getState) => {
   const urlAlreadyInSource: Source | undefined = R.find(
     (s) =>
       R.contains(
@@ -558,13 +558,16 @@ const dispatchAddToSettings = (newSource: Source, iri: string): AppThunk => asyn
     getState().distnet.settings.sources
   );
   if (urlAlreadyInSource) {
-    alert(`That path already exists in source ${urlAlreadyInSource.id}`);
+    alert(
+      `That path ${newSource.urls[0].url} already exists in source ${urlAlreadyInSource.id}`
+    );
   } else if (iriAlreadyInSource) {
-    alert(`That path already exists in source ${urlAlreadyInSource.id}`);
+    alert(`The IRI ${iri} already exists in source ${iriAlreadyInSource.id}`);
   } else {
     await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
     await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
-    await dispatch(dispatchReloadCacheForId(newSource.id)); // if we don't await here then drag-drop addition to task-lists will fail to 'show' if you click it
+    // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
+    await dispatch(dispatchReloadCacheForId(newSource.id));
     saveIriToWellKnownDir(newSource.urls[0].url, iri);
     // eslint-disable-next-line no-new
     new Notification('Added', {
