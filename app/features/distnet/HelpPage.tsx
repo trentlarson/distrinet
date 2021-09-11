@@ -28,6 +28,10 @@ export default function HelpPage(): JSX.Element {
       <br />
       <h2>Help</h2>
 
+      <h3>How do I add my first source?</h3>
+
+      Go to your desired app (genealogy, history, or project) and drag the right kind of item onto it (respectively: GedcomX file, directory, or TaskYaml file). Note that you need move to an area where the green "plus" does not show.
+
       <h3>What sync tools do you recommend?</h3>
 
       There is a helpful <a onClick={() =>

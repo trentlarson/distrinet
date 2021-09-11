@@ -25,7 +25,11 @@ import {
   Settings,
   Source,
 } from './distnetClasses';
-import { loadSettingsFromFile, saveSettingsToFile } from './settings';
+import {
+  loadSettingsFromFile,
+  saveSettingsToFile,
+  saveIriToWellKnownDir
+} from './settings';
 import uriTools from './uriTools';
 
 interface SettingsEditor {
@@ -235,7 +239,7 @@ export const dispatchCacheForAll = (): AppThunk => async (
   return dispatch(setCachedStateForAll(result));
 };
 
-export const setSettingsTextForDispatch = (
+export const dispatchSetSettingsText = (
   contents: string,
   changedFromFile: boolean
 ): AppThunk => (dispatch) => {
@@ -247,7 +251,7 @@ export const dispatchSetSettingsTextAndYaml = (
   contents: string,
   changedFromFile: boolean
 ): AppThunk => (dispatch) => {
-  dispatch(setSettingsTextForDispatch(contents, changedFromFile));
+  dispatch(dispatchSetSettingsText(contents, changedFromFile));
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
@@ -418,7 +422,7 @@ export const dispatchModifySettings = (
   settingsEditor: SettingsEditor
 ): AppThunk => async (dispatch, getState) => {
   const newSettings = settingsEditor(getState().distnet.settings);
-  const settingsYaml = yaml.safeDump(newSettings);
+  const settingsYaml: string = yaml.safeDump(newSettings);
   dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, true));
 };
 
@@ -448,7 +452,7 @@ export const addDistrinetTaskSource = (settings: Settings) => {
   return newSettings;
 };
 
-export const testSettingsYaml = (appPath: string) => {
+export const testSettingsYamlText = (appPath: string): string => {
   const testSettings: Settings = {
     sources: [],
     resourceTypes: [],
@@ -533,12 +537,15 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
-// This is similar to the process in Genealogy.tsx when the "Add to your permanent settings" is clicked.
-const dispatchAddToSettings = (newSource: Source): AppThunk => async (
+/**
+ param newSource must have unique location
+ param iri (optional) must be unique, will be written to a file in the repo
+ */
+const dispatchAddToSettings = (newSource: Source, iri: string): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const alreadyInSource: Source | undefined = R.find(
+  const urlAlreadyInSource: Source | undefined = R.find(
     (s) =>
       R.contains(
         newSource.urls[0].url,
@@ -546,12 +553,19 @@ const dispatchAddToSettings = (newSource: Source): AppThunk => async (
       ),
     getState().distnet.settings.sources
   );
-  if (alreadyInSource) {
-    alert(`That path already exists in source ${alreadyInSource.id}`);
+  const iriAlreadyInSource: Source | undefined = R.find(
+    (s) => s.id === iri,
+    getState().distnet.settings.sources
+  );
+  if (urlAlreadyInSource) {
+    alert(`That path already exists in source ${urlAlreadyInSource.id}`);
+  } else if (iriAlreadyInSource) {
+    alert(`That path already exists in source ${urlAlreadyInSource.id}`);
   } else {
     await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
     await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
-    await dispatch(dispatchReloadCacheForId(newSource.id));
+    await dispatch(dispatchReloadCacheForId(newSource.id)); // if we don't await here then drag-drop addition to task-lists will fail to 'show' if you click it
+    saveIriToWellKnownDir(newSource.urls[0].url, iri);
     // eslint-disable-next-line no-new
     new Notification('Added', {
       body: `Added that source.`,
@@ -571,11 +585,11 @@ const dispatchBuildSourceAndAddToSettings = (
     id: newId,
     urls: [{ url: fileUrl }],
   };
-  await dispatch(dispatchAddToSettings(newSource));
+  await dispatch(dispatchAddToSettings(newSource, newSource.id));
 };
 
 export const dispatchAddGenealogyToSettings = (newSource: Source) =>
-  dispatchAddToSettings(newSource);
+  dispatchAddToSettings(newSource, newSource.id);
 
 export const dispatchAddHistoryToSettings = (filePath: string) =>
   dispatchBuildSourceAndAddToSettings('histories', filePath);

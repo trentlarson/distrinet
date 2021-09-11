@@ -21,8 +21,8 @@ import {
   dispatchSaveSettingsTextToFileAndResetInternally,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
-  setSettingsTextForDispatch,
-  testSettingsYaml,
+  dispatchSetSettingsText,
+  testSettingsYamlText,
 } from './distnetSlice';
 import { isUriLocalhost } from './uriTools';
 
@@ -187,7 +187,7 @@ export default function Distnet(options: AppInfo) {
             cols={80}
             value={distnet.settingsText || ''}
             onChange={(event) => {
-              dispatch(setSettingsTextForDispatch(event.target.value, true));
+              dispatch(dispatchSetSettingsText(event.target.value, true));
             }}
           />
           <br />
@@ -293,8 +293,8 @@ export default function Distnet(options: AppInfo) {
                 );
               } else {
                 dispatch(
-                  dispatchSetSettingsTextAndYaml(
-                    testSettingsYaml(options.appPath),
+                  dispatchSetSettingsText(
+                    testSettingsYamlText(options.appPath),
                     true
                   )
                 );
