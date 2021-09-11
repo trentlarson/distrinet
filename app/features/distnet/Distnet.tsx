@@ -19,9 +19,9 @@ import {
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
   dispatchSaveSettingsTextToFileAndResetInternally,
-  dispatchSetSettingsText,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
+  setSettingsTextForDispatch,
   testSettingsYaml,
 } from './distnetSlice';
 import { isUriLocalhost } from './uriTools';
@@ -186,8 +186,8 @@ export default function Distnet(options: AppInfo) {
             rows={10}
             cols={80}
             value={distnet.settingsText || ''}
-            onChange={() => {
-              dispatch(dispatchSetSettingsText(event.target.value));
+            onChange={(event) => {
+              dispatch(setSettingsTextForDispatch(event.target.value, true));
             }}
           />
           <br />
@@ -213,7 +213,7 @@ export default function Distnet(options: AppInfo) {
             className={styles.btn}
             onClick={() => {
               dispatch(
-                dispatchSetSettingsTextAndYaml(distnet.settingsText, true)
+                dispatchSetSettingsTextAndYaml(distnet.settingsText || '', true)
               );
             }}
             data-tclass="btn"

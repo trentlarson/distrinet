@@ -53,6 +53,7 @@ const distnetSlice = createSlice({
     },
     setSettingsStateObject: (state, contents: Payload<Settings>) => {
       state.settings = contents.payload;
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       state.settingsErrorMessage = checkSettings(contents.payload);
     },
     setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
@@ -63,11 +64,11 @@ const distnetSlice = createSlice({
     },
     setCachedStateForAll: (state, result: Payload<Array<CacheData>>) => {
       const newData: Array<CacheData> = result.payload;
-      //console.log('Refreshing cache from', newData);
+      // console.log('Refreshing cache from', newData);
       for (let i = 0; i < newData.length; i += 1) {
         state.cache[newData[i].sourceId] = newData[i];
       }
-      //console.log('Finished refreshing memory cache results for: ', newData);
+      // console.log('Finished refreshing memory cache results for: ', newData);
     },
     setCachedStateForOne: (state, result: Payload<CacheData>) => {
       state.cache[result.payload.sourceId] = result.payload;
@@ -234,19 +235,19 @@ export const dispatchCacheForAll = (): AppThunk => async (
   return dispatch(setCachedStateForAll(result));
 };
 
-export const dispatchSetSettingsText = (
-  contents: string
+export const setSettingsTextForDispatch = (
+  contents: string,
+  changedFromFile: boolean
 ): AppThunk => (dispatch) => {
   dispatch(setSettingsStateText(contents));
-  dispatch(setSettingsChanged(true));
+  dispatch(setSettingsChanged(changedFromFile));
 };
 
 export const dispatchSetSettingsTextAndYaml = (
   contents: string,
   changedFromFile: boolean
 ): AppThunk => (dispatch) => {
-  dispatch(setSettingsStateText(contents));
-  dispatch(setSettingsChanged(changedFromFile));
+  dispatch(setSettingsTextForDispatch(contents, changedFromFile));
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
@@ -332,9 +333,7 @@ export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => 
   }
 };
 
-const addSourceToSettings = (newSource: Source) => (
-  settings: Settings
-) => {
+const addSourceToSettings = (newSource: Source) => (settings: Settings) => {
   const newSettings = R.clone(settings);
   newSettings.sources = R.append(newSource, newSettings.sources);
   return newSettings;
