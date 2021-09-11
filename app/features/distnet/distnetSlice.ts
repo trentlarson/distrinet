@@ -33,6 +33,62 @@ interface SettingsEditor {
   (settings: Settings): Settings;
 }
 
+const distnetSlice = createSlice({
+  name: 'distnet',
+  initialState: {
+    settings: { sources: [], resourceTypes: [], credentials: [] },
+    settingsChanged: false,
+    settingsErrorMessage: null,
+    settingsText: null,
+    settingsSaveErrorMessage: null,
+    cache: {},
+    cacheErrorMessage: null,
+  } as DistnetState,
+  reducers: {
+    setSettingsChanged: (state, contents: Payload<boolean>) => {
+      state.settingsChanged = contents.payload;
+    },
+    setSettingsStateText: (state, contents: Payload<string>) => {
+      state.settingsText = contents.payload;
+    },
+    setSettingsStateObject: (state, contents: Payload<Settings>) => {
+      state.settings = contents.payload;
+      state.settingsErrorMessage = checkSettings(contents.payload);
+    },
+    setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
+      state.settingsErrorMessage = contents.payload;
+    },
+    setSettingsSaveErrorMessage: (state, contents: Payload<string | null>) => {
+      state.settingsSaveErrorMessage = contents.payload;
+    },
+    setCachedStateForAll: (state, result: Payload<Array<CacheData>>) => {
+      const newData: Array<CacheData> = result.payload;
+      //console.log('Refreshing cache from', newData);
+      for (let i = 0; i < newData.length; i += 1) {
+        state.cache[newData[i].sourceId] = newData[i];
+      }
+      //console.log('Finished refreshing memory cache results for: ', newData);
+    },
+    setCachedStateForOne: (state, result: Payload<CacheData>) => {
+      state.cache[result.payload.sourceId] = result.payload;
+    },
+    setCacheErrorMessage: (state, result: Payload<string>) => {
+      state.cacheErrorMessage = result.payload;
+    },
+  },
+});
+
+const {
+  setCachedStateForAll,
+  setCachedStateForOne,
+  setCacheErrorMessage,
+  setSettingsChanged,
+  setSettingsErrorMessage,
+  setSettingsSaveErrorMessage,
+  setSettingsStateObject,
+  setSettingsStateText,
+} = distnetSlice.actions;
+
 function isSettings(
   // eslint-disable-next-line @typescript-eslint/ban-types
   contents: string | object | undefined
@@ -75,64 +131,6 @@ function checkSettings(loaded: Settings): string | null {
   }
   return null;
 }
-
-const distnetSlice = createSlice({
-  name: 'distnet',
-  initialState: {
-    settings: { sources: [], resourceTypes: [], credentials: [] },
-    settingsChanged: false,
-    settingsErrorMessage: null,
-    settingsText: null,
-    settingsSaveErrorMessage: null,
-    cache: {},
-    cacheErrorMessage: null,
-  } as DistnetState,
-  reducers: {
-    setSettingsChanged: (state, contents: Payload<boolean>) => {
-      state.settingsChanged = contents.payload;
-    },
-    setSettingsStateText: (state, contents: Payload<string>) => {
-      state.settingsText = contents.payload;
-    },
-    setSettingsStateObject: (state, contents: Payload<Settings>) => {
-      state.settings = contents.payload;
-      console.log('New distnet settings object:\n', contents.payload);
-      state.settingsErrorMessage = checkSettings(contents.payload);
-    },
-    setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
-      state.settingsErrorMessage = contents.payload;
-    },
-    setSettingsSaveErrorMessage: (state, contents: Payload<string | null>) => {
-      state.settingsSaveErrorMessage = contents.payload;
-    },
-    setCachedStateForAll: (state, result: Payload<Array<CacheData>>) => {
-      const newData: Array<CacheData> = result.payload;
-      console.log('Refreshing cache from', newData);
-      for (let i = 0; i < newData.length; i += 1) {
-        state.cache[newData[i].sourceId] = newData[i];
-      }
-      console.log('Finished refreshing memory cache results for all sources.');
-    },
-    setCachedStateForOne: (state, result: Payload<CacheData>) => {
-      state.cache[result.payload.sourceId] = result.payload;
-      console.log('Cached to memory the payload for', result.payload.sourceId);
-    },
-    setCacheErrorMessage: (state, result: Payload<string>) => {
-      state.cacheErrorMessage = result.payload;
-    },
-  },
-});
-
-const {
-  setCachedStateForAll,
-  setCachedStateForOne,
-  setCacheErrorMessage,
-  setSettingsChanged,
-  setSettingsErrorMessage,
-  setSettingsSaveErrorMessage,
-  setSettingsStateObject,
-  setSettingsStateText,
-} = distnetSlice.actions;
 
 let resetStateMethods: Array<ActionCreatorWithoutPayload<string>> = [];
 
@@ -236,12 +234,19 @@ export const dispatchCacheForAll = (): AppThunk => async (
   return dispatch(setCachedStateForAll(result));
 };
 
-export const dispatchSetSettingsTextAndYaml = (
-  contents: string,
-  sameAsFile: boolean
+export const dispatchSetSettingsText = (
+  contents: string
 ): AppThunk => (dispatch) => {
   dispatch(setSettingsStateText(contents));
-  dispatch(setSettingsChanged(!sameAsFile));
+  dispatch(setSettingsChanged(true));
+};
+
+export const dispatchSetSettingsTextAndYaml = (
+  contents: string,
+  changedFromFile: boolean
+): AppThunk => (dispatch) => {
+  dispatch(setSettingsStateText(contents));
+  dispatch(setSettingsChanged(changedFromFile));
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
@@ -278,7 +283,7 @@ export const dispatchLoadSettingsFromFile = (): AppThunk => async (
   if (isError(result)) {
     dispatch(setSettingsErrorMessage(result.error));
   } else {
-    dispatch(dispatchSetSettingsTextAndYaml(result, true));
+    dispatch(dispatchSetSettingsTextAndYaml(result, false));
   }
 };
 
@@ -298,7 +303,7 @@ export const dispatchLoadSettingsAndCacheIfEmpty = (
   resetStateMethods = methodsThatResetState;
 };
 
-export const dispatchSaveSettingsTextToFile = (): AppThunk => async (
+export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => async (
   dispatch,
   getState
 ) => {
@@ -321,13 +326,13 @@ export const dispatchSaveSettingsTextToFile = (): AppThunk => async (
     if (result && result.error) {
       dispatch(setSettingsSaveErrorMessage(result.error));
     } else {
-      dispatch(dispatchSetSettingsTextAndYaml(settingsText, true));
+      dispatch(dispatchSetSettingsTextAndYaml(settingsText, false));
       dispatch(setSettingsSaveErrorMessage(null));
     }
   }
 };
 
-export const addSourceToSettings = (newSource: Source) => (
+const addSourceToSettings = (newSource: Source) => (
   settings: Settings
 ) => {
   const newSettings = R.clone(settings);
@@ -415,7 +420,7 @@ export const dispatchModifySettings = (
 ): AppThunk => async (dispatch, getState) => {
   const newSettings = settingsEditor(getState().distnet.settings);
   const settingsYaml = yaml.safeDump(newSettings);
-  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, false));
+  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, true));
 };
 
 export const addDistrinetTaskSource = (settings: Settings) => {
@@ -546,7 +551,7 @@ const dispatchAddToSettings = (newSource: Source): AppThunk => async (
     alert(`That path already exists in source ${alreadyInSource.id}`);
   } else {
     await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
-    await dispatch(dispatchSaveSettingsTextToFile());
+    await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
     await dispatch(dispatchReloadCacheForId(newSource.id));
     // eslint-disable-next-line no-new
     new Notification('Added', {

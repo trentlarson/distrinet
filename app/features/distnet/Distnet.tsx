@@ -18,7 +18,8 @@ import {
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
-  dispatchSaveSettingsTextToFile,
+  dispatchSaveSettingsTextToFileAndResetInternally,
+  dispatchSetSettingsText,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
   testSettingsYaml,
@@ -173,6 +174,8 @@ export default function Distnet(options: AppInfo) {
         )}
         <div>{cacheErrorMessage}</div>
         <div>
+          <br />
+          <br />
           <hr />
           <h2>Advanced</h2>
           <br />
@@ -183,10 +186,8 @@ export default function Distnet(options: AppInfo) {
             rows={10}
             cols={80}
             value={distnet.settingsText || ''}
-            onChange={(event) => {
-              dispatch(
-                dispatchSetSettingsTextAndYaml(event.target.value, false)
-              );
+            onChange={() => {
+              dispatch(dispatchSetSettingsText(event.target.value));
             }}
           />
           <br />
@@ -211,12 +212,24 @@ export default function Distnet(options: AppInfo) {
           <button
             className={styles.btn}
             onClick={() => {
-              dispatch(dispatchSaveSettingsTextToFile());
+              dispatch(
+                dispatchSetSettingsTextAndYaml(distnet.settingsText, true)
+              );
             }}
             data-tclass="btn"
             type="button"
           >
-            save config
+            apply config
+          </button>
+          <button
+            className={styles.btn}
+            onClick={() => {
+              dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
+            }}
+            data-tclass="btn"
+            type="button"
+          >
+            apply & save
           </button>
           <ul>
             <li>
@@ -291,7 +304,7 @@ export default function Distnet(options: AppInfo) {
                 dispatch(
                   dispatchSetSettingsTextAndYaml(
                     testSettingsYaml(options.appPath),
-                    false
+                    true
                   )
                 );
               }
