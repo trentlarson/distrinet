@@ -265,7 +265,7 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
 ) => {
   if (R.isEmpty(getState().histories.uriTree)) {
     const historySources = R.filter(
-      (s) => s.id.startsWith('histories:'),
+      (s) => s.id && s.id.startsWith('histories:'),
       getState().distnet.settings.sources
     );
     const uriAndTreePromises: Array<Promise<UriAndTree | null>> = historySources.map(

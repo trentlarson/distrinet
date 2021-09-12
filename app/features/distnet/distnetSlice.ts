@@ -265,7 +265,16 @@ const convertSourceToInternalFromStorage = async (
   source: sourceForStorage
 ): sourceInternal => {
   const sourceInt = R.clone(source);
-  sourceInt.id = await readIriFromWellKnownDir(sourceInt.urls[0].url);
+  sourceInt.id =
+    await readIriFromWellKnownDir(sourceInt.urls[0].url)
+    .catch((err) => {
+      if (err.message && err.message.startsWith('ENOENT')) {
+        // it doesn't exist, but that's OK
+        return null;
+      } else {
+        throw err;
+      }
+    });
   return sourceInt;
 }
 
