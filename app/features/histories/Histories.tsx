@@ -10,7 +10,7 @@ import url, { URLSearchParams, fileURLToPath } from 'url';
 
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store'; // eslint-disable-line import/no-cycle
-import { Source } from '../distnet/distnetClasses';
+import { SourceInternal } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
   dispatchAddHistoryToSettings,
@@ -147,7 +147,7 @@ function isSearchingVisible(historiesIsSearching: SearchProgress) {
 
 interface DirProps {
   name: string;
-  source: Source;
+  source: SourceInternal;
   tree: FileTree;
   treePath: Array<string>;
 }

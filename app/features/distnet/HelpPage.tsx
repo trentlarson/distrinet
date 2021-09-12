@@ -28,7 +28,18 @@ export default function HelpPage(): JSX.Element {
       <br />
       <h2>Help</h2>
 
-      <h3>How do I add my first source?</h3>
+      <h3>What am I supposed to do with this?</h3>
+
+      Funny you should ask... there aren't many people who stumble here without some instructions from a friend... but try this test data:
+      <ul>
+        <li>Go back to the main screen and then to "settings", click "Reset to Test Settings", and then "apply".</li>
+        <li>From the main screen, go to "genealogy": click "Change Source" and then enter 'gedcomx:my-local-test:test-sample-norman' and browse around.</li>
+        <li>From the main screen, go to "histories": Search for text, or click on the button to expand a directory and click "inspect" and put your mouse over "Jed" and click around.</li>
+        <li>From the main screen, go to "projects" and click around.</li>
+        <li>Add your own sources and play around.</li>
+      </ul>
+
+      <h3>How do I add my sources?</h3>
 
       Go to your desired app (genealogy, history, or project) and drag the right kind of item onto it (respectively: GedcomX file, directory, or TaskYaml file). Note that you need move to an area where the green "plus" does not show.
 

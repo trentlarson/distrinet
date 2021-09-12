@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 // imports for this app
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
-import { Source } from '../distnet/distnetClasses';
+import { SourceInternal } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
   dispatchAddGenealogyToSettings,
@@ -27,7 +27,7 @@ const treeFun = require('features/genealogy/js/tree.js');
 
 interface TreeOption {
   tree: {
-    setSources(sources: Array<Source>): void;
+    setSources(sources: Array<SourceInternal>): void;
     getTree(rootUri: string): void;
     getQueryParams(): Record<string, string>;
   };
@@ -104,7 +104,7 @@ function GenealogyView(options: TreeOption) {
 
   dispatch(refreshIdMapperForDispatch());
 
-  const sources: Array<Source> = useSelector(
+  const sources: Array<SourceInternal> = useSelector(
     (state: RootState) => state.distnet.settings.sources
   );
   options.tree.setSources(sources);
@@ -292,7 +292,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
   }, [sourceOptions.id, sourceOptions.name, sourceOptions.url]);
 
   const dispatch = useDispatch();
-  const sources: Array<Source> = useSelector(
+  const sources: Array<SourceInternal> = useSelector(
     (state: RootState) => state.distnet.settings.sources
   );
 
@@ -344,7 +344,6 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
             type="button"
             onClick={() => {
               const newSource = {
-                id: settingsId,
                 name: settingsName,
                 urls: [{ url: settingsUrl }],
               };

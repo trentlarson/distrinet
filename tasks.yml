@@ -3,14 +3,20 @@ tasks :
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 2 move the settings IDs to a .well-known directory id:well-known :
-    - on settings creation, write to the .well-known dir, with a .iri file
+    - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit (and erase)
     - on settings read, read from the .well-known dir for the localUrl
     - on settings change
+    - edit IRI
     - when a diff is detected, make sure there are big warnings if the .iri is changed.
-    - remove 'id' from settings
+    - rename Source id to iri
+    - remove 'id' from settings?
     - backup the .well-known directory in history ref:#history
+    - totally remove the ID/IRI creation from genealogy when adding a new one
+    - rename Source "type" to transfer/storage/sharing-type
   - 1 rename the "urls" arrays to "otherUrls" :
     - migrate existing settings for current users
+
+  - 0 get version call that works for packaged app
 
   - 2 save another local copy of files to track what is most recently seen id:#history
     - one file first
@@ -27,8 +33,6 @@ tasks :
     - show if there's a difference in the local copy
     - if we ever edit local copy :
       - we retrieve latest from remote & compare to remote
-
-  - 0 get version call that works for packaged app
 
   - -1 documentation - Google Drive vs Backup
   - -1 distrinet write tests for many setting new settings (to ensure we don't erase settings)
@@ -98,6 +102,9 @@ tasks :
   - >-
     50 0 allow blank settings files (which will still allow us to set top-level
     keys if missing) id:set-settings-keys
+  - 1 debounce when there are multiple redux 'dispatch' calls at a time (for better performance), eg in dispatchSetSettingsTextAndYaml.
+    One approach is https://medium.com/unsplash/react-redux-performance-considerations-when-dispatching-multiple-actions-5162047bf8a6
+    ... or create one dispatch method combining multiple.
   - '20 0 read binary files id:read-binary'
   - 20 4 stop requiring semicolons in the code
 log:

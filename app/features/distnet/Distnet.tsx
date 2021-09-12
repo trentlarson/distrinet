@@ -10,7 +10,7 @@ import url from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 
-import { Source } from './distnetClasses';
+import { SourceInternal } from './distnetClasses';
 import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
@@ -90,6 +90,8 @@ export default function Distnet(options: AppInfo) {
       </div>
 
       <div className={styles.content}>
+        <br />
+        <br />
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (
           <table>
@@ -118,9 +120,9 @@ export default function Distnet(options: AppInfo) {
               </tr>
             </thead>
             <tbody>
-              {distnet.settings.sources.map((uriSource: Source) => (
-                <tr key={uriSource.id}>
-                  <td>{uriSource.id || '?'}</td>
+              {distnet.settings.sources.map((uriSource: SourceInternal) => (
+                <tr key={uriSource.urls[0].url}>
+                  <td>{uriSource.id || '-'}</td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
                     {uriSource.urls[0] && isUriLocalhost(uriSource.urls[0].url)

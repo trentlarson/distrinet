@@ -22,19 +22,22 @@ import {
   DistnetState,
   Payload,
   ResourceType,
-  Settings,
-  Source,
+  SettingsForStorage,
+  SettingsInternal,
+  SourceForStorage,
+  SourceInternal,
 } from './distnetClasses';
 import {
   loadSettingsFromFile,
-  saveSettingsToFile,
+  readIriFromWellKnownDir,
   saveIriToWellKnownDir,
+  saveSettingsToFile,
 } from './settings';
 import uriTools from './uriTools';
 
 interface SettingsEditor {
   // should clone the settings and return a new one
-  (settings: Settings): Settings;
+  (settings: SettingsInternal): SettingsInternal;
 }
 
 const distnetSlice = createSlice({
@@ -55,10 +58,10 @@ const distnetSlice = createSlice({
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
     },
-    setSettingsStateObject: (state, contents: Payload<Settings>) => {
+    setSettingsStateObject: (state, contents: Payload<FullSettings>) => {
       state.settings = contents.payload;
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      state.settingsErrorMessage = checkSettings(contents.payload);
+      state.settingsErrorMessage = checkSettingsInternal(contents.payload);
     },
     setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
       state.settingsErrorMessage = contents.payload;
@@ -94,14 +97,25 @@ const {
   setSettingsStateText,
 } = distnetSlice.actions;
 
-function isSettings(
+function isSettingsForStorage(
   // eslint-disable-next-line @typescript-eslint/ban-types
   contents: string | object | undefined
-): contents is Settings {
+): contents is SettingsForStorage {
   return (
     typeof contents !== 'undefined' &&
     typeof contents !== 'string' &&
-    (contents as Settings).sources !== undefined
+    (contents as SettingsForStorage).sources !== undefined
+  );
+}
+
+function isSettingsInternal(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  contents: string | object | undefined
+): contents is SettingsInternal {
+  return (
+    typeof contents !== 'undefined' &&
+    typeof contents !== 'string' &&
+    (contents as SettingsInternal).sources !== undefined
   );
 }
 
@@ -109,13 +123,10 @@ function isSettings(
  * Take a settings object and do some validity checking
  * return error message or null (if no errors)
  */
-function checkSettings(loaded: Settings): string | null {
+function checkSettingsInternal(loaded: SettingsInternal): string | null {
   // do some basic sanity checks
-  if (isSettings(loaded) && loaded.sources) {
-    const errorsOrNulls = loaded.sources.map((s: Source, index: number) => {
-      if (!s || !s.id) {
-        return `Source #${index} or its ID is null or undefined.`;
-      }
+  if (isSettingsInternal(loaded) && loaded.sources) {
+    const errorsOrNulls = loaded.sources.map((s: SourceInternal, index: number) => {
       if (!s.urls || s.urls.length === 0) {
         return `Source #${index + 1} has no URL.`;
       }
@@ -125,14 +136,17 @@ function checkSettings(loaded: Settings): string | null {
     if (errors.length > 0) {
       return errors[0];
     }
-    const sourcesById = R.groupBy(R.prop('id'), loaded.sources);
+    const sourcesById = R.groupBy(
+      R.prop('id'),
+      R.reject(R.pipe(R.prop('id'), R.isNil), loaded.sources)
+    );
     const dupsLists = R.filter((sa) => sa.length > 1, R.values(sourcesById));
     if (dupsLists.length > 0) {
       const ids = R.map((dups) => dups[0].id, dupsLists);
       return `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`;
     }
   } else {
-    return 'That settings object does not have all settings elements, ie sources';
+    return 'That settings object does not have all settings elements, ie. sources';
   }
   return null;
 }
@@ -247,16 +261,62 @@ export const dispatchSetSettingsText = (
   dispatch(setSettingsChanged(changedFromFile));
 };
 
+const convertSourceToInternalFromStorage = async (
+  source: sourceForStorage
+): sourceInternal => {
+  const sourceInt = R.clone(source);
+  sourceInt.id = await readIriFromWellKnownDir(sourceInt.urls[0].url);
+  return sourceInt;
+}
+
+const convertSettingsToInternalFromStorage = async (
+  settingsFile: SettingsForStorage
+): SettingsInternal => {
+  const settingsInt = R.clone(settingsFile);
+  let promises = [];
+  for (let i = 0; i < settingsInt.sources.length; i++) {
+    promises = R.append(
+      new Promise(async (resolve, reject) => {
+        settingsInt.sources[i] =
+          await convertSourceToInternalFromStorage(settingsInt.sources[i]);
+        resolve();
+      }),
+      promises
+    );
+  }
+  await Promise.all(promises);
+  return settingsInt;
+}
+
+const convertSourceToStorageFromInternal = (
+  source: SourceInternal
+): SourceForStorage => {
+  return { name: source.name, type: source.type, urls: source.urls };
+}
+
+const convertSettingsToStorageFromInternal = (
+  settings: SettingsInternal
+): SettingsForStorage => {
+  const settingsStor = R.clone(settings);
+  for (let i = 0; i < settingsStor.sources; i++) {
+    settingsStor.sources[i] =
+      convertSourceToStorageFromInternal(settings.sources[i]);
+  }
+  return settingsStor;
+}
+
 export const dispatchSetSettingsTextAndYaml = (
   contents: string,
   changedFromFile: boolean
-): AppThunk => (dispatch) => {
+): AppThunk => async (dispatch) => {
   dispatch(dispatchSetSettingsText(contents, changedFromFile));
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
-    if (isSettings(loadedSettings)) {
-      dispatch(setSettingsStateObject(loadedSettings));
+    if (isSettingsForStorage(loadedSettings)) {
+      const internalSettings =
+        await convertSettingsToInternalFromStorage(loadedSettings);
+      dispatch(setSettingsStateObject(internalSettings));
       dispatch(dispatchCacheForAll());
       dispatch(callResetStateMethods());
     } else {
@@ -337,9 +397,12 @@ export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => 
   }
 };
 
-const addSourceToSettings = (newSource: Source) => (settings: Settings) => {
-  const newSettings = R.clone(settings);
-  newSettings.sources = R.append(newSource, newSettings.sources);
+const addSourceToSettings = (newSource: SourceForStorage) => (
+  settings: SettingsInternal
+): SettingsInternal => {
+  const newSettings: SettingsInternal = R.clone(settings);
+  const newSourceInt = loadSourceObject(newSource);
+  newSettings.sources = R.append(newSourceInt, newSettings.sources);
   return newSettings;
 };
 
@@ -391,7 +454,7 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
 /**
  Note that we've got this as a function
  */
-export const generateKeyAndSet = (settings: Settings) => {
+export const generateKeyAndSet = (settings: SettingsInternal) => {
   const newSettings = _.cloneDeep(settings);
   const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
     namedCurve: 'secp224r1',
@@ -422,18 +485,21 @@ export const dispatchModifySettings = (
   settingsEditor: SettingsEditor
 ): AppThunk => async (dispatch, getState) => {
   const newSettings = settingsEditor(getState().distnet.settings);
-  const settingsYaml: string = yaml.safeDump(newSettings);
+  const settingsForStorage = convertSettingsToStorageFromInternal(newSettings);
+  const settingsYaml: string = yaml.safeDump(settingsForStorage);
   dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, true));
 };
 
-export const addDistrinetTaskSource = (settings: Settings) => {
+export const addDistrinetTaskSource: SettingsEditor = (
+  settings: SettingsInternal
+): SettingsInternal => {
   const newSettings = _.cloneDeep(settings);
   const baseTasksPath = path.join(
     electron.remote.app.getAppPath(),
     '..',
     'tasks.yml'
   );
-  const newSource: Source = {
+  const newSource: SourceInternal = {
     id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
     name: 'Distrinet Project',
     urls: [
@@ -453,7 +519,7 @@ export const addDistrinetTaskSource = (settings: Settings) => {
 };
 
 export const testSettingsYamlText = (appPath: string): string => {
-  const testSettings: Settings = {
+  const testSettings: SettingsForStorage = {
     sources: [],
     resourceTypes: [],
     credentials: [],
@@ -472,11 +538,11 @@ export const testSettingsYamlText = (appPath: string): string => {
   /* eslint-enable prefer-template */
 
   testSettings.sources = [
-    { name: 'Sample Genealogy', id: 'gedcomx:my-local-test:test-sample-norman', urls: [ { url: genealogyPath } ] },
-    { name: 'Sample Histories', id: 'histories:local-test-files:test-sample', urls: [ { url: historiesPath } ] },
-    { name: 'Sample Business Project', id: 'taskyaml:local-business-test-project', urls: [ { url: businessTasksUrl } ] }, // eslint-disable-line max-len
-    { name: 'Sample Camping Project', id: 'taskyaml:local-camping-test-project', urls: [ { url: campingTasksUrl } ] },
-    { name: 'Sample Workweek Project', id: 'taskyaml:local-workweek-test-project', urls: [ { url: workweekTasksUrl } ] }, // eslint-disable-line max-len
+    { name: 'Sample Genealogy', urls: [ { url: genealogyPath } ] },
+    { name: 'Sample Histories', urls: [ { url: historiesPath } ] },
+    { name: 'Sample Business Project', urls: [ { url: businessTasksUrl } ] },
+    { name: 'Sample Camping Project', urls: [ { url: campingTasksUrl } ] },
+    { name: 'Sample Workweek Project', urls: [ { url: workweekTasksUrl } ] },
   ];
 
   /* eslint-enable prettier/prettier */
@@ -542,10 +608,9 @@ export const addDragDropListeners = (
  param iri (optional) must be unique, will be written to a file in the repo
  */
 const dispatchAddToSettings = (
-  newSource: Source,
-  iri: string
+  newSource: SourceForStorage
 ): AppThunk => async (dispatch, getState) => {
-  const urlAlreadyInSource: Source | undefined = R.find(
+  const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
       R.contains(
         newSource.urls[0].url,
@@ -553,22 +618,25 @@ const dispatchAddToSettings = (
       ),
     getState().distnet.settings.sources
   );
-  const iriAlreadyInSource: Source | undefined = R.find(
-    (s) => s.id === iri,
-    getState().distnet.settings.sources
-  );
   if (urlAlreadyInSource) {
     alert(
       `That path ${newSource.urls[0].url} already exists in source ${urlAlreadyInSource.id}`
     );
-  } else if (iriAlreadyInSource) {
-    alert(`The IRI ${iri} already exists in source ${iriAlreadyInSource.id}`);
   } else {
-    await dispatch(dispatchModifySettings(addSourceToSettings(newSource)));
+    const iri = await readIriFromWellKnownDir(newSource.urls[0].url);
+    const iriAlreadyInSource: SourceInternal | undefined = R.find(
+      (s) => s.id === iri,
+      getState().distnet.settings.sources
+    );
+    if (iriAlreadyInSource) {
+      // alert, but allow to keep going
+      alert(`That IRI of ${iri} is now duplicated in two sources.`);
+    }
+    const newSettings: SettingsInternal = await addSourceToSettings(newSource);
+    await dispatch(dispatchModifySettings(newSettings));
     await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
     // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
-    await dispatch(dispatchReloadCacheForId(newSource.id));
-    saveIriToWellKnownDir(newSource.urls[0].url, iri);
+    await dispatch(dispatchReloadCacheForId(iri));
     // eslint-disable-next-line no-new
     new Notification('Added', {
       body: `Added that source.`,
@@ -583,16 +651,14 @@ const dispatchBuildSourceAndAddToSettings = (
 ): AppThunk => async (dispatch) => {
   const fileUrl = `file://${filePath}`;
   const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
-  const newId = `${prefix}:${newPath}`;
   const newSource = {
-    id: newId,
     urls: [{ url: fileUrl }],
   };
-  await dispatch(dispatchAddToSettings(newSource, newSource.id));
+  await dispatch(dispatchAddToSettings(newSource));
 };
 
-export const dispatchAddGenealogyToSettings = (newSource: Source) =>
-  dispatchAddToSettings(newSource, newSource.id);
+export const dispatchAddGenealogyToSettings = (newSource: SourceForStorage) =>
+  dispatchAddToSettings(newSource);
 
 export const dispatchAddHistoryToSettings = (filePath: string) =>
   dispatchBuildSourceAndAddToSettings('histories', filePath);

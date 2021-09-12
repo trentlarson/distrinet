@@ -12,18 +12,18 @@ export default function Home(): JSX.Element {
   return (
     <div className={styles.container} data-tid="container">
       <h2>Go</h2>
-      <Link to={routes.DISTNET}>to distrinet settings</Link>
+      <Link to={routes.DISTNET}>... to distrinet settings</Link>
       <br />
-      <Link to={routes.GENEALOGY}>to genealogy</Link>
+      <Link to={routes.GENEALOGY}>... to genealogy</Link>
       <br />
-      <Link to={routes.HISTORIES}>to histories</Link>
+      <Link to={routes.HISTORIES}>... to histories</Link>
       <br />
-      <Link to={routes.TASK_LISTS}>to projects</Link>
+      <Link to={routes.TASK_LISTS}>... to projects</Link>
       <br />
-      <Link to={routes.HELP}>get helpful advice</Link>
+      <Link to={routes.HELP}>... get helpful advice</Link>
       {/*
       <br />
-      <Link to={routes.COUNTER}>to Counter</Link>
+      <Link to={routes.COUNTER}>... to Counter</Link>
       */}
     </div>
   );

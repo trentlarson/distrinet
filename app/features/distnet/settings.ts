@@ -6,7 +6,6 @@ import url from 'url';
 // eslint-disable-next-line import/no-cycle
 import { APP_NAME } from './distnetClasses';
 
-const fsPromises = fs.promises;
 const paths = envPaths(APP_NAME);
 export const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
 
@@ -15,7 +14,7 @@ export const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
  * If an error occurs, the result is: { error: '...' }
  * */
 export function loadSettingsFromFile(): Promise<string | { error: string }> {
-  return fsPromises
+  return fs.promises
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())
     .catch((err) => {
@@ -31,23 +30,17 @@ export function loadSettingsFromFile(): Promise<string | { error: string }> {
 export function saveSettingsToFile(
   text: string
 ): Promise<void | { error: string }> {
-  return fsPromises.writeFile(SETTINGS_FILE, text).catch((err) => {
+  return fs.promises.writeFile(SETTINGS_FILE, text).catch((err) => {
     console.error('Error saving settings:', err);
     return { error: `Error saving settings: ${err}` };
   });
 }
 
-/**
- Make a .well-known/FILE.iri file, and return a Promise with null result on success or with {error:'...'} on failure.
- */
-export async function saveIriToWellKnownDir(
-  sourceLocalUrl: string,
-  iri: string
-): Promise<null | { error: string }> {
+async function getIriFileName(sourceLocalUrl: string): Promise<string> {
   const filename: string = new url.URL(sourceLocalUrl).pathname;
   let containingDir: string = filename;
   let finalIriFile = '.iri';
-  const sourceStats = await fsPromises.stat(filename);
+  const sourceStats = await fs.promises.stat(filename);
   if (sourceStats.isDirectory()) {
     // good, it's the whole thing
   } else if (sourceStats.isFile()) {
@@ -57,13 +50,31 @@ export async function saveIriToWellKnownDir(
     finalIriFile = `${parsed.base}.iri`;
   } else {
     // less good: it's not a file or directory
-    return {
-      error: `Unable to set IRI because this source location is neither a file nor a directory: ${filename}`,
-    };
+    throw Error(
+      `Unable to get IRI because this source location is neither a file nor a directory: ${filename}`
+    );
   }
   const wellKnownDir = path.join(containingDir, '.well-known');
+  const iriFullPath = path.join(wellKnownDir, finalIriFile);
+  return iriFullPath;
+}
+
+export async function readIriFromWellKnownDir(sourceLocalUrl: string): Promise<null | string> {
+  const iriFullPath = await getIriFileName(sourceLocalUrl);
+  return fs.promises.readFile(iriFullPath, { encoding: 'utf-8' });
+}
+
+/**
+ Make a .well-known/FILE.iri file, and return a Promise with null result on success or with {error:'...'} on failure.
+ */
+export async function saveIriToWellKnownDir(
+  sourceLocalUrl: string,
+  iri: string
+): Promise<null | { error: string }> {
+  const iriFullPath = await getIriFileName(sourceLocalUrl);
+
   let wellKnownDirExists = false;
-  await fsPromises
+  await fs.promises
     .stat(wellKnownDir)
     .then((s) => {
       if (s.isDirectory()) {
@@ -84,10 +95,10 @@ export async function saveIriToWellKnownDir(
       }
     });
   if (!wellKnownDirExists) {
-    await fsPromises.mkdir(wellKnownDir);
+    await fs.promises.mkdir(wellKnownDir);
   }
-  const iriFullPath = path.join(wellKnownDir, finalIriFile);
-  await fsPromises
+  // note that the writeFile would overwrite contents, and we don't want that
+  await fs.promises
     .stat(iriFullPath)
     .then(() => {
       // something already exists, so that's not good
@@ -96,6 +107,6 @@ export async function saveIriToWellKnownDir(
     .catch(() => {
       // continue, knowing that we'll create it
     });
-  await fsPromises.writeFile(iriFullPath, iri);
+  await fs.promises.writeFile(iriFullPath, iri);
   return null;
 }

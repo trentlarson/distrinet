@@ -170,8 +170,8 @@ export const {
 /** potentially useful
 function sourceFromId(
   id: string,
-  settingsSources: Array<Source>
-): Source | undefined {
+  settingsSources: Array<SourceInternal>
+): SourceInternal | undefined {
   return R.find((source) => source.id === id, settingsSources);
 }
 * */

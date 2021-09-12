@@ -17,20 +17,29 @@ export interface DistnetState {
   cacheErrorMessage: string | null;
 }
 
-export interface Settings {
+// Settings saved to disk, eg. without an ID
+export interface SettingsForStorage {
   sources: Array<Source>;
   resourceTypes: Array<ResourceType>;
   credentials: Array<Credential>;
 }
 
-export interface Source {
+export interface SourceForStorage {
   name?: string;
-  id: string;
-  type?: string;
-  didDoc?: DidDoc;
+  type?: string; // type of transfer/storage/sharing
   urls: Array<UrlData>;
 }
 
+// Full Settings, built in memory
+export interface SettingsInternal extends SettingsForStorage {
+  sources: Array<SourceInternal>;
+}
+
+export interface SourceInternal extends SourceForStorage {
+  id: string;
+}
+
+/** not yet ready
 interface DidDoc {
   // This is for the '@context'
   didDocContext: DidDocContext;
@@ -42,6 +51,7 @@ interface DidDoc {
 enum DidDocContext {
   V1 = 'https://www.w3.org/ns/did/v1',
 }
+*/
 
 export interface UrlData {
   url: string;
