@@ -299,7 +299,10 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
   let addToSettings = <span />;
 
   if (uriTools.isUriLocalhost(rootUri)) {
-    const sourceWithPrefix = R.find((s) => rootUri.startsWith(s.id), sources);
+    const sourceWithPrefix = R.find(
+      (s) => !!s.id && rootUri.startsWith(s.id),
+      sources
+    );
     let sourceUrlWithPrefix = null;
     if (!sourceWithPrefix) {
       const allUrls = R.flatten(sources.map((s) => s.urls.map((u) => u.url)));
@@ -351,7 +354,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
 
               dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
 
-              dispatch(setRootUri(settingsId));
+              dispatch(setRootUri(settingsUrl));
 
               setSettingsId('');
               setSettingsName('');

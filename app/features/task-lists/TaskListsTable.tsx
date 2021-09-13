@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import URL from 'url';
 
 import { AppThunk, RootState } from '../../store';
-import { Cache, ResourceType, Source } from '../distnet/distnetClasses';
+import { Cache, ResourceType, SourceInternal } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
   dispatchAddTaskListToSettings,
@@ -91,8 +91,8 @@ export default function TaskListsTable() {
     }
   }
 
-  const taskSources: Array<Source> = R.filter(
-    (s) => isTaskyamlUriScheme(s.id),
+  const taskSources: Array<SourceInternal> = R.filter(
+    (s) => !!s.id && isTaskyamlUriScheme(s.id),
     distnet.settings.sources
   );
 
@@ -186,7 +186,7 @@ export default function TaskListsTable() {
 function sourceActions(
   dispatch: (arg0: AppThunk) => void,
   cache: Cache,
-  taskSources: Array<Source>,
+  taskSources: Array<SourceInternal>,
   resourceTypes: Array<ResourceType>,
   hoursPerWeek: number,
   setHoursPerWeek: (arg0: number) => void,
@@ -372,7 +372,7 @@ const sameArray: <T>(arr: Array<T>) => Array<T> = R.identity;
 
 function bigListTable(
   dispatch: (arg0: AppThunk) => void,
-  taskSources: Array<Source>,
+  taskSources: Array<SourceInternal>,
   hoursPerWeek: number,
   taskSigningComment: string,
   setFocusOnTaskId: (arg0: string) => void,
@@ -461,7 +461,7 @@ function smallListTable(
   activityLists: Array<Array<YamlTask>>,
   hoursPerWeek: number,
   taskSigningComment: string,
-  taskSources: Array<Source>,
+  taskSources: Array<SourceInternal>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,
@@ -519,7 +519,7 @@ function oneTaskRow(
   index: number,
   hoursPerWeek: number,
   taskSigningComment: string,
-  taskSources: Array<Source>,
+  taskSources: Array<SourceInternal>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   setFocusOnTaskId: (arg0: string) => void,

@@ -7,8 +7,8 @@ import url from 'url';
 import {
   APP_NAME,
   CacheData,
-  Settings,
-  Source,
+  SettingsInternal,
+  SourceInternal,
   UrlData,
 } from './distnetClasses';
 
@@ -45,9 +45,12 @@ export const createCacheDir: () => Promise<void> = async () => {
  * return CacheData for the first source URL that works, or null if none work (may update local file)
  */
 export const loadOneSourceContents: (
-  arg0: Source,
+  arg0: SourceInternal,
   arg1: string
-) => Promise<CacheData | null> = async (source: Source, cacheDir: string) => {
+) => Promise<CacheData | null> = async (
+  source: SourceInternal,
+  cacheDir: string
+) => {
   let cacheInfo: CacheData | null = null;
 
   let index = 0;
@@ -208,8 +211,8 @@ export const loadOneSourceContents: (
   return null;
 };
 
-export const loadOneOfTheSources: (
-  arg0: Array<Source>,
+const loadOneOfTheSources: (
+  arg0: Array<SourceInternal>,
   arg1: string,
   arg2: string
 ) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
@@ -226,17 +229,19 @@ export const loadOneOfTheSources: (
  */
 export const reloadOneSourceIntoCache: (
   arg0: string,
-  arg1: Settings
+  arg1: SettingsInternal
 ) => Promise<CacheData | null> = (sourceId, settings) => {
   return loadOneOfTheSources(settings.sources, sourceId, DEFAULT_CACHE_DIR);
 };
 
 export const reloadAllSourcesIntoCache: (
-  settings: Settings
+  settings: SettingsInternal
 ) => Promise<Array<CacheData | null>> = (settings) => {
   const { sources } = settings;
   const sourceReloads = R.isNil(sources)
     ? []
-    : sources.map((s: Source) => reloadOneSourceIntoCache(s.id, settings));
+    : sources.map((s: SourceInternal) =>
+        reloadOneSourceIntoCache(s.id, settings)
+      );
   return Promise.all(sourceReloads);
 };

@@ -30,7 +30,7 @@ import {
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
-import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
+import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 
 const TASKYAML_SCHEME = 'taskyaml';
 const DEFAULT_FORECAST_SERVER =
@@ -379,7 +379,7 @@ async function retrieveTasksFromSource(
     } else if (isProjectFile(contentTasks)) {
       taskList = contentTasks.tasks;
     } else {
-      console.error('Failure getting array or .tasks from source', sourceId);
+      console.error('Failure getting array or .tasks from file', sourceId);
       return [];
     }
     const issues = parseYamlIssues(sourceId, taskList);
@@ -404,7 +404,7 @@ async function retrieveAllTasksFromSources(
   if (cacheValues) {
     for (let i = 0; i < cacheValues.length; i += 1) {
       const entry = cacheValues[i];
-      if (isTaskyamlUriScheme(entry.sourceId)) {
+      if (entry.sourceId && isTaskyamlUriScheme(entry.sourceId)) {
         const next = retrieveTasksFromSource(entry.sourceId, distnet);
         result = R.concat(result, [next]);
       }
@@ -596,7 +596,7 @@ export const dispatchToggleDependentExpansionUi = (
 export const dispatchLoadOneSourceIntoTasks = (
   sourceId: string
 ): AppThunk => async (dispatch, getState) => {
-  await dispatch(dispatchReloadCacheForId(sourceId));
+  await dispatch(dispatchReloadCacheForFile(sourceId));
   const taskList: Array<YamlTask> = await retrieveTasksFromSource(
     sourceId,
     getState().distnet

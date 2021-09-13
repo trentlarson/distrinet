@@ -134,10 +134,10 @@
             prefixUri = keys[i];
           }
         }
-        if (prefixUri) {
+        const source = R.find((src) => src.id === prefixUri, sources);
+        if (prefixUri && source && source.urls) {
           try {
 
-            const source = R.find((src) => src.id === prefixUri, sources);
             await loader.loadOneSourceContents(source)
               .then((cacheData) => {
                 if (cacheData) {

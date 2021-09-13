@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
 // eslint-disable-next-line import/no-cycle
-import { dispatchReloadCacheForId } from '../distnet/distnetSlice';
+import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 import MapperBetweenSets from './samePerson';
 
 interface Payload<T> {
@@ -64,12 +64,14 @@ export const updateSettingsAndIdMapperForDispatch = (
   sourceId: string
 ): AppThunk => async (dispatch, getState): Promise<void> => {
   // Two caches... let's hope we never have any more!
-  await dispatch(dispatchReloadCacheForId(sourceId));
-  const { cache } = getState().distnet;
-  MapperBetweenSets.forceOneRefresh(
-    cache,
-    sourceId,
-    getState().genealogy.correlatedIdsRefreshedMillis,
-    (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
-  );
+  await dispatch(dispatchReloadCacheForFile(sourceId));
+  if (sourceId) {
+    const { cache } = getState().distnet;
+    MapperBetweenSets.forceOneRefresh(
+      cache,
+      sourceId,
+      getState().genealogy.correlatedIdsRefreshedMillis,
+      (millis) => dispatch(setCorrelatedIdsRefreshedMillis(millis))
+    );
+  }
 };

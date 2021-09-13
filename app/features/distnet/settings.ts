@@ -36,8 +36,13 @@ export function saveSettingsToFile(
   });
 }
 
-async function getIriFileName(sourceLocalUrl: string): Promise<string> {
-  const filename: string = new url.URL(sourceLocalUrl).pathname;
+interface WellKnownAndIri {
+  wellKnownDir: string;
+  iriFile: string;
+}
+
+async function getIriFileName(localUrl: string): Promise<WellKnownAndIri> {
+  const filename: string = new url.URL(localUrl).pathname;
   let containingDir: string = filename;
   let finalIriFile = '.iri';
   const sourceStats = await fs.promises.stat(filename);
@@ -55,13 +60,17 @@ async function getIriFileName(sourceLocalUrl: string): Promise<string> {
     );
   }
   const wellKnownDir = path.join(containingDir, '.well-known');
-  const iriFullPath = path.join(wellKnownDir, finalIriFile);
-  return iriFullPath;
+  const iriFile = path.join(wellKnownDir, finalIriFile);
+  return { wellKnownDir, iriFile };
 }
 
-export async function readIriFromWellKnownDir(sourceLocalUrl: string): Promise<null | string> {
-  const iriFullPath = await getIriFileName(sourceLocalUrl);
-  return fs.promises.readFile(iriFullPath, { encoding: 'utf-8' });
+export async function readIriFromWellKnownDir(
+  sourceLocalUrl: string
+): Promise<string> {
+  const { iriFile } = await getIriFileName(sourceLocalUrl);
+  return fs.promises.readFile(iriFile, { encoding: 'utf-8' }).then(
+    (s) => s.trim()
+  );
 }
 
 /**
@@ -71,7 +80,7 @@ export async function saveIriToWellKnownDir(
   sourceLocalUrl: string,
   iri: string
 ): Promise<null | { error: string }> {
-  const iriFullPath = await getIriFileName(sourceLocalUrl);
+  const { wellKnownDir, iriFile } = await getIriFileName(sourceLocalUrl);
 
   let wellKnownDirExists = false;
   await fs.promises
@@ -81,7 +90,7 @@ export async function saveIriToWellKnownDir(
         wellKnownDirExists = true;
       } else {
         throw Error(
-          `The .well-known location exists but is not a directory here: ${containingDir}`
+          `The .well-known location exists but is not a directory here: ${sourceLocalUrl}`
         );
       }
       return null;
@@ -90,23 +99,23 @@ export async function saveIriToWellKnownDir(
       // just continue, expecting that it doesn't exist and we should create it
       if (err.message && err.message.startsWith('ENOENT')) {
         // it doesn't exist, so we're good to continue
-      } else {
-        throw err;
+        return;
       }
+      throw err;
     });
   if (!wellKnownDirExists) {
     await fs.promises.mkdir(wellKnownDir);
   }
   // note that the writeFile would overwrite contents, and we don't want that
   await fs.promises
-    .stat(iriFullPath)
+    .stat(iriFile)
     .then(() => {
       // something already exists, so that's not good
-      throw Error(`The IRI file already exists here: ${iriFullPath}`);
+      throw Error(`The IRI file already exists here: ${iriFile}`);
     })
     .catch(() => {
       // continue, knowing that we'll create it
     });
-  await fs.promises.writeFile(iriFullPath, iri);
+  await fs.promises.writeFile(iriFile, iri);
   return null;
 }

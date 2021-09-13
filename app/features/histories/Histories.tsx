@@ -43,7 +43,7 @@ export default function Histories() {
   dispatch(dispatchLoadHistoryDirsIfEmpty());
 
   const historySources = R.filter(
-    (s) => s.id && s.id.startsWith('histories:'),
+    (s: SourceInternal) => !!s.id && s.id.startsWith('histories:'),
     distnet.settings.sources
   );
 

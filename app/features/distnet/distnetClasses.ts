@@ -8,7 +8,7 @@
  * This is the main object stored into the state with the name 'distnet'.
  * */
 export interface DistnetState {
-  settings: Settings;
+  settings: SettingsInternal;
   settingsChanged: boolean;
   settingsErrorMessage: string | null;
   settingsText: string | null;
@@ -19,7 +19,7 @@ export interface DistnetState {
 
 // Settings saved to disk, eg. without an ID
 export interface SettingsForStorage {
-  sources: Array<Source>;
+  sources: Array<SourceForStorage>;
   resourceTypes: Array<ResourceType>;
   credentials: Array<Credential>;
 }
@@ -94,9 +94,8 @@ export interface ResourceType {
 
 /** Cached-file info * */
 
-// The type of the keys is string
 export interface Cache {
-  [sourceId: string]: CacheData;
+  [localFile: string]: CacheData; // index is local source file
 }
 
 export interface CacheData {

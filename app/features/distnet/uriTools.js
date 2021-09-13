@@ -140,11 +140,10 @@ const path = require('path');
    *
    * @param homeDir is optional and defaults to os.homedir()
    */
-  function bestGuessAtGoodUriPath(dirPath, homeDir) {
-    const finalHomeDir = homeDir || os.homedir();
+  function bestGuessAtGoodUriPath(dirPath, homeDir = os.homedir()) {
     let newPath;
-    if (dirPath.startsWith(finalHomeDir)) {
-      newPath = dirPath.substring(finalHomeDir.length + 1);
+    if (dirPath.startsWith(homeDir)) {
+      newPath = dirPath.substring(homeDir.length + 1);
       const split = newPath.split(path.sep);
       if (split.length > 1) {
         newPath = split.slice(1).join(path.sep);

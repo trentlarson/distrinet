@@ -30,10 +30,8 @@ import {
 import {
   loadSettingsFromFile,
   readIriFromWellKnownDir,
-  saveIriToWellKnownDir,
   saveSettingsToFile,
 } from './settings';
-import uriTools from './uriTools';
 
 interface SettingsEditor {
   // should clone the settings and return a new one
@@ -58,7 +56,7 @@ const distnetSlice = createSlice({
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
     },
-    setSettingsStateObject: (state, contents: Payload<FullSettings>) => {
+    setSettingsStateObject: (state, contents: Payload<SettingsInternal>) => {
       state.settings = contents.payload;
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       state.settingsErrorMessage = checkSettingsInternal(contents.payload);
@@ -126,23 +124,23 @@ function isSettingsInternal(
 function checkSettingsInternal(loaded: SettingsInternal): string | null {
   // do some basic sanity checks
   if (isSettingsInternal(loaded) && loaded.sources) {
-    const errorsOrNulls = loaded.sources.map((s: SourceInternal, index: number) => {
-      if (!s.urls || s.urls.length === 0) {
-        return `Source #${index + 1} has no URL.`;
+    const errorsOrNulls = loaded.sources.map(
+      (s: SourceInternal, index: number) => {
+        if (!s.urls || s.urls.length === 0) {
+          return `Source #${index + 1} has no URL.`;
+        }
+        return null;
       }
-      return null;
-    });
+    );
     const errors = R.reject(R.isNil, errorsOrNulls);
     if (errors.length > 0) {
       return errors[0];
     }
-    const sourcesById = R.groupBy(
-      R.prop('id'),
-      R.reject(R.pipe(R.prop('id'), R.isNil), loaded.sources)
-    );
-    const dupsLists = R.filter((sa) => sa.length > 1, R.values(sourcesById));
+    const sourceIds: Array<string> = loaded.sources.map((s) => s.id || '');
+    const dupIds = R.omit([''], R.groupBy(R.identity, sourceIds));
+    const dupsLists = R.filter((sa) => sa.length > 1, R.values(dupIds));
     if (dupsLists.length > 0) {
-      const ids = R.map((dups) => dups[0].id, dupsLists);
+      const ids = R.map((dups) => dups[0], dupsLists);
       return `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`;
     }
   } else {
@@ -207,10 +205,9 @@ export const resourceTypesForUris = (
   return R.map(R.prop('fullType'), inOrder);
 };
 
-export const dispatchReloadCacheForId = (sourceId: string): AppThunk => async (
-  dispatch,
-  getState
-): Promise<void> => {
+export const dispatchReloadCacheForFile = (
+  sourceId: string
+): AppThunk => async (dispatch, getState): Promise<void> => {
   await createCacheDir().catch((error) => {
     dispatch(setCacheErrorMessage(error.toString()));
   });
@@ -262,57 +259,58 @@ export const dispatchSetSettingsText = (
 };
 
 const convertSourceToInternalFromStorage = async (
-  source: sourceForStorage
-): sourceInternal => {
-  const sourceInt = R.clone(source);
-  sourceInt.id =
-    await readIriFromWellKnownDir(sourceInt.urls[0].url)
-    .catch((err) => {
+  storSource: SourceForStorage
+): Promise<SourceInternal> => {
+  const id = await readIriFromWellKnownDir(storSource.urls[0].url).catch(
+    (err) => {
       if (err.message && err.message.startsWith('ENOENT')) {
-        // it doesn't exist, but that's OK
-        return null;
-      } else {
-        throw err;
+        // it doesn't exist, so let's generate something internally
+        return storSource.urls[0].url;
       }
-    });
+      throw err;
+    }
+  );
+
+  const sourceInt: SourceInternal = { ...storSource, id };
   return sourceInt;
-}
+};
 
 const convertSettingsToInternalFromStorage = async (
   settingsFile: SettingsForStorage
-): SettingsInternal => {
-  const settingsInt = R.clone(settingsFile);
-  let promises = [];
-  for (let i = 0; i < settingsInt.sources.length; i++) {
+): Promise<SettingsInternal> => {
+  const settingsInt: SettingsInternal = {
+    ...settingsFile,
+    sources: [],
+  };
+  let promises: Array<Promise<SourceInternal>> = [];
+  for (let i = 0; i < settingsFile.sources.length; i += 1) {
     promises = R.append(
-      new Promise(async (resolve, reject) => {
-        settingsInt.sources[i] =
-          await convertSourceToInternalFromStorage(settingsInt.sources[i]);
-        resolve();
-      }),
+      convertSourceToInternalFromStorage(settingsFile.sources[i]),
       promises
     );
   }
-  await Promise.all(promises);
+  const newSources = await Promise.all(promises);
+  settingsInt.sources = newSources;
   return settingsInt;
-}
+};
 
 const convertSourceToStorageFromInternal = (
   source: SourceInternal
 ): SourceForStorage => {
   return { name: source.name, type: source.type, urls: source.urls };
-}
+};
 
 const convertSettingsToStorageFromInternal = (
   settings: SettingsInternal
 ): SettingsForStorage => {
-  const settingsStor = R.clone(settings);
-  for (let i = 0; i < settingsStor.sources; i++) {
-    settingsStor.sources[i] =
-      convertSourceToStorageFromInternal(settings.sources[i]);
+  const settingsStor: SettingsForStorage = R.clone(settings);
+  for (let i = 0; i < settingsStor.sources.length; i += 1) {
+    settingsStor.sources[i] = convertSourceToStorageFromInternal(
+      settings.sources[i]
+    );
   }
   return settingsStor;
-}
+};
 
 export const dispatchSetSettingsTextAndYaml = (
   contents: string,
@@ -323,8 +321,9 @@ export const dispatchSetSettingsTextAndYaml = (
   try {
     loadedSettings = yaml.safeLoad(contents);
     if (isSettingsForStorage(loadedSettings)) {
-      const internalSettings =
-        await convertSettingsToInternalFromStorage(loadedSettings);
+      const internalSettings = await convertSettingsToInternalFromStorage(
+        loadedSettings
+      );
       dispatch(setSettingsStateObject(internalSettings));
       dispatch(dispatchCacheForAll());
       dispatch(callResetStateMethods());
@@ -406,13 +405,17 @@ export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => 
   }
 };
 
-const addSourceToSettings = (newSource: SourceForStorage) => (
-  settings: SettingsInternal
-): SettingsInternal => {
-  const newSettings: SettingsInternal = R.clone(settings);
-  const newSourceInt = loadSourceObject(newSource);
-  newSettings.sources = R.append(newSourceInt, newSettings.sources);
-  return newSettings;
+const addSourceToSettings = async (
+  newSource: SourceForStorage
+): Promise<SettingsEditor> => {
+  const newSourceInt: SourceInternal = await convertSourceToInternalFromStorage(
+    newSource
+  );
+  return (settings: SettingsInternal): SettingsInternal => {
+    const newSettings: SettingsInternal = R.clone(settings);
+    newSettings.sources = R.append(newSourceInt, newSettings.sources);
+    return newSettings;
+  };
 };
 
 /**
@@ -616,9 +619,10 @@ export const addDragDropListeners = (
  param newSource must have unique location
  param iri (optional) must be unique, will be written to a file in the repo
  */
-const dispatchAddToSettings = (
-  newSource: SourceForStorage
-): AppThunk => async (dispatch, getState) => {
+const dispatchAddToSettings = (newSource: SourceForStorage): AppThunk => async (
+  dispatch,
+  getState
+) => {
   const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
       R.contains(
@@ -641,11 +645,12 @@ const dispatchAddToSettings = (
       // alert, but allow to keep going
       alert(`That IRI of ${iri} is now duplicated in two sources.`);
     }
-    const newSettings: SettingsInternal = await addSourceToSettings(newSource);
-    await dispatch(dispatchModifySettings(newSettings));
+    await dispatch(
+      dispatchModifySettings(await addSourceToSettings(newSource))
+    );
     await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
     // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
-    await dispatch(dispatchReloadCacheForId(iri));
+    await dispatch(dispatchReloadCacheForFile(iri));
     // eslint-disable-next-line no-new
     new Notification('Added', {
       body: `Added that source.`,
@@ -655,11 +660,9 @@ const dispatchAddToSettings = (
 };
 
 const dispatchBuildSourceAndAddToSettings = (
-  prefix: string,
   filePath: string
 ): AppThunk => async (dispatch) => {
   const fileUrl = `file://${filePath}`;
-  const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
   const newSource = {
     urls: [{ url: fileUrl }],
   };
@@ -670,9 +673,9 @@ export const dispatchAddGenealogyToSettings = (newSource: SourceForStorage) =>
   dispatchAddToSettings(newSource);
 
 export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('histories', filePath);
+  dispatchBuildSourceAndAddToSettings(filePath);
 
 export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('taskyaml', filePath);
+  dispatchBuildSourceAndAddToSettings(filePath);
 
 export default distnetSlice.reducer;
