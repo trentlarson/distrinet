@@ -4,15 +4,24 @@ tasks :
 
   - 2 move the settings IDs to a .well-known directory id:well-known :
     - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit (and erase)
+    - auto-create source ID on load? allow null?
     - on settings read, read from the .well-known dir for the localUrl
     - on settings change
+    - Fix the spaces in file name
+```
+      - name: History Multimedia from Janell
+        id: 'histories:484e1fd5-976b-4e01-883d-2e1840478d76_Janell_multimedia'
+        urls:
+          - url: file:///Users/tlarson/backed/Multimedia from Janell
+```
     - edit IRI
     - when a diff is detected, make sure there are big warnings if the .iri is changed.
     - rename Source id to iri
-    - remove 'id' from settings?
     - backup the .well-known directory in history ref:#history
     - totally remove the ID/IRI creation from genealogy when adding a new one
     - rename Source "type" to transfer/storage/sharing-type
+    - write tests for the file-checking methods in settings.txt (& elsewhere?)
+
   - 1 rename the "urls" arrays to "otherUrls" :
     - migrate existing settings for current users
 

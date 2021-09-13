@@ -64,22 +64,33 @@ async function getIriFileName(localUrl: string): Promise<WellKnownAndIri> {
   return { wellKnownDir, iriFile };
 }
 
+/**
+ return the IRI found on the file system, or null if it doesn't exist
+ */
 export async function readIriFromWellKnownDir(
   sourceLocalUrl: string
-): Promise<string> {
+): Promise<string | null> {
   const { iriFile } = await getIriFileName(sourceLocalUrl);
-  return fs.promises.readFile(iriFile, { encoding: 'utf-8' }).then(
-    (s) => s.trim()
-  );
+  return fs.promises
+    .readFile(iriFile, { encoding: 'utf-8' })
+    .then((s) => s.trim())
+    .catch((err) => {
+      if (err.message && err.message.startsWith('ENOENT')) {
+        // it doesn't exist
+        return null;
+      }
+      throw err;
+    });
 }
 
 /**
  Make a .well-known/FILE.iri file, and return a Promise with null result on success or with {error:'...'} on failure.
+ Throws error if something goes wrong.
  */
 export async function saveIriToWellKnownDir(
   sourceLocalUrl: string,
   iri: string
-): Promise<null | { error: string }> {
+): Promise<null> {
   const { wellKnownDir, iriFile } = await getIriFileName(sourceLocalUrl);
 
   let wellKnownDirExists = false;

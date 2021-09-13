@@ -347,6 +347,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
             type="button"
             onClick={() => {
               const newSource = {
+                id: settingsId,
                 name: settingsName,
                 urls: [{ url: settingsUrl }],
               };
@@ -354,7 +355,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
 
               dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
 
-              dispatch(setRootUri(settingsUrl));
+              dispatch(setRootUri(settingsId));
 
               setSettingsId('');
               setSettingsName('');

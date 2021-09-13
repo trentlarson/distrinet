@@ -30,8 +30,10 @@ import {
 import {
   loadSettingsFromFile,
   readIriFromWellKnownDir,
+  saveIriToWellKnownDir,
   saveSettingsToFile,
 } from './settings';
+import uriTools from './uriTools';
 
 interface SettingsEditor {
   // should clone the settings and return a new one
@@ -261,16 +263,11 @@ export const dispatchSetSettingsText = (
 const convertSourceToInternalFromStorage = async (
   storSource: SourceForStorage
 ): Promise<SourceInternal> => {
-  const id = await readIriFromWellKnownDir(storSource.urls[0].url).catch(
-    (err) => {
-      if (err.message && err.message.startsWith('ENOENT')) {
-        // it doesn't exist, so let's generate something internally
-        return storSource.urls[0].url;
-      }
-      throw err;
-    }
-  );
-
+  let id = await readIriFromWellKnownDir(storSource.urls[0].url);
+  if (!id) {
+    // we'll generate something internally to ensure we have one
+    id = storSource.urls[0].url;
+  }
   const sourceInt: SourceInternal = { ...storSource, id };
   return sourceInt;
 };
@@ -405,18 +402,26 @@ export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => 
   }
 };
 
-const addSourceToSettings = async (
+const addSourceInternalToSettings = async (
+  newSource: SourceInternal
+): Promise<SettingsEditor> => {
+  return (settings: SettingsInternal): SettingsInternal => {
+    const newSettings: SettingsInternal = R.clone(settings);
+    newSettings.sources = R.append(newSource, newSettings.sources);
+    return newSettings;
+  };
+};
+
+/** may no longer be needed
+const addSourceForStorageToSettings = async (
   newSource: SourceForStorage
 ): Promise<SettingsEditor> => {
   const newSourceInt: SourceInternal = await convertSourceToInternalFromStorage(
     newSource
   );
-  return (settings: SettingsInternal): SettingsInternal => {
-    const newSettings: SettingsInternal = R.clone(settings);
-    newSettings.sources = R.append(newSourceInt, newSettings.sources);
-    return newSettings;
-  };
+  return addSourceInternalToSettings(newSourceInt);
 };
+ */
 
 /**
 
@@ -616,13 +621,13 @@ export const addDragDropListeners = (
 };
 
 /**
- param newSource must have unique location
- param iri (optional) must be unique, will be written to a file in the repo
+ param newSource must have unique ID & location
+ param sourceIdIsOptional means that newSource.id is only a recommendation and should only be used if there is no IRI
  */
-const dispatchAddToSettings = (newSource: SourceForStorage): AppThunk => async (
-  dispatch,
-  getState
-) => {
+const dispatchAddToSettings = (
+  newSource: SourceInternal,
+  sourceIdIsOptional: boolean
+): AppThunk => async (dispatch, getState) => {
   const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
       R.contains(
@@ -631,22 +636,57 @@ const dispatchAddToSettings = (newSource: SourceForStorage): AppThunk => async (
       ),
     getState().distnet.settings.sources
   );
+  const sourceIdAlreadyInSource: SourceInternal | undefined = R.find(
+    (s) => s.id === newSource.id,
+    getState().distnet.settings.sources
+  );
+  let iri = await readIriFromWellKnownDir(newSource.urls[0].url);
+  const iriAlreadyInSource: SourceInternal | undefined = R.find(
+    (s) => s.id === iri,
+    getState().distnet.settings.sources
+  );
   if (urlAlreadyInSource) {
     alert(
-      `That path ${newSource.urls[0].url} already exists in source ${urlAlreadyInSource.id}`
+      `That path ${newSource.urls[0].url} already exists in source: ${urlAlreadyInSource.id}`
+    );
+  } else if (sourceIdAlreadyInSource) {
+    alert(`That source ID of ${iri} already exists.`);
+  } else if (iriAlreadyInSource) {
+    alert(`That IRI of ${iri} already exists.`);
+  } else if (!!iri && iri !== newSource.id && !sourceIdIsOptional) {
+    alert(
+      `The IRI on the file system of ${iri} doesn't match the supplied IRI of: ${newSource.id}`
     );
   } else {
-    const iri = await readIriFromWellKnownDir(newSource.urls[0].url);
-    const iriAlreadyInSource: SourceInternal | undefined = R.find(
-      (s) => s.id === iri,
-      getState().distnet.settings.sources
-    );
-    if (iriAlreadyInSource) {
-      // alert, but allow to keep going
-      alert(`That IRI of ${iri} is now duplicated in two sources.`);
+    if (!iri) {
+      saveIriToWellKnownDir(newSource.urls[0].url, newSource.id).catch(
+        (err) => {
+          console.log(
+            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.urls[0].url}`,
+            err
+          );
+          alert(
+            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.urls[0].url} ... so you may have to fix your settings.` // eslint-disable-line max-len
+          );
+        }
+      );
+      iri = newSource.id;
     }
+
+    // at this point, the IRI should be set to the right thing
+    if (sourceIdIsOptional) {
+      newSource.id = iri;
+    } else if (newSource.id !== iri) {
+      console.log(
+        `Got a problem correlating ID ${newSource.id} to the IRI ${iri} ... so you may have to fix your settings. This shouldn't happen because the logic above should have set things correctly, but I guess it's good I added this warning.` // eslint-disable-line max-len
+      );
+      alert(
+        `Got a problem correlating ID ${newSource.id} to the IRI ${iri} ... so you may have to fix your settings.`
+      );
+    }
+
     await dispatch(
-      dispatchModifySettings(await addSourceToSettings(newSource))
+      dispatchModifySettings(await addSourceInternalToSettings(newSource))
     );
     await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
     // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
@@ -660,22 +700,26 @@ const dispatchAddToSettings = (newSource: SourceForStorage): AppThunk => async (
 };
 
 const dispatchBuildSourceAndAddToSettings = (
+  prefix: string,
   filePath: string
 ): AppThunk => async (dispatch) => {
   const fileUrl = `file://${filePath}`;
+  const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
+  const newId = `${prefix}:${newPath}`;
   const newSource = {
+    id: newId,
     urls: [{ url: fileUrl }],
   };
-  await dispatch(dispatchAddToSettings(newSource));
+  await dispatch(dispatchAddToSettings(newSource, true));
 };
 
-export const dispatchAddGenealogyToSettings = (newSource: SourceForStorage) =>
-  dispatchAddToSettings(newSource);
+export const dispatchAddGenealogyToSettings = (newSource: SourceInternal) =>
+  dispatchAddToSettings(newSource, false);
 
 export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings(filePath);
+  dispatchBuildSourceAndAddToSettings('history:', filePath);
 
 export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings(filePath);
+  dispatchBuildSourceAndAddToSettings('taskyaml:', filePath);
 
 export default distnetSlice.reducer;

@@ -1,9 +1,10 @@
 
+  - 0 list genealogy sources at the top of the genealogy page
   - -1 make all HTTP links open a separate window by default, just like www.familysearch.com
 
-  - get test data to show children with gedcomx:my-local-test:test-sample-norman#elinora
+  - 0 get test data to show children with gedcomx:my-local-test:test-sample-norman#elinora
 
-  - otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
+  - 0 otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
 
   - >-
     0 optimize refreshIfNewer localStorage update by only refreshing those that are newer than the previousMillis
