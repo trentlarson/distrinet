@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [?]
+
+### Added
+
+Projects:
+- Allow to show only the biggest 5 project tasks.
+
+### Changed
+
+- Store IRI in .well-known directory (rather than in settings.yml).
+
+Projects:
+- Use public forecasting server.
+
+
+
+## [0.1.14] - 2021-08-16 - 09691f4057e21fc7f3ef8636ba43e29e57674a8b
+
+### Changed
+
+Histories:
+- Use semantic bookmarklet code from inside app (rather than from familyhistories.info).
+
+
+
 ## [0.1.10] - 2021-07-25 - d87d3034ed92f3da3b56436cc22fdda58800473b
 
 ### Fixed

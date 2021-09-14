@@ -51,7 +51,7 @@ To run tests:
 
 To package (following https://www.electron.build/auto-update ):
 
-- Edit both package.json versions (in / and /app).
+- Edit all versions: package.json in / and /app, and HelpPage.
 - Add to CHANGELOG.md
 - `git push` and let GitHub build all packages before pushing anything new.
   - Sometimes GitHub builds will fail when publishing a file (eg. with a timeout or hang up) and bumping the version can fix it.

@@ -4,16 +4,10 @@ tasks :
 
   - 2 move the settings IDs to a .well-known directory id:well-known :
     - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit (and erase)
+    - test the drag-and-drops
     - auto-create source ID on load? allow null?
     - on settings read, read from the .well-known dir for the localUrl
     - on settings change
-    - Fix the spaces in file name
-```
-      - name: History Multimedia from Janell
-        id: 'histories:484e1fd5-976b-4e01-883d-2e1840478d76_Janell_multimedia'
-        urls:
-          - url: file:///Users/tlarson/backed/Multimedia from Janell
-```
     - edit IRI
     - when a diff is detected, make sure there are big warnings if the .iri is changed.
     - rename Source id to iri

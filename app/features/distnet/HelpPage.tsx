@@ -91,8 +91,8 @@ export default function HelpPage(): JSX.Element {
         type="button"
         onClick={() => {
           const appInfo = `
-            ${process.env.npm_package_name}
-            Version ${process.env.npm_package_version}
+            Distrinet Apps
+            Version 0.1.15-beta
           `;
           alert(appInfo);
         }}
