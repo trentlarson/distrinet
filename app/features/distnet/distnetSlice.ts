@@ -294,7 +294,7 @@ const convertSettingsToInternalFromStorage = async (
 const convertSourceToStorageFromInternal = (
   source: SourceInternal
 ): SourceForStorage => {
-  return { name: source.name, type: source.type, urls: source.urls };
+  return R.omit('id', source);
 };
 
 const convertSettingsToStorageFromInternal = (
@@ -717,9 +717,9 @@ export const dispatchAddGenealogyToSettings = (newSource: SourceInternal) =>
   dispatchAddToSettings(newSource, false);
 
 export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('history:', filePath);
+  dispatchBuildSourceAndAddToSettings('histories', filePath);
 
 export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('taskyaml:', filePath);
+  dispatchBuildSourceAndAddToSettings('taskyaml', filePath);
 
 export default distnetSlice.reducer;
