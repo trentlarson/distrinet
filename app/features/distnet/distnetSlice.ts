@@ -294,7 +294,7 @@ const convertSettingsToInternalFromStorage = async (
 const convertSourceToStorageFromInternal = (
   source: SourceInternal
 ): SourceForStorage => {
-  return R.omit('id', source);
+  return R.omit(['id'], source);
 };
 
 const convertSettingsToStorageFromInternal = (

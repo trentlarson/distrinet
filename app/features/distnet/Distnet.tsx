@@ -24,7 +24,7 @@ import {
   dispatchSetSettingsText,
   testSettingsYamlText,
 } from './distnetSlice';
-import { isUriLocalhost } from './uriTools';
+import uriTools from './uriTools';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 
@@ -122,10 +122,11 @@ export default function Distnet(options: AppInfo) {
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => (
                 <tr key={uriSource.urls[0].url}>
-                  <td>{uriSource.id || '-'}</td>
+                  <td>{uriTools.globalUriScheme(uriSource.id)}</td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
-                    {uriSource.urls[0] && isUriLocalhost(uriSource.urls[0].url)
+                    {uriSource.urls[0] &&
+                     uriTools.isUriLocalhost(uriSource.urls[0].url)
                       ? ''
                       : 'Y'}
                   </td>
