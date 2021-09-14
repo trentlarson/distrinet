@@ -126,7 +126,7 @@ export default function Distnet(options: AppInfo) {
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
                     {uriSource.urls[0] &&
-                     uriTools.isUriLocalhost(uriSource.urls[0].url)
+                    uriTools.isUriLocalhost(uriSource.urls[0].url)
                       ? ''
                       : 'Y'}
                   </td>
