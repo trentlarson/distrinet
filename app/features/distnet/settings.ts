@@ -42,7 +42,7 @@ interface WellKnownAndIri {
 }
 
 async function getIriFileName(localUrl: string): Promise<WellKnownAndIri> {
-  const filename: string = new url.URL(localUrl).pathname;
+  const filename: string = url.fileURLToPath(localUrl);
   let containingDir: string = filename;
   let finalIriFile = '.iri';
   const sourceStats = await fs.promises.stat(filename);
