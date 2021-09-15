@@ -732,7 +732,7 @@ export const dispatchVolunteer = (
           }
           const sourceUrls = R.prepend(
             source.workUrl,
-            source.urls.map((u) => u.url)
+            (source.urls || []).map(R.prop('url'))
           );
           for (let i = 0; projectContents && i < sourceUrls.length; i += 1) {
             // now find where to write the task
@@ -753,10 +753,7 @@ export const dispatchVolunteer = (
                 projectContents.log || []
               );
               const projectYamlString = yaml.safeDump(projectContents);
-              saveToFile(
-                url.fileURLToPath(sourceUrls[i]),
-                projectYamlString
-              )
+              saveToFile(url.fileURLToPath(sourceUrls[i]), projectYamlString)
                 .then(() => {
                   console.log(
                     'Successfully saved task',

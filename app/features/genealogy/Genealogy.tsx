@@ -305,8 +305,10 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
     );
     let sourceUrlWithPrefix = null;
     if (!sourceWithPrefix) {
-      const urls = R.flatten(sources.map((s) => s.urls.map((u) => u.url)));
-      const allUrls = R.prepend(source.workUrl, urls);
+      const urls = R.flatten(
+        sources.map((s) => (s.urls || []).map(R.prop('url')))
+      );
+      const allUrls = R.concat(sources.map(R.prop('workUrl')), urls);
       sourceUrlWithPrefix = R.find((u) => rootUri.startsWith(u), allUrls);
     }
     if (!sourceWithPrefix && !sourceUrlWithPrefix) {

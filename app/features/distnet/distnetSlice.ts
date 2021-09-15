@@ -631,10 +631,7 @@ const dispatchAddToSettings = (
   const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
       newSource.workUrl === s.workUrl ||
-      R.contains(
-        newSource.workUrl,
-        s.urls.map((u) => u.url)
-      ),
+      R.contains(newSource.workUrl, (s.urls || []).map(R.prop('url'))),
     getState().distnet.settings.sources
   );
   const sourceIdAlreadyInSource: SourceInternal | undefined = R.find(
@@ -660,17 +657,15 @@ const dispatchAddToSettings = (
     );
   } else {
     if (!iri) {
-      saveIriToWellKnownDir(newSource.workUrl, newSource.id).catch(
-        (err) => {
-          console.log(
-            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl}`,
-            err
-          );
-          alert(
-            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl} ... so you may have to fix your settings.` // eslint-disable-line max-len
-          );
-        }
-      );
+      saveIriToWellKnownDir(newSource.workUrl, newSource.id).catch((err) => {
+        console.log(
+          `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl}`,
+          err
+        );
+        alert(
+          `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl} ... so you may have to fix your settings.` // eslint-disable-line max-len
+        );
+      });
       iri = newSource.id;
     }
 

@@ -9,7 +9,6 @@ import {
   CacheData,
   SettingsInternal,
   SourceInternal,
-  UrlData,
 } from './distnetClasses';
 
 const fsPromises = fs.promises;
@@ -54,18 +53,17 @@ export const loadOneSourceContents: (
   let cacheInfo: CacheData | null = null;
 
   let index = 0;
-  const sourceUrls = R.prepend({ url: source.workUrl }, source.urls);
-  console.log(
-    'Trying to retrieve URLs',
-    sourceUrls.map((u: UrlData) => u.url),
-    'for caching...'
+  const sourceUrls = R.prepend(
+    source.workUrl,
+    (source.urls || []).map(R.prop('url'))
   );
+  console.log('Trying to retrieve URLs', sourceUrls, 'for caching...');
 
   while (!cacheInfo && index < sourceUrls.length) {
     const thisIndex = index;
     index += 1; // because an error before incrementing causes an infinte loop
     try {
-      const sourceUrl = new url.URL(sourceUrls[thisIndex].url);
+      const sourceUrl = new url.URL(sourceUrls[thisIndex]);
       if (sourceUrl.protocol === 'file:') {
         console.log(
           '... trying to read file',
@@ -192,7 +190,7 @@ export const loadOneSourceContents: (
       // probably a TypeError for a bad URL (including null or blank URLs)
       console.log(
         'Failed to retrieve and cache URL',
-        sourceUrls[thisIndex].url,
+        sourceUrls[thisIndex],
         'in source',
         source,
         e

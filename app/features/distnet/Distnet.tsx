@@ -125,9 +125,7 @@ export default function Distnet(options: AppInfo) {
                   <td>{uriTools.globalUriScheme(uriSource.id)}</td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
-                    {uriTools.isUriLocalhost(uriSource.workUrl)
-                      ? ''
-                      : 'Y'}
+                    {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
                   </td>
                   <td>
                     {distnet.cache[uriSource.id]
@@ -136,38 +134,37 @@ export default function Distnet(options: AppInfo) {
                   </td>
                   <td>
                     {R.prepend(
-                      { url: uriSource.workUrl }, uriSource.urls || []
-                    ).map(
-                      (inUrl, index) => (
-                        <span key={inUrl && inUrl.url}>
-                          {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                          {index > 0 ? `, ${index + 1}) ` : ''}
-                          <a
-                            href="#"
-                            key={inUrl && inUrl.url}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              electron.shell.openExternal(inUrl.url);
-                            }}
-                          >
-                            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                            Open
-                          </a>
-                          {inUrl?.url?.startsWith('file:') ? (
-                            <span>
-                              ,&nbsp;
-                              <a href={inUrl.url}>
-                                Drag&nbsp;
-                                {getExtension(inUrl.url)}
-                              </a>
-                            </span>
-                          ) : (
-                            ''
-                          )}
-                          {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                        </span>
-                      )
-                    )}
+                      { url: uriSource.workUrl },
+                      uriSource.urls || []
+                    ).map((inUrl, index) => (
+                      <span key={inUrl && inUrl.url}>
+                        {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                        {index > 0 ? `, ${index + 1}) ` : ''}
+                        <a
+                          href="#"
+                          key={inUrl && inUrl.url}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            electron.shell.openExternal(inUrl.url);
+                          }}
+                        >
+                          {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                          Open
+                        </a>
+                        {inUrl?.url?.startsWith('file:') ? (
+                          <span>
+                            ,&nbsp;
+                            <a href={inUrl.url}>
+                              Drag&nbsp;
+                              {getExtension(inUrl.url)}
+                            </a>
+                          </span>
+                        ) : (
+                          ''
+                        )}
+                        {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                      </span>
+                    ))}
                   </td>
                 </tr>
               ))}
