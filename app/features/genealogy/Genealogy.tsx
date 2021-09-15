@@ -305,7 +305,8 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
     );
     let sourceUrlWithPrefix = null;
     if (!sourceWithPrefix) {
-      const allUrls = R.flatten(sources.map((s) => s.urls.map((u) => u.url)));
+      const urls = R.flatten(sources.map((s) => s.urls.map((u) => u.url)));
+      const allUrls = R.prepend(source.workUrl, urls);
       sourceUrlWithPrefix = R.find((u) => rootUri.startsWith(u), allUrls);
     }
     if (!sourceWithPrefix && !sourceUrlWithPrefix) {
@@ -349,7 +350,7 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
               const newSource = {
                 id: settingsId,
                 name: settingsName,
-                urls: [{ url: settingsUrl }],
+                workUrl: settingsUrl,
               };
               dispatch(dispatchAddGenealogyToSettings(newSource));
 

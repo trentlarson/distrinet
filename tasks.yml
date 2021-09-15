@@ -3,16 +3,16 @@ tasks :
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 2 move the settings IDs to a .well-known directory id:well-known :
-    - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit (and erase)
-    - test the drag-and-drops
+    - create a mainUrl for the editable version
+    - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit
+    - do I make my own copy a special property or just assume it's the first in the list?
+    - use "fetch" to read IRIs from URLs? (to allow for non-"file:" URLs)
     - auto-create source ID on load? allow null?
-    - on settings read, read from the .well-known dir for the localUrl
-    - on settings change
     - edit IRI
     - when a diff is detected, make sure there are big warnings if the .iri is changed.
     - rename Source id to iri
     - backup the .well-known directory in history ref:#history
-    - totally remove the ID/IRI creation from genealogy when adding a new one
+    - auto-set the ID/IRI creation in genealogy when dropping a new one (if IRI exists)
     - rename Source "type" to transfer/storage/sharing-type
     - write tests for the file-checking methods in settings.txt (& elsewhere?)
 

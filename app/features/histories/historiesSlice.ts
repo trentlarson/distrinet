@@ -270,14 +270,8 @@ export const dispatchLoadHistoryDirsIfEmpty = (): AppThunk => async (
     );
     const uriAndTreePromises: Array<Promise<UriAndTree | null>> = historySources.map(
       (source) => {
-        if (
-          source.urls &&
-          source.urls[0] &&
-          source.urls[0].url &&
-          // see task id:uri-local-version
-          new URL(source.urls[0].url).protocol === 'file:'
-        ) {
-          return loadFileOrDir(fileURLToPath(source.urls[0].url), '').then(
+        if (new URL(source.workUrl).protocol === 'file:') {
+          return loadFileOrDir(fileURLToPath(source.workUrl), '').then(
             (fileTree) => {
               return { uri: source.id, tree: fileTree };
             }

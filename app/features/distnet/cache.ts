@@ -54,16 +54,18 @@ export const loadOneSourceContents: (
   let cacheInfo: CacheData | null = null;
 
   let index = 0;
+  const sourceUrls = R.prepend({ url: source.workUrl }, source.urls);
   console.log(
     'Trying to retrieve URLs',
-    source.urls.map((u: UrlData) => u.url),
+    sourceUrls.map((u: UrlData) => u.url),
     'for caching...'
   );
-  while (!cacheInfo && index < source.urls.length) {
+
+  while (!cacheInfo && index < sourceUrls.length) {
     const thisIndex = index;
     index += 1; // because an error before incrementing causes an infinte loop
     try {
-      const sourceUrl = new url.URL(source.urls[thisIndex].url);
+      const sourceUrl = new url.URL(sourceUrls[thisIndex].url);
       if (sourceUrl.protocol === 'file:') {
         console.log(
           '... trying to read file',
@@ -190,7 +192,7 @@ export const loadOneSourceContents: (
       // probably a TypeError for a bad URL (including null or blank URLs)
       console.log(
         'Failed to retrieve and cache URL',
-        source.urls[thisIndex].url,
+        sourceUrls[thisIndex].url,
         'in source',
         source,
         e
@@ -217,7 +219,7 @@ const loadOneOfTheSources: (
   arg2: string
 ) => Promise<CacheData | null> = async (sources, sourceId, cacheDir) => {
   const source = R.find((src) => src.id === sourceId, sources);
-  if (source && source.urls) {
+  if (source) {
     return loadOneSourceContents(source, cacheDir);
   }
   console.error('Failed to retrieve and cache any sources for', sourceId);

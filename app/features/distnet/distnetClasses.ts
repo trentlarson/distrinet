@@ -26,8 +26,9 @@ export interface SettingsForStorage {
 
 export interface SourceForStorage {
   name?: string;
+  workUrl: string;
   type?: string; // type of transfer/storage/sharing
-  urls: Array<UrlData>;
+  urls?: Array<UrlData>;
 }
 
 // Full Settings, built in memory

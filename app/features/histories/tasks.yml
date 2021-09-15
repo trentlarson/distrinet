@@ -8,4 +8,3 @@
   - 0 log search errors somewhere in app, available to user id:log-errors
   - 0 pass the search term from the histories onto a history page for quicker finding
   - 1 load history file from list & show relationship +histories
-  - 1 load the right local copy (because it might not be element 0) id:uri-local-version

@@ -121,12 +121,11 @@ export default function Distnet(options: AppInfo) {
             </thead>
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => (
-                <tr key={uriSource.urls[0].url}>
+                <tr key={uriSource.workUrl}>
                   <td>{uriTools.globalUriScheme(uriSource.id)}</td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
-                    {uriSource.urls[0] &&
-                    uriTools.isUriLocalhost(uriSource.urls[0].url)
+                    {uriTools.isUriLocalhost(uriSource.workUrl)
                       ? ''
                       : 'Y'}
                   </td>
@@ -136,9 +135,10 @@ export default function Distnet(options: AppInfo) {
                       : '(none)'}
                   </td>
                   <td>
-                    {uriSource.urls &&
-                    Array.isArray(uriSource.urls) && // can fail with malformed settings
-                      uriSource.urls.map((inUrl, index) => (
+                    {R.prepend(
+                      { url: uriSource.workUrl }, uriSource.urls || []
+                    ).map(
+                      (inUrl, index) => (
                         <span key={inUrl && inUrl.url}>
                           {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                           {index > 0 ? `, ${index + 1}) ` : ''}
@@ -166,7 +166,8 @@ export default function Distnet(options: AppInfo) {
                           )}
                           {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                         </span>
-                      ))}
+                      )
+                    )}
                   </td>
                 </tr>
               ))}

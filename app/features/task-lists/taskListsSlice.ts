@@ -677,8 +677,6 @@ export const dispatchVolunteer = (
       );
       if (
         source &&
-        source.urls &&
-        source.urls.length > 0 &&
         getState().distnet.cache &&
         getState().distnet.cache[task.sourceId] &&
         getState().distnet.cache[task.sourceId].contents
@@ -732,9 +730,13 @@ export const dispatchVolunteer = (
             );
             return;
           }
-          for (let i = 0; projectContents && i < source.urls.length; i += 1) {
+          const sourceUrls = R.prepend(
+            source.workUrl,
+            source.urls.map((u) => u.url)
+          );
+          for (let i = 0; projectContents && i < sourceUrls.length; i += 1) {
             // now find where to write the task
-            if (isFileUrl(source.urls[i].url)) {
+            if (isFileUrl(sourceUrls[i])) {
               const newLog: Log = {
                 id: uuid.v4(),
                 taskId,
@@ -752,7 +754,7 @@ export const dispatchVolunteer = (
               );
               const projectYamlString = yaml.safeDump(projectContents);
               saveToFile(
-                url.fileURLToPath(source.urls[i].url),
+                url.fileURLToPath(sourceUrls[i]),
                 projectYamlString
               )
                 .then(() => {
@@ -760,7 +762,7 @@ export const dispatchVolunteer = (
                     'Successfully saved task',
                     taskId,
                     'to file',
-                    source.urls[i].url
+                    sourceUrls[i]
                   );
                   return true;
                 })
@@ -769,7 +771,7 @@ export const dispatchVolunteer = (
                     'Failed to save task',
                     taskId,
                     'to file',
-                    source.urls[i].url,
+                    sourceUrls[i],
                     'because',
                     err
                   );
@@ -779,7 +781,7 @@ export const dispatchVolunteer = (
                 'I do not know how to save task',
                 taskId,
                 '... to this URL',
-                source.urls[i]
+                sourceUrls[i]
               );
             }
           }

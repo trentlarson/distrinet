@@ -108,7 +108,7 @@
     } else {
 
       const source = R.find((src) => src.id === uri, sources);
-      if (source && source.urls) {
+      if (source) {
         await loader.loadOneSourceContents(source)
           .then((cacheData) => {
             if (cacheData) {
@@ -135,7 +135,7 @@
           }
         }
         const source = R.find((src) => src.id === prefixUri, sources);
-        if (prefixUri && source && source.urls) {
+        if (prefixUri && source) {
           try {
 
             await loader.loadOneSourceContents(source)

@@ -128,8 +128,8 @@ function checkSettingsInternal(loaded: SettingsInternal): string | null {
   if (isSettingsInternal(loaded) && loaded.sources) {
     const errorsOrNulls = loaded.sources.map(
       (s: SourceInternal, index: number) => {
-        if (!s.urls || s.urls.length === 0) {
-          return `Source #${index + 1} has no URL.`;
+        if (!s.workUrl) {
+          return `Source #${index + 1} has no working URL.`;
         }
         return null;
       }
@@ -143,7 +143,7 @@ function checkSettingsInternal(loaded: SettingsInternal): string | null {
     const dupsLists = R.filter((sa) => sa.length > 1, R.values(dupIds));
     if (dupsLists.length > 0) {
       const ids = R.map((dups) => dups[0], dupsLists);
-      return `These sources have duplicate URI IDs: ${JSON.stringify(ids)}`;
+      return `These sources have duplicate IRI IDs: ${JSON.stringify(ids)}`;
     }
   } else {
     return 'That settings object does not have all settings elements, ie. sources';
@@ -263,10 +263,10 @@ export const dispatchSetSettingsText = (
 const convertSourceToInternalFromStorage = async (
   storSource: SourceForStorage
 ): Promise<SourceInternal> => {
-  let id = await readIriFromWellKnownDir(storSource.urls[0].url);
+  let id = await readIriFromWellKnownDir(storSource.workUrl);
   if (!id) {
     // we'll generate something internally to ensure we have one
-    id = storSource.urls[0].url;
+    id = storSource.workUrl;
   }
   const sourceInt: SourceInternal = { ...storSource, id };
   return sourceInt;
@@ -519,8 +519,8 @@ export const addDistrinetTaskSource: SettingsEditor = (
   const newSource: SourceInternal = {
     id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
     name: 'Distrinet Project',
+    workUrl: `file://${baseTasksPath}`,
     urls: [
-      { url: `file://${baseTasksPath}` },
       {
         url:
           'https://raw.githubusercontent.com/trentlarson/distrinet/master/tasks.yml',
@@ -555,11 +555,11 @@ export const testSettingsYamlText = (appPath: string): string => {
   /* eslint-enable prefer-template */
 
   testSettings.sources = [
-    { name: 'Sample Genealogy', urls: [ { url: genealogyPath } ] },
-    { name: 'Sample Histories', urls: [ { url: historiesPath } ] },
-    { name: 'Sample Business Project', urls: [ { url: businessTasksUrl } ] },
-    { name: 'Sample Camping Project', urls: [ { url: campingTasksUrl } ] },
-    { name: 'Sample Workweek Project', urls: [ { url: workweekTasksUrl } ] },
+    { name: 'Sample Genealogy', workUrl: genealogyPath },
+    { name: 'Sample Histories', workUrl: historiesPath },
+    { name: 'Sample Business Project', workUrl: businessTasksUrl },
+    { name: 'Sample Camping Project', workUrl: campingTasksUrl },
+    { name: 'Sample Workweek Project', workUrl: workweekTasksUrl },
   ];
 
   /* eslint-enable prettier/prettier */
@@ -630,8 +630,9 @@ const dispatchAddToSettings = (
 ): AppThunk => async (dispatch, getState) => {
   const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
+      newSource.workUrl === s.workUrl ||
       R.contains(
-        newSource.urls[0].url,
+        newSource.workUrl,
         s.urls.map((u) => u.url)
       ),
     getState().distnet.settings.sources
@@ -640,14 +641,14 @@ const dispatchAddToSettings = (
     (s) => s.id === newSource.id,
     getState().distnet.settings.sources
   );
-  let iri = await readIriFromWellKnownDir(newSource.urls[0].url);
+  let iri = await readIriFromWellKnownDir(newSource.workUrl);
   const iriAlreadyInSource: SourceInternal | undefined = R.find(
     (s) => s.id === iri,
     getState().distnet.settings.sources
   );
   if (urlAlreadyInSource) {
     alert(
-      `That path ${newSource.urls[0].url} already exists in source: ${urlAlreadyInSource.id}`
+      `That path ${newSource.workUrl} already exists in source: ${urlAlreadyInSource.id}`
     );
   } else if (sourceIdAlreadyInSource) {
     alert(`That source ID of ${iri} already exists.`);
@@ -659,14 +660,14 @@ const dispatchAddToSettings = (
     );
   } else {
     if (!iri) {
-      saveIriToWellKnownDir(newSource.urls[0].url, newSource.id).catch(
+      saveIriToWellKnownDir(newSource.workUrl, newSource.id).catch(
         (err) => {
           console.log(
-            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.urls[0].url}`,
+            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl}`,
             err
           );
           alert(
-            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.urls[0].url} ... so you may have to fix your settings.` // eslint-disable-line max-len
+            `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl} ... so you may have to fix your settings.` // eslint-disable-line max-len
           );
         }
       );
@@ -708,7 +709,7 @@ const dispatchBuildSourceAndAddToSettings = (
   const newId = `${prefix}:${newPath}`;
   const newSource = {
     id: newId,
-    urls: [{ url: fileUrl }],
+    workUrl: fileUrl,
   };
   await dispatch(dispatchAddToSettings(newSource, true));
 };
