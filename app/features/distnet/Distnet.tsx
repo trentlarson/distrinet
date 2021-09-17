@@ -122,7 +122,36 @@ export default function Distnet(options: AppInfo) {
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => (
                 <tr key={uriSource.workUrl}>
-                  <td>{uriTools.globalUriScheme(uriSource.id)}</td>
+                  <td>
+                    {uriTools.globalUriScheme(uriSource.id)}
+                    &nbsp;
+                    {/* eslint-disable no-new */}
+                    {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus,no-new */}
+                    <a
+                      className="fa fa-copy"
+                      role="button"
+                      title="Copy IRI"
+                      onClick={() => {
+                        electron.clipboard.writeText(uriSource.id);
+                        new Notification('Copied', {
+                          body: `Added this to your clipboard: ${uriSource.id}`,
+                          silent: true,
+                        });
+                      }}
+                    />
+                    {/* eslint-enable no-new */}
+                    &nbsp;
+                    <a
+                      href={uriSource.idFile}
+                      onClick={() => {
+                        alert(
+                          'This IRI file is meant to be dragged into a text editor. Restart the app if that is not what you wanted.' // eslint-disable-line max-len
+                        );
+                      }}
+                    >
+                      <i title="Drag IRI File" className="fa fa-hand-rock" />
+                    </a>
+                  </td>
                   <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                   <td>
                     {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}

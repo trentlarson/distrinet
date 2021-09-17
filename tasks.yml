@@ -3,7 +3,6 @@ tasks :
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 2 move the settings IDs to a .well-known directory id:well-known :
-    - create a mainUrl for the editable version
     - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit
     - do I make my own copy a special property or just assume it's the first in the list?
     - use "fetch" to read IRIs from URLs? (to allow for non-"file:" URLs)

@@ -3,8 +3,6 @@ import { createSlice } from '@reduxjs/toolkit';
 // imports in this app
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
-// eslint-disable-next-line import/no-cycle
-import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 import MapperBetweenSets from './samePerson';
 
 interface Payload<T> {
@@ -47,6 +45,9 @@ export const resetIdMappings = (): AppThunk => async (): Promise<void> => {
   console.log('Cache cleared.');
 };
 
+/**
+ Refresh all ID mappings for all sources.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const refreshIdMapperForDispatch = (): AppThunk => async (
   dispatch,
@@ -59,12 +60,14 @@ export const refreshIdMapperForDispatch = (): AppThunk => async (
   );
 };
 
+/**
+ Update ID mappings for given source.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const updateSettingsAndIdMapperForDispatch = (
-  sourceId: string
-): AppThunk => async (dispatch, getState): Promise<void> => {
-  // Two caches... let's hope we never have any more!
-  await dispatch(dispatchReloadCacheForFile(sourceId));
+export const updateIdMapperForDispatch = (sourceId: string): AppThunk => async (
+  dispatch,
+  getState
+): Promise<void> => {
   if (sourceId) {
     const { cache } = getState().distnet;
     MapperBetweenSets.forceOneRefresh(

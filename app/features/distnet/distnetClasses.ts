@@ -38,6 +38,7 @@ export interface SettingsInternal extends SettingsForStorage {
 
 export interface SourceInternal extends SourceForStorage {
   id: string;
+  idFile: string;
 }
 
 /** not yet ready

@@ -5,6 +5,7 @@ import * as R from 'ramda';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import url from 'url';
 
 // imports for this app
 import routes from '../../constants/routes.json';
@@ -12,13 +13,15 @@ import { RootState } from '../../store';
 import { SourceInternal } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
-  dispatchAddGenealogyToSettings,
+  buildSource,
+  dispatchAddSourceToSettings,
 } from '../distnet/distnetSlice';
+import { isErrorResult } from '../distnet/settings';
 import uriTools from '../distnet/uriTools';
 import {
   refreshIdMapperForDispatch,
   setRootUri,
-  updateSettingsAndIdMapperForDispatch,
+  updateIdMapperForDispatch,
 } from './genealogySlice';
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
@@ -62,9 +65,9 @@ export default function Genealogy() {
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
     svgHeight: 400,
-    newWindow: (url: string) => {
+    newWindow: (someUrl: string) => {
       // open a new window
-      window.open(url);
+      window.open(someUrl);
     },
     // refreshWindow: Couldn't figure it out.
     // Other things are available if you import 'electron', eg webFrame.context.location.getURL(),
@@ -249,21 +252,12 @@ function OfferToSaveIfNew(options: SaveOptions) {
     newUrlText = newUrl.toString();
   }
 
-  let uriText = newUrlText;
-  if (newUrlText.startsWith('file://')) {
-    // guess at a better URI & assume GedcomX
-    const nonFileUri = newUrlText.substring('file://'.length);
-    const remainingPath = uriTools.bestGuessAtGoodUriPath(nonFileUri);
-    uriText = `gedcomx:${remainingPath}`;
-  }
-
   const newNamePrefix = newUrlText.startsWith('file:') ? 'Local ' : '';
   const replaced = newUrlText.split(path.sep).slice(-2).join(' ');
   const newName = `${newNamePrefix}${replaced}`;
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   return SourceInputs({
-    id: uriText,
     name: newName,
     rootUri,
     url: newUrlText,
@@ -271,7 +265,6 @@ function OfferToSaveIfNew(options: SaveOptions) {
 }
 
 interface NewSourceOptions {
-  id: string;
   name: string;
   url: string;
   rootUri: string;
@@ -280,16 +273,14 @@ interface NewSourceOptions {
 function SourceInputs(sourceOptions: NewSourceOptions) {
   // Why doesn't it work to set these defaults and I have to set them later in a useEffect?
   // see https://matthewdaly.co.uk/blog/2019/10/27/input-components-with-the-usestate-and-useeffect-hooks-in-react/
-  const [settingsId, setSettingsId] = useState(sourceOptions.id);
   const [settingsName, setSettingsName] = useState(sourceOptions.name);
   const [settingsUrl, setSettingsUrl] = useState(sourceOptions.url);
   const { rootUri } = sourceOptions;
 
   useEffect(() => {
-    setSettingsId(sourceOptions.id);
     setSettingsName(sourceOptions.name);
     setSettingsUrl(sourceOptions.url);
-  }, [sourceOptions.id, sourceOptions.name, sourceOptions.url]);
+  }, [sourceOptions.name, sourceOptions.url]);
 
   const dispatch = useDispatch();
   const sources: Array<SourceInternal> = useSelector(
@@ -326,43 +317,34 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
             }}
           />
           <br />
-          URI &nbsp;
-          <input
-            type="text"
-            size={100}
-            value={settingsId}
-            onChange={(event) => {
-              setSettingsId(event.target.value);
-            }}
-          />
-          <br />
-          Location &nbsp;
-          <input
-            type="text"
-            size={100}
-            value={settingsUrl}
-            onChange={(event) => {
-              setSettingsUrl(event.target.value);
-            }}
-          />
+          Location&nbsp;
+          {settingsUrl}
           <br />
           <button
             type="button"
             onClick={() => {
-              const newSource = {
-                id: settingsId,
-                name: settingsName,
-                workUrl: settingsUrl,
-              };
-              dispatch(dispatchAddGenealogyToSettings(newSource));
-
-              dispatch(updateSettingsAndIdMapperForDispatch(settingsId));
-
-              dispatch(setRootUri(settingsId));
-
-              setSettingsId('');
-              setSettingsName('');
-              setSettingsUrl('');
+              buildSource(
+                settingsName,
+                'gedcomx',
+                url.fileURLToPath(settingsUrl),
+                sources
+              )
+                .then(async (newSource) => {
+                  if (isErrorResult(newSource)) {
+                    alert(newSource.error);
+                  } else {
+                    await dispatch(dispatchAddSourceToSettings(newSource));
+                    dispatch(updateIdMapperForDispatch(newSource.id));
+                    dispatch(setRootUri(newSource.id));
+                    setSettingsName('');
+                    setSettingsUrl('');
+                  }
+                  return null;
+                })
+                .catch((err) => {
+                  console.log('Got an error trying to set that source info.');
+                  alert(`Got an error with that source info: ${err.message}`);
+                });
             }}
           >
             Add to your permanent settings & search for same IDs.
@@ -372,7 +354,6 @@ function SourceInputs(sourceOptions: NewSourceOptions) {
             type="button"
             onClick={() => {
               dispatch(setRootUri(''));
-              setSettingsId('');
               setSettingsName('');
               setSettingsUrl('');
             }}

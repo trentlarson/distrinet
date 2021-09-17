@@ -41,7 +41,7 @@ interface WellKnownAndIri {
   iriFile: string;
 }
 
-async function getIriFileName(localUrl: string): Promise<WellKnownAndIri> {
+async function retrieveIriFileName(localUrl: string): Promise<WellKnownAndIri> {
   const filename: string = url.fileURLToPath(localUrl);
   let containingDir: string = filename;
   let finalIriFile = '.iri';
@@ -64,34 +64,57 @@ async function getIriFileName(localUrl: string): Promise<WellKnownAndIri> {
   return { wellKnownDir, iriFile };
 }
 
+export interface IriResults {
+  iri?: string; // optional because it may not exist
+  iriFile: string; // always a value; if it doesn't exist, this is the file where it would be located
+}
+
+export function isIriResults(contents: any): contents is IriResults {
+  return (
+    typeof contents !== 'undefined' &&
+    (contents as IriResults).iriFile !== undefined
+  );
+}
+
+export interface ErrorResult {
+  error: string;
+}
+
+export function isErrorResult(contents: any): contents is ErrorResult {
+  return (
+    typeof contents !== 'undefined' &&
+    (contents as ErrorResult).error !== undefined
+  );
+}
+
 /**
- return the IRI found on the file system, or null if it doesn't exist
+ return { iri: the IRI found on the file system or null if it doesn't exist, iriFile: the file that should contain the IRI}
  */
 export async function readIriFromWellKnownDir(
   sourceLocalUrl: string
-): Promise<string | null> {
-  const { iriFile } = await getIriFileName(sourceLocalUrl);
+): Promise<IriResults> {
+  const { iriFile } = await retrieveIriFileName(sourceLocalUrl);
   return fs.promises
     .readFile(iriFile, { encoding: 'utf-8' })
-    .then((s) => s.trim())
+    .then((s) => ({ iri: s.trim(), iriFile }))
     .catch((err) => {
       if (err.message && err.message.startsWith('ENOENT')) {
         // it doesn't exist
-        return null;
+        return { iriFile };
       }
       throw err;
     });
 }
 
 /**
- Make a .well-known/FILE.iri file, and return a Promise with null result on success or with {error:'...'} on failure.
+ Make a .well-known/FILE.iri file, and return a Promise with IRI file name as result on success or with {error:'...'} on failure.
  Throws error if something goes wrong.
  */
 export async function saveIriToWellKnownDir(
   sourceLocalUrl: string,
   iri: string
-): Promise<null> {
-  const { wellKnownDir, iriFile } = await getIriFileName(sourceLocalUrl);
+): Promise<string> {
+  const { wellKnownDir, iriFile } = await retrieveIriFileName(sourceLocalUrl);
 
   let wellKnownDirExists = false;
   await fs.promises
@@ -104,13 +127,13 @@ export async function saveIriToWellKnownDir(
           `The .well-known location exists but is not a directory here: ${sourceLocalUrl}`
         );
       }
-      return null;
+      return iriFile;
     })
     .catch((err) => {
       // just continue, expecting that it doesn't exist and we should create it
       if (err.message && err.message.startsWith('ENOENT')) {
         // it doesn't exist, so we're good to continue
-        return;
+        return iriFile;
       }
       throw err;
     });
@@ -128,5 +151,5 @@ export async function saveIriToWellKnownDir(
       // continue, knowing that we'll create it
     });
   await fs.promises.writeFile(iriFile, iri);
-  return null;
+  return iriFile;
 }

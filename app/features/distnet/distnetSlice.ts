@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 import path from 'path';
 import * as R from 'ramda';
+import url from 'url';
 import { Dispatch } from 'react';
 import { ActionCreatorWithoutPayload, createSlice } from '@reduxjs/toolkit';
 
@@ -28,6 +29,8 @@ import {
   SourceInternal,
 } from './distnetClasses';
 import {
+  ErrorResult,
+  isErrorResult,
   loadSettingsFromFile,
   readIriFromWellKnownDir,
   saveIriToWellKnownDir,
@@ -263,12 +266,13 @@ export const dispatchSetSettingsText = (
 const convertSourceToInternalFromStorage = async (
   storSource: SourceForStorage
 ): Promise<SourceInternal> => {
-  let id = await readIriFromWellKnownDir(storSource.workUrl);
-  if (!id) {
-    // we'll generate something internally to ensure we have one
-    id = storSource.workUrl;
-  }
-  const sourceInt: SourceInternal = { ...storSource, id };
+  const { iri, iriFile } = await readIriFromWellKnownDir(storSource.workUrl);
+  const finalIri = iri || storSource.workUrl;
+  const sourceInt: SourceInternal = {
+    ...storSource,
+    id: finalIri,
+    idFile: iriFile,
+  };
   return sourceInt;
 };
 
@@ -294,7 +298,7 @@ const convertSettingsToInternalFromStorage = async (
 const convertSourceToStorageFromInternal = (
   source: SourceInternal
 ): SourceForStorage => {
-  return R.omit(['id'], source);
+  return R.omit(['id', 'idFile'], source);
 };
 
 const convertSettingsToStorageFromInternal = (
@@ -402,9 +406,9 @@ export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => 
   }
 };
 
-const addSourceInternalToSettings = async (
+const addSourceInternalToSettingsObject = (
   newSource: SourceInternal
-): Promise<SettingsEditor> => {
+): SettingsEditor => {
   return (settings: SettingsInternal): SettingsInternal => {
     const newSettings: SettingsInternal = R.clone(settings);
     newSettings.sources = R.append(newSource, newSettings.sources);
@@ -413,13 +417,13 @@ const addSourceInternalToSettings = async (
 };
 
 /** may no longer be needed
-const addSourceForStorageToSettings = async (
+const addSourceForStorageToSettingsObject = async (
   newSource: SourceForStorage
 ): Promise<SettingsEditor> => {
   const newSourceInt: SourceInternal = await convertSourceToInternalFromStorage(
     newSource
   );
-  return addSourceInternalToSettings(newSourceInt);
+  return addSourceInternalToSettingsObject(newSourceInt);
 };
  */
 
@@ -511,15 +515,22 @@ export const addDistrinetTaskSource: SettingsEditor = (
   settings: SettingsInternal
 ): SettingsInternal => {
   const newSettings = _.cloneDeep(settings);
-  const baseTasksPath = path.join(
+  const baseTasksPath: string = path.join(
     electron.remote.app.getAppPath(),
     '..',
     'tasks.yml'
   );
+  const iriPath: string = path.join(
+    electron.remote.app.getAppPath(),
+    '..',
+    '.well-known',
+    'tasks.yml.iri'
+  );
   const newSource: SourceInternal = {
     id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
+    idFile: iriPath,
     name: 'Distrinet Project',
-    workUrl: `file://${baseTasksPath}`,
+    workUrl: url.pathToFileURL(baseTasksPath).toString(),
     urls: [
       {
         url:
@@ -546,11 +557,11 @@ export const testSettingsYamlText = (appPath: string): string => {
   /* eslint-disable prefer-template */
 
   const basePath = path.join(appPath, '..', 'test', 'features');
-  const genealogyPath = 'file://' + path.join(basePath, 'genealogy', 'sample-gedcomx-norman.json');
-  const historiesPath = 'file://' + path.join(basePath, 'histories', 'sample-histories');
-  const businessTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-business.yml');
-  const campingTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-camping.yml');
-  const workweekTasksUrl = 'file://' + path.join(basePath, 'task-lists', 'sample-workweek.yml');
+  const genealogyPath = url.pathToFileURL(path.join(basePath, 'genealogy', 'sample-gedcomx-norman.json')).toString();
+  const historiesPath = url.pathToFileURL(path.join(basePath, 'histories', 'sample-histories')).toString();
+  const businessTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-business.yml')).toString();
+  const campingTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-camping.yml')).toString();
+  const workweekTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-workweek.yml')).toString();
 
   /* eslint-enable prefer-template */
 
@@ -620,102 +631,130 @@ export const addDragDropListeners = (
   // There are also 'dragenter' and 'dragleave' events which may help to trigger visual indications.
 };
 
-/**
- param newSource must have unique ID & location
- param sourceIdIsOptional means that newSource.id is only a recommendation and should only be used if there is no IRI
- */
-const dispatchAddToSettings = (
-  newSource: SourceInternal,
-  sourceIdIsOptional: boolean
-): AppThunk => async (dispatch, getState) => {
+const setupLocalIri = async (
+  name: string,
+  workUrl: string,
+  suggestedId: string,
+  sources: Array<SourceInternal>
+): Promise<SourceInternal | ErrorResult> => {
   const urlAlreadyInSource: SourceInternal | undefined = R.find(
     (s) =>
-      newSource.workUrl === s.workUrl ||
-      R.contains(newSource.workUrl, (s.urls || []).map(R.prop('url'))),
-    getState().distnet.settings.sources
-  );
-  const sourceIdAlreadyInSource: SourceInternal | undefined = R.find(
-    (s) => s.id === newSource.id,
-    getState().distnet.settings.sources
-  );
-  let iri = await readIriFromWellKnownDir(newSource.workUrl);
-  const iriAlreadyInSource: SourceInternal | undefined = R.find(
-    (s) => s.id === iri,
-    getState().distnet.settings.sources
+      workUrl === s.workUrl ||
+      R.contains(workUrl, (s.urls || []).map(R.prop('url'))),
+    sources
   );
   if (urlAlreadyInSource) {
-    alert(
-      `That path ${newSource.workUrl} already exists in source: ${urlAlreadyInSource.id}`
-    );
-  } else if (sourceIdAlreadyInSource) {
-    alert(`That source ID of ${iri} already exists.`);
-  } else if (iriAlreadyInSource) {
-    alert(`That IRI of ${iri} already exists.`);
-  } else if (!!iri && iri !== newSource.id && !sourceIdIsOptional) {
-    alert(
-      `The IRI on the file system of ${iri} doesn't match the supplied IRI of: ${newSource.id}`
-    );
-  } else {
-    if (!iri) {
-      saveIriToWellKnownDir(newSource.workUrl, newSource.id).catch((err) => {
-        console.log(
-          `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl}`,
-          err
-        );
-        alert(
-          `Got a problem saving the ID ${newSource.id} to the file: ${newSource.workUrl} ... so you may have to fix your settings.` // eslint-disable-line max-len
-        );
-      });
-      iri = newSource.id;
-    }
+    return {
+      error: `That path ${workUrl} already exists in source: ${urlAlreadyInSource.id}`,
+    };
+  }
 
-    // at this point, the IRI should be set to the right thing
-    if (sourceIdIsOptional) {
-      newSource.id = iri;
-    } else if (newSource.id !== iri) {
+  const { iri, iriFile } = await readIriFromWellKnownDir(workUrl);
+  const finalIri = iri || suggestedId;
+  const sourceIdAlreadyInSource: SourceInternal | undefined = R.find(
+    (s) => s.id === finalIri,
+    sources
+  );
+  if (sourceIdAlreadyInSource) {
+    return { error: `That source ID of ${finalIri} already exists.` };
+  }
+
+  const iriAlreadyInSource: SourceInternal | undefined = R.find(
+    (s) => s.id === finalIri,
+    sources
+  );
+  if (iriAlreadyInSource) {
+    return { error: `That IRI of ${finalIri} already exists.` };
+  }
+
+  if (!iri) {
+    await saveIriToWellKnownDir(workUrl, suggestedId).catch((err) => {
+      // Not aborting because I'm unsure that this is catastrophic, and we'll flag cases of missing IRI files in their settings.
       console.log(
-        `Got a problem correlating ID ${newSource.id} to the IRI ${iri} ... so you may have to fix your settings. This shouldn't happen because the logic above should have set things correctly, but I guess it's good I added this warning.` // eslint-disable-line max-len
+        `Got a problem saving the ID ${suggestedId} to the file: ${workUrl}`,
+        err
       );
       alert(
-        `Got a problem correlating ID ${newSource.id} to the IRI ${iri} ... so you may have to fix your settings.`
+        `Got a problem saving the ID ${suggestedId} to the file: ${workUrl} ... so you may have to reload and check the settings for this source.` // eslint-disable-line max-len
       );
-    }
-
-    await dispatch(
-      dispatchModifySettings(await addSourceInternalToSettings(newSource))
-    );
-    await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
-    // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
-    await dispatch(dispatchReloadCacheForFile(iri));
-    // eslint-disable-next-line no-new
-    new Notification('Added', {
-      body: `Added that source.`,
-      silent: true,
     });
   }
+  const newSource = {
+    id: finalIri,
+    idFile: iriFile,
+    name,
+    workUrl,
+  };
+  return newSource;
+};
+
+/**
+ param newSource must have unique ID & location
+ param suggestedId is a potential IRI ID if there is none in .well-known dir
+ */
+export const dispatchAddSourceToSettings = (
+  newSource: SourceInternal
+): AppThunk => async (dispatch) => {
+  await dispatch(
+    dispatchModifySettings(addSourceInternalToSettingsObject(newSource))
+  );
+  await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
+  // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
+  await dispatch(dispatchReloadCacheForFile(newSource.id));
+  // eslint-disable-next-line no-new
+  new Notification('Added', {
+    body: `Added that source.`,
+    silent: true,
+  });
+};
+
+export const buildSource = (
+  name: string,
+  prefix: string,
+  filePath: string,
+  sources: Array<SourceInternal>
+): Promise<SourceInternal | ErrorResult> => {
+  const fileUrl = url.pathToFileURL(filePath).toString();
+  const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
+  const suggestedId = `${prefix}:${newPath}`;
+  return setupLocalIri(name, fileUrl, suggestedId, sources);
 };
 
 const dispatchBuildSourceAndAddToSettings = (
+  name: string,
   prefix: string,
   filePath: string
-): AppThunk => async (dispatch) => {
-  const fileUrl = `file://${filePath}`;
+): AppThunk => async (dispatch, getState) => {
+  const fileUrl = url.pathToFileURL(filePath).toString();
   const newPath = uriTools.bestGuessAtGoodUriPath(filePath);
-  const newId = `${prefix}:${newPath}`;
-  const newSource = {
-    id: newId,
-    workUrl: fileUrl,
-  };
-  await dispatch(dispatchAddToSettings(newSource, true));
+  const suggestedId = `${prefix}:${newPath}`;
+  const newSource = await setupLocalIri(
+    name,
+    fileUrl,
+    suggestedId,
+    getState().distnet.settings.sources
+  );
+  if (isErrorResult(newSource)) {
+    throw Error(newSource.error);
+  } else {
+    return dispatch(dispatchAddSourceToSettings(newSource));
+  }
 };
 
-export const dispatchAddGenealogyToSettings = (newSource: SourceInternal) =>
-  dispatchAddToSettings(newSource, false);
+const nameFromPath = (prefix: string, fullPath: string): string => {
+  const parsedPath = path.parse(fullPath);
+  const parentPath = path.parse(parsedPath.dir);
+  return `Local ${prefix} ${parentPath.base} ${parsedPath.base}`;
+};
 
-export const dispatchAddHistoryToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('histories', filePath);
+export const dispatchAddHistoryToSettings = (filePath: string) => {
+  const name = nameFromPath('Histories', filePath);
+  return dispatchBuildSourceAndAddToSettings(name, 'histories', filePath);
+};
 
-export const dispatchAddTaskListToSettings = (filePath: string) =>
-  dispatchBuildSourceAndAddToSettings('taskyaml', filePath);
+export const dispatchAddTaskListToSettings = (filePath: string) => {
+  const name = nameFromPath('Tasks', filePath);
+  return dispatchBuildSourceAndAddToSettings(name, 'taskyaml', filePath);
+};
 
 export default distnetSlice.reducer;
