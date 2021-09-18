@@ -127,11 +127,34 @@ function GenealogyView(options: TreeOption) {
     }
   });
 
+  const genealogySources = R.filter((s) =>
+    R.includes(uriTools.globalUriScheme(s.id), ['gedcomx', 'gedcom-indi']),
+    sources
+  );
+
   /* eslint-disable no-alert */
   return (
     <div ref={droppableRef}>
       <div>
-        <span>{rootUri}</span>
+        <div>
+         {genealogySources.map((source) =>
+           <ul>
+             <li>
+               {source.name}
+               &nbsp;
+               <a
+                 className="fa fa-bullseye"
+                 role="button"
+                 onClick={() => {
+                   console.log("hit!", source.id)
+                   dispatch(setRootUri(source.id));
+                 }}
+               />
+             </li>
+           </ul>
+         )}
+        </div>
+        <span>Now Viewing {rootUri}</span>
         &nbsp;
         {rootUri ? (
           <span>
@@ -193,15 +216,14 @@ function ChangeRootUriInput() {
   return (
     <span>
       <span style={{ visibility: getVisibility(!rootUriInputExpanded) }}>
-        <button
-          type="button"
+        <a
+          className="fa fa-edit"
+          role="button"
           onClick={() => {
             setRootUriInput('');
             setRootUriInputExpanded(true);
           }}
-        >
-          Change Source
-        </button>
+        />
       </span>
       <span style={{ visibility: getVisibility(rootUriInputExpanded) }}>
         <br />
