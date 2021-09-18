@@ -2,21 +2,12 @@ tasks :
 
   - -2 move genealogy/history/task-list-specific code out of distnet
 
-  - 2 move the settings IDs to a .well-known directory id:well-known :
-    - user drops a source & loads IRI; if no IRI & if there is context, it creates a random IRI; user can edit
-    - do I make my own copy a special property or just assume it's the first in the list?
-    - use "fetch" to read IRIs from URLs? (to allow for non-"file:" URLs)
-    - auto-create source ID on load? allow null?
-    - edit IRI
-    - when a diff is detected, make sure there are big warnings if the .iri is changed.
-    - rename Source id to iri
-    - backup the .well-known directory in history ref:#history
-    - auto-set the ID/IRI creation in genealogy when dropping a new one (if IRI exists)
-    - rename Source "type" to transfer/storage/sharing-type
-    - write tests for the file-checking methods in settings.txt (& elsewhere?)
-
-  - 1 rename the "urls" arrays to "otherUrls" :
+  - 1 rename the "urls" arrays to "moreUrls" :
     - migrate existing settings for current users
+
+  - 2 move the settings IDs to a .well-known directory id:well-known :
+    - id -> iri, idFile -> iriFile, cache sourceId -> sourceIri
+    - rename Source "type" to transfer/storage/sharing-type
 
   - 0 get version call that works for packaged app
 
@@ -27,6 +18,7 @@ tasks :
       - create directory (with any name, maybe based on name of the IRI)
       - store that local directory name in settings in the app "history" directory
     - when parsing, ensure IRIs are unique
+    - when a .well-known/*.iri diff is detected, make sure there are big warnings
     - add a column to show if there's a difference from last seen
     - add a button to update the most recent (ie. mark as seen)
     - add a diff function for history
