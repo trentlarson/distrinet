@@ -1,12 +1,16 @@
+import electron from 'electron';
 import { mount } from 'enzyme';
+import path from 'path';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
+import url from 'url';
 
 // imports in this app
 import Counter from '../../../app/features/counter/Counter';
 import * as distnetSlice from '../../../app/features/distnet/distnetSlice';
+import * as settings from '../../../app/features/distnet/settings';
 
 function setup() {
   const store = configureStore({
@@ -88,5 +92,30 @@ describe('Resource Types', () => {
       ['gedcomx:distrinet/stuff.json', 'file:///Users/myself/tree/mother.html'],
       [taskyamlRes, jsonRes, htmlRes, gedcomxRes]
     )).toEqual([jsonRes, htmlRes, gedcomxRes]);
+  });
+
+  it('IRI files should be right', async () => {
+
+    const thisTestPath = __dirname;
+    const genealogyPath = path.join(thisTestPath, "..", "genealogy");
+
+    /* eslint-disable prettier/prettier */
+
+    expect(await settings.retrieveIriFileNameForTesting(
+      url.pathToFileURL(path.join(genealogyPath, "sample-gedcomx-norman.json"))
+    )).toEqual({
+      wellKnownDir: path.join(genealogyPath, ".well-known"),
+      iriFile: path.join(genealogyPath, ".well-known", "sample-gedcomx-norman.json.iri"),
+    });
+
+    expect(await settings.readIriFromWellKnownDir(
+      url.pathToFileURL(path.join(genealogyPath, "sample-gedcomx-norman.json"))
+    )).toEqual({
+      iri: "gedcomx:my-local-test:test-sample-norman",
+      iriFile: path.join(genealogyPath, ".well-known", "sample-gedcomx-norman.json.iri"),
+    });
+
+    /* eslint-enable prettier/prettier */
+
   });
 });

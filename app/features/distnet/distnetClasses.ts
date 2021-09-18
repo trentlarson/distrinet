@@ -26,9 +26,9 @@ export interface SettingsForStorage {
 
 export interface SourceForStorage {
   name?: string;
-  workUrl: string;
   type?: string; // type of transfer/storage/sharing
   urls?: Array<UrlData>;
+  workUrl: string;
 }
 
 // Full Settings, built in memory
@@ -38,7 +38,7 @@ export interface SettingsInternal extends SettingsForStorage {
 
 export interface SourceInternal extends SourceForStorage {
   id: string;
-  idFile: string;
+  idFile: string; // a file path (which the UI often renders as a "file:" URL, probably when it's in an href)
 }
 
 /** not yet ready

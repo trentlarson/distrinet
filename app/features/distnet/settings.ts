@@ -41,7 +41,9 @@ interface WellKnownAndIri {
   iriFile: string;
 }
 
-async function retrieveIriFileName(localUrl: string): Promise<WellKnownAndIri> {
+const retrieveIriFileName = async (
+  localUrl: string
+): Promise<WellKnownAndIri> => {
   const filename: string = url.fileURLToPath(localUrl);
   let containingDir: string = filename;
   let finalIriFile = '.iri';
@@ -62,7 +64,12 @@ async function retrieveIriFileName(localUrl: string): Promise<WellKnownAndIri> {
   const wellKnownDir = path.join(containingDir, '.well-known');
   const iriFile = path.join(wellKnownDir, finalIriFile);
   return { wellKnownDir, iriFile };
-}
+};
+
+/**
+ Do not use externally: it's only being exported here for test purposes.
+ */
+export const retrieveIriFileNameForTesting = retrieveIriFileName;
 
 export interface IriResults {
   iri?: string; // optional because it may not exist

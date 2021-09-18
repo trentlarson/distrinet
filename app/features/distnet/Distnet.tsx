@@ -130,7 +130,7 @@ export default function Distnet(options: AppInfo) {
                     <a
                       className="fa fa-copy"
                       role="button"
-                      title="Copy IRI"
+                      title={`Copy IRI ${uriSource.id}`}
                       onClick={() => {
                         electron.clipboard.writeText(uriSource.id);
                         new Notification('Copied', {
