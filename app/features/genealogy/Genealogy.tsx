@@ -62,6 +62,7 @@ export default function Genealogy() {
   }
 
   treeDs.addListener({
+    viewportSelector: ".viewer",
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
     svgHeight: 400,
@@ -72,6 +73,12 @@ export default function Genealogy() {
     // refreshWindow: Couldn't figure it out.
     // Other things are available if you import 'electron', eg webFrame.context.location.getURL(),
     // but I couldn't get anything to actually set the existingpage to the new URL.
+    copyCallback: (text) => {
+      new Notification('Copied', {
+        body: `Added this to your clipboard: ${text}`,
+        silent: true,
+      });
+    }
   });
 
   const pageUri = treeFun.getQueryParams().id || '';
@@ -151,7 +158,7 @@ function GenealogyView(options: TreeOption) {
                {source.name || "(no name)"}
                &nbsp;
                <a
-                 className="fa fa-bullseye"
+                 className="fa fa-crosshairs"
                  role="button"
                  onClick={() => {
                    dispatch(setRootUri(source.id));
@@ -169,9 +176,12 @@ function GenealogyView(options: TreeOption) {
           <span>
             {/* eslint-disable no-new */}
             {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
+            (IRI
+            &nbsp;
             <a
               className="fa fa-copy"
               role="button"
+              title={`Copy ${rootUri}`}
               onClick={() => {
                 electron.clipboard.writeText(rootUri);
                 new Notification('Copied', {
@@ -180,6 +190,7 @@ function GenealogyView(options: TreeOption) {
                 });
               }}
             />
+            )
             {/* eslint-enable no-new */}
           </span>
         ) : (

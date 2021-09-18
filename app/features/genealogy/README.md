@@ -52,3 +52,4 @@ To test:
 - [Matt Misbach's Decentralized Distributed Genealogical Tree graphics & parsing](https://github.com/DecentralizedGenealogy/webclient)
 - [Justin York's D3 Pedigree Examples](https://github.com/justincy/d3-pedigree-examples)
 - [arrow image](https://svgsilh.com/9e9e9e/image/29170.html)
+- [external link](https://fontawesome.com/v5.15/icons/external-link-alt?style=solid) and [clipboard copy](https://fontawesome.com/v5.15/icons/copy?style=solid) and probably other icons from Font Awesome

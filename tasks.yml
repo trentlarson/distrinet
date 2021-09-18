@@ -1,11 +1,14 @@
 tasks :
 
+  - 0 copy individual URL
+  - 0 link from history to genealogy page for known IRIs
+
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 1 rename the "urls" arrays to "moreUrls" :
     - migrate existing settings for current users
 
-  - 2 move the settings IDs to a .well-known directory id:well-known :
+  - 2 rename the internal variables
     - id -> iri, idFile -> iriFile, cache sourceId -> sourceIri
     - rename Source "type" to transfer/storage/sharing-type
 
@@ -23,6 +26,8 @@ tasks :
     - add a column to show if there's a difference from last seen
     - add a button to update the most recent (ie. mark as seen)
     - add a diff function for history
+
+  - 1 make some activities advanced (eg. caching, ID map) and allow disabling at start
 
   - 1 save the local copy (for a given remote URL) only... on setting? :
     - show if there's a difference in the local copy

@@ -1,4 +1,9 @@
-// originally from https://github.com/justincy/d3-pedigree-examples
+
+/**
+   Provide a listener that will render the tree.
+
+   Originally from: https://github.com/justincy/d3-pedigree-examples
+ **/
 
 (function(exports){
 
@@ -9,18 +14,14 @@
     if (!options) {
       options = {};
     }
-    if (!options.newWindow) {
-      options.newWindow = ()=>{};
-    }
-    if (!options.refreshWindow) {
-      options.refreshWindow = ()=>{};
-    }
+    const viewportSelector = options.viewportSelector || ".viewer";
     const treeUrlPrefix = options.treeUrlPrefix || "tree.html";
     const personUrlPrefix = options.personUrlPrefix || "person.html";
     const svgWidth = options.svgWidth || 1000;
     const svgHeight = options.svgHeight || 800;
-    const newWindow = options.newWindow;
-    const refreshWindow = options.refreshWindow;
+    const newWindow = options.newWindow || (() => {});
+    const refreshWindow = options.refreshWindow || (() => {});
+    const copyCallback = options.copyCallback || (() => {});
 
     document.addEventListener('treeComplete', function (e) {
 
@@ -31,8 +32,8 @@
           nodeWidth = 200,
           nodeHeight = 250,
           // duration of transitions in ms
-          duration = 750, 
-          // d3 multiplies the node size by this value 
+          duration = 750,
+          // d3 multiplies the node size by this value
           // to calculate the distance between nodes
           separation = .5;
 
@@ -64,7 +65,7 @@
 
         const xformX = svgWidth / 4;
         const xformY = svgHeight / 2;
-        var svg = d3.select(".viewer").append("svg")
+        var svg = d3.select(options.viewportSelector).append("svg")
           .attr('width', svgWidth)
           .attr('height', svgHeight)
           .call(zoom)
@@ -322,12 +323,12 @@
         nodeEnter.append("a")
           .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
           .append("svg:image")
-            .attr("xlink:href", "features/genealogy/images/tree.svg")
+            .attr("xlink:href", "features/genealogy/images/crosshairs-solid.svg")
             .attr("width", 16)
             .attr("height", 16)
             .attr("x", -80)
             .attr("y", 40)
-            .attr("fill-opacity", .5)
+            .attr("fill-opacity", .5) // this doesn't this fontawesome svg
             .attr("visibility", (person) =>
                   person.id !== treeObj.id
                   ? "visible"
@@ -337,7 +338,22 @@
               refreshWindow(treeUrlPrefix + "?id=" + person.id);
             })
             .append("svg:title")
-            .text(function(person) { return person.id });
+            .text(function(person) { return "Focus" });
+
+        // Copy Link - copy person's IRI to the clipboard
+        nodeEnter.append("a")
+          .append("svg:image")
+          .attr("xlink:href", "features/genealogy/images/copy-solid.svg")
+          .attr("width", 16)
+          .attr("height", 16)
+          .attr("x", -60)
+          .attr("y", 40)
+          .on("click", function(person) {
+            navigator.clipboard.writeText(person.id);
+            copyCallback(person.id);
+          })
+          .append("svg:title")
+          .text(function(person) { return "Copy IRI: " + person.id });
 
         /** We don't have this view yet.
         // Go to profile view
@@ -364,10 +380,10 @@
             nodeEnter
               .append("a")
               .append("svg:image")
-              .attr("xlink:href", "features/genealogy/images/arrow-swoop.svg")
+              .attr("xlink:href", "features/genealogy/images/external-link-alt-solid.svg")
               .attr("width", 16)
               .attr("height", 16)
-              .attr("x", -60 + (i * 20))
+              .attr("x", -40 + (i * 20))
               .attr("y", 40)
               .attr("fill-opacity", .5)
               .attr("visibility", (person) =>

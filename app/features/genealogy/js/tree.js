@@ -1,3 +1,9 @@
+
+/**
+   Parse through the genealogy file to create the tree for the URI, then dispatch it to the "treeComplete" event when finished.
+   Note that an element with ID "error_message" will be filled with any errors.
+ **/
+
 (function(exports){
 
   const $ = require('./jquery-2.2.4.min.js');
