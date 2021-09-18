@@ -93,7 +93,7 @@ const path = require('path');
   }
 
   /**
-   * Find the longest member or uriList that is a prefix of uri, or null if none match.
+   * Find the longest member of uriList that is a prefix of uri, or null if none match.
    * */
   function findClosestUriForGlobalUri(uri, uriList) {
     let maxUri = '';

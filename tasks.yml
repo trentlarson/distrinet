@@ -9,7 +9,8 @@ tasks :
     - id -> iri, idFile -> iriFile, cache sourceId -> sourceIri
     - rename Source "type" to transfer/storage/sharing-type
 
-  - 0 get version call that works for packaged app
+  - 0 get version call that works for packaged app (important for data migrations)
+    (Retrieval from asar?) (Not app.getVersion(): gives electron version)
 
   - 2 save another local copy of files to track what is most recently seen id:#history
     - one file first

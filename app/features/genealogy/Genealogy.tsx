@@ -26,13 +26,13 @@ import {
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
-const treeFun = require('features/genealogy/js/tree.js');
+const treeFun: TreeOption = require('features/genealogy/js/tree.js');
 
 interface TreeOption {
   tree: {
-    setSources(sources: Array<SourceInternal>): void;
-    getTree(rootUri: string): void;
     getQueryParams(): Record<string, string>;
+    renderTree(rootUri: string): void;
+    setSources(sources: Array<SourceInternal>): void;
   };
 }
 
@@ -115,8 +115,16 @@ function GenealogyView(options: TreeOption) {
   const rootUri: string = useSelector(
     (state: RootState) => state.genealogy.rootUri
   );
+
+  let chosenSource: SourceInternal = null;
+  if (rootUri) {
+    const sourceIds = R.map((s) => s.id, sources);
+    const closestUri = uriTools.findClosestUriForGlobalUri(rootUri, sourceIds);
+    chosenSource = R.find((s) => s.id === closestUri, sources);
+  }
+
   // Walk tree for ancestors and descendants
-  options.tree.getTree(rootUri);
+  options.tree.renderTree(rootUri);
 
   const droppableRef = useRef(null);
   const addCallback = (filePath: string) => setRootUri(`file://${filePath}`);
@@ -137,24 +145,25 @@ function GenealogyView(options: TreeOption) {
     <div ref={droppableRef}>
       <div>
         <div>
-         {genealogySources.map((source) =>
-           <ul>
-             <li>
-               {source.name}
+         <ul>
+           {genealogySources.map((source) =>
+             <li key={source.id}>
+               {source.name || "(no name)"}
                &nbsp;
                <a
                  className="fa fa-bullseye"
                  role="button"
                  onClick={() => {
-                   console.log("hit!", source.id)
                    dispatch(setRootUri(source.id));
                  }}
                />
              </li>
-           </ul>
-         )}
+           )}
+         </ul>
         </div>
-        <span>Now Viewing {rootUri}</span>
+        <span>Now Viewing:
+        &nbsp;
+        {(chosenSource && chosenSource.name)  || rootUri}</span>
         &nbsp;
         {rootUri ? (
           <span>

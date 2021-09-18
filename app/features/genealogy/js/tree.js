@@ -12,7 +12,7 @@
     sources = _sources;
   }
 
-  // Walk tree with getTree & walkTree
+  // Walk tree with renderTree & walkTree
 
   // let's remove this global and pass around explicitly for thread safety (& more clarity)
   var asyncCount = 0;
@@ -21,14 +21,14 @@
   /**
    * @param uri URI of the individual (null and '' will be ignored)
    */
-  function getTree(uri) {
+  function renderTree(uri) {
     userMessage = '';
     if (!uri) {
       return;
     }
     asyncCount = 0;
     allSameIds = MapperBetweenSets.retrieveAllIdRecordsFromLocalStorage();
-    getTree2(
+    renderTree2(
       uri,
       0,
       { id: null, prefixUri: "", fullUri: uri, name: null, _parents: [], _children: [], portrait: null }
@@ -39,7 +39,7 @@
    * @param uri URI of the individual, non-null
    * @param node container for the derived info to display
    */
-  async function getTree2(uri, generationCount, node) {
+  async function renderTree2(uri, generationCount, node) {
     if (!uri) {
       return;
     }
@@ -319,13 +319,13 @@
     // Only proceed with parents for base person up to 4 generations
     if (-1 < generationCount && generationCount < 5) {
       for (let i = 0; i < tmpNode._parents.length; i += 1) {
-        getTree2(tmpNode._parents[i].id, generationCount + 1, node);
+        renderTree2(tmpNode._parents[i].id, generationCount + 1, node);
       }
     }
     // Only proceed with children for base person down 1 generation
     if (-2 < generationCount && generationCount < 1) {
       for (let i = 0; i < tmpNode._children.length; i += 1) {
-        getTree2(tmpNode._children[i].id, generationCount - 1, node);
+        renderTree2(tmpNode._children[i].id, generationCount - 1, node);
       }
     }
   }
@@ -473,7 +473,7 @@
 
 
   exports.setSources = setSources;
-  exports.getTree = getTree;
+  exports.renderTree = renderTree;
   exports.getQueryParams = getQueryParams;
 
 }(typeof exports === 'undefined' ? this.tree = {} : exports));
