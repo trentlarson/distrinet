@@ -26,14 +26,12 @@ import {
 
 require('features/genealogy/js/d3.min.js'); // v 3.5.5
 const treeDs = require('features/genealogy/js/tree_ds.js');
-const treeFun: TreeOption = require('features/genealogy/js/tree.js');
+const treeFun: TreeOptions = require('features/genealogy/js/tree.js');
 
-interface TreeOption {
-  tree: {
-    getQueryParams(): Record<string, string>;
-    renderTree(rootUri: string): void;
-    setSources(sources: Array<SourceInternal>): void;
-  };
+interface TreeOptions {
+  getQueryParams(): Record<string, string>;
+  renderTree(rootUri: string): void;
+  setSources(sources: Array<SourceInternal>): void;
 }
 
 export default function Genealogy() {
@@ -62,7 +60,7 @@ export default function Genealogy() {
   }
 
   treeDs.addListener({
-    viewportSelector: ".viewer",
+    viewportSelector: '.viewer',
     treeUrlPrefix: '#/genealogy',
     svgWidth: 1200,
     svgHeight: 400,
@@ -73,12 +71,13 @@ export default function Genealogy() {
     // refreshWindow: Couldn't figure it out.
     // Other things are available if you import 'electron', eg webFrame.context.location.getURL(),
     // but I couldn't get anything to actually set the existingpage to the new URL.
-    copyCallback: (text) => {
+    copyCallback: (text: string) => {
+      // eslint-disable-next-line no-new
       new Notification('Copied', {
         body: `Added this to your clipboard: ${text}`,
         silent: true,
       });
-    }
+    },
   });
 
   const pageUri = treeFun.getQueryParams().id || '';
@@ -109,7 +108,7 @@ export default function Genealogy() {
   );
 }
 
-function GenealogyView(options: TreeOption) {
+function GenealogyView(options: { tree: TreeOptions }) {
   const dispatch = useDispatch();
 
   dispatch(refreshIdMapperForDispatch());
@@ -123,7 +122,7 @@ function GenealogyView(options: TreeOption) {
     (state: RootState) => state.genealogy.rootUri
   );
 
-  let chosenSource: SourceInternal = null;
+  let chosenSource: SourceInternal | undefined;
   if (rootUri) {
     const sourceIds = R.map((s) => s.id, sources);
     const closestUri = uriTools.findClosestUriForGlobalUri(rootUri, sourceIds);
@@ -142,8 +141,9 @@ function GenealogyView(options: TreeOption) {
     }
   });
 
-  const genealogySources = R.filter((s) =>
-    R.includes(uriTools.globalUriScheme(s.id), ['gedcomx', 'gedcom-indi']),
+  const genealogySources = R.filter(
+    (s) =>
+      R.includes(uriTools.globalUriScheme(s.id), ['gedcomx', 'gedcom-indi']),
     sources
   );
 
@@ -152,38 +152,40 @@ function GenealogyView(options: TreeOption) {
     <div ref={droppableRef}>
       <div>
         <div>
-         <ul>
-           {genealogySources.map((source) =>
-             <li key={source.id}>
-               {source.name || "(no name)"}
-               &nbsp;
-               <a
-                 className="fa fa-crosshairs"
-                 role="button"
-                 onClick={() => {
-                   dispatch(setRootUri(source.id));
-                 }}
-               />
-             </li>
-           )}
-         </ul>
+          <ul>
+            {genealogySources.map((source) => (
+              <li key={source.id}>
+                {source.name || '(no name)'}
+                &nbsp;
+                {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
+                <a
+                  className="fa fa-crosshairs"
+                  role="button"
+                  title="Load"
+                  onClick={() => {
+                    dispatch(setRootUri(source.id));
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
-        <span>Now Viewing:
-        &nbsp;
-        {(chosenSource && chosenSource.name)  || rootUri}</span>
+        <span>
+          Now Viewing:&nbsp;
+          {(chosenSource && chosenSource.name) || rootUri}
+        </span>
         &nbsp;
         {rootUri ? (
           <span>
-            {/* eslint-disable no-new */}
+            (IRI&nbsp;
             {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
-            (IRI
-            &nbsp;
             <a
               className="fa fa-copy"
               role="button"
               title={`Copy ${rootUri}`}
               onClick={() => {
                 electron.clipboard.writeText(rootUri);
+                // eslint-disable-next-line no-new
                 new Notification('Copied', {
                   body: `Added this to your clipboard: ${rootUri}`,
                   silent: true,
@@ -191,7 +193,6 @@ function GenealogyView(options: TreeOption) {
               }}
             />
             )
-            {/* eslint-enable no-new */}
           </span>
         ) : (
           <span />
@@ -236,9 +237,11 @@ function ChangeRootUriInput() {
   return (
     <span>
       <span style={{ visibility: getVisibility(!rootUriInputExpanded) }}>
+        {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
         <a
           className="fa fa-edit"
           role="button"
+          title="Change"
           onClick={() => {
             setRootUriInput('');
             setRootUriInputExpanded(true);

@@ -477,7 +477,6 @@
     return vars;
   }
 
-
   exports.setSources = setSources;
   exports.renderTree = renderTree;
   exports.getQueryParams = getQueryParams;
