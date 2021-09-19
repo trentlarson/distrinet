@@ -21,6 +21,7 @@
     const svgHeight = options.svgHeight || 800;
     const newWindow = options.newWindow || (() => {});
     const refreshWindow = options.refreshWindow || (() => {});
+    // Action to take after copying to the clipboard.
     const copyCallback = options.copyCallback || (() => {});
 
     document.addEventListener('treeComplete', function (e) {

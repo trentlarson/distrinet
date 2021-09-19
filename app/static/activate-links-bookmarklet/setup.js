@@ -32,8 +32,10 @@ function loadScript( url, callback ) {
 
 
 
-// This is set in the HistoryPage script because the derived electron reference is different from references in this file.
-//var bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
+// The bookmarkletFilesLoc is set in the HistoryPage script because the derived electron reference is different from references in this file.
+if (!bookmarkletFilesLoc) {
+  bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
+}
 //
 // You can use this approach by running an http server from the root of the repo:
 //var bookmarkletFilesLoc = "http://localhost:8080/static/tools/activate-links-bookmarklet";
@@ -41,6 +43,11 @@ function loadScript( url, callback ) {
 // Local file:/// URLs no longer work due to new CORS restrictions:
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSRequestNotHttp
 // I couldn't even get them to work with the security turned off in Firefox & Chrome.
+
+// The nonHttpPrefix is for URLs that are not external.
+if (!nonHttpPrefix) {
+  nonHttpPrefix = "";
+}
 
 var jqueryScriptLoc = bookmarkletFilesLoc + "/js/jquery-1.5.min.js";
 
@@ -66,17 +73,43 @@ var addHoverLinks = function() {
             var urlInfo = [];
             var urlPieces, domain;
             for (var i = 0; i < urls.length; i++) {
-              urlPieces = urls[i].href.split("/");
-              // it's probably either element 2 or 3 (from http://xyz or file:///xyz)
-              domain = urlPieces[2];
-              if (domain === "") {
-                domain = urlPieces[3];
+              // Let's determine the title text.
+              var thisUrl = urls[i].href;
+              var scheme = thisUrl.split(":")[0].toLowerCase();
+              var remaining = thisUrl.substring(scheme.length + 1);
+              if (scheme.startsWith('http')) {
+                scheme = "web";
+              } else if (scheme.startsWith('file')) {
+                scheme = "local file";
               }
-              buttonInfo.push({img:'ui-icon-check', title:domain});
-              urlInfo.push(urls[i].href);
+
+              // Now, try for the domain.
+              // it is probably element 2 or 3 (eg. from http://xyz or file:///xyz)
+              var nextPart = remaining; // default to everything
+              urlPieces = remaining.split("/");
+              for (var partNum = 0; partNum < urlPieces.length; partNum++) {
+                if (urlPieces[partNum]) {
+                  nextPart = urlPieces[partNum];
+                  break;
+                }
+              }
+
+              var title = scheme + " " + nextPart;
+
+              buttonInfo.push({img:'ui-icon-check', title:title});
+              urlInfo.push(thisUrl);
             }
             var openUrlFun = function(urls) {
-              var result = function(itemNum) { console.log("opening " + urls[itemNum]); window.open(urls[itemNum], "_linkWindow"); };
+              var result = function(itemNum) {
+                console.log("opening " + urls[itemNum]);
+                var url = urls[itemNum];
+                var external = url.startsWith("http") || url.startsWith("file");
+                if (external) {
+                  window.open(url, "_linkWindow");
+                } else {
+                  location.replace(nonHttpPrefix + url);
+                }
+              };
               return result;
             }(urlInfo);
             // Bug: with only one selection button in the pie, prettypie UI puts the link graphic too high.
