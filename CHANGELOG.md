@@ -8,9 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [?]
+## [0.1.15] - 2021-09.19 - 5ea08bcf5dcd22d04b9407cf926883c5c6e9909b
 
 ### Added
+
+Genealogy:
+- Display all genealogy sources.
+
+Histories:
+- Link to local genealogy for non-HTTP IRIs.
 
 Projects:
 - Allow to show only the biggest 5 project tasks.
@@ -18,6 +24,7 @@ Projects:
 ### Changed
 
 - Store IRI in .well-known directory (rather than in settings.yml).
+- Add more icons instead of words.
 
 Projects:
 - Use public forecasting server.

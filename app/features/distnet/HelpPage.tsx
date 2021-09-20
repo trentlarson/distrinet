@@ -92,7 +92,7 @@ export default function HelpPage(): JSX.Element {
         onClick={() => {
           const appInfo = `
             Distrinet Apps
-            Version 0.1.15
+            Version 0.1.16-beta
           `;
           alert(appInfo);
         }}
