@@ -32,22 +32,34 @@ function loadScript( url, callback ) {
 
 
 
-// The bookmarkletFilesLoc is set in the HistoryPage script because the derived electron reference is different from references in this file.
-if (!bookmarkletFilesLoc) {
-  bookmarkletFilesLoc = "./static/activate-links-bookmarklet";
-}
-//
-// You can use this approach by running an http server from the root of the repo:
-//var bookmarkletFilesLoc = "http://localhost:8080/static/tools/activate-links-bookmarklet";
-//
-// Local file:/// URLs no longer work due to new CORS restrictions:
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSRequestNotHttp
-// I couldn't even get them to work with the security turned off in Firefox & Chrome.
 
-// The nonHttpPrefix is for URLs that are not external.
-if (!nonHttpPrefix) {
-  nonHttpPrefix = "";
+// These variables might be set in an application that includes this script.
+// For example, the Distrinet HistoryPage electron references are different from public references.
+
+// The bookmarkletFilesLoc is the directory containing this 'setup.js' file.
+if (typeof bookmarkletFilesLoc === 'undefined') {
+  bookmarkletFilesLoc = "https://familyhistories.info/static/tools/activate-links-bookmarklet";
+
+  // You can use this approach by running an http server from the root of the repo:
+  //bookmarkletFilesLoc = "http://localhost:8080/static/tools/activate-links-bookmarklet";
+  //
+  // Local file:/// URLs no longer work due to new CORS restrictions:
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSRequestNotHttp
+  // I couldn't even get them to work with the security turned off in Firefox & Chrome.
 }
+
+
+// The nonHttpFilePrefix is for URIs other than HTTP & file, URIs that should be interpreted (e. by a Distrinet lookup).
+if (typeof nonHttpFilePrefix === 'undefined') {
+  nonHttpFilePrefix = null;
+}
+
+
+// The nonHttpFileSameWindow is to enforce a load in the same window, not a new one (eg. for a Distrinet genealogy).
+if (typeof nonHttpFileSameWindow === 'undefined') {
+  nonHttpFileSameWindow = false;
+}
+
 
 var jqueryScriptLoc = bookmarkletFilesLoc + "/js/jquery-1.5.min.js";
 
@@ -78,9 +90,9 @@ var addHoverLinks = function() {
               var scheme = thisUrl.split(":")[0].toLowerCase();
               var remaining = thisUrl.substring(scheme.length + 1);
               if (scheme.startsWith('http')) {
-                scheme = "web";
+                scheme = "Visit";
               } else if (scheme.startsWith('file')) {
-                scheme = "local file";
+                scheme = "Load file";
               }
 
               // Now, try for the domain.
@@ -104,10 +116,15 @@ var addHoverLinks = function() {
                 console.log("opening " + urls[itemNum]);
                 var url = urls[itemNum];
                 var external = url.startsWith("http") || url.startsWith("file");
-                if (external) {
+                if (external || !nonHttpFilePrefix) {
                   window.open(url, "_linkWindow");
                 } else {
-                  location.replace(nonHttpPrefix + url);
+                  var otherUrl = nonHttpFilePrefix + encodeURIComponent(url);
+                  if (nonHttpFileSameWindow) {
+                    location.replace(otherUrl);
+                  } else {
+                    window.open(otherUrl, "_linkWindow");
+                  }
                 }
               };
               return result;

@@ -471,7 +471,7 @@
     for (let i = 0; i < hashes.length; i++) {
       hash = hashes[i].split('=');
       vars.push(hash[0]);
-      vars[hash[0]] = hash[1];
+      vars[hash[0]] = decodeURIComponent(hash[1]);
     }
     // removed the default location because we now want to know when it's not supplied
     return vars;

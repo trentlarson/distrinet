@@ -322,7 +322,7 @@
 
         // Tree Link - focus on this person
         nodeEnter.append("a")
-          .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + d.id})
+          .attr("xlink:href", function(d) {return treeUrlPrefix + "?id=" + encodeURIComponent(d.id)})
           .append("svg:image")
             .attr("xlink:href", "features/genealogy/images/crosshairs-solid.svg")
             .attr("width", 16)
@@ -336,7 +336,7 @@
                   : "hidden"
                  )
             .on("click", function(person) {
-              refreshWindow(treeUrlPrefix + "?id=" + person.id);
+              refreshWindow(treeUrlPrefix + "?id=" + encodeURIComponent(person.id));
             })
             .append("svg:title")
             .text(function(person) { return "Focus" });
@@ -359,7 +359,7 @@
         /** We don't have this view yet.
         // Go to profile view
         nodeEnter.append("a")
-          //.attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + d.id})
+          //.attr("xlink:href", function(d) {return personUrlPrefix + "?id=" + encodeURIComponent(d.id)})
           .append("svg:image")
             .attr("xlink:href", "features/genealogy/images/profile.svg")
             .attr("width", 16)
@@ -399,7 +399,7 @@
                   let link = person.otherLocations[i];
                   if (link.format === "gedcomx"
                       || link.resource.startsWith("gedcomx:")) {
-                    location.assign(treeUrlPrefix + "?id=" + link.resource);
+                    location.assign(treeUrlPrefix + "?id=" + encodeURIComponent(link.resource));
                   } else {
                     newWindow(link.resource);
                   }

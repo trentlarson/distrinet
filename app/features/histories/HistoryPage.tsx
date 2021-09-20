@@ -44,13 +44,18 @@ export default function HistoryPage(props: Record<string, any>) {
     varScript.appendChild(document.createTextNode(varText));
     document.body.appendChild(varScript);
 
-    const httpVarScript = document.createElement('script');
+    const protocolVarScript = document.createElement('script');
     const genealogyPath = '#/genealogy?id=';
-    const httpVarText = `var nonHttpPrefix = "${genealogyPath}";`;
-    httpVarScript.appendChild(document.createTextNode(httpVarText));
-    document.body.appendChild(httpVarScript);
+    const protocolVarText = `var nonHttpFilePrefix = "${genealogyPath}";`;
+    protocolVarScript.appendChild(document.createTextNode(protocolVarText));
+    document.body.appendChild(protocolVarScript);
 
-    // We're hoping the above finishes and the variable is recognized before the next part runs.
+    const windowVarScript = document.createElement('script');
+    const windowVarText = `var nonHttpFileSameWindow = true;`;
+    windowVarScript.appendChild(document.createTextNode(windowVarText));
+    document.body.appendChild(windowVarScript);
+
+    // We're hoping the above finishes and the variables are recognized before the next part runs.
 
     // Run script to highlight results.
     const script = document.createElement('script');
