@@ -111,7 +111,7 @@
           markFinished(node);
         });
 
-    } else {
+    } else { // not global, or not HTTP/FILE URI
 
       const source = R.find((src) => src.id === uri, sources);
       if (source) {

@@ -350,11 +350,15 @@
           .attr("x", -60)
           .attr("y", 40)
           .on("click", function(person) {
-            navigator.clipboard.writeText(person.id);
-            copyCallback(person.id);
+            var fullUri = person.fullUri || person.id;
+            navigator.clipboard.writeText(fullUri);
+            copyCallback(fullUri);
           })
           .append("svg:title")
-          .text(function(person) { return "Copy IRI: " + person.id });
+          .text(function(person) {
+            var fullUri = person.fullUri || person.id;
+            return "Copy IRI: " + fullUri;
+          });
 
         /** We don't have this view yet.
         // Go to profile view
