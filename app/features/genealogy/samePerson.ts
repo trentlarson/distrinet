@@ -33,6 +33,7 @@ export interface Gedcomx {
  * We currently allow pointers to records with arbitrary formats.
  */
 export default class MapperBetweenSets {
+
   /**
    * Retrieve the DB of all duplicate IDs.
    *
@@ -59,8 +60,16 @@ export default class MapperBetweenSets {
     return idMap[idKey] || [];
   }
 
+  public static getStorageKey() {
+    return SAME_IDENTITIES_KEY;
+  }
+
+  public static getStorage() {
+    return localStorage[SAME_IDENTITIES_KEY];
+  }
+
   public static clear() {
-    localStorage.removeItem('SAME_IDENTITIES');
+    localStorage.removeItem(SAME_IDENTITIES_KEY);
   }
 
   /**

@@ -43,6 +43,25 @@ export default function HelpPage(): JSX.Element {
 
       Go to your desired app (genealogy, history, or project) and drag the right kind of item onto it (respectively: GedcomX file, directory, or TaskYaml file). Note that you need move to an area where the green "plus" does not show.
 
+      <h3>How do I add semantics to my history files?</h3>
+
+      Here is an example, wrapping "Jed" with the tags that identify him as a Person and give another reference for him:
+      <br/>
+      <br/>
+
+      { '<span itemscope itemtype="https://schema.org/Person">' }
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;{ '<link itemprop="url" href="https://beverlyhillbillies.fandom.com/wiki/Jed_Clampett" />' }
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;Jed
+      <br/>
+      { '</span>' }
+
+      For further reference, see <a onClick={() =>
+      require('electron').shell.openExternal('http://familyhistories.info/src-pages-sharing')}>
+      the excellent instructions at schema.org
+      </a>.
+
       <h3>What sync tools do you recommend?</h3>
 
       There is a helpful <a onClick={() =>

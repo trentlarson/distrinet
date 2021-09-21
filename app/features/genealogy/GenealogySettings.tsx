@@ -70,6 +70,8 @@ export default function GenealogySettings() {
         >
           Clear ID cache
         </button>
+        <br />
+        (Note that you can see and copy previous data in the Dev Tools, which you can reveal in the Help page.)
       </div>
     </div>
   );

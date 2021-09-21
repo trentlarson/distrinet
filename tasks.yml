@@ -1,17 +1,11 @@
 tasks :
 
-  - 0 link from history to genealogy page for known IRIs
-    - 0 update version on FamilyHistories.info and test as bookmarklet
-  - 0 change ":" after domain,2020 to "/"
-
-  - -1 gotta url-encode the treeUrlPrefix in tree_ds and the nonHttpPrefix url in setup.js
-
   - -2 move genealogy/history/task-list-specific code out of distnet
 
-  - 1 rename the "urls" arrays to "moreUrls" :
+  - 1 rename the "urls" arrays to "moreUrls" type:tech-cleanup :
     - migrate existing settings for current users
 
-  - 2 rename the internal variables
+  - 2 rename the internal variables type:tech-cleanup
     - id -> iri, idFile -> iriFile, cache sourceId -> sourceIri
     - rename Source "type" to transfer/storage/sharing-type
 

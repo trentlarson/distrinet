@@ -40,9 +40,10 @@ export default genealogySlice.reducer;
 
 // This could take 'dispatch' and 'getState' on the Promise function.
 export const resetIdMappings = (): AppThunk => async (): Promise<void> => {
+  console.log('Here is the previous text for ID mapping, stored inside the localStorage', MapperBetweenSets.getStorageKey(), 'key:', MapperBetweenSets.getStorage());
   MapperBetweenSets.clear();
   setCorrelatedIdsRefreshedMillis(0);
-  console.log('Cache cleared.');
+  console.log('Cleared ID mapping data.');
 };
 
 /**
