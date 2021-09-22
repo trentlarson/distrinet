@@ -523,8 +523,7 @@ export const addDistrinetTaskSource: SettingsEditor = (
   const iriPath: string = path.join(
     electron.remote.app.getAppPath(),
     '..',
-    '.well-known',
-    'tasks.yml.iri'
+    '.tasks.yml.iri'
   );
   const newSource: SourceInternal = {
     id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
@@ -690,7 +689,7 @@ const setupLocalIri = async (
 
 /**
  param newSource must have unique ID & location
- param suggestedId is a potential IRI ID if there is none in .well-known dir
+ param suggestedId is a potential IRI ID if there is none
  */
 export const dispatchAddSourceToSettings = (
   newSource: SourceInternal

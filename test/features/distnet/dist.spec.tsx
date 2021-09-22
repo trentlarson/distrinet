@@ -98,20 +98,19 @@ describe('Resource Types', () => {
 
     const thisTestPath = __dirname;
     const genealogyPath = path.join(thisTestPath, "..", "genealogy");
-    const genealogyKnownPath = path.join(genealogyPath, ".well-known");
 
     expect(await settings.retrieveIriFileNameForTesting(
       url.pathToFileURL(path.join(genealogyPath, "sample-gedcomx-norman.json"))
     )).toEqual({
-      wellKnownDir: path.join(genealogyPath, ".well-known"),
-      iriFile: path.join(genealogyKnownPath, "sample-gedcomx-norman.json.iri"),
+      wellKnownDir: genealogyPath,
+      iriFile: path.join(genealogyPath, ".sample-gedcomx-norman.json.iri"),
     });
 
     expect(await settings.readIriFromWellKnownDir(
       url.pathToFileURL(path.join(genealogyPath, "sample-gedcomx-norman.json"))
     )).toEqual({
       iri: "gedcomx:my-local-test:test-sample-norman",
-      iriFile: path.join(genealogyKnownPath, "sample-gedcomx-norman.json.iri"),
+      iriFile: path.join(genealogyPath, ".sample-gedcomx-norman.json.iri"),
     });
 
   });

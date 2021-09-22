@@ -27,6 +27,8 @@ tasks :
 
   - 1 make some activities advanced (eg. caching, ID map) and allow disabling at start
 
+  - 0 totally remove references to any .well-known / wellKnown directory (or allow in advanced settings)
+
   - 1 save the local copy (for a given remote URL) only... on setting? :
     - show if there's a difference in the local copy
     - if we ever edit local copy :

@@ -54,16 +54,15 @@ const retrieveIriFileName = async (
     // good, it's a file
     const parsed = path.parse(filename);
     containingDir = parsed.dir;
-    finalIriFile = `${parsed.base}.iri`;
+    finalIriFile = `.${parsed.base}.iri`;
   } else {
     // ungood: it's not a file or directory
     throw Error(
       `Unable to get IRI because this source location is neither a file nor a directory: ${filename}`
     );
   }
-  const wellKnownDir = path.join(containingDir, '.well-known');
-  const iriFile = path.join(wellKnownDir, finalIriFile);
-  return { wellKnownDir, iriFile };
+  const iriFile = path.join(containingDir, finalIriFile);
+  return { wellKnownDir: containingDir, iriFile };
 };
 
 /**
@@ -114,7 +113,7 @@ export async function readIriFromWellKnownDir(
 }
 
 /**
- Make a .well-known/FILE.iri file, and return a Promise with IRI file name as result on success or with {error:'...'} on failure.
+ Make a .FILE.iri file, and return a Promise with IRI file name as result on success or with {error:'...'} on failure.
  Throws error if something goes wrong.
  */
 export async function saveIriToWellKnownDir(
@@ -131,7 +130,7 @@ export async function saveIriToWellKnownDir(
         wellKnownDirExists = true;
       } else {
         throw Error(
-          `The .well-known location exists but is not a directory here: ${sourceLocalUrl}`
+          `The location for .iri file exists but is not a directory here: ${sourceLocalUrl}`
         );
       }
       return iriFile;
