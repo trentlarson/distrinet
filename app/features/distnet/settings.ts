@@ -56,7 +56,7 @@ const retrieveIriFileName = async (
     containingDir = parsed.dir;
     finalIriFile = `${parsed.base}.iri`;
   } else {
-    // less good: it's not a file or directory
+    // ungood: it's not a file or directory
     throw Error(
       `Unable to get IRI because this source location is neither a file nor a directory: ${filename}`
     );

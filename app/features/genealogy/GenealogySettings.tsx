@@ -68,7 +68,7 @@ export default function GenealogySettings() {
           data-tclass="btn"
           type="button"
         >
-          Clear ID cache
+          Clear ID Mapping Cache
         </button>
         <br />
         (Note that you can see and copy previous data in the Dev Tools, which you can reveal in the Help page.)
