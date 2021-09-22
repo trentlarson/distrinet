@@ -50,6 +50,7 @@ export const resetIdMappings = (): AppThunk => async (): Promise<void> => {
     'key:',
     previousData
   );
+  // eslint-disable-next-line no-new
   new Notification('Cleared', {
     body: `Cleared ID mapping data.`,
     silent: true,

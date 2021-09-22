@@ -33,7 +33,6 @@ export interface Gedcomx {
  * We currently allow pointers to records with arbitrary formats.
  */
 export default class MapperBetweenSets {
-
   /**
    * Retrieve the DB of all duplicate IDs.
    *
