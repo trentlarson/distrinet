@@ -1,4 +1,5 @@
   - -1 allow selection of units for estimates (eg. 2^x, hours, days)
+  - 1 Determine a workflow for seeing priorities and interest
   - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
   - 1 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import

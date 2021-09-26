@@ -1,7 +1,7 @@
 {
   "name": "Distrinet",
   "productName": "distrinet",
-  "version": "0.1.16-beta",
+  "version": "0.1.16",
   "description": "Utilities to support and share private data references, with sample applications.",
   "main": "./main.prod.js",
   "author": {
