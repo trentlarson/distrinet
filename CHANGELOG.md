@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.16] - 2021-09.25 - 60142e1026f52c887f3dd94153ef643bc340f973
+
+### Changed
+
+- Remove the .well-known directory.
+
+
+
 ## [0.1.15] - 2021-09.19 - 5ea08bcf5dcd22d04b9407cf926883c5c6e9909b
 
 ### Added
