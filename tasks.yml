@@ -13,10 +13,10 @@ tasks :
   - 0 get version call that works for packaged app (important for data migrations)
     (Retrieval from asar?) (Not app.getVersion() - gives electron version)
 
-  - 2 save another local copy of files to track what is most recently seen id:#history
-    - one file first
+  - 2 save another local copy of files to track what is most recently seen id:#history :
+    - one file first :
       - for git & Syncthing, don't copy but rather look into .stfolder for history
-        - ... except for the .well-known/*.iri file(s), if ref:#well-known is done
+        ... except for the .well-known/*.iri file(s), if ref:#well-known is done
       - create directory (with any name, maybe based on name of the IRI)
       - store that local directory name in settings in the app "history" directory
     - when parsing, ensure IRIs are unique
