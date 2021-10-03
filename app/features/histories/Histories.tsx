@@ -204,7 +204,8 @@ export function HistoryDir(props: DirProps) {
     </a>
   );
 
-  const dragLink = <a href={fileUrl.toString()}>(drag)</a>;
+  const dragUrlLink = <a href={fileUrl.toString()}>(drag URL)</a>;
+  const dragFileLink = <a href={path.format(tree.fullPath)}>(drag file)</a>;
 
   const resourceTypes = useSelector(
     (state: RootState) => state.distnet.settings.resourceTypes
@@ -242,7 +243,9 @@ export function HistoryDir(props: DirProps) {
       &nbsp;
       {openLink}
       &nbsp;
-      {dragLink}
+      {dragFileLink}
+      &nbsp;
+      {dragUrlLink}
       &nbsp;
       {moreLinks}
       <br />

@@ -13,6 +13,8 @@ tasks :
   - 0 get version call that works for packaged app (important for data migrations)
     (Retrieval from asar?) (Not app.getVersion() - gives electron version)
 
+  - -1 documentation - Google Drive vs Backup
+
   - 2 save another local copy of files to track what is most recently seen id:#history :
     - one file first :
       - for git & Syncthing, don't copy but rather look into .stfolder for history
@@ -27,14 +29,15 @@ tasks :
 
   - 1 make some activities advanced (eg. caching, ID map) and allow disabling at start
 
-  - 0 totally remove references to any .well-known / wellKnown directory (or allow in advanced settings)
+  - 2 add detection for local, uncommitted changes
 
-  - 1 save the local copy (for a given remote URL) only... on setting? :
+  - 1 save the local copy (for a given remote URL); only... on setting? :
     - show if there's a difference in the local copy
     - if we ever edit local copy :
       - we retrieve latest from remote & compare to remote
 
-  - -1 documentation - Google Drive vs Backup
+  - 0 totally remove references to any .well-known / wellKnown directory (or allow in advanced settings)
+
   - -1 distrinet write tests for many setting new settings (to ensure we don't erase settings)
   - 0 encrypt private key
   - 90 1 create list-source directory file that points at other lists of sources
@@ -75,7 +78,7 @@ tasks :
   - '80 0 on startup, check for files already cached in files and show that date'
   - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
   - '80 -1 in settings, rename source.id to source.uri'
-  - 80 1 change all alerts into on-page errors
+  - 80 1 change most alerts into on-page errors
   - 80 1 upgrade electron version
   - >-
     75 2 start an HTTP server for file access (rather than direct library
@@ -87,7 +90,6 @@ tasks :
     check)
   - '70 0 show if cached file already exists, and allow redownload'
   - 70 1 handle timeout failures (tried node-fetch with abort-controller)
-  - 70 1 show indicator if settings file has been changed
   - 70 2 save a preference for loading cache on app start
   - 65 3 package for mobile
   - >-

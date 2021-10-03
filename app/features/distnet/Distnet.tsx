@@ -106,9 +106,6 @@ export default function Distnet(options: AppInfo) {
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   {/* It's stupid how styles conflict. Try fix this, I dare you. */}
                   {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                  1<sup>st</sup>
-                  &nbsp;URL
-                  <br />
                   Remote
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>

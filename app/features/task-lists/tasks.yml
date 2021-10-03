@@ -1,10 +1,10 @@
+  - 1 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people
   - -1 allow selection of units for estimates (eg. 2^x, hours, days)
-  - 1 Determine a workflow for seeing priorities and interest
   - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
   - 1 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
   - 70 1 add markdown parsing id:markdown :
-    blocks: joplin
+    blocks: [ ref:joplin ]
   - 70 1 test with Joplin id:joplin
   - 70 0 expand dependents in top list (and avoid "Empty or mismatched" error)
   - 70 -1 look into subtasks for labels to make available
@@ -36,6 +36,5 @@
   - 45 0 fix jsx-ally ignores (for accessibility)
   - 45 0 handle more task YAML variations (eg. blocked & child issues)
   - 45 1 work off SQLite
-  - 40 2 Make an edit to a task list and ensure a collaborator can see it.
 
   - 1 parse Orlin's project supertasks:supertasks
