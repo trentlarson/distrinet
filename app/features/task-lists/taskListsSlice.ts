@@ -34,13 +34,13 @@ import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 
 const DEFAULT_FORECAST_SERVER =
   'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
-const REF_LABEL_KEY = 'ref';
 const TASKYAML_SCHEME = 'taskyaml';
 
 const fsPromises = fs.promises;
 
 export const DEFAULT_HOURS_PER_WEEK = 40;
 export const DEFAULT_TASK_COMMENT = 'I volunteer to work on this.';
+export const REF_LABEL_KEY = 'ref';
 
 export interface ProjectFile {
   tasks: Array<YamlInputIssues>;
@@ -168,6 +168,7 @@ export const {
   setAllTaskLists,
   setForecastData,
   setTaskList,
+  setTopLinkedInfo,
   setUiForPath,
   toggleLinkedTasksInSourceExpansionUi,
 } = taskListsSlice.actions;
@@ -197,16 +198,16 @@ export function labelValueInSummary(
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
 
-// return values for all those labels or [] if none
+// return values for all instances of that label; always some array, even if empty
 function getLabelValues(label: string, summary: string): Array<string> {
-  let result = [];
+  let result: Array<string> = [];
   const parts = summary.split(`${label}:`);
   // start at the second value and find all the values
-  for (let i = 1; i < parts.length; i += 1 ) {
+  for (let i = 1; i < parts.length; i += 1) {
     const value = parts[i].trim();
     if (value) {
       let spacePos = value.indexOf(' ');
-      if (spacePos == -1) {
+      if (spacePos === -1) {
         spacePos = value.length;
       }
       result = R.append(value.substring(0, spacePos), result);
@@ -835,7 +836,7 @@ const referencedTaskCounts = (
   listKey: string,
   tasks: Array<YamlTask>
 ): Record<string, number> => {
-  const result = {};
+  const result: Record<string, number> = {};
   for (let i = 0; i < tasks.length; i += 1) {
     const refs = getRefValues(tasks[i].summary);
     for (let j = 0; j < refs.length; j += 1) {
@@ -848,7 +849,7 @@ const referencedTaskCounts = (
 
 // only exporting for tests
 export const aggregateReferencedTaskCounts = (
-  allTasks: Array<Record<string, Array<YamlTask>>>
+  allTasks: Record<string, Array<YamlTask>>
 ): Record<string, number> => {
   const keys = R.keys(allTasks);
   const countRecords = keys.map((key) =>
@@ -857,8 +858,11 @@ export const aggregateReferencedTaskCounts = (
   return R.reduce(R.curry(R.mergeWith(R.add)), {}, countRecords);
 };
 
-export const determineTopTasks = (): AppThunk => async (_1, getState) => {
-  const linked = aggregateReferencedTaskCounts(getState().taskLists.allLists)
+export const dispatchDetermineTopTasks = (): AppThunk => async (
+  _1,
+  getState
+) => {
+  const linked = aggregateReferencedTaskCounts(getState().taskLists.allLists);
   setTopLinkedInfo(linked);
 };
 
