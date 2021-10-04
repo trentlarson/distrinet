@@ -1,6 +1,8 @@
 import * as R from 'ramda';
 
 import {
+  aggregateReferencedTaskCounts,
+  getRefValues,
   taskFromString,
   toggleProperty
 } from '../../../app/features/task-lists/taskListsSlice';
@@ -232,4 +234,59 @@ describe('editUiTreeAtPathOneSource', () => {
     ))
     .toEqual([sub322trueMidFalse]);
   });
+});
+
+describe('determine task list', () => {
+  it('should get all ref: labels', () => {
+    expect(getRefValues('')).toEqual([]);
+    expect(getRefValues('Got something')).toEqual([]);
+    expect(getRefValues('Got some against ref:gabba')).toEqual(['gabba']);
+    expect(getRefValues('Got some for both ref:gabba and ref:hey')).toEqual(['gabba', 'hey']);
+    expect(getRefValues('ref:stuff is related to ref:hey yo')).toEqual(['stuff', 'hey']);
+  });
+});
+
+describe('aggregate task list counts', () => {
+  const list1 = {
+    'taskyaml:test-distrinet.com': [
+      { 'summary': 'Lots of stuff' },
+      { 'summary': 'Moar' },
+    ]
+  };
+  const list2 = {
+    'taskyaml:test-distrinet.com': [
+      { 'summary': 'Lots of stuff ref:stuff' },
+      { 'summary': 'Moar' },
+    ],
+  };
+  const list3 = {
+    'taskyaml:test-distrinet.com': [
+      { 'summary': 'Stuff id:stuff' },
+      { 'summary': 'Lots of stuff ref:stuff' },
+      { 'summary': 'Moar' },
+    ],
+    'taskyaml:test-distrinet-2.com': [
+      { 'summary': 'Lots of stuff like ref:stuff' },
+      { 'summary': 'Lots of stuff like ref:taskyaml:test-distrinet.com#stuff too' },
+      { 'summary': 'Moar but nothing special id:moar' },
+      { 'summary': 'Moar ref:moar too' },
+      { 'summary': 'Moar ref:taskyaml:test-distrinet-3.com/another-thing big too' },
+      { 'summary': 'Moar ref:taskyaml:test-distrinet-2.com#moar big three' },
+    ],
+  };
+
+  it('should aggregate references correctly', () => {
+    expect(aggregateReferencedTaskCounts([])).toEqual({});
+    expect(aggregateReferencedTaskCounts(list1)).toEqual({});
+    expect(aggregateReferencedTaskCounts(list2)).toEqual({
+      'taskyaml:test-distrinet.com#stuff': 1,
+    });
+    expect(aggregateReferencedTaskCounts(list3)).toEqual({
+      'taskyaml:test-distrinet.com#stuff': 2,
+      'taskyaml:test-distrinet-2.com#moar': 2,
+      'taskyaml:test-distrinet-2.com#stuff': 1,
+      'taskyaml:test-distrinet-3.com/another-thing': 1,
+    });
+  });
+
 });

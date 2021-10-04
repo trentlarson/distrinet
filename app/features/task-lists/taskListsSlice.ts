@@ -32,9 +32,10 @@ import {
 // eslint-disable-next-line import/no-cycle
 import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 
-const TASKYAML_SCHEME = 'taskyaml';
 const DEFAULT_FORECAST_SERVER =
   'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
+const REF_LABEL_KEY = 'ref';
+const TASKYAML_SCHEME = 'taskyaml';
 
 const fsPromises = fs.promises;
 
@@ -115,6 +116,7 @@ const taskListsSlice = createSlice({
     // 'display' is a record of which tasks have expanded subtasks or dependent tasks
     display: {} as Record<string, Array<UiTree>>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
+    linkedTasks: {} as Record<string, number>,
   },
   reducers: {
     setAllTaskLists: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
@@ -132,6 +134,9 @@ const taskListsSlice = createSlice({
     setUiForPath: (state, sourceDisplay: Payload<SourceIdAndUiTrees>) => {
       state.display[sourceDisplay.payload.sourceId] =
         sourceDisplay.payload.uiTreeList;
+    },
+    setTopLinkedInfo: (state, linkedTasks: Payload<Record<string, number>>) => {
+      state.linkedTasks = linkedTasks.payload;
     },
     toggleLinkedTasksInSourceExpansionUi: (
       state,
@@ -191,6 +196,26 @@ export function labelValueInSummary(
   const pair = R.find((str) => str.startsWith(`${label}:`), pairs);
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
+
+// return values for all those labels or [] if none
+function getLabelValues(label: string, summary: string): Array<string> {
+  let result = [];
+  const parts = summary.split(`${label}:`);
+  // start at the second value and find all the values
+  for (let i = 1; i < parts.length; i += 1 ) {
+    const value = parts[i].trim();
+    if (value) {
+      let spacePos = value.indexOf(' ');
+      if (spacePos == -1) {
+        spacePos = value.length;
+      }
+      result = R.append(value.substring(0, spacePos), result);
+    }
+  }
+  return result;
+}
+
+export const getRefValues = R.curry(getLabelValues)(REF_LABEL_KEY);
 
 export function taskFromString(
   sourceId: string,
@@ -803,6 +828,38 @@ export const dispatchVolunteer = (
       'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
     );
   }
+};
+
+// return map of issue key & number of references
+const referencedTaskCounts = (
+  listKey: string,
+  tasks: Array<YamlTask>
+): Record<string, number> => {
+  const result = {};
+  for (let i = 0; i < tasks.length; i += 1) {
+    const refs = getRefValues(tasks[i].summary);
+    for (let j = 0; j < refs.length; j += 1) {
+      const key = globalUriForId(refs[j], listKey);
+      result[key] = 1 + (result[key] || 0);
+    }
+  }
+  return result;
+};
+
+// only exporting for tests
+export const aggregateReferencedTaskCounts = (
+  allTasks: Array<Record<string, Array<YamlTask>>>
+): Record<string, number> => {
+  const keys = R.keys(allTasks);
+  const countRecords = keys.map((key) =>
+    referencedTaskCounts(key, allTasks[key])
+  );
+  return R.reduce(R.curry(R.mergeWith(R.add)), {}, countRecords);
+};
+
+export const determineTopTasks = (): AppThunk => async (_1, getState) => {
+  const linked = aggregateReferencedTaskCounts(getState().taskLists.allLists)
+  setTopLinkedInfo(linked);
 };
 
 export default taskListsSlice.reducer;
