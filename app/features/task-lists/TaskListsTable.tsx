@@ -4,6 +4,7 @@ import * as R from 'ramda';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 import { useDispatch, useSelector } from 'react-redux';
+import SyncLoader from 'react-spinners/SyncLoader';
 import URL from 'url';
 
 import { AppThunk, RootState } from '../../store';
@@ -17,6 +18,7 @@ import {
   clearForecastData,
   DEFAULT_HOURS_PER_WEEK,
   DEFAULT_TASK_COMMENT,
+  dispatchDetermineTopTasks,
   dispatchLoadAllSourcesIntoTasks,
   dispatchLoadOneSourceIntoTasks,
   dispatchToggleDependentExpansionUi,
@@ -24,6 +26,7 @@ import {
   dispatchVolunteer,
   isTaskyamlUriScheme,
   labelValueInSummary,
+  REF_LABEL_KEY,
   retrieveForecast,
 } from './taskListsSlice';
 import {
@@ -59,6 +62,7 @@ export default function TaskListsTable() {
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
   const [showOnlyBiggest5, setShowOnlyBiggest5] = useState(false);
+  const [calculatingLinkedTasks, setCalculatingLinkedTasks] = useState(false);
 
   let allLabels: Array<string> = [];
 
@@ -133,6 +137,33 @@ export default function TaskListsTable() {
           listSourceIdsToShow,
           setListSourceIdsToShow
         )}
+      </div>
+      <div>
+        <hr />
+        Report&nbsp;
+        <button
+          type="button"
+          onClick={async () => {
+            setCalculatingLinkedTasks(true);
+            return dispatch(dispatchDetermineTopTasks()).finally(() =>
+              setCalculatingLinkedTasks(false)
+            );
+          }}
+        >
+          Find Top Links
+        </button>
+        {calculatingLinkedTasks ? <SyncLoader color="silver" /> : <span />}
+        <div>
+          <ul>
+            {R.keys(taskLists.linkedTasks).map((key) => (
+              <li key={key}>
+                {taskLists.linkedTasks[key]}
+                &nbsp;
+                {key}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <div>
         {taskLists.forecastData.html.length > 0 ? (
@@ -553,7 +584,11 @@ function oneTaskRow(
       {labelsToShow.map((label) => {
         const labelValue = labelValueInSummary(label, task.summary);
         let more = <span />;
-        if (label === 'ref' && labelValue && isTaskyamlUriScheme(labelValue)) {
+        if (
+          label === REF_LABEL_KEY &&
+          labelValue &&
+          isTaskyamlUriScheme(labelValue)
+        ) {
           const newUri = findClosestUriForGlobalUri(
             labelValue,
             R.map(R.prop('id'), taskSources)

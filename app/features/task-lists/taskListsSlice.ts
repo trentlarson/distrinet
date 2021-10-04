@@ -859,11 +859,11 @@ export const aggregateReferencedTaskCounts = (
 };
 
 export const dispatchDetermineTopTasks = (): AppThunk => async (
-  _1,
+  dispatch,
   getState
 ) => {
   const linked = aggregateReferencedTaskCounts(getState().taskLists.allLists);
-  setTopLinkedInfo(linked);
+  return dispatch(setTopLinkedInfo(linked));
 };
 
 export default taskListsSlice.reducer;
