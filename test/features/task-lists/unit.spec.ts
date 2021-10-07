@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import {
   aggregateReferencedTaskCounts,
   getRefValues,
+  sortedReferencedTasks,
   taskFromString,
   toggleProperty
 } from '../../../app/features/task-lists/taskListsSlice';
@@ -271,6 +272,7 @@ describe('aggregate task list counts', () => {
       { 'summary': 'Moar but nothing special id:moar' },
       { 'summary': 'Moar ref:moar too' },
       { 'summary': 'Moar ref:taskyaml:test-distrinet-3.com/another-thing big too' },
+      { 'summary': 'Moar ref:taskyaml:test-distrinet-2.com#moar big too 2' },
       { 'summary': 'Moar ref:taskyaml:test-distrinet-2.com#moar big three' },
     ],
   };
@@ -283,10 +285,26 @@ describe('aggregate task list counts', () => {
     });
     expect(aggregateReferencedTaskCounts(list3)).toEqual({
       'taskyaml:test-distrinet.com#stuff': 2,
-      'taskyaml:test-distrinet-2.com#moar': 2,
+      'taskyaml:test-distrinet-2.com#moar': 3,
       'taskyaml:test-distrinet-2.com#stuff': 1,
       'taskyaml:test-distrinet-3.com/another-thing': 1,
     });
+  });
+
+  it('should aggregate & sort references correctly', () => {
+    expect(sortedReferencedTasks([])).toEqual([]);
+    expect(sortedReferencedTasks(list1)).toEqual([]);
+    expect(sortedReferencedTasks(list2)).toEqual([
+      ['taskyaml:test-distrinet.com#stuff', 1],
+    ]);
+
+    // to be precise, this should check descending order (ignoring keys)
+    expect(sortedReferencedTasks(list3)).toEqual([
+      ['taskyaml:test-distrinet-2.com#moar', 3],
+      ['taskyaml:test-distrinet.com#stuff', 2],
+      ['taskyaml:test-distrinet-3.com/another-thing', 1],
+      ['taskyaml:test-distrinet-2.com#stuff', 1],
+    ]);
   });
 
 });

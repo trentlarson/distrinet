@@ -847,7 +847,7 @@ const referencedTaskCounts = (
   return result;
 };
 
-// only exporting for tests
+// only exporting so that we can run tests
 export const aggregateReferencedTaskCounts = (
   allTasks: Record<string, Array<YamlTask>>
 ): Record<string, number> => {
@@ -856,6 +856,14 @@ export const aggregateReferencedTaskCounts = (
     referencedTaskCounts(key, allTasks[key])
   );
   return R.reduce(R.curry(R.mergeWith(R.add)), {}, countRecords);
+};
+
+// only exporting so that we can run tests
+export const sortedReferencedTasks = (
+  allTasks: Record<string, Array<YamlTask>>
+): [[string, number]] => {
+  const aggregated = aggregateReferencedTaskCounts(allTasks);
+  return R.reverse(R.sortBy(R.view(R.lensIndex(1)), R.toPairs(aggregated)));
 };
 
 export const dispatchDetermineTopTasks = (): AppThunk => async (

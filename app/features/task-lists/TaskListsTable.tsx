@@ -145,9 +145,8 @@ export default function TaskListsTable() {
           type="button"
           onClick={async () => {
             setCalculatingLinkedTasks(true);
-            return dispatch(dispatchDetermineTopTasks()).finally(() =>
-              setCalculatingLinkedTasks(false)
-            );
+            await dispatch(dispatchDetermineTopTasks());
+            setCalculatingLinkedTasks(false);
           }}
         >
           Find Top Links
