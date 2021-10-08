@@ -159,6 +159,20 @@ export default function TaskListsTable() {
                 {taskLists.linkedTasks[key]}
                 &nbsp;
                 {key}
+                &nbsp;
+                <a
+                  className="fa fa-crosshairs"
+                  role="button"
+                  title="Load"
+                  onClick={() => {
+                    let taskSourceIds = R.filter(
+                      (sid) => R.startsWith(sid, key),
+                      R.keys(taskLists.allLists)
+                    );
+                    let taskSourceId = R.last(R.sort(R.length, taskSourceIds));
+                    setListSourceIdsToShow([taskSourceId]);
+                  }}
+                />
               </li>
             ))}
           </ul>
