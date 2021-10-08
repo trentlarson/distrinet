@@ -160,17 +160,22 @@ export default function TaskListsTable() {
                 &nbsp;
                 {key}
                 &nbsp;
+                {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
                 <a
                   className="fa fa-crosshairs"
                   role="button"
                   title="Load"
                   onClick={() => {
-                    let taskSourceIds = R.filter(
+                    const taskSourceIds = R.filter(
                       (sid) => R.startsWith(sid, key),
                       R.keys(taskLists.allLists)
                     );
-                    let taskSourceId = R.last(R.sort(R.length, taskSourceIds));
-                    setListSourceIdsToShow([taskSourceId]);
+                    const taskSourceId = R.last(
+                      R.sort((s) => s.length, taskSourceIds)
+                    );
+                    if (taskSourceId) {
+                      setListSourceIdsToShow([taskSourceId]);
+                    }
                   }}
                 />
               </li>
