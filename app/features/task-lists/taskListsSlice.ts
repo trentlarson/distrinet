@@ -861,9 +861,10 @@ export const aggregateReferencedTaskCounts = (
 // only exporting so that we can run tests
 export const sortedReferencedTasks = (
   allTasks: Record<string, Array<YamlTask>>
-): [[string, number]] => {
+): [string, number][] => {
   const aggregated = aggregateReferencedTaskCounts(allTasks);
-  return R.reverse(R.sortBy(R.view(R.lensIndex(1)), R.toPairs(aggregated)));
+  const pairs: [string, number][] = R.toPairs(aggregated);
+  return R.reverse(R.sortBy(R.view(R.lensIndex(1)), pairs));
 };
 
 export const dispatchDetermineTopTasks = (): AppThunk => async (
