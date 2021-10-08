@@ -40,6 +40,7 @@ const fsPromises = fs.promises;
 
 export const DEFAULT_HOURS_PER_WEEK = 40;
 export const DEFAULT_TASK_COMMENT = 'I volunteer to work on this.';
+export const ID_LABEL_KEY = 'id';
 export const REF_LABEL_KEY = 'ref';
 
 export interface ProjectFile {
@@ -216,6 +217,7 @@ function getLabelValues(label: string, summary: string): Array<string> {
   return result;
 }
 
+export const getIdValues = R.curry(getLabelValues)(ID_LABEL_KEY);
 export const getRefValues = R.curry(getLabelValues)(REF_LABEL_KEY);
 
 export function taskFromString(

@@ -13,7 +13,10 @@ import {
   addDragDropListeners,
   dispatchAddTaskListToSettings,
 } from '../distnet/distnetSlice';
-import { findClosestUriForGlobalUri } from '../distnet/uriTools';
+import {
+  findClosestUriForGlobalUri,
+  globalUriForId,
+} from '../distnet/uriTools';
 import {
   clearForecastData,
   DEFAULT_HOURS_PER_WEEK,
@@ -24,6 +27,7 @@ import {
   dispatchToggleDependentExpansionUi,
   dispatchToggleSubtaskExpansionUi,
   dispatchVolunteer,
+  getIdValues,
   isTaskyamlUriScheme,
   labelValueInSummary,
   REF_LABEL_KEY,
@@ -170,12 +174,14 @@ export default function TaskListsTable() {
                       (sid) => R.startsWith(sid, key),
                       R.keys(taskLists.allLists)
                     );
+                    // I have IRIs that are paths under others, so only select the most specific.
                     const taskSourceId = R.last(
                       R.sort((s) => s.length, taskSourceIds)
                     );
                     if (taskSourceId) {
                       setListSourceIdsToShow([taskSourceId]);
                     }
+                    setFocusOnTaskId(key);
                   }}
                 />
               </li>
@@ -216,6 +222,7 @@ export default function TaskListsTable() {
         taskSources,
         hoursPerWeek,
         taskSigningComment,
+        focusOnTaskId,
         setFocusOnTaskId,
         setListSourceIdsToShow,
         labelsToShow,
@@ -424,6 +431,7 @@ function bigListTable(
   taskSources: Array<SourceInternal>,
   hoursPerWeek: number,
   taskSigningComment: string,
+  focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   labelsToShow: Array<string>,
@@ -497,6 +505,7 @@ function bigListTable(
         taskSources,
         labelsToShow,
         setListSourceIdsToShow,
+        focusOnTaskId,
         setFocusOnTaskId,
         [],
         allUiTrees,
@@ -513,6 +522,7 @@ function smallListTable(
   taskSources: Array<SourceInternal>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
+  focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
@@ -551,6 +561,7 @@ function smallListTable(
               taskSources,
               labelsToShow,
               setListSourceIdsToShow,
+              focusOnTaskId,
               setFocusOnTaskId,
               uiTreePath,
               allUiTrees,
@@ -571,6 +582,7 @@ function oneTaskRow(
   taskSources: Array<SourceInternal>,
   labelsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
+  focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
   uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
@@ -592,6 +604,11 @@ function oneTaskRow(
     dependentUiTreePath,
     allUiTrees[task.sourceId],
     UiTreeProperty.DEPENDENTS_EXP
+  );
+  const taskIds = getIdValues(task.summary);
+  const globalUris: Array<string> = R.map(
+    R.curry(globalUriForId)(R.__, task.sourceId), // eslint-disable-line no-underscore-dangle
+    taskIds
   );
   // eslint-disable-next-line react/no-array-index-key
   return (
@@ -636,7 +653,13 @@ function oneTaskRow(
           </td>
         );
       })}
-      <td>
+      <td
+        style={{
+          border: R.includes(focusOnTaskId, globalUris)
+            ? '5px solid yellow'
+            : '',
+        }}
+      >
         {task.summary}
         <br />
         {task.subtasks.length > 0 ? (
@@ -666,6 +689,7 @@ function oneTaskRow(
                 taskSources,
                 labelsToShow,
                 setListSourceIdsToShow,
+                focusOnTaskId,
                 setFocusOnTaskId,
                 subtaskUiTreePath,
                 allUiTrees,
@@ -710,6 +734,7 @@ function oneTaskRow(
                 taskSources,
                 labelsToShow,
                 setListSourceIdsToShow,
+                focusOnTaskId,
                 setFocusOnTaskId,
                 dependentUiTreePath,
                 allUiTrees,
