@@ -136,7 +136,7 @@ const taskListsSlice = createSlice({
       state.display[sourceDisplay.payload.sourceId] =
         sourceDisplay.payload.uiTreeList;
     },
-    setTopLinkedInfo: (state, linkedTasks: Payload<Record<string, number>>) => {
+    setTopLinkedInfo: (state, linkedTasks: Payload<[string, number][]>) => {
       state.linkedTasks = linkedTasks.payload;
     },
     toggleLinkedTasksInSourceExpansionUi: (

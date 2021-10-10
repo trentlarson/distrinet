@@ -161,7 +161,6 @@ export default function TaskListsTable() {
         <div>
           <ul>
             {taskLists.linkedTasks.map(([key, number]) => {
-
               const taskSourceIds = R.filter(
                 (sid) => R.startsWith(sid, key),
                 R.keys(taskLists.allLists)
@@ -173,37 +172,40 @@ export default function TaskListsTable() {
               let taskSourceName = '';
               if (taskSourceId) {
                 const taskSource = getSourceForIri(taskSourceId, taskSources);
-                if (taskSource && taskSource.name) { // we may not know the source
+                if (taskSource && taskSource.name) {
+                  // may not have the source
                   taskSourceName = taskSource.name || '';
                 }
               }
 
-              return <li key={key}>
-                {taskSourceName}
-                &nbsp;-&nbsp;
-                {lastSignificantChars(key)}
-                &nbsp;
-                ({number} reference)
-                &nbsp;
-                {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
-                <a
-                  className="fa fa-crosshairs"
-                  role="button"
-                  title="Load"
-                  onClick={() => {
-                    if (taskSourceId) {
-                      setListSourceIdsToShow([taskSourceId]);
-                      setFocusOnTaskId(key);
-                    } else {
-                      // eslint-disable-next-line no-new
-                      new Notification('Unknown', {
-                        body: `That task is not in any known projects.`,
-                        silent: true,
-                      });
-                    }
-                  }}
-                />
-              </li>
+              return (
+                <li key={key}>
+                  {taskSourceName}
+                  &nbsp;-&nbsp;
+                  {lastSignificantChars(key)}
+                  &nbsp;
+                  {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                  ({number} reference)&nbsp;
+                  {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
+                  <a
+                    className="fa fa-crosshairs"
+                    role="button"
+                    title="Load"
+                    onClick={() => {
+                      if (taskSourceId) {
+                        setListSourceIdsToShow([taskSourceId]);
+                        setFocusOnTaskId(key);
+                      } else {
+                        // eslint-disable-next-line no-new
+                        new Notification('Unknown', {
+                          body: `That task is not in any known projects.`,
+                          silent: true,
+                        });
+                      }
+                    }}
+                  />
+                </li>
+              );
             })}
           </ul>
         </div>
@@ -630,13 +632,13 @@ function oneTaskRow(
     R.curry(globalUriForId)(R.__, task.sourceId), // eslint-disable-line no-underscore-dangle
     taskIds
   );
+  const taskSource = sourceMap[task.sourceId];
+  const taskSourceName = taskSource ? taskSource.name : '';
+
   // eslint-disable-next-line react/no-array-index-key
   return (
     <tr key={`${task.sourceId}/${index}`}>
-      <td>{index > 0
-        ? ''
-        : sourceMap[task.sourceId] ? sourceMap[task.sourceId].name : ''}
-      </td>
+      <td>{index > 0 ? '' : taskSourceName}</td>
       <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
       <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
       {labelsToShow.map((label) => {

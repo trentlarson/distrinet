@@ -187,12 +187,14 @@ export const lastSignificantChars = (url: string): string => {
   if (R.isNil(url)) {
     return url;
   }
-  const finalPart = url.split('/').pop().split('#').pop();
+  const finalPart = url.split('/').pop()?.split('#').pop();
+  if (!finalPart) {
+    // Shouldn't happen, but the typecheck fails without this check claiming that the result of pop could be undefined.
+    return '';
+  }
   const result =
     finalPart.length < 20
-    ? finalPart
-    : finalPart.substring(0, 8)
-      + '...'
-      + finalPart.substring(finalPart.length - 8);
+      ? finalPart
+      : finalPart.substring(0, 8) + '...' + finalPart.substring(finalPart.length - 8); // eslint-disable-line prefer-template, prettier/prettier, max-len
   return result;
-}
+};
