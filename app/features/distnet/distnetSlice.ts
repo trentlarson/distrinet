@@ -100,6 +100,11 @@ const {
   setSettingsStateText,
 } = distnetSlice.actions;
 
+// similar to sourceMap in TaskListTable
+export function getSourceForIri(iri: string, sources: Array<SourceInternal>) {
+  return R.find((s) => s.id === iri, sources);
+}
+
 function isSettingsForStorage(
   // eslint-disable-next-line @typescript-eslint/ban-types
   contents: string | object | undefined

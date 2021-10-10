@@ -180,3 +180,19 @@ export function onlyBiggest5(taskList: Array<YamlTask>): Array<YamlTask> {
   }
   return result;
 }
+
+// Extract the last piece of the URL and ensure < 20 characters.
+export const lastSignificantChars = (url: string): string => {
+  // get the last piece
+  if (R.isNil(url)) {
+    return url;
+  }
+  const finalPart = url.split('/').pop().split('#').pop();
+  const result =
+    finalPart.length < 20
+    ? finalPart
+    : finalPart.substring(0, 8)
+      + '...'
+      + finalPart.substring(finalPart.length - 8);
+  return result;
+}

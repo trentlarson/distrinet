@@ -9,6 +9,7 @@ import {
 } from '../../../app/features/task-lists/taskListsSlice';
 import {
   editUiTreeAtPathOneSource,
+  lastSignificantChars,
   onlyBiggest5,
   posOfFirstEstimateSmallerThan,
   UiTreeLinkageProperty,
@@ -305,6 +306,16 @@ describe('aggregate task list counts', () => {
       ['taskyaml:test-distrinet-3.com/another-thing', 1],
       ['taskyaml:test-distrinet-2.com#stuff', 1],
     ]);
+  });
+
+  it('should return the end of a URL', () => {
+    expect(lastSignificantChars(null)).toEqual(null);
+    expect(lastSignificantChars('')).toEqual('');
+    expect(lastSignificantChars('http://')).toEqual('');
+    expect(lastSignificantChars('file:///Users/me/here')).toEqual('here');
+    expect(lastSignificantChars('file:///Users/me/here#')).toEqual('');
+    expect(lastSignificantChars('file:///Users/me/here#stuff_and_puff')).toEqual('stuff_and_puff');
+    expect(lastSignificantChars('file:///Users/me/here#stuff_and_puff.are.all.related.html')).toEqual('stuff_an...ted.html');
   });
 
 });

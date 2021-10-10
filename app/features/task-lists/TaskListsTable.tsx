@@ -12,6 +12,7 @@ import { Cache, ResourceType, SourceInternal } from '../distnet/distnetClasses';
 import {
   addDragDropListeners,
   dispatchAddTaskListToSettings,
+  getSourceForIri,
 } from '../distnet/distnetSlice';
 import {
   findClosestUriForGlobalUri,
@@ -35,6 +36,7 @@ import {
 } from './taskListsSlice';
 import {
   areLinkedTasksExpanded,
+  lastSignificantChars,
   onlyBiggest5,
   UiTree,
   UiTreeBranch,
@@ -158,11 +160,30 @@ export default function TaskListsTable() {
         {calculatingLinkedTasks ? <SyncLoader color="silver" /> : <span />}
         <div>
           <ul>
-            {R.keys(taskLists.linkedTasks).map((key) => (
-              <li key={key}>
-                {taskLists.linkedTasks[key]}
+            {taskLists.linkedTasks.map(([key, number]) => {
+
+              const taskSourceIds = R.filter(
+                (sid) => R.startsWith(sid, key),
+                R.keys(taskLists.allLists)
+              );
+              // I have IRIs that are paths under others, so only select the most specific.
+              const taskSourceId = R.last(
+                R.sort((s) => s.length, taskSourceIds)
+              );
+              let taskSourceName = '';
+              if (taskSourceId) {
+                const taskSource = getSourceForIri(taskSourceId, taskSources);
+                if (taskSource && taskSource.name) { // we may not know the source
+                  taskSourceName = taskSource.name || '';
+                }
+              }
+
+              return <li key={key}>
+                {taskSourceName}
+                &nbsp;-&nbsp;
+                {lastSignificantChars(key)}
                 &nbsp;
-                {key}
+                ({number} reference)
                 &nbsp;
                 {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus */}
                 <a
@@ -170,22 +191,20 @@ export default function TaskListsTable() {
                   role="button"
                   title="Load"
                   onClick={() => {
-                    const taskSourceIds = R.filter(
-                      (sid) => R.startsWith(sid, key),
-                      R.keys(taskLists.allLists)
-                    );
-                    // I have IRIs that are paths under others, so only select the most specific.
-                    const taskSourceId = R.last(
-                      R.sort((s) => s.length, taskSourceIds)
-                    );
                     if (taskSourceId) {
                       setListSourceIdsToShow([taskSourceId]);
+                      setFocusOnTaskId(key);
+                    } else {
+                      // eslint-disable-next-line no-new
+                      new Notification('Unknown', {
+                        body: `That task is not in any known projects.`,
+                        silent: true,
+                      });
                     }
-                    setFocusOnTaskId(key);
                   }}
                 />
               </li>
-            ))}
+            })}
           </ul>
         </div>
       </div>
@@ -588,6 +607,7 @@ function oneTaskRow(
   allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
 ) {
+  // similar to getSourceForIri in distnetSlice
   const sourceMap = R.fromPairs(R.map((s) => [s.id, s], taskSources));
   const subtaskUiTreePath = R.concat(uiTreePath, [
     { index, path: UiTreeLinkageProperty.SUBTASKS },
@@ -613,7 +633,10 @@ function oneTaskRow(
   // eslint-disable-next-line react/no-array-index-key
   return (
     <tr key={`${task.sourceId}/${index}`}>
-      <td>{index > 0 ? '' : sourceMap[task.sourceId].name}</td>
+      <td>{index > 0
+        ? ''
+        : sourceMap[task.sourceId] ? sourceMap[task.sourceId].name : ''}
+      </td>
       <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
       <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
       {labelsToShow.map((label) => {

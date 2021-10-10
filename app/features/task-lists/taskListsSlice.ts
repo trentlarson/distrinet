@@ -117,7 +117,7 @@ const taskListsSlice = createSlice({
     // 'display' is a record of which tasks have expanded subtasks or dependent tasks
     display: {} as Record<string, Array<UiTree>>,
     forecastData: { sourceId: '', html: '' } as ForecastData,
-    linkedTasks: {} as Record<string, number>,
+    linkedTasks: [] as [string, number][],
   },
   reducers: {
     setAllTaskLists: (state, tasks: Payload<Array<Array<YamlTask>>>) => {
@@ -489,8 +489,6 @@ function createForecastTasksRaw(
   });
 }
 
-const REF_KEY = 'ref';
-
 function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
   let rawTrees: Array<IssueToSchedule> = createForecastTasksRaw(tasks, '');
   const masterMap: Record<string, IssueToSchedule> = {};
@@ -504,7 +502,7 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
       const issue = masterMap[keys[keyIndex]];
       for (let depi = 0; depi < issue.dependents.length; depi += 1) {
         const depRef = labelValueInSummary(
-          REF_KEY,
+          REF_LABEL_KEY,
           issue.dependents[depi].summary
         );
         if (depRef !== null && masterMap[depRef]) {
@@ -516,7 +514,7 @@ function createForecastTasks(tasks: Array<YamlTask>): Array<IssueToSchedule> {
       }
       for (let subi = 0; subi < issue.subtasks.length; subi += 1) {
         const subRef = labelValueInSummary(
-          REF_KEY,
+          REF_LABEL_KEY,
           issue.subtasks[subi].summary
         );
         if (subRef !== null && masterMap[subRef]) {
@@ -873,7 +871,7 @@ export const dispatchDetermineTopTasks = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const linked = aggregateReferencedTaskCounts(getState().taskLists.allLists);
+  const linked = sortedReferencedTasks(getState().taskLists.allLists);
   return dispatch(setTopLinkedInfo(linked));
 };
 
