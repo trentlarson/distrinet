@@ -1,5 +1,6 @@
 import electron from 'electron';
 import _ from 'lodash';
+import { DateTime } from 'luxon';
 import * as R from 'ramda';
 import path from 'path';
 import React from 'react';
@@ -109,7 +110,14 @@ export default function Distnet(options: AppInfo) {
                   Remote
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  In-Memory Data Date
+                  Needs
+                  <br />
+                  Review
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  In-Memory
+                  <br />
+                  Data Date
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Actions
@@ -117,8 +125,17 @@ export default function Distnet(options: AppInfo) {
               </tr>
             </thead>
             <tbody>
-              {distnet.settings.sources.map((uriSource: SourceInternal) => (
-                <tr key={uriSource.workUrl}>
+              {distnet.settings.sources.map((uriSource: SourceInternal) => {
+                const needsReview = R.isNil(uriSource.dateReviewed);
+                if (uriSource.dateReviewed && distnet.cache[uriSource.id]) {
+                  const diskDate = distnet.cache[uriSource.id].updatedDate;
+                  if (DateTime.fromISO(diskDate)
+                      > DateTime.fromISO(uriSource.dateReviewed)) {
+                    needsReview = true;
+                  }
+                }
+                const needsReviewStr = needsReview ? 'Y' : '';
+                return <tr key={uriSource.workUrl}>
                   <td>
                     {uriTools.globalUriScheme(uriSource.id)}
                     &nbsp;
@@ -154,8 +171,12 @@ export default function Distnet(options: AppInfo) {
                     {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
                   </td>
                   <td>
+                    {needsReviewStr}
+                  </td>
+                  <td>
                     {distnet.cache[uriSource.id]
                       ? distnet.cache[uriSource.id].updatedDate
+                        .replace('T', ' ')
                       : '(none)'}
                   </td>
                   <td>
@@ -193,7 +214,7 @@ export default function Distnet(options: AppInfo) {
                     ))}
                   </td>
                 </tr>
-              ))}
+              })}
             </tbody>
           </table>
         ) : (

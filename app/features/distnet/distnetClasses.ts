@@ -29,6 +29,8 @@ export interface SourceForStorage {
   type?: string; // type of transfer/storage/sharing
   urls?: Array<UrlData>;
   workUrl: string;
+  // most recent date this data was reviewed, ISO-formatted
+  dateReviewed?: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 // Full Settings, built in memory
