@@ -1,5 +1,6 @@
 tasks :
 
+  - test all UI functions
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 1 rename the "urls" arrays to "moreUrls" type:tech-cleanup :

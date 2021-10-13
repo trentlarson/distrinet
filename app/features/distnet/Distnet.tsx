@@ -127,106 +127,117 @@ export default function Distnet(options: AppInfo) {
             </thead>
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => {
-                const needsReview = R.isNil(uriSource.dateReviewed);
+                let needsReview = R.isNil(uriSource.dateReviewed);
                 if (uriSource.dateReviewed && distnet.cache[uriSource.id]) {
                   const diskDate = distnet.cache[uriSource.id].updatedDate;
-                  if (DateTime.fromISO(diskDate)
-                      > DateTime.fromISO(uriSource.dateReviewed)) {
+                  if (
+                    DateTime.fromISO(diskDate) >
+                    DateTime.fromISO(uriSource.dateReviewed)
+                  ) {
                     needsReview = true;
                   }
                 }
                 const needsReviewStr = needsReview ? 'Y' : '';
-                return <tr key={uriSource.workUrl}>
-                  <td>
-                    {uriTools.globalUriScheme(uriSource.id)}
-                    &nbsp;
-                    {/* eslint-disable no-new */}
-                    {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus,no-new */}
-                    <a
-                      className="fa fa-copy"
-                      role="button"
-                      title={`Copy IRI ${uriSource.id}`}
-                      onClick={() => {
-                        electron.clipboard.writeText(uriSource.id);
-                        new Notification('Copied', {
-                          body: `Added this to your clipboard: ${uriSource.id}`,
-                          silent: true,
-                        });
-                      }}
-                    />
-                    {/* eslint-enable no-new */}
-                    &nbsp;
-                    <a
-                      href={uriSource.idFile}
-                      onClick={() => {
-                        alert(
-                          'This IRI file is meant to be dragged into a text editor. Restart the app if that is not what you wanted.' // eslint-disable-line max-len
-                        );
-                      }}
-                    >
-                      <i title="Drag IRI File" className="fa fa-hand-rock" />
-                    </a>
-                  </td>
-                  <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
-                  <td>
-                    {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
-                  </td>
-                  <td>
-                    {needsReviewStr}
-                    &nbsp;
-                    {!needsReview
-                      ? ''
-                      : <a className="fas fa-check-circle"
-                          href="#"
-                          onClick={() => {
-                            event.preventDefault();
-                            dispatch(dispatchAddReviewedDateToSettings(uriSource.id));
-                          }}
-                        >
-                        </a>
-                    }
-                  </td>
-                  <td>
-                    {distnet.cache[uriSource.id]
-                      ? distnet.cache[uriSource.id].updatedDate
-                        .replace('T', ' ')
-                      : '(none)'}
-                  </td>
-                  <td>
-                    {R.prepend(
-                      { url: uriSource.workUrl },
-                      uriSource.urls || []
-                    ).map((inUrl, index) => (
-                      <span key={inUrl && inUrl.url}>
-                        {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                        {index > 0 ? `, ${index + 1}) ` : ''}
+                return (
+                  <tr key={uriSource.workUrl}>
+                    <td>
+                      {uriTools.globalUriScheme(uriSource.id)}
+                      &nbsp;
+                      {/* eslint-disable no-new */}
+                      {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus,no-new */}
+                      <a
+                        className="fa fa-copy"
+                        role="button"
+                        title={`Copy IRI ${uriSource.id}`}
+                        onClick={() => {
+                          electron.clipboard.writeText(uriSource.id);
+                          new Notification('Copied', {
+                            body: `Added this to your clipboard: ${uriSource.id}`,
+                            silent: true,
+                          });
+                        }}
+                      />
+                      {/* eslint-enable no-new */}
+                      &nbsp;
+                      <a
+                        href={uriSource.idFile}
+                        onClick={() => {
+                          alert(
+                            'This IRI file is meant to be dragged into a text editor. Restart the app if that is not what you wanted.' // eslint-disable-line max-len
+                          );
+                        }}
+                      >
+                        <i title="Drag IRI File" className="fa fa-hand-rock" />
+                      </a>
+                    </td>
+                    <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
+                    <td>
+                      {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
+                    </td>
+                    <td>
+                      {needsReviewStr}
+                      &nbsp;
+                      {!needsReview ? (
+                        ''
+                      ) : (
+                        /* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */
                         <a
+                          className="fas fa-check-circle"
                           href="#"
-                          key={inUrl && inUrl.url}
                           onClick={(event) => {
                             event.preventDefault();
-                            electron.shell.openExternal(inUrl.url);
+                            dispatch(
+                              dispatchAddReviewedDateToSettings(uriSource.id)
+                            );
                           }}
-                        >
-                          {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                          Open
-                        </a>
-                        {inUrl?.url?.startsWith('file:') ? (
-                          <span>
-                            ,&nbsp;
-                            <a href={inUrl.url}>
-                              Drag&nbsp;
-                              {getExtension(inUrl.url)}
-                            </a>
-                          </span>
-                        ) : (
-                          ''
-                        )}
-                        {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                      </span>
-                    ))}
-                  </td>
-                </tr>
+                        />
+                        /* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */
+                      )}
+                    </td>
+                    <td>
+                      {distnet.cache[uriSource.id]
+                        ? distnet.cache[uriSource.id].updatedDate.replace(
+                            'T',
+                            ' '
+                          )
+                        : '(none)'}
+                    </td>
+                    <td>
+                      {R.prepend(
+                        { url: uriSource.workUrl },
+                        uriSource.urls || []
+                      ).map((inUrl, index) => (
+                        <span key={inUrl && inUrl.url}>
+                          {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                          {index > 0 ? `, ${index + 1}) ` : ''}
+                          <a
+                            href="#"
+                            key={inUrl && inUrl.url}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              electron.shell.openExternal(inUrl.url);
+                            }}
+                          >
+                            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                            Open
+                          </a>
+                          {inUrl?.url?.startsWith('file:') ? (
+                            <span>
+                              ,&nbsp;
+                              <a href={inUrl.url}>
+                                Drag&nbsp;
+                                {getExtension(inUrl.url)}
+                              </a>
+                            </span>
+                          ) : (
+                            ''
+                          )}
+                          {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                        </span>
+                      ))}
+                    </td>
+                  </tr>
+                );
               })}
             </tbody>
           </table>

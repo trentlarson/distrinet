@@ -55,7 +55,6 @@ const distnetSlice = createSlice({
     cacheErrorMessage: null,
   } as DistnetState,
   reducers: {
-
     // settings
 
     setSettingsChanged: (state, contents: Payload<boolean>) => {
@@ -66,7 +65,9 @@ const distnetSlice = createSlice({
         (s) => s.id === contents.payload,
         state.settings.sources
       );
-      source.dateReviewed = new Date().toISOString();
+      if (source) {
+        source.dateReviewed = new Date().toISOString();
+      }
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
@@ -335,9 +336,9 @@ const convertSettingsToStorageFromInternal = (
   return settingsStor;
 };
 
-const dispatchSetSettingsYamlFromText = (
-  contents: string
-): AppThunk => async (dispatch) => {
+const dispatchSetSettingsYamlFromText = (contents: string): AppThunk => async (
+  dispatch
+) => {
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
@@ -361,7 +362,7 @@ const dispatchSetSettingsYamlFromText = (
     );
     dispatch(setSettingsErrorMessage(error.message));
   }
-}
+};
 
 /**
   Use contents arg to set all the settings state for text & objects, plus the cache.
@@ -805,6 +806,6 @@ export const dispatchAddReviewedDateToSettings = (
   } else {
     dispatch(setSettingsSaveErrorMessage(null));
   }
-}
+};
 
 export default distnetSlice.reducer;
