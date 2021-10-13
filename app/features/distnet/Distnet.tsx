@@ -16,10 +16,11 @@ import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
   addDistrinetTaskSource,
+  dispatchAddReviewedDateToSettings,
   dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
-  dispatchSaveSettingsTextToFileAndResetInternally,
+  dispatchSaveSettingsTextToFileAndResetObject,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
   dispatchSetSettingsText,
@@ -172,6 +173,18 @@ export default function Distnet(options: AppInfo) {
                   </td>
                   <td>
                     {needsReviewStr}
+                    &nbsp;
+                    {!needsReview
+                      ? ''
+                      : <a className="fas fa-check-circle"
+                          href="#"
+                          onClick={() => {
+                            event.preventDefault();
+                            dispatch(dispatchAddReviewedDateToSettings(uriSource.id));
+                          }}
+                        >
+                        </a>
+                    }
                   </td>
                   <td>
                     {distnet.cache[uriSource.id]
@@ -276,7 +289,7 @@ export default function Distnet(options: AppInfo) {
           <button
             className={styles.btn}
             onClick={() => {
-              dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
+              dispatch(dispatchSaveSettingsTextToFileAndResetObject());
             }}
             data-tclass="btn"
             type="button"

@@ -55,8 +55,18 @@ const distnetSlice = createSlice({
     cacheErrorMessage: null,
   } as DistnetState,
   reducers: {
+
+    // settings
+
     setSettingsChanged: (state, contents: Payload<boolean>) => {
       state.settingsChanged = contents.payload;
+    },
+    setSettingsSourceReviewed: (state, contents: Payload<string>) => {
+      const source = R.find(
+        (s) => s.id === contents.payload,
+        state.settings.sources
+      );
+      source.dateReviewed = new Date().toISOString();
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
@@ -66,12 +76,18 @@ const distnetSlice = createSlice({
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       state.settingsErrorMessage = checkSettingsInternal(contents.payload);
     },
+
+    // messages
+
     setSettingsErrorMessage: (state, contents: Payload<string | null>) => {
       state.settingsErrorMessage = contents.payload;
     },
     setSettingsSaveErrorMessage: (state, contents: Payload<string | null>) => {
       state.settingsSaveErrorMessage = contents.payload;
     },
+
+    // cache
+
     setCachedStateForAll: (state, result: Payload<Array<CacheData>>) => {
       const newData: Array<CacheData> = result.payload;
       // console.log('Refreshing cache from', newData);
@@ -96,6 +112,7 @@ const {
   setSettingsChanged,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
+  setSettingsSourceReviewed,
   setSettingsStateObject,
   setSettingsStateText,
 } = distnetSlice.actions;
@@ -318,11 +335,9 @@ const convertSettingsToStorageFromInternal = (
   return settingsStor;
 };
 
-export const dispatchSetSettingsTextAndYaml = (
-  contents: string,
-  changedFromFile: boolean
+const dispatchSetSettingsYamlFromText = (
+  contents: string
 ): AppThunk => async (dispatch) => {
-  dispatch(dispatchSetSettingsText(contents, changedFromFile));
   let loadedSettings;
   try {
     loadedSettings = yaml.safeLoad(contents);
@@ -346,6 +361,17 @@ export const dispatchSetSettingsTextAndYaml = (
     );
     dispatch(setSettingsErrorMessage(error.message));
   }
+}
+
+/**
+  Use contents arg to set all the settings state for text & objects, plus the cache.
+ */
+export const dispatchSetSettingsTextAndYaml = (
+  contents: string,
+  changedFromFile: boolean
+): AppThunk => async (dispatch) => {
+  dispatch(dispatchSetSettingsText(contents, changedFromFile));
+  dispatch(dispatchSetSettingsYamlFromText(contents));
 };
 
 // let's transform these results into explicit Left|Right convention
@@ -382,7 +408,10 @@ export const dispatchLoadSettingsAndCacheIfEmpty = (
   resetStateMethods = methodsThatResetState;
 };
 
-export const dispatchSaveSettingsTextToFileAndResetInternally = (): AppThunk => async (
+/**
+  Use settings text to save in file and set internal object
+ */
+export const dispatchSaveSettingsTextToFileAndResetObject = (): AppThunk => async (
   dispatch,
   getState
 ) => {
@@ -702,7 +731,7 @@ export const dispatchAddSourceToSettings = (
   await dispatch(
     dispatchModifySettings(addSourceInternalToSettingsObject(newSource))
   );
-  await dispatch(dispatchSaveSettingsTextToFileAndResetInternally());
+  await dispatch(dispatchSaveSettingsTextToFileAndResetObject());
   // If we don't await on reload-cache then drag-drop addition to task-lists will fail to 'show' if you click it.
   await dispatch(dispatchReloadCacheForFile(newSource.id));
   // eslint-disable-next-line no-new
@@ -760,5 +789,22 @@ export const dispatchAddTaskListToSettings = (filePath: string) => {
   const name = nameFromPath('Tasks', filePath);
   return dispatchBuildSourceAndAddToSettings(name, 'taskyaml', filePath);
 };
+
+export const dispatchAddReviewedDateToSettings = (
+  sourceId: string
+): AppThunk => async (dispatch, getState) => {
+  await dispatch(setSettingsSourceReviewed(sourceId));
+  const settingsForStorage = convertSettingsToStorageFromInternal(
+    getState().distnet.settings
+  );
+  const settingsText: string = yaml.safeDump(settingsForStorage);
+  dispatch(setSettingsStateText(settingsText));
+  const result = await saveSettingsToFile(settingsText);
+  if (result && result.error) {
+    dispatch(setSettingsSaveErrorMessage(result.error));
+  } else {
+    dispatch(setSettingsSaveErrorMessage(null));
+  }
+}
 
 export default distnetSlice.reducer;
