@@ -209,7 +209,7 @@ export default function Distnet(options: AppInfo) {
                       ).map((inUrl, index) => (
                         <span key={inUrl && inUrl.url}>
                           {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                          {index > 0 ? `, ${index + 1}) ` : ''}
+                          &nbsp;
                           <a
                             href="#"
                             key={inUrl && inUrl.url}
@@ -219,14 +219,16 @@ export default function Distnet(options: AppInfo) {
                             }}
                           >
                             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                            Open
+                            <i title={`Open ${inUrl.url}`} className="fas fa-external-link-alt" />
                           </a>
                           {inUrl?.url?.startsWith('file:') ? (
                             <span>
-                              ,&nbsp;
+                              &nbsp;
                               <a href={inUrl.url}>
-                                Drag&nbsp;
-                                {getExtension(inUrl.url)}
+                                <i
+                                  title={`Drag ${inUrl.url}`}
+                                  className="fa fa-hand-rock"
+                                />
                               </a>
                             </span>
                           ) : (
@@ -398,13 +400,4 @@ export default function Distnet(options: AppInfo) {
       </div>
     </div>
   );
-}
-
-function getExtension(str: string) {
-  const nameStr = str.substring(str.lastIndexOf(path.sep) + 1);
-  const dotPos = nameStr.lastIndexOf('.');
-  if (dotPos > -1) {
-    return nameStr.substring(dotPos + 1);
-  }
-  return '';
 }
