@@ -395,7 +395,7 @@ function sourceActions(
                 </td>
                 <td>
                   {cache[source.id]
-                    ? cache[source.id].updatedDate
+                    ? cache[source.id].updatedDate.replace('T', ' ')
                     : '(not loaded)'}
                 </td>
                 <td>
@@ -708,7 +708,10 @@ function oneTaskRow(
                 );
               }}
             >
-              {areSubtasksExpanded ? '^' : 'V'}
+              {areSubtasksExpanded
+                ? <i title="Collapse" className="fas fa-angle-up" />
+                : <i title="Expand" className="fas fa-angle-down" />
+              }
               <span className={style.tooltiptext}>Subtasks</span>
             </button>
             {areSubtasksExpanded ? (
@@ -750,7 +753,10 @@ function oneTaskRow(
                 );
               }}
             >
-              {areDependentsExpanded ? '<' : '>'}
+              {areDependentsExpanded
+                ? <i title="Collapse" className="fas fa-angle-left" />
+                : <i title="Expand" className="fas fa-angle-right" />
+              }
               <span className={style.tooltiptext}>
                 Dependent Tasks (which cannot be started until the previous is
                 finished)
