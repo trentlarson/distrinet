@@ -1,5 +1,6 @@
 import child_process from 'child_process';
 import Electron from 'electron';
+import path from 'path';
 import * as R from 'ramda';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
@@ -148,6 +149,7 @@ export default function TaskListsTable() {
         <hr />
         Report&nbsp;
         <button
+          title="Show the Tasks Referenced by Others"
           type="button"
           onClick={async () => {
             setCalculatingLinkedTasks(true);
@@ -282,6 +284,7 @@ function sourceActions(
             <td />
             <td>
               <button
+                title="Toggle Showing All"
                 type="button"
                 onClick={() => {
                   if (listSourceIdsToShow.length === 0) {
@@ -291,7 +294,7 @@ function sourceActions(
                   }
                 }}
               >
-                Toggle
+                All
               </button>
             </td>
           </tr>
@@ -315,6 +318,7 @@ function sourceActions(
                 <td>{source.name || '(unknown)'}</td>
                 <td>
                   <button
+                    title="Show List"
                     type="button"
                     onClick={() => {
                       if (R.any(R.equals(source.id), listSourceIdsToShow)) {
@@ -343,6 +347,7 @@ function sourceActions(
                 </td>
                 <td>
                   <button
+                    title="Display Forecast of All Tasks"
                     type="button"
                     onClick={
                       () =>
@@ -370,7 +375,7 @@ function sourceActions(
                       );
                     }}
                   >
-                    Open on System
+                    <i title="Open with Default App" className="fas fa-external-link-alt" />
                   </button>
 
                   {execPath ? (
@@ -378,14 +383,15 @@ function sourceActions(
                       type="button"
                       onClick={() => execProtocolApp(execPath, [file])}
                     >
-                      Open&nbsp;
-                      {protocol}
+                      <i title={ `Open with ${execPath.split(path.sep).pop()}` } className="fas fa-external-link-alt" />
                     </button>
                   ) : (
                     <span />
                   )}
-
-                  <a href={file}>{dragMessage}</a>
+                  &nbsp;
+                  <a href={file}>
+                    <i title={ dragMessage } className="fa fa-hand-rock" />
+                  </a>
                 </td>
                 <td>
                   {cache[source.id]
@@ -402,7 +408,7 @@ function sourceActions(
                       // eslint-disable-next-line react/jsx-curly-newline
                     }
                   >
-                    Reload
+                    <i title="Reload Data" className="fa fa-sync" />
                   </button>
                 </td>
               </tr>
