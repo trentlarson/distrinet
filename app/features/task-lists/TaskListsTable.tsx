@@ -301,7 +301,6 @@ function sourceActions(
         </thead>
         <tbody>
           {taskSources.map((source) => {
-            const protocol = source.id.substring(0, source.id.indexOf(':'));
             const execPath =
               resourceTypes &&
               R.find(
@@ -375,22 +374,27 @@ function sourceActions(
                       );
                     }}
                   >
-                    <i title="Open with Default App" className="fas fa-external-link-alt" />
+                    <i
+                      title="Open with Default App"
+                      className="fas fa-external-link-alt"
+                    />
                   </button>
-
                   {execPath ? (
                     <button
                       type="button"
                       onClick={() => execProtocolApp(execPath, [file])}
                     >
-                      <i title={ `Open with ${execPath.split(path.sep).pop()}` } className="fas fa-external-link-alt" />
+                      <i
+                        title={`Open with ${execPath.split(path.sep).pop()}`}
+                        className="fas fa-external-link-alt"
+                      />
                     </button>
                   ) : (
                     <span />
                   )}
                   &nbsp;
                   <a href={file}>
-                    <i title={ dragMessage } className="fa fa-hand-rock" />
+                    <i title={dragMessage} className="fa fa-hand-rock" />
                   </a>
                 </td>
                 <td>
@@ -709,10 +713,11 @@ function oneTaskRow(
                 );
               }}
             >
-              {areSubtasksExpanded
-                ? <i title="Collapse" className="fas fa-angle-up" />
-                : <i title="Expand" className="fas fa-angle-down" />
-              }
+              {areSubtasksExpanded ? (
+                <i title="Collapse" className="fas fa-angle-up" />
+              ) : (
+                <i title="Expand" className="fas fa-angle-down" />
+              )}
               <span className={style.tooltiptext}>Subtasks</span>
             </button>
             {areSubtasksExpanded ? (
@@ -754,10 +759,11 @@ function oneTaskRow(
                 );
               }}
             >
-              {areDependentsExpanded
-                ? <i title="Collapse" className="fas fa-angle-left" />
-                : <i title="Expand" className="fas fa-angle-right" />
-              }
+              {areDependentsExpanded ? (
+                <i title="Collapse" className="fas fa-angle-left" />
+              ) : (
+                <i title="Expand" className="fas fa-angle-right" />
+              )}
               <span className={style.tooltiptext}>
                 Dependent Tasks (which cannot be started until the previous is
                 finished)

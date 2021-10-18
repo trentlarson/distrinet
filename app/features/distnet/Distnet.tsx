@@ -2,7 +2,6 @@ import electron from 'electron';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 import * as R from 'ramda';
-import path from 'path';
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -178,9 +177,7 @@ export default function Distnet(options: AppInfo) {
                       {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
                     </td>
                     <td>
-                      <span title={ needsReviewTitle }>
-                        {needsReviewStr}
-                      </span>
+                      <span title={needsReviewTitle}>{needsReviewStr}</span>
                       &nbsp;
                       {!needsReview ? (
                         ''
@@ -212,7 +209,7 @@ export default function Distnet(options: AppInfo) {
                       {R.prepend(
                         { url: uriSource.workUrl },
                         uriSource.urls || []
-                      ).map((inUrl, index) => (
+                      ).map((inUrl) => (
                         <span key={inUrl && inUrl.url}>
                           {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                           &nbsp;
@@ -225,7 +222,10 @@ export default function Distnet(options: AppInfo) {
                             }}
                           >
                             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                            <i title={`Open ${inUrl.url}`} className="fas fa-external-link-alt" />
+                            <i
+                              title={`Open ${inUrl.url}`}
+                              className="fas fa-external-link-alt"
+                            />
                           </a>
                           {inUrl?.url?.startsWith('file:') ? (
                             <span>
