@@ -357,7 +357,7 @@
           .append("svg:title")
           .text(function(person) {
             var fullUri = person.fullUri || person.id;
-            return "Copy IRI: " + fullUri;
+            return "Copy to Clipboard: " + fullUri;
           });
 
         /** We don't have this view yet.

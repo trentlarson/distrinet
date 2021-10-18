@@ -182,7 +182,7 @@ function GenealogyView(options: { tree: TreeOptions }) {
             <a
               className="fa fa-copy"
               role="button"
-              title={`Copy ${rootUri}`}
+              title={`Copy to Clipboard: ${rootUri}`}
               onClick={() => {
                 electron.clipboard.writeText(rootUri);
                 // eslint-disable-next-line no-new

@@ -1,5 +1,7 @@
 tasks :
 
+  - -3 change estimates to hours (done with Personal & Gifts)
+    - change forecast equation
   - test all UI functions
   - -2 move genealogy/history/task-list-specific code out of distnet
 

@@ -138,6 +138,9 @@ export default function Distnet(options: AppInfo) {
                   }
                 }
                 const needsReviewStr = needsReview ? 'Y' : '';
+                const needsReviewTitle = R.isNil(uriSource.dateReviewed)
+                  ? 'Never Reviewed'
+                  : `Last Reviewed ${uriSource.dateReviewed}`;
                 return (
                   <tr key={uriSource.workUrl}>
                     <td>
@@ -148,7 +151,7 @@ export default function Distnet(options: AppInfo) {
                       <a
                         className="fa fa-copy"
                         role="button"
-                        title={`Copy IRI ${uriSource.id}`}
+                        title={`Copy to Clipboard: ${uriSource.id}`}
                         onClick={() => {
                           electron.clipboard.writeText(uriSource.id);
                           new Notification('Copied', {
@@ -175,13 +178,16 @@ export default function Distnet(options: AppInfo) {
                       {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
                     </td>
                     <td>
-                      {needsReviewStr}
+                      <span title={ needsReviewTitle }>
+                        {needsReviewStr}
+                      </span>
                       &nbsp;
                       {!needsReview ? (
                         ''
                       ) : (
                         /* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */
                         <a
+                          title="Mark as Reviewed"
                           className="fas fa-check-circle"
                           href="#"
                           onClick={(event) => {

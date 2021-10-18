@@ -498,6 +498,7 @@ function bigListTable(
       Labels:
       {allLabels.map((label) => (
         <button
+          title="Show Label"
           type="button"
           key={label}
           onClick={() => {
