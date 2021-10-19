@@ -26,6 +26,7 @@ import {
   dispatchDetermineTopTasks,
   dispatchLoadAllSourcesIntoTasks,
   dispatchLoadOneSourceIntoTasks,
+  dispatchLogWork,
   dispatchToggleDependentExpansionUi,
   dispatchToggleSubtaskExpansionUi,
   dispatchVolunteer,
@@ -800,6 +801,14 @@ function oneTaskRow(
           }}
         >
           Volunteer
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            dispatch(dispatchLogWork(task, taskSigningComment));
+          }}
+        >
+          Log Work
         </button>
       </td>
     </tr>

@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import nodeCrypto from 'crypto';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import path from 'path';
 import * as R from 'ramda';
 import url from 'url';
 import * as uuid from 'uuid';
@@ -58,14 +59,20 @@ export interface Log {
   signature?: string;
 }
 
-// Remember to keep these in alphabetical order for standard.
-interface VolunteerMessageForSigning {
-  did?: string;
+// Remember to keep the fields in alphabetical order for independently verifiable standard.
+interface MessageForSigning {
   comment: string;
+  did?: string;
   summary: string;
   taskUri: string;
   time: string;
 }
+
+// Remember to keep the fields in alphabetical order for independently verifiable standard.
+interface VolunteerMessageForSigning extends MessageForSigning {}
+
+// Remember to keep the fields in alphabetical order for independently verifiable standard.
+interface LogMessageForSigning extends MessageForSigning {}
 
 interface IssueToSchedule {
   key: string;
@@ -677,8 +684,20 @@ export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
 function saveToFile(
   file: string,
   text: string
-): Promise<void | { error: string }> {
+): Promise<void> {
   return fsPromises.writeFile(file, text).catch((err) => {
+    console.error('Error saving to file:', err);
+    throw Error(
+      `Error saving to file: ${err} ... with err.toString() ${err.toString()}`
+    );
+  });
+}
+
+function appendToFile(
+  file: string,
+  text: string
+): Promise<void> {
+  return fsPromises.appendFile(file, text).catch((err) => {
     console.error('Error saving to file:', err);
     throw Error(
       `Error saving to file: ${err} ... with err.toString() ${err.toString()}`
@@ -707,24 +726,28 @@ export const dispatchVolunteer = (
         getState().distnet.cache[task.sourceId] &&
         getState().distnet.cache[task.sourceId].contents
       ) {
-        const taskId = labelValueInSummary('id', task.summary);
+        const taskId = labelValueInSummary(ID_LABEL_KEY, task.summary);
 
         if (R.isNil(taskId)) {
           alert(
-            'Cannot volunteer for a task without an ID.' +
-              '  Edit the task and add a unique "id:SOME_VALUE" in the summary.'
+            `Cannot volunteer for a task without an ID.` +
+              `  Edit the task and add a unique "${ID_LABEL_KEY}:SOME_VALUE"` +
+              ` in the summary.`
           );
         } else {
           // sign
           const sign = nodeCrypto.createSign('SHA256');
           const volunteerMessageForSigning: VolunteerMessageForSigning = {
             comment,
+            did: "", // doing this so that it's in the right order if used
             summary: task.summary,
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),
           };
           if (keyContents.did) {
             volunteerMessageForSigning.did = keyContents.did;
+          } else {
+            delete volunteerMessageForSigning["did"];
           }
           sign.write(JSON.stringify(volunteerMessageForSigning));
           sign.end();
@@ -779,8 +802,10 @@ export const dispatchVolunteer = (
                 projectContents.log || []
               );
               const projectYamlString = yaml.safeDump(projectContents);
-              saveToFile(url.fileURLToPath(sourceUrls[i]), projectYamlString)
-                .then(() => {
+              return saveToFile(
+                url.fileURLToPath(sourceUrls[i]),
+                projectYamlString
+              ).then(() => {
                   console.log(
                     'Successfully saved task',
                     taskId,
@@ -813,6 +838,104 @@ export const dispatchVolunteer = (
         console.log('I do not know how to save this task info anywhere:', task);
         alert(
           `I don't know how to save this task info anywhere: ${JSON.stringify(
+            task
+          )}`
+        );
+      }
+    } else {
+      alert(
+        'You have not set a "credentials.privateKey" in your settings, which is necessary' +
+          ' to submit a task.  To fix, go to the settings and click' +
+          ' "Generate Key".'
+      );
+    }
+  } else {
+    alert(
+      'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
+    );
+  }
+};
+
+function localLogFileName(filename) {
+  const parsed = path.parse(filename);
+  const containingDir = parsed.dir;
+  const finalLogFile = `.${parsed.base}.ymllog`;
+  return path.join(containingDir, finalLogFile);
+}
+
+export const dispatchLogWork = (
+  task: YamlTask,
+  comment: string
+): AppThunk => async (_1, getState) => {
+  if (getState().distnet.settings.credentials) {
+    const keyContents = R.find(
+      (c) => c.id === 'privateKey',
+      getState().distnet.settings.credentials
+    );
+    if (keyContents && keyContents.privateKeyPkcs8Pem) {
+      // figure out how to push out the message
+      const source = R.find(
+        (s) => s.id === task.sourceId,
+        getState().distnet.settings.sources
+      );
+      if (
+        source &&
+        isFileUrl(source.workUrl) &&
+        getState().distnet.cache &&
+        getState().distnet.cache[task.sourceId] &&
+        getState().distnet.cache[task.sourceId].contents
+      ) {
+        const taskId = labelValueInSummary(ID_LABEL_KEY, task.summary);
+
+        if (R.isNil(taskId)) {
+          alert(
+            `Cannot log work for a task without an ID.` +
+              `  Edit the task and add a unique "${ID_LABEL_KEY}:SOME_VALUE"` +
+              ` in the summary.`
+          );
+        } else {
+          // sign
+          const sign = nodeCrypto.createSign('SHA256');
+          const logWorkMessageForSigning: LogWorkMessageForSigning = {
+            comment,
+            did: "", // doing this so that it's in the right order if used
+            summary: task.summary,
+            taskUri: globalUriForId(taskId, task.sourceId),
+            time: new Date().toISOString(),
+          };
+          if (keyContents.did) {
+            logWorkMessageForSigning.did = keyContents.did;
+          } else {
+            delete logWorkMessageForSigning["did"];
+          }
+          sign.write(JSON.stringify(logWorkMessageForSigning));
+          sign.end();
+          const keyPem: string = keyContents.privateKeyPkcs8Pem;
+          const privateKey = nodeCrypto.createPrivateKey(keyPem);
+          const publicKeyEncoded = nodeCrypto
+            .createPublicKey(keyPem)
+            .export({ type: 'spki', format: 'pem' })
+            .toString();
+
+          const signature = sign.sign(privateKey, 'hex');
+
+          const newLog: Log = {
+            id: uuid.v4(),
+            taskId,
+            data: { messageData: logWorkMessageForSigning },
+            time: logWorkMessageForSigning.time,
+            publicKey: publicKeyEncoded,
+            signature,
+          };
+          const logYaml: string = yaml.safeDump(newLog);
+          const logText = '\n- ' + logYaml.replace(/\n/g, '\n  ');
+          const filename = url.fileURLToPath(source.workUrl);
+          return appendToFile(localLogFileName(filename), logText);
+        }
+      } else {
+        console.log('I do not know how to log work for this task:', task);
+        alert(
+          `I don't know how to log work for this task: ${JSON.stringify(
             task
           )}`
         );
