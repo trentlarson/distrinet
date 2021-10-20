@@ -704,7 +704,7 @@ function appendToFile(file: string, text: string): Promise<void> {
 function localLogFileName(filename: string) {
   const parsed = path.parse(filename);
   const containingDir = parsed.dir;
-  const finalLogFile = `.${parsed.base}.ymllog`;
+  const finalLogFile = `.${parsed.base}.log.yml`;
   return path.join(containingDir, finalLogFile);
 }
 
