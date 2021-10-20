@@ -427,7 +427,7 @@ function sourceActions(
         value={hoursPerWeek}
         onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
       />
-      &nbsp;hrs/wk and focused on issue ID&nbsp;
+      &nbsp;hrs/wk and focused on issue ID:&nbsp;
       <input
         size={20}
         type="text"
@@ -436,9 +436,9 @@ function sourceActions(
       />
       )
       <br />
-      (Log messages will contain this comment:
+      (Signed log messages will contain this comment:&nbsp;
       <input
-        size={40}
+        size={35}
         type="text"
         value={taskSigningComment}
         onChange={(e) => setTaskSigningComment(e.target.value)}
@@ -799,7 +799,7 @@ function oneTaskRow(
             dispatch(dispatchLogMessage(task, taskSigningComment));
           }}
         >
-          Log Message
+          Sign Log
         </button>
       </td>
     </tr>

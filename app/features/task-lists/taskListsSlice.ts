@@ -40,7 +40,7 @@ const TASKYAML_SCHEME = 'taskyaml';
 const fsPromises = fs.promises;
 
 export const DEFAULT_HOURS_PER_WEEK = 40;
-export const DEFAULT_TASK_COMMENT = 'I volunteer to work on this.';
+export const DEFAULT_TASK_COMMENT = 'I worked on this.';
 export const ID_LABEL_KEY = 'id';
 export const REF_LABEL_KEY = 'ref';
 
@@ -67,12 +67,6 @@ interface MessageForSigning {
   taskUri: string;
   time: string;
 }
-
-// Remember to keep the fields in alphabetical order for independently verifiable standard.
-interface VolunteerMessageForSigning extends MessageForSigning {}
-
-// Remember to keep the fields in alphabetical order for independently verifiable standard.
-interface LogMessageForSigning extends MessageForSigning {}
 
 interface IssueToSchedule {
   key: string;
@@ -698,10 +692,7 @@ function saveToFile(
  *
  */
 
-function appendToFile(
-  file: string,
-  text: string
-): Promise<void> {
+function appendToFile(file: string, text: string): Promise<void> {
   return fsPromises.appendFile(file, text).catch((err) => {
     console.error('Error saving to file:', err);
     throw Error(
@@ -710,7 +701,7 @@ function appendToFile(
   });
 }
 
-function localLogFileName(filename) {
+function localLogFileName(filename: string) {
   const parsed = path.parse(filename);
   const containingDir = parsed.dir;
   const finalLogFile = `.${parsed.base}.ymllog`;
@@ -750,19 +741,19 @@ export const dispatchLogMessage = (
         } else {
           // sign
           const sign = nodeCrypto.createSign('SHA256');
-          const logWorkMessageForSigning: LogWorkMessageForSigning = {
+          const messageForSigning: MessageForSigning = {
             comment,
-            did: "", // doing this so that it's in the right order if used
+            did: '', // doing this so that it's in the right order if used
             summary: task.summary,
             taskUri: globalUriForId(taskId, task.sourceId),
             time: new Date().toISOString(),
           };
           if (keyContents.did) {
-            logWorkMessageForSigning.did = keyContents.did;
+            messageForSigning.did = keyContents.did;
           } else {
-            delete logWorkMessageForSigning["did"];
+            delete messageForSigning.did;
           }
-          sign.write(JSON.stringify(logWorkMessageForSigning));
+          sign.write(JSON.stringify(messageForSigning));
           sign.end();
           const keyPem: string = keyContents.privateKeyPkcs8Pem;
           const privateKey = nodeCrypto.createPrivateKey(keyPem);
@@ -776,8 +767,8 @@ export const dispatchLogMessage = (
           const newLog: Log = {
             id: uuid.v4(),
             taskId,
-            data: { messageData: logWorkMessageForSigning },
-            time: logWorkMessageForSigning.time,
+            data: { messageData: messageForSigning },
+            time: messageForSigning.time,
             publicKey: publicKeyEncoded,
             signature,
           };
@@ -786,27 +777,34 @@ export const dispatchLogMessage = (
             newLog.did = keyContents.did;
           }
           const logYaml: string = yaml.safeDump(newLog);
+          // eslint-disable-next-line prefer-template
           const logText = '\n- ' + logYaml.replace(/\n/g, '\n  ');
           const filename = url.fileURLToPath(source.workUrl);
-          return appendToFile(localLogFileName(filename), logText).then(() => {
-            console.log('Successfully saved message to file', filename);
-          })
-          .catch((err) => {
-            console.log(
-              'Failed to save message to file',
-              filename,
-              'because',
-              err
-            );
-            alert('Failed to save message to file ' + filename + ' because ' + err);
-          });
+          const logFilename = localLogFileName(filename);
+          appendToFile(logFilename, logText)
+            // eslint-disable-next-line promise/always-return
+            .then(() => {
+              // eslint-disable-next-line no-new
+              new Notification('Saved', {
+                body: `Successfully saved message to ${logFilename}`,
+              });
+            })
+            .catch((err) => {
+              console.log(
+                'Failed to save message to file',
+                logFilename,
+                'because',
+                err
+              );
+              alert(
+                `Failed to save message to file ${logFilename} because ${err}`
+              );
+            });
         }
       } else {
         console.log('I do not know how to log work for this task:', task);
         alert(
-          `I don't know how to log work for this task: ${JSON.stringify(
-            task
-          )}`
+          `I don't know how to log work for this task: ${JSON.stringify(task)}`
         );
       }
     } else {

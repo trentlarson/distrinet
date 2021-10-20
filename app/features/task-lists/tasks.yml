@@ -1,6 +1,5 @@
 
-  - log signed record claiming to have worked on an item id:work-log
-    - allow a different log message in the UI
+  - log signed record claiming to have worked on an item id:work-log :
     - show a message after the log has been written
     - test - test without DID in data
   - 1 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people
