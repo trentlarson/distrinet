@@ -681,6 +681,9 @@ export const dispatchLoadAllTaskListsIfEmpty = (): AppThunk => async (
  *
  */
 
+/**
+ * unused
+ *
 function saveToFile(
   file: string,
   text: string
@@ -692,6 +695,8 @@ function saveToFile(
     );
   });
 }
+ *
+ */
 
 function appendToFile(
   file: string,
@@ -705,157 +710,6 @@ function appendToFile(
   });
 }
 
-export const dispatchVolunteer = (
-  task: YamlTask,
-  comment: string
-): AppThunk => async (_1, getState) => {
-  if (getState().distnet.settings.credentials) {
-    const keyContents = R.find(
-      (c) => c.id === 'privateKey',
-      getState().distnet.settings.credentials
-    );
-    if (keyContents && keyContents.privateKeyPkcs8Pem) {
-      // figure out how to push out the message
-      const source = R.find(
-        (s) => s.id === task.sourceId,
-        getState().distnet.settings.sources
-      );
-      if (
-        source &&
-        getState().distnet.cache &&
-        getState().distnet.cache[task.sourceId] &&
-        getState().distnet.cache[task.sourceId].contents
-      ) {
-        const taskId = labelValueInSummary(ID_LABEL_KEY, task.summary);
-
-        if (R.isNil(taskId)) {
-          alert(
-            `Cannot volunteer for a task without an ID.` +
-              `  Edit the task and add a unique "${ID_LABEL_KEY}:SOME_VALUE"` +
-              ` in the summary.`
-          );
-        } else {
-          // sign
-          const sign = nodeCrypto.createSign('SHA256');
-          const volunteerMessageForSigning: VolunteerMessageForSigning = {
-            comment,
-            did: "", // doing this so that it's in the right order if used
-            summary: task.summary,
-            taskUri: globalUriForId(taskId, task.sourceId),
-            time: new Date().toISOString(),
-          };
-          if (keyContents.did) {
-            volunteerMessageForSigning.did = keyContents.did;
-          } else {
-            delete volunteerMessageForSigning["did"];
-          }
-          sign.write(JSON.stringify(volunteerMessageForSigning));
-          sign.end();
-          const keyPem: string = keyContents.privateKeyPkcs8Pem;
-          const privateKey = nodeCrypto.createPrivateKey(keyPem);
-          const publicKeyEncoded = nodeCrypto
-            .createPublicKey(keyPem)
-            .export({ type: 'spki', format: 'pem' })
-            .toString();
-
-          const signature = sign.sign(privateKey, 'hex');
-
-          const fileContents = yaml.safeLoad(
-            getState().distnet.cache[task.sourceId].contents
-          );
-          let projectContents: ProjectFile;
-          if (isInputIssueArray(fileContents)) {
-            // this changes the format to put the array under the "tasks" key
-            projectContents = { tasks: fileContents };
-          } else if (isProjectFile(fileContents)) {
-            projectContents = fileContents;
-          } else {
-            console.log(
-              'Failed to load array or .tasks from source',
-              task.sourceId
-            );
-            alert(
-              `Failed to load array or .tasks from source ${task.sourceId}`
-            );
-            return;
-          }
-          const sourceUrls = R.prepend(
-            source.workUrl,
-            (source.urls || []).map(R.prop('url'))
-          );
-          for (let i = 0; projectContents && i < sourceUrls.length; i += 1) {
-            // now find where to write the task
-            if (isFileUrl(sourceUrls[i])) {
-              const newLog: Log = {
-                id: uuid.v4(),
-                taskId,
-                data: { messageData: volunteerMessageForSigning },
-                time: volunteerMessageForSigning.time,
-                publicKey: publicKeyEncoded,
-                signature,
-              };
-              if (volunteerMessageForSigning.did) {
-                newLog.did = volunteerMessageForSigning.did;
-              }
-              projectContents.log = R.concat(
-                [newLog],
-                projectContents.log || []
-              );
-              const projectYamlString = yaml.safeDump(projectContents);
-              return saveToFile(
-                url.fileURLToPath(sourceUrls[i]),
-                projectYamlString
-              ).then(() => {
-                  console.log(
-                    'Successfully saved task',
-                    taskId,
-                    'to file',
-                    sourceUrls[i]
-                  );
-                  return true;
-                })
-                .catch((err) => {
-                  console.log(
-                    'Failed to save task',
-                    taskId,
-                    'to file',
-                    sourceUrls[i],
-                    'because',
-                    err
-                  );
-                });
-            } else {
-              console.log(
-                'I do not know how to save task',
-                taskId,
-                '... to this URL',
-                sourceUrls[i]
-              );
-            }
-          }
-        }
-      } else {
-        console.log('I do not know how to save this task info anywhere:', task);
-        alert(
-          `I don't know how to save this task info anywhere: ${JSON.stringify(
-            task
-          )}`
-        );
-      }
-    } else {
-      alert(
-        'You have not set a "credentials.privateKey" in your settings, which is necessary' +
-          ' to submit a task.  To fix, go to the settings and click' +
-          ' "Generate Key".'
-      );
-    }
-  } else {
-    alert(
-      'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
-    );
-  }
-};
-
 function localLogFileName(filename) {
   const parsed = path.parse(filename);
   const containingDir = parsed.dir;
@@ -863,7 +717,7 @@ function localLogFileName(filename) {
   return path.join(containingDir, finalLogFile);
 }
 
-export const dispatchLogWork = (
+export const dispatchLogMessage = (
   task: YamlTask,
   comment: string
 ): AppThunk => async (_1, getState) => {
@@ -927,10 +781,25 @@ export const dispatchLogWork = (
             publicKey: publicKeyEncoded,
             signature,
           };
+          // since the field order doesn't matter here, we'll throw it onto the end
+          if (keyContents.did) {
+            newLog.did = keyContents.did;
+          }
           const logYaml: string = yaml.safeDump(newLog);
           const logText = '\n- ' + logYaml.replace(/\n/g, '\n  ');
           const filename = url.fileURLToPath(source.workUrl);
-          return appendToFile(localLogFileName(filename), logText);
+          return appendToFile(localLogFileName(filename), logText).then(() => {
+            console.log('Successfully saved message to file', filename);
+          })
+          .catch((err) => {
+            console.log(
+              'Failed to save message to file',
+              filename,
+              'because',
+              err
+            );
+            alert('Failed to save message to file ' + filename + ' because ' + err);
+          });
         }
       } else {
         console.log('I do not know how to log work for this task:', task);

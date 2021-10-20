@@ -26,10 +26,9 @@ import {
   dispatchDetermineTopTasks,
   dispatchLoadAllSourcesIntoTasks,
   dispatchLoadOneSourceIntoTasks,
-  dispatchLogWork,
+  dispatchLogMessage,
   dispatchToggleDependentExpansionUi,
   dispatchToggleSubtaskExpansionUi,
-  dispatchVolunteer,
   getIdValues,
   isTaskyamlUriScheme,
   labelValueInSummary,
@@ -437,7 +436,7 @@ function sourceActions(
       />
       )
       <br />
-      (Task signatures will contain this comment:
+      (Log messages will contain this comment:
       <input
         size={40}
         type="text"
@@ -797,18 +796,10 @@ function oneTaskRow(
         <button
           type="button"
           onClick={() => {
-            dispatch(dispatchVolunteer(task, taskSigningComment));
+            dispatch(dispatchLogMessage(task, taskSigningComment));
           }}
         >
-          Volunteer
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            dispatch(dispatchLogWork(task, taskSigningComment));
-          }}
-        >
-          Log Work
+          Log Message
         </button>
       </td>
     </tr>
