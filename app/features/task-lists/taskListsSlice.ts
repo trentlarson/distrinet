@@ -81,9 +81,17 @@ interface IssueToSchedule {
 }
 
 interface ForecastData {
-  sourceId: string;
+  focusIssue: string;
+  hoursPerWeek: number;
   html: string;
+  sourceId: string;
 }
+const EMPTY_FORECAST = {
+  focusIssueId: '',
+  hoursPerWeek: 40,
+  html: '',
+  sourceId: '',
+} as ForecastData;
 
 interface IdAndTaskList {
   sourceId: string;
@@ -117,7 +125,7 @@ const taskListsSlice = createSlice({
     allLists: {} as Record<string, Array<YamlTask>>,
     // 'display' is a record of which tasks have expanded subtasks or dependent tasks
     display: {} as Record<string, Array<UiTree>>,
-    forecastData: { sourceId: '', html: '' } as ForecastData,
+    forecastData: EMPTY_FORECAST as ForecastData,
     linkedTasks: [] as [string, number][],
   },
   reducers: {
@@ -157,7 +165,7 @@ const taskListsSlice = createSlice({
       );
     },
     clearForecastData: (state) => {
-      state.forecastData = { sourceId: '', html: '' };
+      state.forecastData = EMPTY_FORECAST;
     },
     setForecastData: (state, html: Payload<ForecastData>) => {
       state.forecastData = html.payload;
@@ -576,7 +584,12 @@ export const retrieveForecast = (
       });
     })
     .then((forecastString) => {
-      return dispatch(setForecastData({ sourceId, html: forecastString }));
+      return dispatch(setForecastData({
+        focusIssueId: focusOnTask,
+        hoursPerWeek,
+        html: forecastString,
+        sourceId,
+      }));
     })
     .catch((err) => {
       console.error('Got error retrieving forecast.', err);

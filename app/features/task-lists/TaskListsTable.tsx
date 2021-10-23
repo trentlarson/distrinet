@@ -225,6 +225,13 @@ export default function TaskListsTable() {
                 )?.name
               }
             </h4>
+            ... spending {taskLists.forecastData.hoursPerWeek} hours/week
+            {taskLists.forecastData.focusIssueId ? (
+              `, focused on issue '${taskLists.forecastData.focusIssueId}'`
+            ) : (
+              ''
+            )}
+            <br />
             <button
               type="button"
               onClick={() => {

@@ -18,7 +18,7 @@ tasks :
 
   - -1 documentation - Google Drive vs Backup
 
-  - 2 save another local copy of files to track what is most recently seen id:#history :
+  - 2 save another local copy of files to track what is most recently seen id:history :
     - one file first :
       - for git & Syncthing, don't copy but rather look into .stfolder for history
         ... except for the .well-known/*.iri file(s), if ref:#well-known is done
