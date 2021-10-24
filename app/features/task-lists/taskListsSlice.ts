@@ -10,13 +10,9 @@ import * as uuid from 'uuid';
 // imports in this app
 // eslint-disable-next-line import/no-cycle
 import { AppThunk } from '../../store';
+import { CacheData, DistnetState, Payload } from '../distnet/distnetClasses';
 import {
-  CacheData,
-  DistnetState,
   isFileUrl,
-  Payload,
-} from '../distnet/distnetClasses';
-import {
   isGlobalUri,
   globalUriForId,
   globalUriScheme,
@@ -81,7 +77,7 @@ interface IssueToSchedule {
 }
 
 interface ForecastData {
-  focusIssue: string;
+  focusIssueId: string;
   hoursPerWeek: number;
   html: string;
   sourceId: string;
@@ -584,12 +580,14 @@ export const retrieveForecast = (
       });
     })
     .then((forecastString) => {
-      return dispatch(setForecastData({
-        focusIssueId: focusOnTask,
-        hoursPerWeek,
-        html: forecastString,
-        sourceId,
-      }));
+      return dispatch(
+        setForecastData({
+          focusIssueId: focusOnTask,
+          hoursPerWeek,
+          html: forecastString,
+          sourceId,
+        })
+      );
     })
     .catch((err) => {
       console.error('Got error retrieving forecast.', err);

@@ -4,6 +4,12 @@ const path = require('path');
 // This wrapper is to allow this to work as a module in both node and browser.
 // eslint-disable-next-line func-names
 (function (exports) {
+  const FILE_PROTOCOL = 'file:';
+
+  function isFileUrl(u) {
+    return u.toLowerCase().startsWith(FILE_PROTOCOL);
+  }
+
   /**
    * from https://tools.ietf.org/html/rfc3986#section-3
    * also useful is https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
@@ -168,6 +174,7 @@ const path = require('path');
   exports.bestGuessAtGoodUriPath = bestGuessAtGoodUriPath;
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isFileOrHttpUri = isFileOrHttpUri;
+  exports.isFileUrl = isFileUrl;
   exports.isGlobalUri = isGlobalUri;
   exports.isUriLocalhost = isUriLocalhost;
   exports.globalUriForId = globalUriForId;

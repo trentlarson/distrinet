@@ -138,6 +138,3 @@ export interface Payload<T> {
 }
 
 export const APP_NAME = 'dist-task-lists';
-
-export const FILE_PROTOCOL = 'file:';
-export const isFileUrl = (u: string) => new URL(u).protocol === FILE_PROTOCOL;

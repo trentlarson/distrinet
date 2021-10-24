@@ -18,6 +18,7 @@ import {
 import {
   findClosestUriForGlobalUri,
   globalUriForId,
+  isFileUrl,
 } from '../distnet/uriTools';
 import {
   clearForecastData,
@@ -225,12 +226,12 @@ export default function TaskListsTable() {
                 )?.name
               }
             </h4>
-            ... spending {taskLists.forecastData.hoursPerWeek} hours/week
-            {taskLists.forecastData.focusIssueId ? (
-              `, focused on issue '${taskLists.forecastData.focusIssueId}'`
-            ) : (
-              ''
-            )}
+            ... spending
+            {taskLists.forecastData.hoursPerWeek}
+            hours/week
+            {taskLists.forecastData.focusIssueId
+              ? `, focused on issue '${taskLists.forecastData.focusIssueId}'`
+              : ''}
             <br />
             <button
               type="button"
@@ -314,9 +315,13 @@ function sourceActions(
                 (type) => source.id.startsWith(`${type.matcher}:`),
                 resourceTypes
               )?.executablePath;
-            const file = cache[source.id]?.localFile;
-            const localFirst = cache[source.id]?.sourceUrl.endsWith(file);
-            const dragMessage = `Drag${localFirst ? '' : ' Local'}`;
+            const localFileSource = isFileUrl(source.workUrl)
+              ? source.workUrl
+              : '';
+            const localCopy = localFileSource || cache[source.id]?.localFile;
+            const dragMessage = `Drag ${
+              localFileSource ? '' : ' Local Copy of'
+            } File`;
             /** I cannot figure out how to fix this stupid linting error. */
             /** eslint-disable-next-line react/jsx-curly-newline */
             return (
@@ -377,7 +382,7 @@ function sourceActions(
                     type="button"
                     onClick={() => {
                       Electron.shell.openExternal(
-                        URL.pathToFileURL(file).toString()
+                        URL.pathToFileURL(localCopy).toString()
                       );
                     }}
                   >
@@ -389,7 +394,7 @@ function sourceActions(
                   {execPath ? (
                     <button
                       type="button"
-                      onClick={() => execProtocolApp(execPath, [file])}
+                      onClick={() => execProtocolApp(execPath, [localCopy])}
                     >
                       <i
                         title={`Open with ${execPath.split(path.sep).pop()}`}
@@ -400,7 +405,7 @@ function sourceActions(
                     <span />
                   )}
                   &nbsp;
-                  <a href={file}>
+                  <a href={localCopy}>
                     <i title={dragMessage} className="fa fa-hand-rock" />
                   </a>
                 </td>
@@ -427,14 +432,14 @@ function sourceActions(
           })}
         </tbody>
       </table>
-      (Forecasts are estimated at&nbsp;
+      (Forecast at&nbsp;
       <input
         size={2}
         type="text"
         value={hoursPerWeek}
         onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10))}
       />
-      &nbsp;hrs/wk and focused on issue ID:&nbsp;
+      &nbsp;hrs/wk, and display with focus on issue ID:&nbsp;
       <input
         size={20}
         type="text"
@@ -443,7 +448,7 @@ function sourceActions(
       />
       )
       <br />
-      (Signed log messages will contain this comment:&nbsp;
+      (Sign log messages with this comment:&nbsp;
       <input
         size={35}
         type="text"
