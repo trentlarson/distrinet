@@ -1,3 +1,4 @@
+  - -1 type:bug when looking at a file, rename a file, then collapse the enclosing folder and expand it again and it does not pick up the new name of the file
   - 90 0 take a search term as a parameter when loading a page id:external-search ref:taskyaml:trentlarson.com,2020/distrinet/genealogy#history-search
   - 90 0 test Google Drive share from Mom works on my computer, get instructions for Google Drive
     - detect .lnk file
