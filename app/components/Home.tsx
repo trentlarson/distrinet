@@ -11,8 +11,7 @@ export default function Home(): JSX.Element {
 
   return (
     <div className={styles.container} data-tid="container">
-      <h2>Menu</h2>
-      <Link to={routes.GENEALOGY}>genealogy</Link>
+      <Link to={routes.GENEALOGY}>genealogies</Link>
       <br />
       <Link to={routes.HISTORIES}>histories</Link>
       <br />
