@@ -507,39 +507,54 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
   return peerDid;
 }
 
-function sha1(input) {
+function sha1(input: string) {
   return nodeCrypto.createHash('sha1').update(input).digest();
 }
 
-function password_derive_bytes(password, salt, iterations, len) {
-  var key = Buffer.from(password + salt);
-  for (var i = 0; i < iterations; i++) {
+function password_derive_bytes(
+  password: string,
+  salt: string,
+  iterations: number,
+  len: number
+) {
+  let key = Buffer.from(password + salt);
+  for (let i = 0; i < iterations; i++) {
     key = sha1(key);
   }
   if (key.length < len) {
-    var hx = password_derive_bytes(password, salt, iterations - 1, 20);
-    for (var counter = 1; key.length < len; ++counter) {
+    const hx = password_derive_bytes(password, salt, iterations - 1, 20);
+    for (let counter = 1; key.length < len; ++counter) {
       key = Buffer.concat([key, sha1(Buffer.concat([Buffer.from(counter.toString()), hx]))]);
     }
   }
   return Buffer.alloc(len, key);
 }
 
-function encode(plainText, password, salt: string, ivBase64: string) {
-  var ivBuf = Buffer.from(ivBase64, 'base64');
-  var key = password_derive_bytes(password, salt, 100, 32);
-  var cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
-  var part1 = cipher.update(plainText, 'utf8');
-  var part2 = cipher.final();
+function encrypt(
+  plainText: string,
+  password: string,
+  salt: string,
+  ivBase64: string
+) {
+  const ivBuf = Buffer.from(ivBase64, 'base64');
+  const key = password_derive_bytes(password, salt, 100, 32);
+  const cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
+  const part1 = cipher.update(plainText, 'utf8');
+  const part2 = cipher.final();
   const encrypted = Buffer.concat([part1, part2]).toString('base64');
   return encrypted;
 }
 
-function decode(encoded: string, password, salt: string, ivBase64: string) {
-  var ivBuf = Buffer.from(ivBase64, 'base64');
-  var key = password_derive_bytes(password, salt, 100, 32);
-  var decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
-  var decrypted = decipher.update(encoded, 'base64', 'utf8');
+export function decrypt(
+  encrypted: string,
+  password: string,
+  salt: string,
+  ivBase64: string
+) {
+  const ivBuf = Buffer.from(ivBase64, 'base64');
+  const key = password_derive_bytes(password, salt, 100, 32);
+  const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
+  var decrypted = decipher.update(encrypted, 'base64', 'utf8');
   decrypted += decipher.final();
   return decrypted;
 }
@@ -547,7 +562,8 @@ function decode(encoded: string, password, salt: string, ivBase64: string) {
 /**
  Function to take settings and return new copy with private key credentials.
  */
-export const generateKeyAndSet = (password) => (settings: SettingsInternal) => {
+// eslint-disable-next-line max-len
+export const generateKeyAndSet = (password: string) => (settings: SettingsInternal) => {
   const newSettings = _.cloneDeep(settings);
 
   // generate the key
@@ -557,14 +573,14 @@ export const generateKeyAndSet = (password) => (settings: SettingsInternal) => {
   const did = peerDidFromPublicKey(publicKey);
   const keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
 
-  // now encode that key with the password
+  // now encrypt that key with the password
   // just random string (which gets added to the password)
   // ... which I realize isn't really a problem here since we're not
   // transmitting the password or storing it with others. But I may reuse code.
   const salt = nodeCrypto.randomBytes(6).toString('base64');
   // encoding of a specific number of bytes
   const ivBase64 = nodeCrypto.randomBytes(16).toString('base64');
-  const keyEncoded = encode(keyPkcs8Pem.toString(), password, salt, ivBase64);
+  const keyEncrypted = encrypt(keyPkcs8Pem.toString(), password, salt, ivBase64);
 
   if (_.isNil(newSettings.credentials)) {
     newSettings.credentials = [];
@@ -575,8 +591,8 @@ export const generateKeyAndSet = (password) => (settings: SettingsInternal) => {
     privCred = { id: 'privateKey', type: CredentialType.PRIVATE_KEY };
   }
   privCred.did = did;
+  privCred.encryptedPkcs8PemPrivateKey = keyEncrypted;
   privCred.ivBase64 = ivBase64;
-  privCred.encryptedPkcs8PemPrivateKey = keyEncoded;
   privCred.salt = salt;
 
   newSettings.credentials = _.unionWith(

@@ -67,6 +67,7 @@ export default function TaskListsTable() {
   const [taskSigningComment, setTaskSigningComment] = useState(
     DEFAULT_TASK_COMMENT
   );
+  const [keyPassword, setKeyPassword] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
   const [showOnlyTop3, setShowOnlyTop3] = useState(false);
   const [showOnlyBiggest5, setShowOnlyBiggest5] = useState(false);
@@ -142,6 +143,8 @@ export default function TaskListsTable() {
           setFocusOnTaskId,
           taskSigningComment,
           setTaskSigningComment,
+          keyPassword,
+          setKeyPassword,
           listSourceIdsToShow,
           setListSourceIdsToShow
         )}
@@ -255,6 +258,7 @@ export default function TaskListsTable() {
         taskSigningComment,
         focusOnTaskId,
         setFocusOnTaskId,
+        keyPassword,
         setListSourceIdsToShow,
         labelsToShow,
         setLabelsToShow,
@@ -281,6 +285,8 @@ function sourceActions(
   setFocusOnTaskId: (arg0: string) => void,
   taskSigningComment: string,
   setTaskSigningComment: (arg0: string) => void,
+  keyPassword: string,
+  setKeyPassword: (arg0: string) => void,
   listSourceIdsToShow: Array<string>,
   setListSourceIdsToShow: (arg0: Array<string>) => void
 ) {
@@ -448,12 +454,19 @@ function sourceActions(
       />
       )
       <br />
-      (Sign log messages with this comment:&nbsp;
+      (Sign log messages with comment:&nbsp;
       <input
         size={35}
         type="text"
         value={taskSigningComment}
         onChange={(e) => setTaskSigningComment(e.target.value)}
+      />
+      &nbsp;after unlocking with password:
+      <input
+        size={10}
+        type="text"
+        value={keyPassword}
+        onChange={(e) => setKeyPassword(e.target.value)}
       />
       )
     </div>
@@ -476,6 +489,7 @@ function bigListTable(
   taskSigningComment: string,
   focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
+  keyPassword: string,
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   labelsToShow: Array<string>,
   setLabelsToShow: (arg0: Array<string>) => void,
@@ -551,6 +565,7 @@ function bigListTable(
         setListSourceIdsToShow,
         focusOnTaskId,
         setFocusOnTaskId,
+        keyPassword,
         [],
         allUiTrees,
         dispatch
@@ -568,6 +583,7 @@ function smallListTable(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
+  keyPassword: string,
   uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
@@ -607,6 +623,7 @@ function smallListTable(
               setListSourceIdsToShow,
               focusOnTaskId,
               setFocusOnTaskId,
+              keyPassword,
               uiTreePath,
               allUiTrees,
               dispatch
@@ -628,6 +645,7 @@ function oneTaskRow(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   focusOnTaskId: string,
   setFocusOnTaskId: (arg0: string) => void,
+  keyPassword: string,
   uiTreePath: Array<UiTreeBranch>,
   allUiTrees: Record<string, Array<UiTree>>,
   dispatch: (arg0: AppThunk) => void
@@ -743,6 +761,7 @@ function oneTaskRow(
                 setListSourceIdsToShow,
                 focusOnTaskId,
                 setFocusOnTaskId,
+                keyPassword,
                 subtaskUiTreePath,
                 allUiTrees,
                 dispatch
@@ -792,6 +811,7 @@ function oneTaskRow(
                 setListSourceIdsToShow,
                 focusOnTaskId,
                 setFocusOnTaskId,
+                keyPassword,
                 dependentUiTreePath,
                 allUiTrees,
                 dispatch
@@ -808,7 +828,12 @@ function oneTaskRow(
         <button
           type="button"
           onClick={() => {
-            dispatch(dispatchLogMessage(task, taskSigningComment));
+            dispatch(dispatchLogMessage(task, taskSigningComment, keyPassword))
+            // regular case gets a message from within the function
+            .catch((e: Error) => {
+              console.log('Something went wrong signing.', e);
+              alert('Something went wrong! See the dev console for details.');
+            });
           }}
         >
           Sign Log

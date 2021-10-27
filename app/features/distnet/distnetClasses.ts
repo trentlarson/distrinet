@@ -83,7 +83,10 @@ interface Credential {
 
   // from keyObjectexport with type 'pkcs8' and format 'pem'
   // see https://nodejs.org/dist/latest-v12.x/docs/api/crypto.html#crypto_keyobject_export_options
-  privateKeyPkcs8Pem?: string;
+  encryptedPkcs8PemPrivateKey?: string;
+
+  ivBase64?: string;
+  salt?: string;
 }
 
 export enum CredentialType {

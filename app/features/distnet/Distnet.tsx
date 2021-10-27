@@ -392,7 +392,7 @@ export default function Distnet(options: AppInfo) {
                     alert('The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.');
                   }
                 })
-                .catch((e) => {
+                .catch((e: Error) => {
                   console.log('Got an error while generating a key pair:', e);
                   alert('Ack! There was an error. See the dev console log for more info.')
                 });
@@ -405,7 +405,7 @@ export default function Distnet(options: AppInfo) {
         size={15}
         type="text"
         value={keyPassword}
-        onChange={(e) => setKeyPassword(e.target.value, 10)}
+        onChange={(e) => setKeyPassword(e.target.value)}
       />
         </div>
         <div>

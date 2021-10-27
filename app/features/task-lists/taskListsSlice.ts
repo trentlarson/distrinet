@@ -27,7 +27,7 @@ import {
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
-import { dispatchReloadCacheForFile } from '../distnet/distnetSlice';
+import { decrypt, dispatchReloadCacheForFile } from '../distnet/distnetSlice';
 
 const DEFAULT_FORECAST_SERVER =
   'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
@@ -721,14 +721,15 @@ function localLogFileName(filename: string) {
 
 export const dispatchLogMessage = (
   task: YamlTask,
-  comment: string
+  comment: string,
+  keyPassword: string
 ): AppThunk => async (_1, getState) => {
   if (getState().distnet.settings.credentials) {
     const keyContents = R.find(
       (c) => c.id === 'privateKey',
       getState().distnet.settings.credentials
     );
-    if (keyContents && keyContents.privateKeyPkcs8Pem) {
+    if (keyContents && keyContents.encryptedPkcs8PemPrivateKey) {
       // figure out how to push out the message
       const source = R.find(
         (s) => s.id === task.sourceId,
@@ -766,7 +767,12 @@ export const dispatchLogMessage = (
           }
           sign.write(JSON.stringify(messageForSigning));
           sign.end();
-          const keyPem: string = keyContents.privateKeyPkcs8Pem;
+          const keyPem: string = decrypt(
+            keyContents.encryptedPkcs8PemPrivateKey,
+            keyPassword,
+            keyContents.salt,
+            keyContents.ivBase64
+          );
           const privateKey = nodeCrypto.createPrivateKey(keyPem);
           const publicKeyEncoded = nodeCrypto
             .createPublicKey(keyPem)
@@ -820,9 +826,10 @@ export const dispatchLogMessage = (
       }
     } else {
       alert(
-        'You have not set a "credentials.privateKey" in your settings, which is necessary' +
-          ' to submit a task.  To fix, go to the settings and click' +
-          ' "Generate Key".'
+        'You have not set a "credentials" with ID "privateKey" and an' +
+        ' "encryptedPkcs8PemPrivateKey" value in your' +
+        ' settings, which is necessary to submit a task.  To fix, go to the' +
+        ' settings and click "Generate Key".'
       );
     }
   } else {
