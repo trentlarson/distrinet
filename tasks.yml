@@ -1,8 +1,9 @@
 tasks :
 
-  - -3 change estimates to hours (done with Personal & Gifts)
+  - 1 password-protect private key
+  - -3 change estimates to hours
     - change forecast equation
-  - test all UI functions
+  - -1 test all UI functions
   - -2 move genealogy/history/task-list-specific code out of distnet
 
   - 1 rename the "urls" arrays to "moreUrls" type:tech-cleanup :

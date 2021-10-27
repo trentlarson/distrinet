@@ -2,8 +2,8 @@ import electron from 'electron';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 import * as R from 'ramda';
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import url from 'url';
 
@@ -36,6 +36,8 @@ interface AppInfo {
 export default function Distnet(options: AppInfo) {
   const dispatch = useDispatch();
   const distnet = useSelector((state: RootState) => state.distnet);
+  const [keyPassword, setKeyPassword] = useState('');
+
   const settingsChangedMessage = distnet.settingsChanged ? (
     <div style={{ color: 'orange' }}>
       Settings have been changed and not yet saved.
@@ -322,6 +324,41 @@ export default function Distnet(options: AppInfo) {
         </div>
         <div>
           <button
+            type="button"
+            onClick={() => {
+              if (distnet.settingsChanged) {
+                alert(
+                  'You have changes in the current settings, so save or undo those first.'
+                );
+              } else {
+                dispatch(dispatchModifySettings(addDistrinetTaskSource));
+              }
+            }}
+          >
+            Add Distrinet Project Source
+          </button>
+          <br />
+          <button
+            type="button"
+            onClick={() => {
+              if (distnet.settingsChanged) {
+                alert(
+                  'You have changes in the current settings, so save or undo those first.'
+                );
+              } else {
+                dispatch(
+                  dispatchSetSettingsText(
+                    testSettingsYamlText(options.appPath),
+                    true
+                  )
+                );
+              }
+            }}
+          >
+            Reset to Test Settings
+          </button>
+          <br />
+          <button
             className="generateKeyButton"
             type="button"
             onClick={() => {
@@ -344,45 +381,32 @@ export default function Distnet(options: AppInfo) {
                 proceed = true;
               }
               if (proceed) {
-                dispatch(dispatchModifySettings(generateKeyAndSet));
+                dispatch(dispatchModifySettings(generateKeyAndSet(keyPassword)))
+                .then(() => {
+                  if (keyPassword) {
+                    new Notification('Generated', {
+                    body: `Be sure to save your password so you can use this key.`,
+                      silent: true,
+                    });
+                  } else {
+                    alert('The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.');
+                  }
+                })
+                .catch((e) => {
+                  console.log('Got an error while generating a key pair:', e);
+                  alert('Ack! There was an error. See the dev console log for more info.')
+                });
               }
             }}
           >
-            Generate Key
+            Generate Key, encrypted with password:
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (distnet.settingsChanged) {
-                alert(
-                  'You have changes in the current settings, so save or undo those first.'
-                );
-              } else {
-                dispatch(dispatchModifySettings(addDistrinetTaskSource));
-              }
-            }}
-          >
-            Add Distrinet Project Source
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (distnet.settingsChanged) {
-                alert(
-                  'You have changes in the current settings, so save or undo those first.'
-                );
-              } else {
-                dispatch(
-                  dispatchSetSettingsText(
-                    testSettingsYamlText(options.appPath),
-                    true
-                  )
-                );
-              }
-            }}
-          >
-            Reset to Test Settings
-          </button>
+      <input
+        size={15}
+        type="text"
+        value={keyPassword}
+        onChange={(e) => setKeyPassword(e.target.value, 10)}
+      />
         </div>
         <div>
           <ul>
