@@ -85,8 +85,8 @@ interface Credential {
   // see https://nodejs.org/dist/latest-v12.x/docs/api/crypto.html#crypto_keyobject_export_options
   encryptedPkcs8PemPrivateKey?: string;
 
-  ivBase64?: string;
-  salt?: string;
+  ivBase64?: string; // required for encryptedPkcs8PemPrivateKey
+  salt?: string; // if empty, will often use ''
 }
 
 export enum CredentialType {

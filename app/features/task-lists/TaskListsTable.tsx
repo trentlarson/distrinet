@@ -828,12 +828,7 @@ function oneTaskRow(
         <button
           type="button"
           onClick={() => {
-            dispatch(dispatchLogMessage(task, taskSigningComment, keyPassword))
-            // regular case gets a message from within the function
-            .catch((e: Error) => {
-              console.log('Something went wrong signing.', e);
-              alert('Something went wrong! See the dev console for details.');
-            });
+            dispatch(dispatchLogMessage(task, taskSigningComment, keyPassword));
           }}
         >
           Sign Log

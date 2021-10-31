@@ -39,8 +39,8 @@ import {
 import uriTools from './uriTools';
 
 interface SettingsEditor {
-  // should clone the settings and return a new one
-  (settings: SettingsInternal): SettingsInternal;
+  // should clone the settings and return a new one (or null on error)
+  (settings: SettingsInternal): SettingsInternal | null;
 }
 
 const distnetSlice = createSlice({
@@ -507,24 +507,27 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
   return peerDid;
 }
 
-function sha1(input: string) {
+function sha1(input: Buffer) {
   return nodeCrypto.createHash('sha1').update(input).digest();
 }
 
-function password_derive_bytes(
+function passwordDeriveBytes(
   password: string,
   salt: string,
   iterations: number,
   len: number
 ) {
   let key = Buffer.from(password + salt);
-  for (let i = 0; i < iterations; i++) {
+  for (let i = 0; i < iterations; i += 1) {
     key = sha1(key);
   }
   if (key.length < len) {
-    const hx = password_derive_bytes(password, salt, iterations - 1, 20);
-    for (let counter = 1; key.length < len; ++counter) {
-      key = Buffer.concat([key, sha1(Buffer.concat([Buffer.from(counter.toString()), hx]))]);
+    const hx = passwordDeriveBytes(password, salt, iterations - 1, 20);
+    for (let counter = 1; key.length < len; counter += 1) {
+      key = Buffer.concat([
+        key,
+        sha1(Buffer.concat([Buffer.from(counter.toString()), hx])),
+      ]);
     }
   }
   return Buffer.alloc(len, key);
@@ -537,8 +540,8 @@ function encrypt(
   ivBase64: string
 ) {
   const ivBuf = Buffer.from(ivBase64, 'base64');
-  const key = password_derive_bytes(password, salt, 100, 32);
-  const cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
+  const key = passwordDeriveBytes(password, salt, 100, 32);
+  const cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf)); // eslint-disable-line max-len,prettier/prettier
   const part1 = cipher.update(plainText, 'utf8');
   const part2 = cipher.final();
   const encrypted = Buffer.concat([part1, part2]).toString('base64');
@@ -552,65 +555,77 @@ export function decrypt(
   ivBase64: string
 ) {
   const ivBuf = Buffer.from(ivBase64, 'base64');
-  const key = password_derive_bytes(password, salt, 100, 32);
-  const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
-  var decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  const key = passwordDeriveBytes(password, salt, 100, 32);
+  const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf)); // eslint-disable-line max-len,prettier/prettier
+  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
   decrypted += decipher.final();
   return decrypted;
 }
 
 /**
  Function to take settings and return new copy with private key credentials.
+ @return null if there was an error
  */
-// eslint-disable-next-line max-len
-export const generateKeyAndSet = (password: string) => (settings: SettingsInternal) => {
-  const newSettings = _.cloneDeep(settings);
+export const generateKeyAndSet = (password: string) => (settings: SettingsInternal) => { // eslint-disable-line max-len,prettier/prettier
+  try {
+    const newSettings = _.cloneDeep(settings);
 
-  // generate the key
-  const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
-    namedCurve: 'secp224r1',
-  });
-  const did = peerDidFromPublicKey(publicKey);
-  const keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+    // generate the key
+    const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
+      namedCurve: 'secp224r1',
+    });
+    const did = peerDidFromPublicKey(publicKey);
+    const keyPkcs8Pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
 
-  // now encrypt that key with the password
-  // just random string (which gets added to the password)
-  // ... which I realize isn't really a problem here since we're not
-  // transmitting the password or storing it with others. But I may reuse code.
-  const salt = nodeCrypto.randomBytes(6).toString('base64');
-  // encoding of a specific number of bytes
-  const ivBase64 = nodeCrypto.randomBytes(16).toString('base64');
-  const keyEncrypted = encrypt(keyPkcs8Pem.toString(), password, salt, ivBase64);
+    // now encrypt that key with the password
+    // just random string (which gets added to the password)
+    // ... which I realize isn't really a problem here since we're not
+    // transmitting the password or storing it with others. But I may reuse code.
+    const salt = nodeCrypto.randomBytes(6).toString('base64');
+    // encoding of a specific number of bytes
+    const ivBase64 = nodeCrypto.randomBytes(16).toString('base64');
+    const keyEncrypted = encrypt(keyPkcs8Pem.toString(), password, salt, ivBase64); // eslint-disable-line max-len,prettier/prettier
 
-  if (_.isNil(newSettings.credentials)) {
-    newSettings.credentials = [];
+    if (_.isNil(newSettings.credentials)) {
+      newSettings.credentials = [];
+    }
+    const creds = newSettings.credentials;
+    let privCred = _.find(creds, (c) => c.id === 'privateKey');
+    if (_.isNil(privCred)) {
+      privCred = { id: 'privateKey', type: CredentialType.PRIVATE_KEY };
+    }
+    privCred.did = did;
+    privCred.encryptedPkcs8PemPrivateKey = keyEncrypted;
+    privCred.ivBase64 = ivBase64;
+    privCred.salt = salt;
+
+    newSettings.credentials = _.unionWith(
+      [privCred],
+      creds,
+      (c1, c2) => c1.id === c2.id
+    );
+
+    return newSettings;
+  } catch (e) {
+    console.log('Got an error while generating a key pair:', e);
+    alert('Ack! There was an error. See the dev console log for more info.');
+    return null;
   }
-  const creds = newSettings.credentials;
-  let privCred = _.find(creds, (c) => c.id === 'privateKey');
-  if (_.isNil(privCred)) {
-    privCred = { id: 'privateKey', type: CredentialType.PRIVATE_KEY };
-  }
-  privCred.did = did;
-  privCred.encryptedPkcs8PemPrivateKey = keyEncrypted;
-  privCred.ivBase64 = ivBase64;
-  privCred.salt = salt;
-
-  newSettings.credentials = _.unionWith(
-    [privCred],
-    creds,
-    (c1, c2) => c1.id === c2.id
-  );
-
-  return newSettings;
 };
 
 export const dispatchModifySettings = (
   settingsEditor: SettingsEditor
 ): AppThunk => async (dispatch, getState) => {
   const newSettings = settingsEditor(getState().distnet.settings);
-  const settingsForStorage = convertSettingsToStorageFromInternal(newSettings);
-  const settingsYaml: string = yaml.safeDump(settingsForStorage);
-  dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, true));
+  if (newSettings != null) {
+    const settingsForStorage = convertSettingsToStorageFromInternal(newSettings); // eslint-disable-line max-len,prettier/prettier
+    const settingsYaml: string = yaml.safeDump(settingsForStorage);
+    dispatch(dispatchSetSettingsTextAndYaml(settingsYaml, true));
+  } else {
+    console.log(
+      'Not saving settings because we got no change. You should see a previous error in the log.'
+    );
+  }
 };
 
 export const addDistrinetTaskSource: SettingsEditor = (

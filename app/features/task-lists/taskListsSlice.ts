@@ -724,118 +724,124 @@ export const dispatchLogMessage = (
   comment: string,
   keyPassword: string
 ): AppThunk => async (_1, getState) => {
-  if (getState().distnet.settings.credentials) {
-    const keyContents = R.find(
-      (c) => c.id === 'privateKey',
-      getState().distnet.settings.credentials
-    );
-    if (keyContents && keyContents.encryptedPkcs8PemPrivateKey) {
-      // figure out how to push out the message
-      const source = R.find(
-        (s) => s.id === task.sourceId,
-        getState().distnet.settings.sources
+  try {
+    if (getState().distnet.settings.credentials) {
+      const keyContents = R.find(
+        (c) => c.id === 'privateKey',
+        getState().distnet.settings.credentials
       );
       if (
-        source &&
-        isFileUrl(source.workUrl) &&
-        getState().distnet.cache &&
-        getState().distnet.cache[task.sourceId] &&
-        getState().distnet.cache[task.sourceId].contents
+        keyContents &&
+        keyContents.encryptedPkcs8PemPrivateKey &&
+        keyContents.ivBase64
       ) {
-        const taskId = labelValueInSummary(ID_LABEL_KEY, task.summary);
+        // figure out how to push out the message
+        const source = R.find(
+          (s) => s.id === task.sourceId,
+          getState().distnet.settings.sources
+        );
+        if (
+          source &&
+          isFileUrl(source.workUrl) &&
+          getState().distnet.cache &&
+          getState().distnet.cache[task.sourceId] &&
+          getState().distnet.cache[task.sourceId].contents
+        ) {
+          const taskId = labelValueInSummary(ID_LABEL_KEY, task.summary);
 
-        if (R.isNil(taskId)) {
-          alert(
-            `Cannot log work for a task without an ID.` +
-              `  Edit the task and add a unique "${ID_LABEL_KEY}:SOME_VALUE"` +
-              ` in the summary.`
-          );
-        } else {
-          // sign
-          const sign = nodeCrypto.createSign('SHA256');
-          const messageForSigning: MessageForSigning = {
-            comment,
-            did: '', // doing this so that it's in the right order if used
-            summary: task.summary,
-            taskUri: globalUriForId(taskId, task.sourceId),
-            time: new Date().toISOString(),
-          };
-          if (keyContents.did) {
-            messageForSigning.did = keyContents.did;
+          if (R.isNil(taskId)) {
+            alert(
+              `Cannot log work for a task without an ID.` +
+                `  Edit the task and add a unique "${ID_LABEL_KEY}:SOME_VALUE"` +
+                ` in the summary.`
+            );
           } else {
-            delete messageForSigning.did;
-          }
-          sign.write(JSON.stringify(messageForSigning));
-          sign.end();
-          const keyPem: string = decrypt(
-            keyContents.encryptedPkcs8PemPrivateKey,
-            keyPassword,
-            keyContents.salt,
-            keyContents.ivBase64
-          );
-          const privateKey = nodeCrypto.createPrivateKey(keyPem);
-          const publicKeyEncoded = nodeCrypto
-            .createPublicKey(keyPem)
-            .export({ type: 'spki', format: 'pem' })
-            .toString();
+            // sign
+            const sign = nodeCrypto.createSign('SHA256');
+            const messageForSigning: MessageForSigning = {
+              comment,
+              did: '', // doing this so that it's in the right order if used
+              summary: task.summary,
+              taskUri: globalUriForId(taskId, task.sourceId),
+              time: new Date().toISOString(),
+            };
+            if (keyContents.did) {
+              messageForSigning.did = keyContents.did;
+            } else {
+              delete messageForSigning.did;
+            }
+            sign.write(JSON.stringify(messageForSigning));
+            sign.end();
+            const keyPem: string = decrypt(
+              keyContents.encryptedPkcs8PemPrivateKey,
+              keyPassword,
+              keyContents.salt || '',
+              keyContents.ivBase64
+            );
+            const privateKey = nodeCrypto.createPrivateKey(keyPem);
+            const publicKeyEncoded = nodeCrypto
+              .createPublicKey(keyPem)
+              .export({ type: 'spki', format: 'pem' })
+              .toString();
 
-          const signature = sign.sign(privateKey, 'hex');
+            const signature = sign.sign(privateKey, 'hex');
 
-          const newLog: Log = {
-            id: uuid.v4(),
-            taskId,
-            data: { messageData: messageForSigning },
-            time: messageForSigning.time,
-            publicKey: publicKeyEncoded,
-            signature,
-          };
-          // since the field order doesn't matter here, we'll throw it onto the end
-          if (keyContents.did) {
-            newLog.did = keyContents.did;
-          }
-          const logYaml: string = yaml.safeDump(newLog);
-          // eslint-disable-next-line prefer-template
-          const logText = '\n- ' + logYaml.replace(/\n/g, '\n  ');
-          const filename = url.fileURLToPath(source.workUrl);
-          const logFilename = localLogFileName(filename);
-          appendToFile(logFilename, logText)
-            // eslint-disable-next-line promise/always-return
-            .then(() => {
-              // eslint-disable-next-line no-new
-              new Notification('Saved', {
-                body: `Successfully saved message to ${logFilename}`,
+            const newLog: Log = {
+              id: uuid.v4(),
+              taskId,
+              data: { messageData: messageForSigning },
+              time: messageForSigning.time,
+              publicKey: publicKeyEncoded,
+              signature,
+            };
+            // since the field order doesn't matter here, we'll throw it onto the end
+            if (keyContents.did) {
+              newLog.did = keyContents.did;
+            }
+            const logYaml: string = yaml.safeDump(newLog);
+            // eslint-disable-next-line prefer-template
+            const logText = '\n- ' + logYaml.replace(/\n/g, '\n  ');
+            const filename = url.fileURLToPath(source.workUrl);
+            const logFilename = localLogFileName(filename);
+            appendToFile(logFilename, logText)
+              // eslint-disable-next-line promise/always-return
+              .then(() => {
+                // eslint-disable-next-line no-new
+                new Notification('Saved', {
+                  body: `Successfully saved message to ${logFilename}`,
+                });
+              })
+              .catch((err) => {
+                console.log(
+                  'Failed to save message to file',
+                  logFilename,
+                  'because',
+                  err
+                );
+                alert(
+                  `Failed to save message to file ${logFilename} because ${err}`
+                );
               });
-            })
-            .catch((err) => {
-              console.log(
-                'Failed to save message to file',
-                logFilename,
-                'because',
-                err
-              );
-              alert(
-                `Failed to save message to file ${logFilename} because ${err}`
-              );
-            });
+          }
+        } else {
+          console.log('I do not know how to log work for this task:', task);
+          alert(
+            `I don't know how to log work for this task: ${JSON.stringify(task)}` // eslint-disable-line max-len,prettier/prettier
+          );
         }
       } else {
-        console.log('I do not know how to log work for this task:', task);
         alert(
-          `I don't know how to log work for this task: ${JSON.stringify(task)}`
+          'You have not set a "credentials" with ID "privateKey" and an "encryptedPkcs8PemPrivateKey" value in your settings, which is necessary to submit a task.  To fix, go to the settings and click "Generate Key".' // eslint-disable-line max-len
         );
       }
     } else {
       alert(
-        'You have not set a "credentials" with ID "privateKey" and an' +
-        ' "encryptedPkcs8PemPrivateKey" value in your' +
-        ' settings, which is necessary to submit a task.  To fix, go to the' +
-        ' settings and click "Generate Key".'
+        'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
       );
     }
-  } else {
-    alert(
-      'You have not put any "credentials" in your settings.  To fix, go to the settings and click "Generate Key".'
-    );
+  } catch (e) {
+    console.log('Something went wrong signing and logging a message.', e);
+    alert('Something went wrong! See the dev console for details.');
   }
 };
 

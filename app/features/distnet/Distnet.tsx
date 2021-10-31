@@ -361,7 +361,7 @@ export default function Distnet(options: AppInfo) {
           <button
             className="generateKeyButton"
             type="button"
-            onClick={() => {
+            onClick={async () => {
               let proceed = false;
               if (
                 distnet.settings.credentials &&
@@ -381,32 +381,31 @@ export default function Distnet(options: AppInfo) {
                 proceed = true;
               }
               if (proceed) {
-                dispatch(dispatchModifySettings(generateKeyAndSet(keyPassword)))
-                .then(() => {
-                  if (keyPassword) {
-                    new Notification('Generated', {
+                await dispatch(
+                  dispatchModifySettings(generateKeyAndSet(keyPassword))
+                );
+                if (keyPassword) {
+                  // eslint-disable-next-line no-new
+                  new Notification('Generated', {
                     body: `Be sure to save your password so you can use this key.`,
-                      silent: true,
-                    });
-                  } else {
-                    alert('The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.');
-                  }
-                })
-                .catch((e: Error) => {
-                  console.log('Got an error while generating a key pair:', e);
-                  alert('Ack! There was an error. See the dev console log for more info.')
-                });
+                    silent: true,
+                  });
+                } else {
+                  alert(
+                    'The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.' // eslint-disable-line max-len
+                  );
+                }
               }
             }}
           >
             Generate Key, encrypted with password:
           </button>
-      <input
-        size={15}
-        type="text"
-        value={keyPassword}
-        onChange={(e) => setKeyPassword(e.target.value)}
-      />
+          <input
+            size={15}
+            type="text"
+            value={keyPassword}
+            onChange={(e) => setKeyPassword(e.target.value)}
+          />
         </div>
         <div>
           <ul>
