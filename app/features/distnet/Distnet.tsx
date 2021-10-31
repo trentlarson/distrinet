@@ -129,7 +129,9 @@ export default function Distnet(options: AppInfo) {
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => {
                 let needsReview = R.isNil(uriSource.dateReviewed);
-                if (uriSource.dateReviewed && distnet.cache[uriSource.id]) {
+                if (!distnet.cache[uriSource.id] || !uriSource.dateReviewed) {
+                  needsReview = null;
+                } else {
                   const diskDate = distnet.cache[uriSource.id].updatedDate;
                   if (
                     DateTime.fromISO(diskDate) >
@@ -138,10 +140,12 @@ export default function Distnet(options: AppInfo) {
                     needsReview = true;
                   }
                 }
-                const needsReviewStr = needsReview ? 'Y' : '';
-                const needsReviewTitle = R.isNil(uriSource.dateReviewed)
-                  ? 'Never Reviewed'
-                  : `Last Reviewed ${uriSource.dateReviewed}`;
+                const needsReviewStr = needsReview == null ? '?' : (needsReview ? 'Y' : '');
+                const needsReviewTitle = R.isNil(distnet.cache[uriSource.id])
+                  ? 'Unknown Current Date for Source'
+                  : R.isNil(uriSource.dateReviewed)
+                    ? 'Never Reviewed'
+                    : `Reviewed ${uriSource.dateReviewed.replace('T', ' ')}`;
                 return (
                   <tr key={uriSource.workUrl}>
                     <td>
