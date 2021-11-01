@@ -16,9 +16,9 @@ import { SETTINGS_FILE } from './settings';
 import {
   addDistrinetTaskSource,
   dispatchAddReviewedDateToSettings,
-  dispatchCacheForAll,
   dispatchLoadSettingsFromFile,
   dispatchModifySettings,
+  dispatchReloadCacheForAll,
   dispatchSaveSettingsTextToFileAndResetObject,
   dispatchSetSettingsTextAndYaml,
   generateKeyAndSet,
@@ -128,9 +128,11 @@ export default function Distnet(options: AppInfo) {
             </thead>
             <tbody>
               {distnet.settings.sources.map((uriSource: SourceInternal) => {
-                let needsReview = R.isNil(uriSource.dateReviewed);
-                if (!distnet.cache[uriSource.id] || !uriSource.dateReviewed) {
+                let needsReview;
+                if (R.isNil(distnet.cache[uriSource.id])) {
                   needsReview = null;
+                } else if (R.isNil(uriSource.dateReviewed)) {
+                  needsReview = true;
                 } else {
                   const diskDate = distnet.cache[uriSource.id].updatedDate;
                   if (
@@ -140,9 +142,11 @@ export default function Distnet(options: AppInfo) {
                     needsReview = true;
                   }
                 }
-                const needsReviewStr = needsReview == null ? '?' : (needsReview ? 'Y' : '');
+                const needsReviewStr = R.isNil(distnet.cache[uriSource.id])
+                  ? '?'
+                  : (needsReview ? 'Y' : '');
                 const needsReviewTitle = R.isNil(distnet.cache[uriSource.id])
-                  ? 'Unknown Current Date for Source'
+                  ? 'Current Date for Source is Unknown'
                   : R.isNil(uriSource.dateReviewed)
                     ? 'Never Reviewed'
                     : `Reviewed ${uriSource.dateReviewed.replace('T', ' ')}`;
@@ -423,7 +427,7 @@ export default function Distnet(options: AppInfo) {
           </ul>
           <button
             className={styles.btn}
-            onClick={() => dispatch(dispatchCacheForAll())}
+            onClick={() => dispatch(dispatchReloadCacheForAll())}
             data-tclass="btn"
             type="button"
           >

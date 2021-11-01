@@ -1,6 +1,7 @@
 import bs58 from 'bs58';
 import nodeCrypto, { KeyObject } from 'crypto';
 import electron from 'electron';
+import fsExtra from 'fs-extra';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import path from 'path';
@@ -28,6 +29,7 @@ import {
   SourceForStorage,
   SourceInternal,
 } from './distnetClasses';
+import { historyDestFullPath, retrieveHistoryReviewedDate } from './history';
 import {
   ErrorResult,
   isErrorResult,
@@ -41,6 +43,11 @@ import uriTools from './uriTools';
 interface SettingsEditor {
   // should clone the settings and return a new one (or null on error)
   (settings: SettingsInternal): SettingsInternal | null;
+}
+
+interface SourceAndReviewedDate {
+  source: SourceInternal;
+  dateReviewed: string;
 }
 
 const distnetSlice = createSlice({
@@ -60,13 +67,13 @@ const distnetSlice = createSlice({
     setSettingsChanged: (state, contents: Payload<boolean>) => {
       state.settingsChanged = contents.payload;
     },
-    setSettingsSourceReviewed: (state, contents: Payload<string>) => {
+    setSettingsSourceReviewed: (state, contents: Payload<SourceAndReviewedDate>) => { // eslint-disable-line max-len
       const source = R.find(
-        (s) => s.id === contents.payload,
+        (s) => s.id === contents.payload.source.id,
         state.settings.sources
       );
       if (source) {
-        source.dateReviewed = new Date().toISOString();
+        source.dateReviewed = contents.payload.dateReviewed;
       }
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
@@ -264,7 +271,7 @@ function removeNulls<T>(array: Array<T | null>): Array<T> {
   return result;
 }
 
-export const dispatchCacheForAll = (): AppThunk => async (
+export const dispatchReloadCacheForAll = (): AppThunk => async (
   dispatch,
   getState
 ) => {
@@ -275,8 +282,23 @@ export const dispatchCacheForAll = (): AppThunk => async (
     getState().distnet.settings
   );
   const result: Array<CacheData> = removeNulls(allCaches);
-  return dispatch(setCachedStateForAll(result));
+  dispatch(setCachedStateForAll(result));
+  dispatch(dispatchReloadReviewed());
 };
+
+export const dispatchReloadReviewed = () => async (dispatch, getState) => {
+  R.map(
+    (source) => {
+      return retrieveHistoryReviewedDate(source.workUrl)
+      .then((dateStr) => {
+        if (dateStr) {
+          dispatch(setSettingsSourceReviewed({ source, dateReviewed: dateStr })); // eslint-disable-line max-len
+        }
+      })
+    },
+    getState().distnet.settings.sources
+  );
+}
 
 export const dispatchSetSettingsText = (
   contents: string,
@@ -347,8 +369,8 @@ const dispatchSetSettingsYamlFromText = (contents: string): AppThunk => async (
         loadedSettings
       );
       dispatch(setSettingsStateObject(internalSettings));
-      dispatch(dispatchCacheForAll());
       dispatch(callResetStateMethods());
+      dispatch(dispatchReloadCacheForAll());
     } else {
       throw Error('Settings file does not match Settings format.');
     }
@@ -876,18 +898,26 @@ export const dispatchAddTaskListToSettings = (filePath: string) => {
 export const dispatchAddReviewedDateToSettings = (
   sourceId: string
 ): AppThunk => async (dispatch, getState) => {
-  await dispatch(setSettingsSourceReviewed(sourceId));
-  const settingsForStorage = convertSettingsToStorageFromInternal(
-    getState().distnet.settings
+
+  const source = R.find(
+    (s) => s.id === sourceId,
+    getState().distnet.settings.sources
   );
-  const settingsText: string = yaml.safeDump(settingsForStorage);
-  dispatch(setSettingsStateText(settingsText));
-  const result = await saveSettingsToFile(settingsText);
-  if (result && result.error) {
-    dispatch(setSettingsSaveErrorMessage(result.error));
-  } else {
-    dispatch(setSettingsSaveErrorMessage(null));
-  }
+  const srcPath = url.fileURLToPath(source.workUrl);
+  const destPath = historyDestFullPath(source.workUrl);
+  fsExtra.copy(srcPath, destPath, { preserveTimestamps: true })
+  .catch((e) => {
+    console.log(
+      `Got an error copying ${source.workUrl} to ${destPath} because`,
+      e
+    );
+    dispatch(setSettingsSaveErrorMessage('An error occurred. See dev console for details.'));
+  });
+
+  await dispatch(setSettingsSourceReviewed({
+    source,
+    dateReviewed: new Date().toISOString()
+  }));
 };
 
 export default distnetSlice.reducer;

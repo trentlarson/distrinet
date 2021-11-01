@@ -29,8 +29,6 @@ export interface SourceForStorage {
   type?: string; // type of transfer/storage/sharing
   urls?: Array<UrlData>;
   workUrl: string;
-  // most recent date this data was reviewed, ISO-formatted
-  dateReviewed?: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 // Full Settings, built in memory
@@ -41,6 +39,8 @@ export interface SettingsInternal extends SettingsForStorage {
 export interface SourceInternal extends SourceForStorage {
   id: string;
   idFile: string; // a file path (which the UI often renders as a "file:" URL, probably when it's in an href)
+  // date of the file when most recently reviewed, ISO-formatted
+  dateReviewed?: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 /** not yet ready

@@ -281,6 +281,7 @@
     "electron-log": "^4.2.2",
     "electron-updater": "^4.3.1",
     "env-paths": "^2.2.0",
+    "fs-extra": "^10.0.0",
     "history": "4.7.2",
     "js-yaml": "^3.14.0",
     "lodash": "^4.17.15",
