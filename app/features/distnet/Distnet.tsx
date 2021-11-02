@@ -192,20 +192,40 @@ export default function Distnet(options: AppInfo) {
                       {!needsReview ? (
                         ''
                       ) : (
-                        /* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */
+                        <Link
+                          to={{
+                            pathname: routes.FILE_DIFF,
+                            search: new URLSearchParams({
+                              workUrl: uriSource.workUrl,
+                            }).toString(),
+                          }}
+                        >
+                          <i title="See Differences" className="fas fa-align-left" />
+                        </Link>
+                      )}
+                      &nbsp;
+                      { /* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */ }
+                      {!needsReview ? (
+                        ''
+                      ) : (
                         <a
                           title="Mark as Reviewed"
                           className="fas fa-check-circle"
                           href="#"
                           onClick={(event) => {
                             event.preventDefault();
-                            dispatch(
-                              dispatchAddReviewedDateToSettings(uriSource.id)
+                            const proceed = confirm(
+                              'You may not be able to review differences after this. Please confirm.'
                             );
+                            if (proceed) {
+                              dispatch(
+                                dispatchAddReviewedDateToSettings(uriSource.id)
+                              );
+                            }
                           }}
                         />
-                        /* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */
                       )}
+                      { /* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */ }
                     </td>
                     <td>
                       {distnet.cache[uriSource.id]

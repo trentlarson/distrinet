@@ -287,7 +287,7 @@ export const dispatchReloadCacheForAll = (): AppThunk => async (
 };
 
 export const dispatchReloadReviewed = () => async (dispatch, getState) => {
-  R.map(
+  return R.map(
     (source) => {
       return retrieveHistoryReviewedDate(source.workUrl)
       .then((dateStr) => {
@@ -905,7 +905,13 @@ export const dispatchAddReviewedDateToSettings = (
   );
   const srcPath = url.fileURLToPath(source.workUrl);
   const destPath = historyDestFullPath(source.workUrl);
-  fsExtra.copy(srcPath, destPath, { preserveTimestamps: true })
+  return fsExtra.copy(srcPath, destPath, { preserveTimestamps: true })
+  .then(() => {
+    return dispatch(setSettingsSourceReviewed({
+      source,
+      dateReviewed: new Date().toISOString()
+    }));
+  })
   .catch((e) => {
     console.log(
       `Got an error copying ${source.workUrl} to ${destPath} because`,
@@ -914,10 +920,6 @@ export const dispatchAddReviewedDateToSettings = (
     dispatch(setSettingsSaveErrorMessage('An error occurred. See dev console for details.'));
   });
 
-  await dispatch(setSettingsSourceReviewed({
-    source,
-    dateReviewed: new Date().toISOString()
-  }));
 };
 
 export default distnetSlice.reducer;

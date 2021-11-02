@@ -28,6 +28,19 @@ const DistnetPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+const LazyFileDiffPage = React.lazy(() =>
+  import(
+    /* webpackChunkName: "FileDiffPage" */ './features/distnet/FileDiffPage'
+  )
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FileDiffPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyFileDiffPage {...props} />
+  </React.Suspense>
+);
+
 const LazyGenealogyPage = React.lazy(() =>
   import(
     /* webpackChunkName: "GenealogyPage" */ './features/genealogy/GenealogyPage'
@@ -110,6 +123,7 @@ export default function Routes() {
       <Switch>
         <Route path={routes.COUNTER} component={CounterPage} />
         <Route path={routes.DISTNET} component={DistnetPage} />
+        <Route path={routes.FILE_DIFF} component={FileDiffPage} />
         <Route path={routes.GENEALOGY} component={GenealogyPage} />
         <Route
           path={routes.GENEALOGY_SETTINGS}

@@ -6,9 +6,10 @@ tasks :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files
       - for git, see `git status` for differences from origin
-      - create directory (with any name, maybe based on name of the IRI)
-      - store that local directory name in settings in the app "history" directory
     - then multiple files in directories (eg. histories)
+      - create directory (with any name, maybe based on name of the IRI)
+      - copy
+      - check size & make tracking optional (to save space)
     - when parsing, ensure IRIs are unique
     - when a *.iri diff is detected, make sure there are big warnings
     - add a column to show if there's a difference from last seen
@@ -37,7 +38,7 @@ tasks :
 
   - 1 make some activities advanced (eg. caching, ID map) and allow disabling at start
 
-  - 2 add detection for local, uncommitted changes
+  - 0 add dark & light mode for the History page
 
   - 1 save the local copy (for a given remote URL); only... on setting? :
     - show if there's a difference in the local copy

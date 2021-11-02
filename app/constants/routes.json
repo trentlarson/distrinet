@@ -1,6 +1,7 @@
 {
   "HOME": "/",
   "COUNTER": "/counter",
+  "FILE_DIFF": "/file-diff",
   "DISTNET": "/distnet",
   "GENEALOGY": "/genealogy",
   "GENEALOGY_SETTINGS": "/genealogy-settings",
