@@ -10,7 +10,7 @@ const paths = envPaths(APP_NAME);
 const DEFAULT_HISTORY_DIR = path.join(paths.config, 'history');
 
 export const historyDestFullPath = (workUrl: string) => {
-  let pathParsed = path.parse(url.fileURLToPath(workUrl))
+  const pathParsed = path.parse(url.fileURLToPath(workUrl));
   return path.join(DEFAULT_HISTORY_DIR, pathParsed.dir, pathParsed.base);
 };
 
@@ -18,7 +18,7 @@ export const historyDestFullPath = (workUrl: string) => {
  return Promise of string of ISO time of file mtime, or null on error
  * */
 export const retrieveHistoryReviewedDate = async (workUrl: string) => {
-  let historyFile = historyDestFullPath(workUrl);
+  const historyFile = historyDestFullPath(workUrl);
   return fsPromises
     .stat(historyFile)
     .then((stats) => {
@@ -32,5 +32,5 @@ export const retrieveHistoryReviewedDate = async (workUrl: string) => {
         err
       );
       return null;
-    })
-}
+    });
+};

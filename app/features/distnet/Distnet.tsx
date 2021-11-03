@@ -142,14 +142,20 @@ export default function Distnet(options: AppInfo) {
                     needsReview = true;
                   }
                 }
+
+                /* eslint-disable no-nested-ternary,prettier/prettier */
                 const needsReviewStr = R.isNil(distnet.cache[uriSource.id])
                   ? '?'
-                  : (needsReview ? 'Y' : '');
+                  : needsReview
+                    ? 'Y'
+                    : '';
                 const needsReviewTitle = R.isNil(distnet.cache[uriSource.id])
                   ? 'Current Date for Source is Unknown'
                   : R.isNil(uriSource.dateReviewed)
                     ? 'Never Reviewed'
                     : `Reviewed ${uriSource.dateReviewed.replace('T', ' ')}`;
+                /* eslint-enable no-nested-ternary,prettier/prettier */
+
                 return (
                   <tr key={uriSource.workUrl}>
                     <td>
@@ -200,11 +206,11 @@ export default function Distnet(options: AppInfo) {
                             }).toString(),
                           }}
                         >
-                          <i title="See Differences" className="fas fa-align-left" />
+                          <i title="See Diffs" className="fas fa-align-left" />
                         </Link>
                       )}
                       &nbsp;
-                      { /* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */ }
+                      {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
                       {!needsReview ? (
                         ''
                       ) : (
@@ -214,6 +220,8 @@ export default function Distnet(options: AppInfo) {
                           href="#"
                           onClick={(event) => {
                             event.preventDefault();
+                            // We need to replace this with dialog.showMessageBox!
+                            // eslint-disable-next-line no-restricted-globals
                             const proceed = confirm(
                               'You may not be able to review differences after this. Please confirm.'
                             );
@@ -225,7 +233,7 @@ export default function Distnet(options: AppInfo) {
                           }}
                         />
                       )}
-                      { /* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */ }
+                      {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
                     </td>
                     <td>
                       {distnet.cache[uriSource.id]

@@ -67,7 +67,8 @@ const distnetSlice = createSlice({
     setSettingsChanged: (state, contents: Payload<boolean>) => {
       state.settingsChanged = contents.payload;
     },
-    setSettingsSourceReviewed: (state, contents: Payload<SourceAndReviewedDate>) => { // eslint-disable-line max-len
+    // eslint-disable-next-line max-len,prettier/prettier
+    setSettingsSourceReviewed: (state, contents: Payload<SourceAndReviewedDate>) => {
       const source = R.find(
         (s) => s.id === contents.payload.source.id,
         state.settings.sources
@@ -271,6 +272,25 @@ function removeNulls<T>(array: Array<T | null>): Array<T> {
   return result;
 }
 
+export const dispatchReloadReviewed = (): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  return R.map((source) => {
+    return retrieveHistoryReviewedDate(source.workUrl).then((dateStr) => {
+      if (dateStr) {
+        return dispatch(
+          setSettingsSourceReviewed({
+            source,
+            dateReviewed: dateStr,
+          })
+        );
+      }
+      return null;
+    });
+  }, getState().distnet.settings.sources);
+};
+
 export const dispatchReloadCacheForAll = (): AppThunk => async (
   dispatch,
   getState
@@ -285,20 +305,6 @@ export const dispatchReloadCacheForAll = (): AppThunk => async (
   dispatch(setCachedStateForAll(result));
   dispatch(dispatchReloadReviewed());
 };
-
-export const dispatchReloadReviewed = () => async (dispatch, getState) => {
-  return R.map(
-    (source) => {
-      return retrieveHistoryReviewedDate(source.workUrl)
-      .then((dateStr) => {
-        if (dateStr) {
-          dispatch(setSettingsSourceReviewed({ source, dateReviewed: dateStr })); // eslint-disable-line max-len
-        }
-      })
-    },
-    getState().distnet.settings.sources
-  );
-}
 
 export const dispatchSetSettingsText = (
   contents: string,
@@ -898,28 +904,36 @@ export const dispatchAddTaskListToSettings = (filePath: string) => {
 export const dispatchAddReviewedDateToSettings = (
   sourceId: string
 ): AppThunk => async (dispatch, getState) => {
-
   const source = R.find(
     (s) => s.id === sourceId,
     getState().distnet.settings.sources
   );
-  const srcPath = url.fileURLToPath(source.workUrl);
-  const destPath = historyDestFullPath(source.workUrl);
-  return fsExtra.copy(srcPath, destPath, { preserveTimestamps: true })
-  .then(() => {
-    return dispatch(setSettingsSourceReviewed({
-      source,
-      dateReviewed: new Date().toISOString()
-    }));
-  })
-  .catch((e) => {
-    console.log(
-      `Got an error copying ${source.workUrl} to ${destPath} because`,
-      e
-    );
-    dispatch(setSettingsSaveErrorMessage('An error occurred. See dev console for details.'));
-  });
-
+  if (source) {
+    const srcPath = url.fileURLToPath(source.workUrl);
+    const destPath = historyDestFullPath(source.workUrl);
+    return fsExtra
+      .copy(srcPath, destPath, { preserveTimestamps: true })
+      .then(() => {
+        return dispatch(
+          setSettingsSourceReviewed({
+            source,
+            dateReviewed: new Date().toISOString(),
+          })
+        );
+      })
+      .catch((e) => {
+        console.log(
+          `Got an error copying ${source.workUrl} to ${destPath} because`,
+          e
+        );
+        return dispatch(
+          setSettingsSaveErrorMessage(
+            'An error occurred. See dev console for details.'
+          )
+        );
+      });
+  }
+  return null;
 };
 
 export default distnetSlice.reducer;
