@@ -104,17 +104,15 @@ export default function Distnet(options: AppInfo) {
                   IRI
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Name
-                </th>
-                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   {/* It's stupid how styles conflict. Try fix this, I dare you. */}
                   {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
                   Remote
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Needs
-                  <br />
-                  Review
+                  Actions
+                </th>
+                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  Name
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   In-Memory
@@ -122,7 +120,9 @@ export default function Distnet(options: AppInfo) {
                   Data Date
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  Actions
+                  Needs
+                  <br />
+                  Review
                 </th>
               </tr>
             </thead>
@@ -188,9 +188,56 @@ export default function Distnet(options: AppInfo) {
                         <i title="Drag IRI File" className="fa fa-hand-rock" />
                       </a>
                     </td>
-                    <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                     <td>
                       {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
+                    </td>
+                    <td>
+                      {R.prepend(
+                        { url: uriSource.workUrl },
+                        uriSource.urls || []
+                      ).map((inUrl) => (
+                        <span key={inUrl && inUrl.url}>
+                          {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                          &nbsp;
+                          <a
+                            href="#"
+                            key={inUrl && inUrl.url}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              electron.shell.openExternal(inUrl.url);
+                            }}
+                          >
+                            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+                            <i
+                              title={`Open ${inUrl.url}`}
+                              className="fas fa-external-link-alt"
+                            />
+                          </a>
+                          {inUrl?.url?.startsWith('file:') ? (
+                            <span>
+                              &nbsp;
+                              <a href={inUrl.url}>
+                                <i
+                                  title={`Drag ${inUrl.url}`}
+                                  className="fa fa-hand-rock"
+                                />
+                              </a>
+                            </span>
+                          ) : (
+                            ''
+                          )}
+                          {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+                        </span>
+                      ))}
+                    </td>
+                    <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
+                    <td>
+                      {distnet.cache[uriSource.id]
+                        ? distnet.cache[uriSource.id].updatedDate.replace(
+                            'T',
+                            ' '
+                          )
+                        : '(none)'}
                     </td>
                     <td>
                       <span title={needsReviewTitle}>{needsReviewStr}</span>
@@ -234,53 +281,6 @@ export default function Distnet(options: AppInfo) {
                         />
                       )}
                       {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
-                    </td>
-                    <td>
-                      {distnet.cache[uriSource.id]
-                        ? distnet.cache[uriSource.id].updatedDate.replace(
-                            'T',
-                            ' '
-                          )
-                        : '(none)'}
-                    </td>
-                    <td>
-                      {R.prepend(
-                        { url: uriSource.workUrl },
-                        uriSource.urls || []
-                      ).map((inUrl) => (
-                        <span key={inUrl && inUrl.url}>
-                          {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                          &nbsp;
-                          <a
-                            href="#"
-                            key={inUrl && inUrl.url}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              electron.shell.openExternal(inUrl.url);
-                            }}
-                          >
-                            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                            <i
-                              title={`Open ${inUrl.url}`}
-                              className="fas fa-external-link-alt"
-                            />
-                          </a>
-                          {inUrl?.url?.startsWith('file:') ? (
-                            <span>
-                              &nbsp;
-                              <a href={inUrl.url}>
-                                <i
-                                  title={`Drag ${inUrl.url}`}
-                                  className="fa fa-hand-rock"
-                                />
-                              </a>
-                            </span>
-                          ) : (
-                            ''
-                          )}
-                          {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-                        </span>
-                      ))}
                     </td>
                   </tr>
                 );
