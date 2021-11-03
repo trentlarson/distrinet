@@ -159,8 +159,6 @@ export default function Distnet(options: AppInfo) {
                 return (
                   <tr key={uriSource.workUrl}>
                     <td>
-                      {uriTools.globalUriScheme(uriSource.id)}
-                      &nbsp;
                       {/* eslint-disable no-new */}
                       {/* eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,jsx-a11y/click-events-have-key-events,jsx-a11y/control-has-associated-label,jsx-a11y/interactive-supports-focus,no-new */}
                       <a
@@ -185,8 +183,13 @@ export default function Distnet(options: AppInfo) {
                           );
                         }}
                       >
-                        <i title="Drag IRI File" className="fa fa-hand-rock" />
+                        <i
+                          title={`Drag IRI File ${uriSource.idFile}`}
+                          className="fa fa-hand-rock"
+                        />
                       </a>
+                      &nbsp;
+                      {uriTools.globalUriScheme(uriSource.id)}
                     </td>
                     <td>
                       {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
