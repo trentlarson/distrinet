@@ -37,7 +37,7 @@ export default function FileDiffPage(props: Record<string, any>) {
         .readFile(histPath, { encoding: 'UTF-8' })
         .then((histContents) => {
           const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-          const thisDiff = dmp.diff_main(workContents, histContents);
+          const thisDiff = dmp.diff_main(histContents, workContents);
           return setDiffHtml(dmp.diff_prettyHtml(thisDiff));
         })
         .catch((e) => {
