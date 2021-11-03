@@ -1,5 +1,8 @@
-import React from 'react';
+import fs from 'fs';
+import * as R from 'ramda';
+import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import url from 'url';
 
@@ -8,18 +11,36 @@ import diff from './diff_match_patch';
 import styles from './Distnet.css';
 import { historyDestFullPath } from './history';
 
+const fsPromises = fs.promises;
+
 export default function FileDiffPage(props: Record<string, any>) {
-  let workPath, histPath;
+  const distnet = useSelector((state: RootState) => state.distnet);
+
+  const [diffHtml, setDiffHtml] = useState('');
+
   const { location } = props;
   if (location && location.search) {
     const params: URLSearchParams = new URLSearchParams(location.search);
     const workUrl = params.get('workUrl');
-    workPath = url.fileURLToPath(workUrl);
-    histPath = historyDestFullPath(workUrl);
+    const workPath = url.fileURLToPath(workUrl);
+    const histPath = historyDestFullPath(workUrl);
+
+    const source = R.find(
+      (s) => s.workUrl === workUrl,
+      distnet.settings.sources
+    );
+    if (source) {
+      const workContents = distnet.cache[source.id].contents;
+
+      fsPromises.readFile(histPath, { encoding: 'UTF-8' })
+      .then((histContents) => {
+        const Diff = new diff.diff_match_patch();
+        const thisDiff = Diff.diff_main(workContents, histContents);
+        setDiffHtml(Diff.diff_prettyHtml(thisDiff));
+      });
+    }
   }
 
-  const Diff = new diff.diff_match_patch();
-  const thisDiff = Diff.diff_main(workPath, histPath);
   return (
     <div>
       <div className={styles.backButton} data-tid="backButton">
@@ -34,7 +55,9 @@ export default function FileDiffPage(props: Record<string, any>) {
         <h2>Changes</h2>
         <br />
         <div style={{ backgroundColor: '#000000' }}>
-          { ReactHtmlParser(Diff.diff_prettyHtml(thisDiff)) }
+          <pre>
+            { ReactHtmlParser(diffHtml) }
+          </pre>
         </div>
       </div>
     </div>
