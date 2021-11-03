@@ -12,9 +12,6 @@ tasks :
       - check size & make tracking optional (to save space)
     - when parsing, ensure IRIs are unique
     - when a *.iri diff is detected, make sure there are big warnings
-    - add a column to show if there's a difference from last seen
-    - add a button to update the most recent (ie. mark as seen)
-    - add a diff function for history
     - for git - look at the origin(s?)
 
   - 1 define a place for backups, including settings.yml
