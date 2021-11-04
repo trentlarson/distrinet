@@ -305,13 +305,10 @@ export const dispatchToggleShowDir = (
 };
 
 const FILE_EXTENSIONS_FOR_SEARCH = [
-  '.doc',
-  '.docx',
   '.htm',
   '.html',
   '.json',
   '.md',
-  '.odt',
   '.txt',
   '.xml',
 ];
