@@ -1,8 +1,4 @@
-/**
- * Structures for the URI mappings
- *
- * Spec: https://w3c.github.io/did-core
- * */
+export const APP_NAME = 'dist-task-lists';
 
 /**
  * This is the main object stored into the state with the name 'distnet'.
@@ -44,6 +40,9 @@ export interface SourceInternal extends SourceForStorage {
 }
 
 /** not yet ready
+
+// Spec: https://w3c.github.io/did-core
+
 interface DidDoc {
   // This is for the '@context'
   didDocContext: DidDocContext;
@@ -55,7 +54,8 @@ interface DidDoc {
 enum DidDocContext {
   V1 = 'https://www.w3.org/ns/did/v1',
 }
-*/
+
+* */
 
 export interface UrlData {
   url: string;
@@ -139,5 +139,3 @@ export interface Payload<T> {
   type: string;
   payload: T;
 }
-
-export const APP_NAME = 'dist-task-lists';

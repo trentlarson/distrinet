@@ -14,14 +14,13 @@ const diff = require('./diff_match_patch.js');
 
 const fsPromises = fs.promises;
 
+type DiffMergePatch = any;
+
 // from https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs
-function diff_lineMode(dmp, text1, text2) {
-  const a = dmp.diff_linesToChars_(text1, text2);
-  const lineText1 = a.chars1;
-  const lineText2 = a.chars2;
-  const lineArray = a.lineArray;
-  const diffs = dmp.diff_main(lineText1, lineText2, false);
-  dmp.diff_charsToLines_(diffs, lineArray);
+function diffLineMode(dmp: DiffMergePatch, text1: string, text2: string) {
+  const a = dmp.diff_linesToChars_(text1, text2); // eslint-disable-line no-underscore-dangle
+  const diffs = dmp.diff_main(a.chars1, a.chars2, false);
+  dmp.diff_charsToLines_(diffs, a.lineArray); // eslint-disable-line no-underscore-dangle
   return diffs;
 }
 
@@ -46,16 +45,20 @@ export default function FileDiffPage(props: Record<string, any>) {
 
       fsPromises
         .readFile(histPath, { encoding: 'UTF-8' })
-        .then((histContents) => {
+        .then((histContentsBuf) => {
+          const histContents = histContentsBuf.toString();
           const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-          //const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
-          const thisDiff = diff_lineMode(dmp, histContents, workContents);
+          // const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
+          const thisDiff = diffLineMode(dmp, histContents, workContents);
           if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
             // there is only one element and it's unchanged (ie. value 0)
-            setDiffError("There are no differences. (Your new copy just has a more recent time on it.)");
+            setDiffError(
+              'There are no differences. (Your new copy just has a more recent time on it.)'
+            );
           } else {
             setDiffHtml(dmp.diff_prettyHtml(thisDiff));
           }
+          return null; // just for eslint
         })
         .catch((e) => {
           console.log('Got an error reading or diffing the files', e);
