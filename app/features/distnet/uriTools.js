@@ -172,6 +172,7 @@ const path = require('path');
   }
 
   exports.bestGuessAtGoodUriPath = bestGuessAtGoodUriPath;
+  exports.FILE_PROTOCOL = FILE_PROTOCOL;
   exports.findClosestUriForGlobalUri = findClosestUriForGlobalUri;
   exports.isFileOrHttpUri = isFileOrHttpUri;
   exports.isFileUrl = isFileUrl;

@@ -10,6 +10,7 @@ import {
   SettingsInternal,
   SourceInternal,
 } from './distnetClasses';
+import uriTools from './uriTools';
 
 const fsPromises = fs.promises;
 
@@ -64,7 +65,7 @@ export const loadOneSourceContents: (
     index += 1; // because an error before incrementing causes an infinte loop
     try {
       const sourceUrl = new url.URL(sourceUrls[thisIndex]);
-      if (sourceUrl.protocol === 'file:') {
+      if (sourceUrl.protocol === uriTools.FILE_PROTOCOL) {
         console.log(
           '... trying to read file',
           sourceUrl.toString(),
@@ -115,6 +116,7 @@ export const loadOneSourceContents: (
             return null;
           });
       } else {
+        // not a 'file:' protocol
         console.log(
           '... trying to retrieve URL',
           sourceUrl.toString(),

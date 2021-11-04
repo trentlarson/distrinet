@@ -2,14 +2,16 @@ tasks :
 
   - 2 save another local copy of files to track what is most recently seen id:history :
     - multiple files in directories (eg. histories)
-      - create directory (with any name, maybe based on name of the IRI)
-      - copy
-      - check size & make tracking optional (to save space)
+      - change the cache to work off the workUrl
+      - add needsReview boolean to cache somehow
+      - loop through all files, show each with review & diff buttons
+      - make tracking optional (to save space)
+      - remove setSettingsSourceReviewedDate
     - sharing-app-specific functions :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files
       - for git, see `git status` for differences from origin
-    - do a diff from the source (and not from the cached copy)
+    - do a diff from the source (and not from the in-memory cached copy)
     - when parsing, ensure IRIs are unique
     - when a *.iri diff is detected, make sure there are big warnings
     - for git - look at the origin(s?)

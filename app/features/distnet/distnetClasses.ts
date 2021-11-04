@@ -102,7 +102,7 @@ export interface ResourceType {
 /** Cached-file info * */
 
 export interface Cache {
-  [localFile: string]: CacheData; // index is local source file
+  [sourceId: string]: CacheData; // index is source ID (should it be workUrl?)
 }
 
 export interface CacheData {

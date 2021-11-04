@@ -71,8 +71,8 @@ export default function GenealogySettings() {
           Clear ID Mapping Cache
         </button>
         <br />
-        (Note that you can see and copy previous data in the Dev Tools, which
-        you can reveal in the Help page.)
+        (Note that you can see and copy the previous cache contents in the Dev
+        Tools, which you can reveal from the Help page.)
       </div>
     </div>
   );

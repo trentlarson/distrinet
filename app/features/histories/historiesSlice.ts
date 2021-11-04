@@ -304,7 +304,7 @@ export const dispatchToggleShowDir = (
   dispatch(markToggleShowNextLevel(filePath));
 };
 
-const FILE_EXTENSIONS_FOR_SEARCH = [
+export const FILE_EXTENSIONS_FOR_SEARCH = [
   '.htm',
   '.html',
   '.json',

@@ -68,7 +68,7 @@ const distnetSlice = createSlice({
       state.settingsChanged = contents.payload;
     },
     // eslint-disable-next-line max-len,prettier/prettier
-    setSettingsSourceReviewed: (state, contents: Payload<SourceAndReviewedDate>) => {
+    setSettingsSourceReviewedDate: (state, contents: Payload<SourceAndReviewedDate>) => {
       const source = R.find(
         (s) => s.id === contents.payload.source.id,
         state.settings.sources
@@ -121,7 +121,7 @@ const {
   setSettingsChanged,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
-  setSettingsSourceReviewed,
+  setSettingsSourceReviewedDate,
   setSettingsStateObject,
   setSettingsStateText,
 } = distnetSlice.actions;
@@ -280,7 +280,7 @@ export const dispatchReloadReviewed = (): AppThunk => async (
     return retrieveHistoryReviewedDate(source.workUrl).then((dateStr) => {
       if (dateStr) {
         return dispatch(
-          setSettingsSourceReviewed({
+          setSettingsSourceReviewedDate({
             source,
             dateReviewed: dateStr,
           })
@@ -915,7 +915,7 @@ export const dispatchAddReviewedDateToSettings = (
       .copy(srcPath, destPath, { preserveTimestamps: true })
       .then(() => {
         return dispatch(
-          setSettingsSourceReviewed({
+          setSettingsSourceReviewedDate({
             source,
             dateReviewed: new Date().toISOString(),
           })
