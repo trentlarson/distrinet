@@ -14,6 +14,17 @@ const diff = require('./diff_match_patch.js');
 
 const fsPromises = fs.promises;
 
+// from https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs
+function diff_lineMode(dmp, text1, text2) {
+  const a = dmp.diff_linesToChars_(text1, text2);
+  const lineText1 = a.chars1;
+  const lineText2 = a.chars2;
+  const lineArray = a.lineArray;
+  const diffs = dmp.diff_main(lineText1, lineText2, false);
+  dmp.diff_charsToLines_(diffs, lineArray);
+  return diffs;
+}
+
 export default function FileDiffPage(props: Record<string, any>) {
   const distnet = useSelector((state: RootState) => state.distnet);
 
@@ -37,7 +48,8 @@ export default function FileDiffPage(props: Record<string, any>) {
         .readFile(histPath, { encoding: 'UTF-8' })
         .then((histContents) => {
           const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-          const thisDiff = dmp.diff_main(histContents, workContents);
+          //const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
+          const thisDiff = diff_lineMode(dmp, histContents, workContents);
           if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
             // there is only one element and it's unchanged (ie. value 0)
             setDiffError("There are no differences. (Your new copy just has a more recent time on it.)");
