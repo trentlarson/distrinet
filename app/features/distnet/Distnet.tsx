@@ -245,7 +245,7 @@ export default function Distnet(options: AppInfo) {
                     <td>
                       <span title={needsReviewTitle}>{needsReviewStr}</span>
                       &nbsp;
-                      {!needsReview ? (
+                      {!needsReview || R.isNil(uriSource.dateReviewed) ? (
                         ''
                       ) : (
                         <Link
