@@ -1,12 +1,16 @@
 tasks :
 
   - 2 save another local copy of files to track what is most recently seen id:history :
+    - add acked date, saved when source changes were last acknowledged
+    - change dateReviewed to be file-based
     - multiple files in directories (eg. histories)
-      - change the cache to work off the workUrl
-      - add needsReview boolean to cache somehow
+      - change the cache to work off the workUrl? (if not, should make non-workUrls read-only?)
+        - remove setSettingsSourceReviewedDate
+        - remove setFileNeedsReview?
+        - don't make dispatchSetSettingsTextAndYaml reload all, especially inside 'modify'
+        - merge dispatchReloadReviewed with convertSourceToInternalFromStorage
       - loop through all files, show each with review & diff buttons
       - make tracking optional (to save space)
-      - remove setSettingsSourceReviewedDate
     - sharing-app-specific functions :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files
@@ -26,7 +30,8 @@ tasks :
     - add a legend (green=insert, red=delete)
 
   - 1 rename the "urls" arrays to "moreUrls" type:tech-cleanup :
-    - migrate existing settings for current users
+    - migrate existing settings for current users - Mom, Janell, Matt?
+  - 0 add option for a single notification for all sources (instead of one for each)
   - -1 make so the IRI column in settings shows (none) & doesn't allow copy when it's blank
 
   - 2 rename the internal variables type:tech-cleanup

@@ -4,12 +4,13 @@ export const APP_NAME = 'dist-task-lists';
  * This is the main object stored into the state with the name 'distnet'.
  * */
 export interface DistnetState {
+  fileCache: FileCache;
   settings: SettingsInternal;
   settingsChanged: boolean;
   settingsErrorMessage: string | null;
   settingsText: string | null;
   settingsSaveErrorMessage: string | null;
-  cache: Cache;
+  cache: Cache; // cache for source info
   cacheErrorMessage: string | null;
 }
 
@@ -20,11 +21,14 @@ export interface SettingsForStorage {
   credentials: Array<Credential>;
 }
 
+// If you change this, remember to change: convertSourceToInternalFromStorage, convertSourceToStorageFromInternal
 export interface SourceForStorage {
   name?: string;
   type?: string; // type of transfer/storage/sharing
   urls?: Array<UrlData>;
   workUrl: string;
+  // most recent date of changes that were acknowledged by the user, ISO-formatted
+  changesAckedDate: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 // Full Settings, built in memory
@@ -32,11 +36,14 @@ export interface SettingsInternal extends SettingsForStorage {
   sources: Array<SourceInternal>;
 }
 
+// If you change this, remember to change: convertSourceToInternalFromStorage, convertSourceToStorageFromInternal
 export interface SourceInternal extends SourceForStorage {
-  id: string;
-  idFile: string; // a file path (which the UI often renders as a "file:" URL, probably when it's in an href)
   // date of the file when most recently reviewed, ISO-formatted
   dateReviewed?: string; // this is a string so that it can be serialized, eg. into the Redux state
+  id: string;
+  idFile: string; // a file path (which the UI often renders as a "file:" URL, probably when it's in an href)
+  // whether there are changes since the changesAckedDate
+  notifyChanged?: boolean;
 }
 
 /** not yet ready
@@ -99,19 +106,19 @@ export interface ResourceType {
   executablePath: string;
 }
 
-/** Cached-file info * */
+/** Cached-file info for each source * */
 
 export interface Cache {
-  [sourceId: string]: CacheData; // index is source ID (should it be workUrl?)
+  [sourceId: string]: CacheData;
 }
 
 export interface CacheData {
+  contents: string;
+  // local path (not URL, ie without "file://")
+  localFile: string;
   sourceId: string;
   // whichever URL was used as the source
   sourceUrl: string;
-  // local path (not URL, ie without "file://")
-  localFile: string;
-  contents: string;
   // ISO-formatted date the local copy on disk was updated (when last checked)
   // (There's a possibility that it has been updated since it was checked.)
   updatedDate: string; // this is a string so that it can be serialized, eg. into the Redux state

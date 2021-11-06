@@ -15,22 +15,28 @@ export const historyDestFullPath = (workUrl: string) => {
 };
 
 /**
- return Promise of string of ISO time of file mtime, or null on error
+ return Promise of string of ISO of mtime for file, or null on error
  * */
-export const retrieveHistoryReviewedDate = async (workUrl: string) => {
-  const historyFile = historyDestFullPath(workUrl);
+export const retrieveFileMtime = async (filePath: string) => {
   return fsPromises
-    .stat(historyFile)
+    .stat(filePath)
     .then((stats) => {
       return stats.mtime.toISOString();
     })
     .catch((err) => {
       console.log(
-        'Failed to determine history for file',
-        historyFile.toString(),
+        'Failed to determine mtime for file',
+        filePath.toString(),
         'because',
         err
       );
       return null;
     });
+}
+
+/**
+ return Promise of string of ISO of mtime for history file for workUrl, or null on error
+ * */
+export const retrieveHistoryReviewedDate = async (workUrl: string) => {
+  return retrieveFileMtime(historyDestFullPath(workUrl));
 };

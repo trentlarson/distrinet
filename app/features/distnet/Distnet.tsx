@@ -20,9 +20,10 @@ import {
   dispatchModifySettings,
   dispatchReloadCacheForAll,
   dispatchSaveSettingsTextToFileAndResetObject,
+  dispatchSetChangesAckedAndSave,
   dispatchSetSettingsTextAndYaml,
-  generateKeyAndSet,
   dispatchSetSettingsText,
+  generateKeyAndSet,
   testSettingsYamlText,
 } from './distnetSlice';
 import uriTools from './uriTools';
@@ -89,12 +90,31 @@ export default function Distnet(options: AppInfo) {
         <Link to={routes.HOME}>
           <i className="fa fa-arrow-left fa-3x" />
         </Link>
-        <h2>Settings</h2>
       </div>
 
       <div className={styles.content}>
-        <br />
-        <br />
+        <h2>Settings</h2>
+
+        <div>
+          {R.filter((source) => source.notifyChanged, distnet.settings.sources)
+           .map((source: SourceInternal) =>
+             <span key={source.id}>
+               <button
+                 type="button"
+                 style={{ borderRadius: '8px' }}
+                 onClick={() => {
+                   dispatch(dispatchSetChangesAckedAndSave(source.id));
+                 }}
+               >
+                 There are changes for your review in&nbsp;
+                 {source.name}
+                 &nbsp;<span className="fas fa-thumbs-up" />
+               </button>
+               <br />
+             </span>
+          )}
+        </div>
+
         {!distnet.settingsErrorMessage &&
         distnet.settings.sources.length > 0 ? (
           <table>
@@ -301,8 +321,8 @@ export default function Distnet(options: AppInfo) {
           <h2>Advanced</h2>
           <br />
           <br />
-          <br />
           Config file contents:
+          <br />
           <textarea
             rows={10}
             cols={80}
@@ -364,6 +384,7 @@ export default function Distnet(options: AppInfo) {
         <div>
           <button
             type="button"
+            style={{ borderRadius: '8px' }}
             onClick={() => {
               if (distnet.settingsChanged) {
                 alert(
@@ -376,9 +397,10 @@ export default function Distnet(options: AppInfo) {
           >
             Add Distrinet Project Source
           </button>
-          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <button
             type="button"
+            style={{ borderRadius: '8px' }}
             onClick={() => {
               if (distnet.settingsChanged) {
                 alert(
@@ -396,6 +418,7 @@ export default function Distnet(options: AppInfo) {
           >
             Reset to Test Settings
           </button>
+          <br />
           <br />
           <button
             className="generateKeyButton"
@@ -439,8 +462,9 @@ export default function Distnet(options: AppInfo) {
           >
             Generate Key, encrypted with password:
           </button>
+          &nbsp;
           <input
-            size={15}
+            size={13}
             type="text"
             value={keyPassword}
             onChange={(e) => setKeyPassword(e.target.value)}

@@ -4,6 +4,7 @@ import electron from 'electron';
 import fsExtra from 'fs-extra';
 import yaml from 'js-yaml';
 import _ from 'lodash';
+import { DateTime } from 'luxon';
 import path from 'path';
 import * as R from 'ramda';
 import url from 'url';
@@ -29,7 +30,11 @@ import {
   SourceForStorage,
   SourceInternal,
 } from './distnetClasses';
-import { historyDestFullPath, retrieveHistoryReviewedDate } from './history';
+import {
+  historyDestFullPath,
+  retrieveFileMtime,
+  retrieveHistoryReviewedDate,
+} from './history';
 import {
   ErrorResult,
   isErrorResult,
@@ -58,12 +63,30 @@ const distnetSlice = createSlice({
     settingsErrorMessage: null,
     settingsText: null,
     settingsSaveErrorMessage: null,
+    fileCache: {},
     cache: {},
     cacheErrorMessage: null,
   } as DistnetState,
   reducers: {
     // settings
 
+    // payload is the source ID on which changes were acked
+    setChangesAckedDate: (state, contents: Payload<string>) => {
+      const source = R.find(
+        (s) => s.id === contents.payload,
+        state.settings.sources
+      );
+      source.changesAckedDate = new Date().toISOString();
+      source.notifyChanged = false;
+    },
+    // payload is the source ID which has changes of which we need to notify the user
+    setNotifySourceChanged: (state, contents: Payload<string>) => {
+      const source = R.find(
+        (s) => s.id === contents.payload,
+        state.settings.sources
+      );
+      source.notifyChanged = true;
+    },
     setSettingsChanged: (state, contents: Payload<boolean>) => {
       state.settingsChanged = contents.payload;
     },
@@ -118,6 +141,8 @@ const {
   setCachedStateForAll,
   setCachedStateForOne,
   setCacheErrorMessage,
+  setChangesAckedDate,
+  setNotifySourceChanged,
   setSettingsChanged,
   setSettingsErrorMessage,
   setSettingsSaveErrorMessage,
@@ -276,7 +301,19 @@ export const dispatchReloadReviewed = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  return R.map((source) => {
+  const unacked = R.map((source) => {
+    return retrieveFileMtime(url.fileURLToPath(source.workUrl))
+    .then((date) => {
+      if (!source.changesAckedDate ||
+          DateTime.fromISO(date) > DateTime.fromISO(source.changesAckedDate)) {
+        return dispatch(
+          setNotifySourceChanged(source.id)
+        );
+      }
+      return null;
+    });
+  }, getState().distnet.settings.sources);
+  const reviewed = R.map((source) => {
     return retrieveHistoryReviewedDate(source.workUrl).then((dateStr) => {
       if (dateStr) {
         return dispatch(
@@ -289,6 +326,28 @@ export const dispatchReloadReviewed = (): AppThunk => async (
       return null;
     });
   }, getState().distnet.settings.sources);
+  return R.concat(unacked, reviewed);
+};
+
+export const dispatchSetChangesAckedAndSave = (sourceId: string): AppThunk => async (
+  dispatch,
+  getState
+) => {
+  await dispatch(setChangesAckedDate(sourceId));
+
+  const settingsForStorage = convertSettingsToStorageFromInternal(
+    getState().distnet.settings
+  );
+  const settingsYaml: string = yaml.safeDump(settingsForStorage);
+  dispatch(setSettingsStateText(settingsYaml));
+
+  // settingsText is a non-empty string
+  const result = await saveSettingsToFile(settingsYaml);
+  if (result && result.error) {
+    dispatch(setSettingsSaveErrorMessage(result.error));
+  } else {
+    dispatch(setSettingsSaveErrorMessage(null));
+  }
 };
 
 export const dispatchReloadCacheForAll = (): AppThunk => async (
@@ -319,10 +378,16 @@ const convertSourceToInternalFromStorage = async (
 ): Promise<SourceInternal> => {
   const { iri, iriFile } = await readIriFromWellKnownDir(storSource.workUrl);
   const finalIri = iri || storSource.workUrl;
+  const mtime = await retrieveFileMtime(url.fileURLToPath(storSource.workUrl));
+  const notifyChanged = !storSource.changesAckedDate ||
+    DateTime.fromISO(mtime) > DateTime.fromISO(storSource.changesAckedDate);
+  const dateReviewed = await retrieveHistoryReviewedDate(storSource.workUrl);
   const sourceInt: SourceInternal = {
     ...storSource,
     id: finalIri,
     idFile: iriFile,
+    notifyChanged,
+    dateReviewed
   };
   return sourceInt;
 };
@@ -349,7 +414,7 @@ const convertSettingsToInternalFromStorage = async (
 const convertSourceToStorageFromInternal = (
   source: SourceInternal
 ): SourceForStorage => {
-  return R.omit(['id', 'idFile'], source);
+  return R.omit(['dateReviewed', 'id', 'idFile', 'notifyChanged'], source);
 };
 
 const convertSettingsToStorageFromInternal = (
@@ -828,6 +893,7 @@ const setupLocalIri = async (
     idFile: iriFile,
     name,
     workUrl,
+    changeNotifyDate: new Date().toISOString(),
   };
   return newSource;
 };
