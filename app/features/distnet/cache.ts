@@ -128,183 +128,106 @@ export const loadOneSourceContents: (
   source: SourceInternal,
   cacheDir: string
 ) => {
-  let cacheInfo: CacheData | null = null;
+  console.log('Trying to cache', source.workUrl, ' in memory...');
 
-  let index = 0;
-  const sourceUrls = R.prepend(
-    source.workUrl,
-    (source.urls || []).map(R.prop('url'))
-  );
-  console.log('Trying to retrieve URLs', sourceUrls, 'for caching...');
+  const sourceUrl = new url.URL(source.workUrl);
+  if (sourceUrl.protocol === uriTools.FILE_PROTOCOL) {
 
-  while (!cacheInfo && index < sourceUrls.length) {
-    const thisIndex = index;
-    index += 1; // because an error before incrementing causes an infinte loop
-    try {
-      const sourceUrl = new url.URL(sourceUrls[thisIndex]);
-      if (sourceUrl.protocol === uriTools.FILE_PROTOCOL) {
-        console.log(
-          '... trying to read file',
-          sourceUrl.toString(),
-          'for caching...'
+    const sourcePath: string = url.fileURLToPath(sourceUrl);
+    return fsPromises
+      .stat(sourcePath)
+      .then((stats) => {
+        if (stats.isFile()) {
+          return fsPromises
+            // without the encoding, readFile returns a Buffer
+            .readFile(sourcePath, { encoding: 'utf8' })
+            .then((contents: string) => {
+              return {
+                sourceId: source.id,
+                sourceUrl: sourceUrl.toString(),
+                localFile: sourcePath,
+                contents,
+                fileCache: [],
+                updatedDate: stats.mtime.toISOString(),
+              } as CacheData;
+            })
+            .catch((err) => {
+              console.log('... failed to read file', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len
+              return null;
+            });
+        } else if (stats.isDirectory()) {
+          return loadSearchableChangedFiles(sourceUrl.toString())
+            .then((fullFileCache: Array<ChangedFile | null>) => {
+              const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
+              return {
+                sourceId: source.id,
+                sourceUrl: sourceUrl.toString(),
+                localFile: sourcePath,
+                contents: undefined,
+                fileCache,
+                updatedDate: stats.mtime.toISOString(),
+              } as CacheData;
+            })
+            .catch((err) => {
+              console.log('... failed to read files inside', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len
+              return null;
+            });
+        } else {
+          console.log('Found non-file non-dir ' + sourceUrl);
+          return null;
+        }
+      })
+      .catch((err) => { // couldn't stat the file
+        console.log('... failed to find file stats for', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len
+        return null;
+      });
+  } else {
+    // not a 'file:' protocol
+    return fetch(sourceUrl.toString())
+      .then((response: Response) => {
+        if (!response.ok) {
+          console.log(`Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${response.status}`); // eslint-disable-line max-len
+          return null;
+        }
+        const cacheFile: string = path.join(
+          cacheDir || DEFAULT_CACHE_DIR,
+          sourceIdToFilename(source.id)
         );
+        console.log('... successfully retrieved URL', sourceUrl.toString(), 'response, so will write that to a local cache file', cacheFile); // eslint-disable-line max-len
 
-        const sourcePath = url.fileURLToPath(sourceUrl);
-        await fsPromises
-          .stat(sourcePath)
-          .then((stats) => {
-            if (stats.isFile()) {
-              // eslint-disable-next-line no-await-in-loop
-              return fsPromises
-                // without the encoding, readFile returns a Buffer
-                .readFile(sourcePath, { encoding: 'utf8' })
-                .then((contents) => {
-                  cacheInfo = {
-                    sourceId: source.id,
-                    sourceUrl: sourceUrl.toString(),
-                    localFile: sourcePath,
-                    contents,
-                    fileCache: [],
-                    updatedDate: stats.mtime.toISOString(),
-                  };
-                })
-                // eslint-disable-next-line no-loop-func
-                .catch((err) => {
-                  console.log(
-                    '... failed to read file',
-                    sourceUrl.toString(),
-                    'for caching because',
-                    err
-                  );
-                });
-            } else if (stats.isDirectory()) {
-              return loadSearchableChangedFiles(sourceUrl.toString())
-                .then((fullFileCache) => {
-                  cacheInfo = {
-                    sourceId: source.id,
-                    sourceUrl: sourceUrl.toString(),
-                    localFile: sourcePath,
-                    contents: undefined,
-                    fileCache: removeNulls(fullFileCache),
-                    updatedDate: stats.mtime.toISOString(),
-                  };
-                })
-                .catch((err) => {
-                  console.log(
-                    '... failed to read files inside',
-                    sourceUrl.toString(),
-                    'because',
-                    err
-                  );
-                });
-            } else {
-              throw 'Found non-file non-dir ' + sourceUrl;
-            }
+        let contents: string;
+        return fsPromises
+          .unlink(cacheFile)
+          .catch(() => {
+            // we're fine if it doesn't exit
+          })
+          .then(() => {
+            return response.text(); // we're assuming the file is not binary (see task read-binary)
+          })
+          .then((data: string) => {
+            contents = data;
+            return fsPromises.writeFile(cacheFile, contents);
+          })
+          .then(() => {
+            return {
+              sourceId: source.id,
+              sourceUrl: sourceUrl.toString(),
+              localFile: cacheFile,
+              contents,
+              fileCache: [],
+              updatedDate: new Date().toISOString(),
+            } as CacheData;
           })
           .catch((err) => {
-            // couldn't stat the file
-            console.log(
-              '... failed to find file stats for',
-              sourceUrl.toString(),
-              'for caching because',
-              err
-            );
+            console.log('... failed to cache URL', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len
+            return null;
           });
-      } else {
-        // not a 'file:' protocol
-        console.log(
-          '... trying to retrieve URL',
-          sourceUrl.toString(),
-          ' for caching...'
-        );
-        // eslint-disable-next-line no-await-in-loop
-        await fetch(sourceUrl.toString())
-          // eslint-disable-next-line no-loop-func
-          .then((response: Response) => {
-            if (!response.ok) {
-              throw Error(
-                `Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${
-                  response.status
-                }`
-              );
-            }
-            const cacheFile = path.join(
-              cacheDir || DEFAULT_CACHE_DIR,
-              sourceIdToFilename(source.id)
-            );
-            console.log(
-              '... successfully retrieved URL',
-              sourceUrl.toString(),
-              'response, so will write that to a local cache file',
-              cacheFile
-            );
-
-            let contents: string;
-            // eslint-disable-next-line promise/no-nesting
-            return fsPromises
-              .unlink(cacheFile)
-              .catch(() => {
-                // we're fine if it doesn't exit
-              })
-              .then(() => {
-                return response.text(); // we're assuming the file is not binary (see task read-binary)
-              })
-              .then((data: string) => {
-                contents = data;
-                return fsPromises.writeFile(cacheFile, contents);
-              })
-              .then(() => {
-                cacheInfo = {
-                  sourceId: source.id,
-                  sourceUrl: sourceUrl.toString(),
-                  localFile: cacheFile,
-                  contents,
-                  fileCache: [],
-                  updatedDate: new Date().toISOString(),
-                };
-              })
-              .catch((err) => {
-                console.log(
-                  '... failed to cache URL',
-                  sourceUrl.toString(),
-                  'because',
-                  err
-                );
-              });
-          })
-          // eslint-disable-next-line no-loop-func
-          .catch((err) => {
-            console.log(
-              '... failed to retrieve URL',
-              sourceUrl.toString(),
-              'and cache because',
-              err
-            );
-          });
-      }
-    } catch (e) {
-      // probably a TypeError for a bad URL (including null or blank URLs)
-      console.log(
-        'Failed to retrieve and cache URL',
-        sourceUrls[thisIndex],
-        'in source',
-        source,
-        e
-      );
-    }
+      })
+      .catch((err) => {
+        console.log('... failed to retrieve URL', sourceUrl.toString(), 'and cache because', err); // eslint-disable-line max-len
+        return null;
+      });
   }
-  if (cacheInfo != null) {
-    console.log(
-      `Successfully retrieved ${cacheInfo.sourceUrl} and cached at ${cacheInfo.localFile}`
-    );
-    return cacheInfo;
-  }
-  console.log(
-    'Failed to retrieve and cache file for',
-    source,
-    '. This is expected if it is a directory.'
-  );
-  return null;
 };
 
 const loadOneOfTheSources: (
