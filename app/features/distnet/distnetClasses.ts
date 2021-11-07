@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+import * as R from 'ramda';
+
 export const APP_NAME = 'dist-task-lists';
 
 /**
@@ -160,3 +164,73 @@ export interface Payload<T> {
   type: string;
   payload: T;
 }
+
+
+
+/** Other * */
+
+export const FILE_EXTENSIONS_FOR_HISTORY = [
+  '.gedcom',
+  '.gedcomx',
+  '.htm',
+  '.html',
+  '.json',
+  '.md',
+  '.txt',
+  '.xml',
+  '.yml',
+  '.yaml',
+];
+
+const FILE_REGEXP_STRINGS_FOR_HISTORY = R.map(
+  (name) => `${name.replace('.', '\\.')}$`,
+  FILE_EXTENSIONS_FOR_HISTORY
+);
+
+const FILE_REGEXPS_FOR_HISTORY = R.map(
+  (rexpStr) => new RegExp(rexpStr, 'i'),
+  FILE_REGEXP_STRINGS_FOR_HISTORY
+);
+
+const HISTORY_EXTENSION_TESTER = R.anyPass(
+  R.map((regexp) => (str: string) => regexp.test(str), FILE_REGEXPS_FOR_HISTORY)
+);
+
+export function keepHistory(filename: string): boolean {
+console.log('checking filename', filename, HISTORY_EXTENSION_TESTER(filename))
+  return HISTORY_EXTENSION_TESTER(filename);
+}
+
+export async function keepHistoryWhileCopying(
+  filename: string
+): Promise<boolean> {
+  return fs.promises.stat(filename)
+    .then((stats) => stats.isDirectory() || HISTORY_EXTENSION_TESTER(filename));
+}
+
+/** unused
+ *
+
+export const FILE_EXTENSIONS_FOR_DIFFS = FILE_EXTENSIONS_FOR_HISTORY;
+
+const FILE_REGEXP_STRINGS_FOR_DIFFS = R.map(
+  (name) => `${name.replace('.', '\\.')}$`,
+  FILE_EXTENSIONS_FOR_DIFFS
+);
+
+const FILE_REGEXPS_FOR_DIFFS = R.map(
+  (rexpStr) => new RegExp(rexpStr, 'i'),
+  FILE_REGEXP_STRINGS_FOR_DIFFS
+);
+
+const DIFF_EXTENSION_TESTER = R.anyPass(
+  R.map((regexp) => (str: string) => regexp.test(str), FILE_REGEXPS_FOR_DIFFS)
+);
+
+export function isDiffable(filename: string): boolean {
+  return DIFF_EXTENSION_TESTER(filename);
+}
+
+ *
+ */
+

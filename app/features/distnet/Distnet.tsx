@@ -10,7 +10,7 @@ import url from 'url';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 
-import { SourceInternal } from './distnetClasses';
+import { FILE_EXTENSIONS_FOR_HISTORY, SourceInternal } from './distnetClasses';
 import styles from './Distnet.css';
 import { SETTINGS_FILE } from './settings';
 import {
@@ -178,7 +178,7 @@ export default function Distnet(options: AppInfo) {
                   ? 'Current Date for Source is Unknown'
                   : R.isNil(uriSource.dateReviewed)
                     ? 'Never Reviewed'
-                    : `Reviewed ${uriSource.dateReviewed.replace('T', ' ')}`;
+                    : `Reviewed ${uriSource.dateReviewed.replace('T', ' ').replace('Z', ' UTC')}`;
                 /* eslint-enable no-nested-ternary,prettier/prettier */
 
                 return (
@@ -261,10 +261,7 @@ export default function Distnet(options: AppInfo) {
                     <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                     <td>
                       {distnet.cache[uriSource.id]
-                        ? distnet.cache[uriSource.id].updatedDate.replace(
-                            'T',
-                            ' '
-                          )
+                        ? `${distnet.cache[uriSource.id].updatedDate.replace('T', ' ').replace('Z', ' UTC')}`
                         : '(none)'}
                     </td>
                     <td>
@@ -338,6 +335,12 @@ export default function Distnet(options: AppInfo) {
           <span />
         )}
         <div>{cacheErrorMessage}</div>
+        <div>
+          <br />
+          <br />
+          Note that this only keeps historical copies of files with these extensions:&nbsp;
+          {FILE_EXTENSIONS_FOR_HISTORY.join(' ')}
+        </div>
         <div>
           <br />
           <br />

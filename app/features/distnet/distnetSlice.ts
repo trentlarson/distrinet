@@ -1,6 +1,7 @@
 import bs58 from 'bs58';
 import nodeCrypto, { KeyObject } from 'crypto';
 import electron from 'electron';
+import fs from 'fs';
 import fsExtra from 'fs-extra';
 import yaml from 'js-yaml';
 import _ from 'lodash';
@@ -24,6 +25,7 @@ import {
   CacheData,
   CredentialType,
   DistnetState,
+  keepHistoryWhileCopying,
   Payload,
   ResourceType,
   SettingsForStorage,
@@ -32,7 +34,7 @@ import {
   SourceInternal,
 } from './distnetClasses';
 import {
-  historyDestFullPathFromUrl,
+  historyDestFullPathFromPath,
   retrieveFileMtime,
   retrieveHistoryReviewedDate,
 } from './history';
@@ -112,6 +114,9 @@ const distnetSlice = createSlice({
       );
       if (source) {
         source.dateReviewed = contents.payload.dateReviewed;
+        source.notifyChanged = false;
+        // I considered setting changesAckedDate here but that should be done some level above because that setting needs to be persisted to disk.
+        state.cache[contents.payload.source.id].fileCache = [];
       }
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
@@ -953,7 +958,7 @@ const dispatchBuildSourceAndAddToSettings = (
     getState().distnet.settings.sources
   );
   if (isErrorResult(newSource)) {
-    throw Error(newSource.error);
+    throw newSource.error;
   } else {
     return dispatch(dispatchAddSourceToSettings(newSource));
   }
@@ -984,9 +989,16 @@ export const dispatchAddReviewedDateToSettings = (
   );
   if (source) {
     const srcPath = url.fileURLToPath(source.workUrl);
-    const destPath = historyDestFullPathFromUrl(source.workUrl);
+    const destPath = historyDestFullPathFromPath(srcPath);
     return fsExtra
-      .copy(srcPath, destPath, { preserveTimestamps: true })
+      .copy(
+        srcPath,
+        destPath,
+        { preserveTimestamps: true, filter: keepHistoryWhileCopying }
+      )
+      .then(() => {
+        return fs.promises.utimes(destPath, new Date(), new Date());
+      })
       .then(() => {
         return dispatch(
           setSettingsSourceReviewedDate({

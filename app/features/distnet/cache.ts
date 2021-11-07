@@ -10,6 +10,7 @@ import {
   ChangedFile,
   SettingsInternal,
   SourceInternal,
+  keepHistory,
 } from './distnetClasses';
 import { historyDestFullPathFromPath } from './history';
 import uriTools from './uriTools';
@@ -72,8 +73,8 @@ const loadSearchableChangedFilesPathed: (
     await fsPromises.readdir(newFilePath, { withFileTypes: true });
 
   const changedFiles = contents.map(async (dirent) => {
-    const newRelativePath = path.join(relativePath, dirent.name);
-    if (dirent.isFile()) {
+    const newRelativePath = path.join(relativePath, dirent.name.toString());
+    if (dirent.isFile() && keepHistory(dirent.name.toString())) {
       // eslint-disable-next-line prettier/prettier
       const stats =
         await fsPromises.stat(path.join(sourcePath, newRelativePath));
