@@ -1,5 +1,6 @@
 {
   "HOME": "/",
+  "DIRECTORY_DIFF": "/dir-diff",
   "COUNTER": "/counter",
   "FILE_DIFF": "/file-diff",
   "DISTNET": "/distnet",

@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import * as R from 'ramda';
 import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
@@ -8,7 +9,7 @@ import { Link } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import styles from './Distnet.css';
-import { historyDestFullPathFromUrl } from './history';
+import { historyDestFullPathFromPaths, historyDestFullPathFromUrl } from './history';
 
 const diff = require('./diff_match_patch.js');
 
@@ -34,39 +35,70 @@ export default function FileDiffPage(props: Record<string, any>) {
   if (location && location.search) {
     const params: URLSearchParams = new URLSearchParams(location.search);
     const workUrl = params.get('workUrl');
+    const workPath = params.get('workPath');
+    const relativePath = params.get('relativePath');
 
     const source = R.find(
       (s) => s.workUrl === workUrl,
       distnet.settings.sources
     );
-    if (workUrl && source) {
-      const histPath = historyDestFullPathFromUrl(workUrl);
-      const workContents = distnet.cache[source.id].contents;
-      if (workContents == null) {
-        setDiffError('There are no file contents to compare.');
-      } else {
-        fsPromises
-          .readFile(histPath, { encoding: 'UTF-8' })
-          .then((histContentsBuf) => {
-            const histContents = histContentsBuf.toString();
-            const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-            // const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
-            const thisDiff = diffLineMode(dmp, histContents, workContents);
-            if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
-              // there is only one element and it's unchanged (ie. value 0)
-              setDiffError(
-                'There are no differences. (Your new copy just has a more recent time on it.)'
-              );
-            } else {
-              setDiffHtml(dmp.diff_prettyHtml(thisDiff));
-            }
-            return null; // just for eslint
-          })
-          .catch((e) => {
-            console.log('Got an error reading or diffing the files', e);
-            setDiffError('Got an error reading or diffing the files.');
-          });
-      }
+    let workContents, histPath;
+    if (workUrl != null && source != null) {
+      histPath = historyDestFullPathFromUrl(workUrl);
+      workContents = new Promise((resolve) => resolve(distnet.cache[source.id].contents));
+    }
+    if (workPath != null && relativePath != null) {
+      histPath = historyDestFullPathFromPaths(workPath, relativePath);
+      const workFile = path.join(workPath, relativePath);
+      workContents = fsPromises
+        .readFile(workFile, { encoding: 'UTF-8' })
+        .then((workContentsBuf) => {
+          return workContentsBuf.toString();
+        })
+        .catch((e) => {
+          console.log('Got an error reading or diffing the files', e);
+          setDiffError('Got an error reading or diffing the files.');
+        });
+    }
+
+    if (workContents) {
+      workContents.then((contents) => {
+        if (contents == null) {
+          setDiffError('There are no file contents to compare.');
+        } else {
+          fsPromises
+            .readFile(histPath, { encoding: 'UTF-8' })
+            .then((histContentsBuf) => {
+              const histContents = histContentsBuf.toString();
+              const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
+              // const thisDiff = dmp.diff_main(histContents, contents); // character-oriented
+              const thisDiff = diffLineMode(dmp, histContents, contents);
+              if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
+                // there is only one element and it's unchanged (ie. value 0)
+                setDiffError(
+                  'There are no differences. (Your new copy just has a more recent time on it.)'
+                );
+              } else {
+                setDiffHtml(dmp.diff_prettyHtml(thisDiff));
+                if (histContents === '') {
+                  setDiffError('The historical version is empty.');
+                }
+                if (workContents === '') {
+                  setDiffError('The current version is empty.');
+                }
+              }
+              return null; // just for eslint
+            })
+            .catch((err) => {
+              if (err.message && err.message.startsWith('ENOENT')) { // it doesn't exist
+                setDiffError('There is no historical copy of this file.');
+              } else {
+                console.log('Got an error reading or diffing the files', e);
+                setDiffError('Got an error reading or diffing the files.');
+              }
+            });
+        }
+      });
     }
   }
 
@@ -81,7 +113,7 @@ export default function FileDiffPage(props: Record<string, any>) {
         <br />
         <br />
         <br />
-        <h2>Changes</h2>
+        <h2>File Changes</h2>
         <br />
         {diffError}
         <br />

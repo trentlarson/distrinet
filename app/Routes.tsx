@@ -17,6 +17,19 @@ const CounterPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+const LazyDirectoryDiffPage = React.lazy(() =>
+  import(
+    /* webpackChunkName: "DirectoryDiffPage" */ './features/distnet/DirectoryDiffPage'
+  )
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DirectoryDiffPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyDirectoryDiffPage {...props} />
+  </React.Suspense>
+);
+
 const LazyDistnetPage = React.lazy(() =>
   import(/* webpackChunkName: "DistnetPage" */ './features/distnet/DistnetPage')
 );
@@ -122,6 +135,7 @@ export default function Routes() {
     <App>
       <Switch>
         <Route path={routes.COUNTER} component={CounterPage} />
+        <Route path={routes.DIRECTORY_DIFF} component={DirectoryDiffPage} />
         <Route path={routes.DISTNET} component={DistnetPage} />
         <Route path={routes.FILE_DIFF} component={FileDiffPage} />
         <Route path={routes.GENEALOGY} component={GenealogyPage} />

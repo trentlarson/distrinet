@@ -3,6 +3,7 @@ tasks :
   - 2 save another local copy of files to track what is most recently seen id:history :
     - change dateReviewed to be file-based
     - multiple files in directories (eg. histories)
+      - change the DirectoryDiffPage to work off the cache ID
       - change the cache to work off the workUrl? (if not, should make non-workUrls read-only?)
         - remove setSettingsSourceReviewedDate
         - remove setFileNeedsReview?
@@ -10,6 +11,8 @@ tasks :
         - merge dispatchReloadReviewed with convertSourceToInternalFromStorage
       - loop through all files, show each with review & diff buttons
       - only save copies of searchable files
+      - change the FileDiffPage back button to go back in history (because it's annoying from the DirectoryDiffPage)
+      - review all uses of historyDestFullPathFromUrl to ensure workUrl is appropriate
     - sharing-app-specific functions :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files

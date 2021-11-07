@@ -299,20 +299,35 @@ export default function Distnet(options: AppInfo) {
                         ''
                       ) : (
                         R.isNil(uriSource.dateReviewed) ? (
-                          <i title="No Diffs Available" className="fas fa-align-left" />
+                          <i title="There is no history for comparison." className="fa fa-minus" />
                         ) : (
-                          <Link
-                            to={{
-                              pathname: routes.FILE_DIFF,
-                              search: new URLSearchParams({
-                                workUrl: uriSource.workUrl,
-                              }).toString(),
-                            }}
-                          >
-                            <i title="See Diffs" className="fas fa-align-left" />
-                          </Link>
+                          distnet.cache[uriSource.id].contents == null ? (
+                            // must be a directory
+                            <Link
+                              to={{
+                                pathname: routes.DIRECTORY_DIFF,
+                                search: new URLSearchParams({
+                                  sourceId: uriSource.id,
+                                }).toString(),
+                              }}
+                            >
+                              <i title="There are nested files with differences." className="fa fa-folder-open" />
+                            </Link>
+                          ) : (
+                            <Link
+                              to={{
+                                pathname: routes.FILE_DIFF,
+                                search: new URLSearchParams({
+                                  workUrl: uriSource.workUrl,
+                                }).toString(),
+                              }}
+                            >
+                              <i title="See Diffs" className="fa fa-align-left" />
+                            </Link>
+                          )
                         )
                       )}
+                      &nbsp;
                     </td>
                   </tr>
                 );
