@@ -1,5 +1,5 @@
 import envPaths from 'env-paths';
-import fs, { Dirent}  from 'fs';
+import fs, { Dirent } from 'fs';
 import path from 'path';
 import * as R from 'ramda';
 import url from 'url';
@@ -66,56 +66,61 @@ const loadSearchableChangedFilesPathed: (
   relativePath: string
 ) => {
   const newFilePath = path.join(sourcePath, relativePath);
+
+  // eslint-disable-next-line prettier/prettier
   const contents: Array<Dirent> =
     await fsPromises.readdir(newFilePath, { withFileTypes: true });
 
   const changedFiles = contents.map(async (dirent) => {
     const newRelativePath = path.join(relativePath, dirent.name);
     if (dirent.isFile()) {
-      const stats = await fsPromises.stat(path.join(sourcePath, newRelativePath));
+      // eslint-disable-next-line prettier/prettier
+      const stats =
+        await fsPromises.stat(path.join(sourcePath, newRelativePath));
+
       const fileMtime = stats.mtime;
-      const histMtime = await fsPromises.stat(path.join(historyPath, newRelativePath))
+
+      // eslint-disable-next-line prettier/prettier
+      const histMtime =
+        await fsPromises.stat(path.join(historyPath, newRelativePath))
         .then((histStats) => {
           return histStats.mtime;
         })
         .catch(() => {
           // the history file must not exist, so continue with a 0 time
           return 0;
-        })
+        });
+
       if (fileMtime > histMtime) {
         // There's a change!
-        return [{
-          file: newRelativePath,
-          mtime: fileMtime.toISOString()
-        } as ChangedFile];
-      } else {
-        return [null];
+        return [{ file: newRelativePath, mtime: fileMtime.toISOString() }];
       }
-    } else if (dirent.isDirectory()) {
-      return await loadSearchableChangedFilesPathed(
+      return [null];
+    }
+    if (dirent.isDirectory()) {
+      return loadSearchableChangedFilesPathed(
         sourcePath,
         historyPath,
         newRelativePath
       );
-    } else {
-      return [null];
     }
+    return [null];
   });
-  return R.flatten(await Promise.all(changedFiles));
-}
+  const mixedResult = await Promise.all(changedFiles);
+  return R.flatten(mixedResult);
+};
 
 // sourcePath is expected to be a directory
 const loadSearchableChangedFiles: (
   arg: string
-) => Promise<Array<ChangedFile | null>> = async (
-  sourcePath: string
-) => {
+) => Promise<Array<ChangedFile | null>> = async (sourcePath: string) => {
+  // eslint-disable-next-line prettier/prettier
   return loadSearchableChangedFilesPathed(
     sourcePath,
     historyDestFullPath(sourcePath),
     ''
   );
-}
+};
 
 /**
  * cacheDir is directory where cached data will be saved; it defaults to DEFAULT_CACHE_DIR
@@ -132,30 +137,31 @@ export const loadOneSourceContents: (
 
   const sourceUrl = new url.URL(source.workUrl);
   if (sourceUrl.protocol === uriTools.FILE_PROTOCOL) {
-
     const sourcePath: string = url.fileURLToPath(sourceUrl);
     return fsPromises
       .stat(sourcePath)
       .then((stats) => {
         if (stats.isFile()) {
-          return fsPromises
-            // without the encoding, readFile returns a Buffer
-            .readFile(sourcePath, { encoding: 'utf8' })
-            .then((contents: string) => {
-              return {
-                sourceId: source.id,
-                sourceUrl: sourceUrl.toString(),
-                localFile: sourcePath,
-                contents,
-                fileCache: [],
-                updatedDate: stats.mtime.toISOString(),
-              } as CacheData;
-            })
-            .catch((err) => {
-              console.log('... failed to read file', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len
-              return null;
-            });
-        } else if (stats.isDirectory()) {
+          return (
+            fsPromises
+              // without the encoding, readFile returns a Buffer
+              .readFile(sourcePath, { encoding: 'utf8' })
+              .then((contents: string) => {
+                return {
+                  sourceId: source.id,
+                  sourceUrl: sourceUrl.toString(),
+                  localFile: sourcePath,
+                  contents,
+                  fileCache: [],
+                  updatedDate: stats.mtime.toISOString(),
+                } as CacheData;
+              })
+              .catch((err) => {
+                console.log('... failed to read file', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len,prettier/prettier
+                return null;
+              })
+          );
+        } else if (stats.isDirectory()) { // eslint-disable-line no-else-return,prettier/prettier
           return loadSearchableChangedFiles(sourceUrl.toString())
             .then((fullFileCache: Array<ChangedFile | null>) => {
               const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
@@ -169,31 +175,31 @@ export const loadOneSourceContents: (
               } as CacheData;
             })
             .catch((err) => {
-              console.log('... failed to read files inside', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len
+              console.log('... failed to read files inside', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len,prettier/prettier
               return null;
             });
-        } else {
-          console.log('Found non-file non-dir ' + sourceUrl);
-          return null;
         }
+        console.log(`Found non-file non-dir ${sourceUrl}`);
+        return null;
       })
-      .catch((err) => { // couldn't stat the file
-        console.log('... failed to find file stats for', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len
+      .catch((err) => {
+        // couldn't stat the file
+        console.log('... failed to find file stats for', sourceUrl.toString(), 'for caching because', err); // eslint-disable-line max-len,prettier/prettier
         return null;
       });
-  } else {
+  } else { // eslint-disable-line no-else-return,prettier/prettier
     // not a 'file:' protocol
     return fetch(sourceUrl.toString())
       .then((response: Response) => {
         if (!response.ok) {
-          console.log(`Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${response.status}`); // eslint-disable-line max-len
+          console.log(`Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${response.status}`); // eslint-disable-line max-len,prettier/prettier
           return null;
         }
         const cacheFile: string = path.join(
           cacheDir || DEFAULT_CACHE_DIR,
           sourceIdToFilename(source.id)
         );
-        console.log('... successfully retrieved URL', sourceUrl.toString(), 'response, so will write that to a local cache file', cacheFile); // eslint-disable-line max-len
+        console.log('... successfully retrieved URL', sourceUrl.toString(), 'response, so will write that to a local cache file', cacheFile); // eslint-disable-line max-len,prettier/prettier
 
         let contents: string;
         return fsPromises
@@ -219,12 +225,12 @@ export const loadOneSourceContents: (
             } as CacheData;
           })
           .catch((err) => {
-            console.log('... failed to cache URL', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len
+            console.log('... failed to cache URL', sourceUrl.toString(), 'because', err); // eslint-disable-line max-len,prettier/prettier
             return null;
           });
       })
       .catch((err) => {
-        console.log('... failed to retrieve URL', sourceUrl.toString(), 'and cache because', err); // eslint-disable-line max-len
+        console.log('... failed to retrieve URL', sourceUrl.toString(), 'and cache because', err); // eslint-disable-line max-len,prettier/prettier
         return null;
       });
   }

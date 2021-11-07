@@ -135,7 +135,10 @@ export default function Histories() {
           )}
         </ul>
         <div>* = found results</div>
-        <div>Note that the search will only look in files with these extensions: { FILE_EXTENSIONS_FOR_SEARCH.join(' ') }</div>
+        <div>
+          Note that search will only look in files with these extensions:&nbsp;
+          {FILE_EXTENSIONS_FOR_SEARCH.join(' ')}
+        </div>
       </div>
     </div>
   );

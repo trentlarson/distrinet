@@ -113,7 +113,6 @@ export interface Cache {
 }
 
 export interface CacheData {
-
   // local path (not URL, ie without "file://")
   localFile: string;
   sourceId: string;
@@ -129,7 +128,7 @@ export interface CacheData {
 
   // for a directory, these are the files with new changes in the current copies
   // for a file, []
-  fileCache: Array<ChangedFile>,
+  fileCache: Array<ChangedFile>;
 }
 
 export interface ChangedFile {

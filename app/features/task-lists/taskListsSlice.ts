@@ -405,7 +405,7 @@ async function retrieveTasksFromSource(
   distnet: DistnetState
 ): Promise<Array<YamlTask>> {
   try {
-    const contents = distnet.cache[sourceId].contents
+    const { contents } = distnet.cache[sourceId];
     if (!contents) {
       return [];
     }

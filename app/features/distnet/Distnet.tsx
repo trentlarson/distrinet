@@ -96,23 +96,26 @@ export default function Distnet(options: AppInfo) {
         <h2>Settings</h2>
 
         <div>
-          {R.filter((source) => source.notifyChanged, distnet.settings.sources)
-           .map((source: SourceInternal) =>
-             <span key={source.id}>
-               <button
-                 type="button"
-                 style={{ borderRadius: '8px' }}
-                 onClick={() => {
-                   dispatch(dispatchSetChangesAckedAndSave(source.id));
-                 }}
-               >
-                 There are changes for your review in&nbsp;
-                 {source.name}
-                 &nbsp;<span className="fas fa-thumbs-up" />
-               </button>
-               <br />
-             </span>
-          )}
+          {R.filter(
+            (source) => source.notifyChanged,
+            distnet.settings.sources
+          ).map((source: SourceInternal) => (
+            <span key={source.id}>
+              <button
+                type="button"
+                style={{ borderRadius: '8px' }}
+                onClick={() => {
+                  dispatch(dispatchSetChangesAckedAndSave(source.id));
+                }}
+              >
+                There are changes for your review in&nbsp;
+                {source.name}
+                &nbsp;
+                <span className="fas fa-thumbs-up" />
+              </button>
+              <br />
+            </span>
+          ))}
         </div>
 
         {!distnet.settingsErrorMessage &&
@@ -352,9 +355,7 @@ export default function Distnet(options: AppInfo) {
           >
             load from file
           </button>
-          &nbsp;
-          &nbsp;
-          &nbsp;
+          &nbsp;&nbsp;&nbsp;
           <button
             className={styles.btn}
             onClick={() => {
@@ -371,9 +372,7 @@ export default function Distnet(options: AppInfo) {
             <br />
             &nbsp;
           </button>
-          &nbsp;
-          &nbsp;
-          &nbsp;
+          &nbsp;&nbsp;&nbsp;
           <button
             className={styles.btn}
             onClick={() => {

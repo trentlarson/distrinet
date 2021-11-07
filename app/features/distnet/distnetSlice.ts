@@ -304,21 +304,19 @@ export const dispatchReloadReviewed = (): AppThunk => async (
   getState
 ) => {
   const unacked: Array<Promise<any>> = R.map(async (source) => {
-    return retrieveFileMtime(url.fileURLToPath(source.workUrl))
-    .then((date) => {
-      if (date != null &&
-          (!source.changesAckedDate ||
-           DateTime.fromISO(date) > DateTime.fromISO(source.changesAckedDate))) {
-        return dispatch(
-          setNotifySourceChanged(source.id)
-        );
+    return retrieveFileMtime(url.fileURLToPath(source.workUrl)).then((date) => {
+      if (
+        date != null &&
+        (!source.changesAckedDate ||
+          DateTime.fromISO(date) > DateTime.fromISO(source.changesAckedDate))
+      ) {
+        return dispatch(setNotifySourceChanged(source.id));
       }
       return null;
     });
   }, getState().distnet.settings.sources);
   const reviewed: Array<Promise<any>> = R.map(async (source) => {
-    return retrieveHistoryReviewedDate(source.workUrl)
-    .then((dateStr) => {
+    return retrieveHistoryReviewedDate(source.workUrl).then((dateStr) => {
       if (dateStr != null) {
         return dispatch(
           setSettingsSourceReviewedDate({ source, dateReviewed: dateStr })
@@ -328,27 +326,6 @@ export const dispatchReloadReviewed = (): AppThunk => async (
     });
   }, getState().distnet.settings.sources);
   return R.concat(unacked, reviewed);
-};
-
-export const dispatchSetChangesAckedAndSave = (sourceId: string): AppThunk => async (
-  dispatch,
-  getState
-) => {
-  await dispatch(setChangesAckedDate(sourceId));
-
-  const settingsForStorage = convertSettingsToStorageFromInternal(
-    getState().distnet.settings
-  );
-  const settingsYaml: string = yaml.safeDump(settingsForStorage);
-  dispatch(setSettingsStateText(settingsYaml));
-
-  // settingsText is a non-empty string
-  const result = await saveSettingsToFile(settingsYaml);
-  if (result && result.error) {
-    dispatch(setSettingsSaveErrorMessage(result.error));
-  } else {
-    dispatch(setSettingsSaveErrorMessage(null));
-  }
 };
 
 export const dispatchReloadCacheForAll = (): AppThunk => async (
@@ -380,7 +357,8 @@ const convertSourceToInternalFromStorage = async (
   const { iri, iriFile } = await readIriFromWellKnownDir(storSource.workUrl);
   const finalIri = iri || storSource.workUrl;
   const mtime = await retrieveFileMtime(url.fileURLToPath(storSource.workUrl));
-  const notifyChanged = !storSource.changesAckedDate ||
+  const notifyChanged =
+    !storSource.changesAckedDate ||
     DateTime.fromISO(mtime) > DateTime.fromISO(storSource.changesAckedDate);
   const dateReviewed = await retrieveHistoryReviewedDate(storSource.workUrl);
   const sourceInt: SourceInternal = {
@@ -388,7 +366,7 @@ const convertSourceToInternalFromStorage = async (
     id: finalIri,
     idFile: iriFile,
     notifyChanged,
-    dateReviewed
+    dateReviewed,
   };
   return sourceInt;
 };
@@ -532,6 +510,26 @@ export const dispatchSaveSettingsTextToFileAndResetObject = (): AppThunk => asyn
       dispatch(dispatchSetSettingsTextAndYaml(settingsText, false));
       dispatch(setSettingsSaveErrorMessage(null));
     }
+  }
+};
+
+export const dispatchSetChangesAckedAndSave = (
+  sourceId: string
+): AppThunk => async (dispatch, getState) => {
+  await dispatch(setChangesAckedDate(sourceId));
+
+  const settingsForStorage = convertSettingsToStorageFromInternal(
+    getState().distnet.settings
+  );
+  const settingsYaml: string = yaml.safeDump(settingsForStorage);
+  dispatch(setSettingsStateText(settingsYaml));
+
+  // settingsText is a non-empty string
+  const result = await saveSettingsToFile(settingsYaml);
+  if (result && result.error) {
+    dispatch(setSettingsSaveErrorMessage(result.error));
+  } else {
+    dispatch(setSettingsSaveErrorMessage(null));
   }
 };
 

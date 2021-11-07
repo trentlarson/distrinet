@@ -64,7 +64,6 @@ describe('searchable', () => {
     expect(isSearchableFile('junk.abc.txt')).toBe(true);
     expect(isSearchableFile('junk.txt')).toBe(true);
     expect(isSearchableFile('junk.md')).toBe(true);
-    expect(isSearchableFile('junk.odt')).toBe(true);
     expect(isSearchableFile('junk.xml')).toBe(true);
   });
   it('should not match', () => {
