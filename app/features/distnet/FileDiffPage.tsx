@@ -42,15 +42,16 @@ export default function FileDiffPage(props: Record<string, any>) {
       (s) => s.workUrl === workUrl,
       distnet.settings.sources
     );
-    let workContents, histPath;
+    let workConProm: Promise<string | null> | null = null;
+    let histPath: string;
     if (workUrl != null && source != null) {
       histPath = historyDestFullPathFromUrl(workUrl);
-      workContents = new Promise((resolve) => resolve(distnet.cache[source.id].contents));
+      workConProm = new Promise((resolve) => resolve(distnet.cache[source.id].contents));
     }
     if (workPath != null && relativePath != null) {
       histPath = historyDestFullPathFromPaths(workPath, relativePath);
       const workFile = path.join(workPath, relativePath);
-      workContents = fsPromises
+      workConProm = fsPromises
         .readFile(workFile, { encoding: 'UTF-8' })
         .then((workContentsBuf) => {
           return workContentsBuf.toString();
@@ -58,12 +59,13 @@ export default function FileDiffPage(props: Record<string, any>) {
         .catch((e) => {
           console.log('Got an error reading or diffing the files', e);
           setDiffError('Got an error reading or diffing the files.');
+          return null;
         });
     }
 
-    if (workContents) {
-      workContents.then((contents) => {
-        if (contents == null) {
+    if (workConProm) {
+      workConProm.then((workContents) => {
+        if (workContents == null) {
           setDiffError('There are no file contents to compare.');
         } else {
           fsPromises
@@ -71,8 +73,8 @@ export default function FileDiffPage(props: Record<string, any>) {
             .then((histContentsBuf) => {
               const histContents = histContentsBuf.toString();
               const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-              // const thisDiff = dmp.diff_main(histContents, contents); // character-oriented
-              const thisDiff = diffLineMode(dmp, histContents, contents);
+              // const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
+              const thisDiff = diffLineMode(dmp, histContents, workContents);
               if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
                 // there is only one element and it's unchanged (ie. value 0)
                 setDiffError(
@@ -93,7 +95,7 @@ export default function FileDiffPage(props: Record<string, any>) {
               if (err.message && err.message.startsWith('ENOENT')) { // it doesn't exist
                 setDiffError('There is no historical copy of this file.');
               } else {
-                console.log('Got an error reading or diffing the files', e);
+                console.log('Got an error reading or diffing the files', err);
                 setDiffError('Got an error reading or diffing the files.');
               }
             });

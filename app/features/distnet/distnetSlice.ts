@@ -297,11 +297,11 @@ export const dispatchReloadCacheForFile = (
   );
   if (result) {
     dispatch(setCachedStateForOne(result));
-    return;
+  } else {
+    console.error(
+      `Failed to load source ${sourceId} into cache because it was not found in sources.`
+    );
   }
-  console.error(
-    `Failed to load source ${sourceId} into cache because it was not found in sources.`
-  );
 };
 
 export const dispatchReloadReviewed = (): AppThunk => async (

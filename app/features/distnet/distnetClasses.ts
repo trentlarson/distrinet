@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import * as R from 'ramda';
 
 export const APP_NAME = 'dist-task-lists';

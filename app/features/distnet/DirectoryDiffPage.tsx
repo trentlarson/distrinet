@@ -1,4 +1,3 @@
-import path from 'path';
 import * as R from 'ramda';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -6,33 +5,32 @@ import { Link } from 'react-router-dom';
 import url from 'url';
 
 import routes from '../../constants/routes.json';
+import { RootState } from '../../store';
 import styles from './Distnet.css';
-import { historyDestFullPathFromPaths } from './history';
+import { ChangedFile } from './distnetClasses';
 
 export default function DirectoryDiffPage(props: Record<string, any>) {
 
   const distnet = useSelector((state: RootState) => state.distnet);
 
-  const [sourceId, setSourceId] = useState('');
   const [sourceWorkPath, setSourceWorkPath] = useState('');
-  const [changedFiles, setChangedFiles] = useState([]);
+  const [changedFiles, setChangedFiles] = useState([] as Array<ChangedFile>);
 
   useEffect(() => {
     // Why did it infinitely reload when I setChangedFiles outside a useEffect?
 
     if (props.location && props.location.search) {
       const params = new URLSearchParams(props.location.search);
-      const thisSourceId = params.get('sourceId');
-      setSourceId(thisSourceId);
+      const sourceId = params.get('sourceId');
 
-      const source = R.find((s) => s.id === thisSourceId, distnet.settings.sources); // eslint-disable-line max-len,prettier/prettier
-      if (source) {
+      const source = R.find((s) => s.id === sourceId, distnet.settings.sources);
+      if (sourceId && source) {
         setSourceWorkPath(url.fileURLToPath(source.workUrl));
 
-        const fileCache = distnet.cache[thisSourceId].fileCache;
+        const fileCache = distnet.cache[sourceId].fileCache;
         setChangedFiles(fileCache);
       } else {
-        console.log('Source not found with ID', thisSourceId);
+        console.log('Source not found with ID', sourceId);
       }
     }
   }, [props]);

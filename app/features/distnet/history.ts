@@ -13,7 +13,6 @@ export const historyDestFullPathFromPaths = (
   workPath: string,
   relativePath: string
 ) => {
-  const pathParsed = path.parse(workPath);
   return path.join(DEFAULT_HISTORY_DIR, workPath, relativePath);
 };
 
