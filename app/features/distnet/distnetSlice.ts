@@ -18,6 +18,7 @@ import {
   createCacheDir,
   reloadAllSourcesIntoCache,
   reloadOneSourceIntoCache,
+  removeNulls,
 } from './cache';
 import {
   CacheData,
@@ -63,7 +64,6 @@ const distnetSlice = createSlice({
     settingsErrorMessage: null,
     settingsText: null,
     settingsSaveErrorMessage: null,
-    fileCache: {},
     cache: {},
     cacheErrorMessage: null,
   } as DistnetState,
@@ -76,8 +76,15 @@ const distnetSlice = createSlice({
         (s) => s.id === contents.payload,
         state.settings.sources
       );
-      source.changesAckedDate = new Date().toISOString();
-      source.notifyChanged = false;
+      if (source) {
+        source.changesAckedDate = new Date().toISOString();
+        source.notifyChanged = false;
+      } else {
+        console.log(
+          'Very strange: tried to set notifyChanged on unknown source',
+          contents.payload
+        );
+      }
     },
     // payload is the source ID which has changes of which we need to notify the user
     setNotifySourceChanged: (state, contents: Payload<string>) => {
@@ -85,7 +92,14 @@ const distnetSlice = createSlice({
         (s) => s.id === contents.payload,
         state.settings.sources
       );
-      source.notifyChanged = true;
+      if (source) {
+        source.notifyChanged = true;
+      } else {
+        console.log(
+          'Very strange: tried to set notifyChanged on unknown source',
+          contents.payload
+        );
+      }
     },
     setSettingsChanged: (state, contents: Payload<boolean>) => {
       state.settingsChanged = contents.payload;
@@ -285,27 +299,16 @@ export const dispatchReloadCacheForFile = (
   );
 };
 
-function removeNulls<T>(array: Array<T | null>): Array<T> {
-  // Lodash _.filter failed me with a Typescript error, and so did Ramda R.filter & R.reject.
-  const result: Array<T> = [];
-  for (let i = 0; i < array.length; i += 1) {
-    const value = array[i];
-    if (value !== null) {
-      result.push(value);
-    }
-  }
-  return result;
-}
-
 export const dispatchReloadReviewed = (): AppThunk => async (
   dispatch,
   getState
 ) => {
-  const unacked = R.map((source) => {
+  const unacked: Array<Promise<any>> = R.map(async (source) => {
     return retrieveFileMtime(url.fileURLToPath(source.workUrl))
     .then((date) => {
-      if (!source.changesAckedDate ||
-          DateTime.fromISO(date) > DateTime.fromISO(source.changesAckedDate)) {
+      if (date != null &&
+          (!source.changesAckedDate ||
+           DateTime.fromISO(date) > DateTime.fromISO(source.changesAckedDate))) {
         return dispatch(
           setNotifySourceChanged(source.id)
         );
@@ -313,14 +316,12 @@ export const dispatchReloadReviewed = (): AppThunk => async (
       return null;
     });
   }, getState().distnet.settings.sources);
-  const reviewed = R.map((source) => {
-    return retrieveHistoryReviewedDate(source.workUrl).then((dateStr) => {
-      if (dateStr) {
+  const reviewed: Array<Promise<any>> = R.map(async (source) => {
+    return retrieveHistoryReviewedDate(source.workUrl)
+    .then((dateStr) => {
+      if (dateStr != null) {
         return dispatch(
-          setSettingsSourceReviewedDate({
-            source,
-            dateReviewed: dateStr,
-          })
+          setSettingsSourceReviewedDate({ source, dateReviewed: dateStr })
         );
       }
       return null;
@@ -746,6 +747,9 @@ export const addDistrinetTaskSource: SettingsEditor = (
           'https://raw.githubusercontent.com/trentlarson/distrinet/master/tasks.yml',
       },
     ],
+    changesAckedDate: new Date().toISOString(),
+    notifyChanged: true,
+    dateReviewed: null,
   };
   newSettings.sources = _.unionWith(
     [newSource],
@@ -771,15 +775,16 @@ export const testSettingsYamlText = (appPath: string): string => {
   const businessTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-business.yml')).toString();
   const campingTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-camping.yml')).toString();
   const workweekTasksUrl = url.pathToFileURL(path.join(basePath, 'task-lists', 'sample-workweek.yml')).toString();
+  const changesAckedDate = new Date().toISOString();
 
   /* eslint-enable prefer-template */
 
   testSettings.sources = [
-    { name: 'Sample Genealogy', workUrl: genealogyPath },
-    { name: 'Sample Histories', workUrl: historiesPath },
-    { name: 'Sample Business Project', workUrl: businessTasksUrl },
-    { name: 'Sample Camping Project', workUrl: campingTasksUrl },
-    { name: 'Sample Workweek Project', workUrl: workweekTasksUrl },
+    { name: 'Sample Genealogy', workUrl: genealogyPath, changesAckedDate },
+    { name: 'Sample Histories', workUrl: historiesPath, changesAckedDate },
+    { name: 'Sample Business Project', workUrl: businessTasksUrl, changesAckedDate },
+    { name: 'Sample Camping Project', workUrl: campingTasksUrl, changesAckedDate },
+    { name: 'Sample Workweek Project', workUrl: workweekTasksUrl, changesAckedDate },
   ];
 
   /* eslint-enable prettier/prettier */
@@ -893,7 +898,9 @@ const setupLocalIri = async (
     idFile: iriFile,
     name,
     workUrl,
-    changeNotifyDate: new Date().toISOString(),
+    changesAckedDate: new Date().toISOString(),
+    dateReviewed: new Date().toISOString(),
+    notifyChanged: false,
   };
   return newSource;
 };

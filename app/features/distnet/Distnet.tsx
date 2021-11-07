@@ -154,13 +154,15 @@ export default function Distnet(options: AppInfo) {
                 } else if (R.isNil(uriSource.dateReviewed)) {
                   needsReview = true;
                 } else {
-                  const diskDate = distnet.cache[uriSource.id].updatedDate;
+                  const cache = distnet.cache[uriSource.id];
                   if (
-                    DateTime.fromISO(diskDate) >
+                    DateTime.fromISO(cache.updatedDate) >
                     DateTime.fromISO(uriSource.dateReviewed)
                   ) {
                     needsReview = true;
-                  }
+                  } else if (cache.fileCache.length > 0) {
+                    needsReview = true;
+                  } // that covers file & dir cases
                 }
 
                 /* eslint-disable no-nested-ternary,prettier/prettier */
@@ -474,7 +476,7 @@ export default function Distnet(options: AppInfo) {
           <ul>
             <li>
               {distnet.cache &&
-                _.sum(_.map(distnet.cache, (value) => value.contents.length))}
+                _.sum(_.map(distnet.cache, (value) => value.contents?.length))}
               &nbsp;characters in memory
             </li>
             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}

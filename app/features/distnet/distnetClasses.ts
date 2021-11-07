@@ -4,7 +4,6 @@ export const APP_NAME = 'dist-task-lists';
  * This is the main object stored into the state with the name 'distnet'.
  * */
 export interface DistnetState {
-  fileCache: FileCache;
   settings: SettingsInternal;
   settingsChanged: boolean;
   settingsErrorMessage: string | null;
@@ -38,12 +37,13 @@ export interface SettingsInternal extends SettingsForStorage {
 
 // If you change this, remember to change: convertSourceToInternalFromStorage, convertSourceToStorageFromInternal
 export interface SourceInternal extends SourceForStorage {
-  // date of the file when most recently reviewed, ISO-formatted
-  dateReviewed?: string; // this is a string so that it can be serialized, eg. into the Redux state
   id: string;
   idFile: string; // a file path (which the UI often renders as a "file:" URL, probably when it's in an href)
   // whether there are changes since the changesAckedDate
-  notifyChanged?: boolean;
+  notifyChanged: boolean;
+
+  // date of the file when most recently reviewed (from historical timestamp), ISO-formatted
+  dateReviewed: string | null; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 /** not yet ready
@@ -113,15 +113,30 @@ export interface Cache {
 }
 
 export interface CacheData {
-  contents: string;
+
   // local path (not URL, ie without "file://")
   localFile: string;
   sourceId: string;
   // whichever URL was used as the source
   sourceUrl: string;
+
   // ISO-formatted date the local copy on disk was updated (when last checked)
   // (There's a possibility that it has been updated since it was checked.)
   updatedDate: string; // this is a string so that it can be serialized, eg. into the Redux state
+
+  // for a file, the contents of the file
+  contents?: string;
+
+  // for a directory, these are the files with new changes in the current copies
+  // for a file, []
+  fileCache: Array<ChangedFile>,
+}
+
+export interface ChangedFile {
+  // path of the file below sourceUrl (without a beginning '/')
+  file: string;
+  // ISO-formatted date the local copy on disk was updated (when last checked)
+  mtime: string; // this is a string so that it can be serialized, eg. into the Redux state
 }
 
 export class CacheWrapper {

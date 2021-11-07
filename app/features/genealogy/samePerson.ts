@@ -94,8 +94,9 @@ export default class MapperBetweenSets {
     const idMap = this.retrieveAllIdRecordsFromLocalStorage();
     for (let ki = 0; ki < cacheKeys.length; ki += 1) {
       const cacheKey = cacheKeys[ki];
-      if (cacheKey.startsWith('gedcomx:')) {
-        const content = JSON.parse(cache.valueFor(cacheKey).contents);
+      const contentStr = cache.valueFor(cacheKey).contents;
+      if (cacheKey.startsWith('gedcomx:') && contentStr != null) {
+        const content = JSON.parse(contentStr);
         this.findAndSaveSameGedcomxPersons(cacheKey, content, idMap);
       }
     }
@@ -113,9 +114,12 @@ export default class MapperBetweenSets {
     if (cacheId.startsWith('gedcomx:')) {
       const cacheWrap = new CacheWrapper(cacheMap);
       const idMap = this.retrieveAllIdRecordsFromLocalStorage();
-      const content = JSON.parse(cacheWrap.valueFor(cacheId).contents);
-      this.findAndSaveSameGedcomxPersons(cacheId, content, idMap);
-      localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
+      const contentStr = cacheWrap.valueFor(cacheId).contents;
+      if (contentStr != null) {
+        const content = JSON.parse(contentStr);
+        this.findAndSaveSameGedcomxPersons(cacheId, content, idMap);
+        localStorage[SAME_IDENTITIES_KEY] = JSON.stringify(idMap);
+      }
 
       const allMillis = R.map(
         R.pipe(R.prop('updatedDate'), (d: string) => new Date(d).valueOf()),

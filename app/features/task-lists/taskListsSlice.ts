@@ -405,7 +405,11 @@ async function retrieveTasksFromSource(
   distnet: DistnetState
 ): Promise<Array<YamlTask>> {
   try {
-    const contentTasks = yaml.safeLoad(distnet.cache[sourceId].contents);
+    const contents = distnet.cache[sourceId].contents
+    if (!contents) {
+      return [];
+    }
+    const contentTasks = yaml.safeLoad(contents);
     let taskList: Array<YamlInputIssues>;
     if (isInputIssueArray(contentTasks)) {
       taskList = contentTasks;

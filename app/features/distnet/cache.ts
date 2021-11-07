@@ -1,5 +1,5 @@
 import envPaths from 'env-paths';
-import fs from 'fs';
+import fs, { Dirent}  from 'fs';
 import path from 'path';
 import * as R from 'ramda';
 import url from 'url';
@@ -7,9 +7,11 @@ import url from 'url';
 import {
   APP_NAME,
   CacheData,
+  ChangedFile,
   SettingsInternal,
   SourceInternal,
 } from './distnetClasses';
+import { historyDestFullPath } from './history';
 import uriTools from './uriTools';
 
 const fsPromises = fs.promises;
@@ -39,6 +41,81 @@ function sourceIdToFilename(sourceId: string) {
 export const createCacheDir: () => Promise<void> = async () => {
   return fsPromises.mkdir(DEFAULT_CACHE_DIR, { recursive: true });
 };
+
+export function removeNulls<T>(array: Array<T | null>): Array<T> {
+  // Lodash _.filter failed me with a Typescript error, and so did Ramda R.filter & R.reject.
+  const result: Array<T> = [];
+  for (let i = 0; i < array.length; i += 1) {
+    const value = array[i];
+    if (value !== null) {
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+// sourcePath is expected to be a directory
+// relative path is the path under sourceUrl to this place in the file tree
+const loadSearchableChangedFilesPathed: (
+  arg0: string,
+  arg1: string,
+  arg2: string
+) => Promise<Array<ChangedFile | null>> = async (
+  sourcePath: string,
+  historyPath: string,
+  relativePath: string
+) => {
+  const newFilePath = path.join(sourcePath, relativePath);
+  const contents: Array<Dirent> =
+    await fsPromises.readdir(newFilePath, { withFileTypes: true });
+
+  const changedFiles = contents.map(async (dirent) => {
+    const newRelativePath = path.join(relativePath, dirent.name);
+    if (dirent.isFile()) {
+      const stats = await fsPromises.stat(path.join(sourcePath, newRelativePath));
+      const fileMtime = stats.mtime;
+      const histMtime = await fsPromises.stat(path.join(historyPath, newRelativePath))
+        .then((histStats) => {
+          return histStats.mtime;
+        })
+        .catch(() => {
+          // the history file must not exist, so continue with a 0 time
+          return 0;
+        })
+      if (fileMtime > histMtime) {
+        // There's a change!
+        return [{
+          file: newRelativePath,
+          mtime: fileMtime.toISOString()
+        } as ChangedFile];
+      } else {
+        return [null];
+      }
+    } else if (dirent.isDirectory()) {
+      return await loadSearchableChangedFilesPathed(
+        sourcePath,
+        historyPath,
+        newRelativePath
+      );
+    } else {
+      return [null];
+    }
+  });
+  return R.flatten(await Promise.all(changedFiles));
+}
+
+// sourcePath is expected to be a directory
+const loadSearchableChangedFiles: (
+  arg: string
+) => Promise<Array<ChangedFile | null>> = async (
+  sourcePath: string
+) => {
+  return loadSearchableChangedFilesPathed(
+    sourcePath,
+    historyDestFullPath(sourcePath),
+    ''
+  );
+}
 
 /**
  * cacheDir is directory where cached data will be saved; it defaults to DEFAULT_CACHE_DIR
@@ -72,25 +149,23 @@ export const loadOneSourceContents: (
           'for caching...'
         );
 
-        // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fsPromises
-          // without the encoding, readFile returns a Buffer
-          .readFile(sourceUrl, { encoding: 'utf8' })
-          .then((contents) => {
-            return (
-              // Lint complains about nested promises but I don't know a better way to work with contents.
-              // eslint-disable-next-line promise/no-nesting
-              fsPromises
-                .stat(sourceUrl)
-                .then((stats) => {
-                  const modDate = stats.mtime;
-
-                  return {
+        const sourcePath = url.fileURLToPath(sourceUrl);
+        await fsPromises
+          .stat(sourcePath)
+          .then((stats) => {
+            if (stats.isFile()) {
+              // eslint-disable-next-line no-await-in-loop
+              return fsPromises
+                // without the encoding, readFile returns a Buffer
+                .readFile(sourcePath, { encoding: 'utf8' })
+                .then((contents) => {
+                  cacheInfo = {
                     sourceId: source.id,
                     sourceUrl: sourceUrl.toString(),
-                    localFile: url.fileURLToPath(sourceUrl),
+                    localFile: sourcePath,
                     contents,
-                    updatedDate: modDate.toISOString(),
+                    fileCache: [],
+                    updatedDate: stats.mtime.toISOString(),
                   };
                 })
                 // eslint-disable-next-line no-loop-func
@@ -101,9 +176,30 @@ export const loadOneSourceContents: (
                     'for caching because',
                     err
                   );
-                  return null;
+                });
+            } else if (stats.isDirectory()) {
+              return loadSearchableChangedFiles(sourceUrl.toString())
+                .then((fullFileCache) => {
+                  cacheInfo = {
+                    sourceId: source.id,
+                    sourceUrl: sourceUrl.toString(),
+                    localFile: sourcePath,
+                    contents: undefined,
+                    fileCache: removeNulls(fullFileCache),
+                    updatedDate: stats.mtime.toISOString(),
+                  };
                 })
-            );
+                .catch((err) => {
+                  console.log(
+                    '... failed to read files inside',
+                    sourceUrl.toString(),
+                    'because',
+                    err
+                  );
+                });
+            } else {
+              throw 'Found non-file non-dir ' + sourceUrl;
+            }
           })
           .catch((err) => {
             // couldn't stat the file
@@ -113,7 +209,6 @@ export const loadOneSourceContents: (
               'for caching because',
               err
             );
-            return null;
           });
       } else {
         // not a 'file:' protocol
@@ -123,7 +218,7 @@ export const loadOneSourceContents: (
           ' for caching...'
         );
         // eslint-disable-next-line no-await-in-loop
-        cacheInfo = await fetch(sourceUrl.toString())
+        await fetch(sourceUrl.toString())
           // eslint-disable-next-line no-loop-func
           .then((response: Response) => {
             if (!response.ok) {
@@ -159,11 +254,12 @@ export const loadOneSourceContents: (
                 return fsPromises.writeFile(cacheFile, contents);
               })
               .then(() => {
-                return {
+                cacheInfo = {
                   sourceId: source.id,
                   sourceUrl: sourceUrl.toString(),
                   localFile: cacheFile,
                   contents,
+                  fileCache: [],
                   updatedDate: new Date().toISOString(),
                 };
               })
@@ -174,7 +270,6 @@ export const loadOneSourceContents: (
                   'because',
                   err
                 );
-                return null;
               });
           })
           // eslint-disable-next-line no-loop-func
@@ -185,7 +280,6 @@ export const loadOneSourceContents: (
               'and cache because',
               err
             );
-            return null;
           });
       }
     } catch (e) {
@@ -199,7 +293,7 @@ export const loadOneSourceContents: (
       );
     }
   }
-  if (cacheInfo) {
+  if (cacheInfo != null) {
     console.log(
       `Successfully retrieved ${cacheInfo.sourceUrl} and cached at ${cacheInfo.localFile}`
     );

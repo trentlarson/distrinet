@@ -1,7 +1,6 @@
 tasks :
 
   - 2 save another local copy of files to track what is most recently seen id:history :
-    - add acked date, saved when source changes were last acknowledged
     - change dateReviewed to be file-based
     - multiple files in directories (eg. histories)
       - change the cache to work off the workUrl? (if not, should make non-workUrls read-only?)
@@ -10,7 +9,7 @@ tasks :
         - don't make dispatchSetSettingsTextAndYaml reload all, especially inside 'modify'
         - merge dispatchReloadReviewed with convertSourceToInternalFromStorage
       - loop through all files, show each with review & diff buttons
-      - make tracking optional (to save space)
+      - only save copies of searchable files
     - sharing-app-specific functions :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files

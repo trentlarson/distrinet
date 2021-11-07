@@ -42,28 +42,31 @@ export default function FileDiffPage(props: Record<string, any>) {
     if (workUrl && source) {
       const histPath = historyDestFullPath(workUrl);
       const workContents = distnet.cache[source.id].contents;
-
-      fsPromises
-        .readFile(histPath, { encoding: 'UTF-8' })
-        .then((histContentsBuf) => {
-          const histContents = histContentsBuf.toString();
-          const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
-          // const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
-          const thisDiff = diffLineMode(dmp, histContents, workContents);
-          if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
-            // there is only one element and it's unchanged (ie. value 0)
-            setDiffError(
-              'There are no differences. (Your new copy just has a more recent time on it.)'
-            );
-          } else {
-            setDiffHtml(dmp.diff_prettyHtml(thisDiff));
-          }
-          return null; // just for eslint
-        })
-        .catch((e) => {
-          console.log('Got an error reading or diffing the files', e);
-          setDiffError('Got an error reading or diffing the files.');
-        });
+      if (workContents == null) {
+        setDiffError('There are no file contents to compare.');
+      } else {
+        fsPromises
+          .readFile(histPath, { encoding: 'UTF-8' })
+          .then((histContentsBuf) => {
+            const histContents = histContentsBuf.toString();
+            const dmp = new diff.diff_match_patch(); // eslint-disable-line new-cap
+            // const thisDiff = dmp.diff_main(histContents, workContents); // character-oriented
+            const thisDiff = diffLineMode(dmp, histContents, workContents);
+            if (thisDiff.length === 1 && thisDiff[0][0] === 0) {
+              // there is only one element and it's unchanged (ie. value 0)
+              setDiffError(
+                'There are no differences. (Your new copy just has a more recent time on it.)'
+              );
+            } else {
+              setDiffHtml(dmp.diff_prettyHtml(thisDiff));
+            }
+            return null; // just for eslint
+          })
+          .catch((e) => {
+            console.log('Got an error reading or diffing the files', e);
+            setDiffError('Got an error reading or diffing the files.');
+          });
+      }
     }
   }
 
