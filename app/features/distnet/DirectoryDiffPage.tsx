@@ -10,7 +10,6 @@ import styles from './Distnet.css';
 import { ChangedFile } from './distnetClasses';
 
 export default function DirectoryDiffPage(props: Record<string, any>) {
-
   const distnet = useSelector((state: RootState) => state.distnet);
 
   const [sourceWorkPath, setSourceWorkPath] = useState('');
@@ -27,7 +26,7 @@ export default function DirectoryDiffPage(props: Record<string, any>) {
       if (sourceId && source) {
         setSourceWorkPath(url.fileURLToPath(source.workUrl));
 
-        const fileCache = distnet.cache[sourceId].fileCache;
+        const { fileCache } = distnet.cache[sourceId];
         setChangedFiles(fileCache);
       } else {
         console.log('Source not found with ID', sourceId);
@@ -48,7 +47,7 @@ export default function DirectoryDiffPage(props: Record<string, any>) {
         <br />
         <h2>Nested Changes</h2>
         <br />
-        {changedFiles.map((chFile) =>
+        {changedFiles.map((chFile) => (
           <ul key={chFile.file}>
             <li>
               <span>{chFile.file}</span>
@@ -66,7 +65,7 @@ export default function DirectoryDiffPage(props: Record<string, any>) {
               </Link>
             </li>
           </ul>
-        )}
+        ))}
       </div>
     </div>
   );

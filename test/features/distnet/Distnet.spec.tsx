@@ -54,7 +54,7 @@ describe('settings text', () => {
 
 describe('settings async actions', () => {
 
-  it('test settings should fill basic info', () => {
+  it('test settings should fill basic info', async () => {
     const { settingsInput, generateKeyButton } = setup();
 
     /**

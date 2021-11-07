@@ -9,7 +9,10 @@ import { Link } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import styles from './Distnet.css';
-import { historyDestFullPathFromPaths, historyDestFullPathFromUrl } from './history';
+import {
+  historyDestFullPathFromPaths,
+  historyDestFullPathFromUrl,
+} from './history';
 
 const diff = require('./diff_match_patch.js');
 
@@ -46,7 +49,9 @@ export default function FileDiffPage(props: Record<string, any>) {
     let histPath: string;
     if (workUrl != null && source != null) {
       histPath = historyDestFullPathFromUrl(workUrl);
-      workConProm = new Promise((resolve) => resolve(distnet.cache[source.id].contents));
+      workConProm = new Promise((resolve) =>
+        resolve(distnet.cache[source.id].contents)
+      );
     }
     if (workPath != null && relativePath != null) {
       histPath = historyDestFullPathFromPaths(workPath, relativePath);
@@ -64,11 +69,13 @@ export default function FileDiffPage(props: Record<string, any>) {
     }
 
     if (workConProm) {
-      workConProm.then((workContents) => {
-        if (workContents == null) {
-          setDiffError('There are no file contents to compare.');
-        } else {
-          fsPromises
+      workConProm
+        .then((workContents) => {
+          if (workContents == null) {
+            setDiffError('There are no file contents to compare.');
+            return null;
+          }
+          return fsPromises
             .readFile(histPath, { encoding: 'UTF-8' })
             .then((histContentsBuf) => {
               const histContents = histContentsBuf.toString();
@@ -89,18 +96,22 @@ export default function FileDiffPage(props: Record<string, any>) {
                   setDiffError('The current version is empty.');
                 }
               }
-              return null; // just for eslint
+              return null;
             })
             .catch((err) => {
-              if (err.message && err.message.startsWith('ENOENT')) { // it doesn't exist
+              if (err.message && err.message.startsWith('ENOENT')) {
+                // it doesn't exist
                 setDiffError('There is no historical copy of this file.');
               } else {
                 console.log('Got an error reading or diffing the files', err);
                 setDiffError('Got an error reading or diffing the files.');
               }
             });
-        }
-      });
+        })
+        .catch((err) => {
+          console.log('Got an error reading the files', err);
+          setDiffError('Got an error reading the files.');
+        });
     }
   }
 

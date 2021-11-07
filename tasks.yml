@@ -1,7 +1,6 @@
 tasks :
 
   - 2 save another local copy of files to track what is most recently seen id:history :
-    - change dateReviewed to be file-based
     - multiple files in directories (eg. histories)
       - change the DirectoryDiffPage to work off the cache ID
       - change the cache to work off the workUrl? (if not, should make non-workUrls read-only?)

@@ -340,7 +340,7 @@ export const dispatchReloadCacheForAll = (): AppThunk => async (
   await createCacheDir().catch((error) => {
     dispatch(setCacheErrorMessage(error.toString()));
   });
-  const numSources = getState().distnet.settings?.sources?.length
+  const numSources = getState().distnet.settings?.sources?.length;
   console.log('Loading', numSources, 'source work URLs into memory cache...');
   const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
     getState().distnet.settings
@@ -958,7 +958,7 @@ const dispatchBuildSourceAndAddToSettings = (
     getState().distnet.settings.sources
   );
   if (isErrorResult(newSource)) {
-    throw newSource.error;
+    throw Error(newSource.error);
   } else {
     return dispatch(dispatchAddSourceToSettings(newSource));
   }
@@ -991,11 +991,10 @@ export const dispatchAddReviewedDateToSettings = (
     const srcPath = url.fileURLToPath(source.workUrl);
     const destPath = historyDestFullPathFromPath(srcPath);
     return fsExtra
-      .copy(
-        srcPath,
-        destPath,
-        { preserveTimestamps: true, filter: keepHistoryWhileCopying }
-      )
+      .copy(srcPath, destPath, {
+        preserveTimestamps: true,
+        filter: keepHistoryWhileCopying,
+      })
       .then(() => {
         return fs.promises.utimes(destPath, new Date(), new Date());
       })

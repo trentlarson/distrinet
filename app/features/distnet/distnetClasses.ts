@@ -164,8 +164,6 @@ export interface Payload<T> {
   payload: T;
 }
 
-
-
 /** Other * */
 
 export const FILE_EXTENSIONS_FOR_HISTORY = [
@@ -196,14 +194,14 @@ const HISTORY_EXTENSION_TESTER = R.anyPass(
 );
 
 export function keepHistory(filename: string): boolean {
-console.log('checking filename', filename, HISTORY_EXTENSION_TESTER(filename))
   return HISTORY_EXTENSION_TESTER(filename);
 }
 
 export async function keepHistoryWhileCopying(
   filename: string
 ): Promise<boolean> {
-  return fs.promises.stat(filename)
+  return fs.promises
+    .stat(filename)
     .then((stats) => stats.isDirectory() || HISTORY_EXTENSION_TESTER(filename));
 }
 
@@ -232,4 +230,3 @@ export function isDiffable(filename: string): boolean {
 
  *
  */
-

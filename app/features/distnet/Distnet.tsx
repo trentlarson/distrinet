@@ -261,7 +261,9 @@ export default function Distnet(options: AppInfo) {
                     <td>{uriSource.name ? uriSource.name : '(unnamed)'}</td>
                     <td>
                       {distnet.cache[uriSource.id]
-                        ? `${distnet.cache[uriSource.id].updatedDate.replace('T', ' ').replace('Z', ' UTC')}`
+                        ? `${distnet.cache[uriSource.id].updatedDate
+                            .replace('T', ' ')
+                            .replace('Z', ' UTC')}`
                         : '(none)'}
                     </td>
                     <td>
@@ -292,11 +294,15 @@ export default function Distnet(options: AppInfo) {
                       )}
                       {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
                       &nbsp;
+                      {/* eslint-disable no-nested-ternary,prettier/prettier */}
                       {!needsReview ? (
                         ''
                       ) : (
                         R.isNil(uriSource.dateReviewed) ? (
-                          <i title="There is no history for comparison." className="fa fa-minus" />
+                          <i
+                            title="There is no history for comparison."
+                            className="fa fa-minus"
+                          />
                         ) : (
                           distnet.cache[uriSource.id].contents == null ? (
                             // must be a directory
@@ -308,7 +314,10 @@ export default function Distnet(options: AppInfo) {
                                 }).toString(),
                               }}
                             >
-                              <i title="There are nested files with differences." className="fa fa-folder-open" />
+                              <i
+                                title="There are nested files with differences."
+                                className="fa fa-folder-open"
+                              />
                             </Link>
                           ) : (
                             <Link
@@ -324,7 +333,7 @@ export default function Distnet(options: AppInfo) {
                           )
                         )
                       )}
-                      &nbsp;
+                      {/* eslint-disable no-nested-ternary */}
                     </td>
                   </tr>
                 );
@@ -338,7 +347,8 @@ export default function Distnet(options: AppInfo) {
         <div>
           <br />
           <br />
-          Note that this only keeps historical copies of files with these extensions:&nbsp;
+          Note that this only keeps historical copies of files with these
+          extensions:&nbsp;
           {FILE_EXTENSIONS_FOR_HISTORY.join(' ')}
         </div>
         <div>
