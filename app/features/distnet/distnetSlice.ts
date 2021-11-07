@@ -32,7 +32,7 @@ import {
   SourceInternal,
 } from './distnetClasses';
 import {
-  historyDestFullPath,
+  historyDestFullPathFromUrl,
   retrieveFileMtime,
   retrieveHistoryReviewedDate,
 } from './history';
@@ -335,11 +335,14 @@ export const dispatchReloadCacheForAll = (): AppThunk => async (
   await createCacheDir().catch((error) => {
     dispatch(setCacheErrorMessage(error.toString()));
   });
+  const numSources = getState().distnet.settings?.sources?.length
+  console.log('Loading', numSources, 'source work URLs into memory cache...');
   const allCaches: Array<CacheData | null> = await reloadAllSourcesIntoCache(
     getState().distnet.settings
   );
   const result: Array<CacheData> = removeNulls(allCaches);
   dispatch(setCachedStateForAll(result));
+  console.log('... succeeded loading', result.length, '/', numSources, 'work URLs into memory cache.'); // eslint-disable-line max-len,prettier/prettier
   dispatch(dispatchReloadReviewed());
 };
 
@@ -981,7 +984,7 @@ export const dispatchAddReviewedDateToSettings = (
   );
   if (source) {
     const srcPath = url.fileURLToPath(source.workUrl);
-    const destPath = historyDestFullPath(source.workUrl);
+    const destPath = historyDestFullPathFromUrl(source.workUrl);
     return fsExtra
       .copy(srcPath, destPath, { preserveTimestamps: true })
       .then(() => {

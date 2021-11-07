@@ -295,19 +295,23 @@ export default function Distnet(options: AppInfo) {
                       )}
                       {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
                       &nbsp;
-                      {!needsReview || R.isNil(uriSource.dateReviewed) ? (
+                      {!needsReview ? (
                         ''
                       ) : (
-                        <Link
-                          to={{
-                            pathname: routes.FILE_DIFF,
-                            search: new URLSearchParams({
-                              workUrl: uriSource.workUrl,
-                            }).toString(),
-                          }}
-                        >
-                          <i title="See Diffs" className="fas fa-align-left" />
-                        </Link>
+                        R.isNil(uriSource.dateReviewed) ? (
+                          <i title="No Diffs Available" className="fas fa-align-left" />
+                        ) : (
+                          <Link
+                            to={{
+                              pathname: routes.FILE_DIFF,
+                              search: new URLSearchParams({
+                                workUrl: uriSource.workUrl,
+                              }).toString(),
+                            }}
+                          >
+                            <i title="See Diffs" className="fas fa-align-left" />
+                          </Link>
+                        )
                       )}
                     </td>
                   </tr>

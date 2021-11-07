@@ -11,7 +11,7 @@ import {
   SettingsInternal,
   SourceInternal,
 } from './distnetClasses';
-import { historyDestFullPath } from './history';
+import { historyDestFullPathFromPath } from './history';
 import uriTools from './uriTools';
 
 const fsPromises = fs.promises;
@@ -117,7 +117,7 @@ const loadSearchableChangedFiles: (
   // eslint-disable-next-line prettier/prettier
   return loadSearchableChangedFilesPathed(
     sourcePath,
-    historyDestFullPath(sourcePath),
+    historyDestFullPathFromPath(sourcePath),
     ''
   );
 };
@@ -133,8 +133,6 @@ export const loadOneSourceContents: (
   source: SourceInternal,
   cacheDir: string
 ) => {
-  console.log('Trying to cache', source.workUrl, ' in memory...');
-
   const sourceUrl = new url.URL(source.workUrl);
   if (sourceUrl.protocol === uriTools.FILE_PROTOCOL) {
     const sourcePath: string = url.fileURLToPath(sourceUrl);
@@ -162,7 +160,7 @@ export const loadOneSourceContents: (
               })
           );
         } else if (stats.isDirectory()) { // eslint-disable-line no-else-return,prettier/prettier
-          return loadSearchableChangedFiles(sourceUrl.toString())
+          return loadSearchableChangedFiles(url.fileURLToPath(sourceUrl))
             .then((fullFileCache: Array<ChangedFile | null>) => {
               const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
               return {
@@ -179,7 +177,7 @@ export const loadOneSourceContents: (
               return null;
             });
         }
-        console.log(`Found non-file non-dir ${sourceUrl}`);
+        console.log(`... failed on non-file non-dir ${sourceUrl}`);
         return null;
       })
       .catch((err) => {
@@ -192,7 +190,7 @@ export const loadOneSourceContents: (
     return fetch(sourceUrl.toString())
       .then((response: Response) => {
         if (!response.ok) {
-          console.log(`Failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${response.status}`); // eslint-disable-line max-len,prettier/prettier
+          console.log(`... failed to retrieve URL ${sourceUrl.toString()} for caching due to response code ${response.status}`); // eslint-disable-line max-len,prettier/prettier
           return null;
         }
         const cacheFile: string = path.join(

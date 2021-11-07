@@ -9,9 +9,13 @@ const fsPromises = fs.promises;
 const paths = envPaths(APP_NAME);
 const DEFAULT_HISTORY_DIR = path.join(paths.config, 'history');
 
-export const historyDestFullPath = (workUrl: string) => {
-  const pathParsed = path.parse(url.fileURLToPath(workUrl));
+export const historyDestFullPathFromPath = (workPath: string) => {
+  const pathParsed = path.parse(workPath);
   return path.join(DEFAULT_HISTORY_DIR, pathParsed.dir, pathParsed.base);
+};
+
+export const historyDestFullPathFromUrl = (workUrl: string) => {
+  return historyDestFullPathFromPath(url.fileURLToPath(workUrl));
 };
 
 /**
@@ -30,13 +34,13 @@ export const retrieveFileMtime: (arg0: string) => Promise<string> = async (
  return Promise of string of ISO of mtime for history file for workUrl, or null on error
  * */
 export const retrieveHistoryReviewedDate = async (workUrl: string) => {
-  return retrieveFileMtime(historyDestFullPath(workUrl)).catch((err) => {
-    console.log(
-      'Failed to determine mtime for file',
-      workUrl.toString(),
-      err,
-      '-- but for a non-existent directory that is expected, so returning null.'
-    );
+  const historyPath = historyDestFullPathFromUrl(workUrl);
+  return retrieveFileMtime(historyPath).catch((err) => {
+    if (err.message && err.message.startsWith('ENOENT')) {
+      // We expect that no history exists at first.
+    } else {
+      console.log('Failed to determine mtime for file', historyPath, err);
+    }
     return null;
   });
 };

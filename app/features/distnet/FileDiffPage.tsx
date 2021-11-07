@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import styles from './Distnet.css';
-import { historyDestFullPath } from './history';
+import { historyDestFullPathFromUrl } from './history';
 
 const diff = require('./diff_match_patch.js');
 
@@ -40,7 +40,7 @@ export default function FileDiffPage(props: Record<string, any>) {
       distnet.settings.sources
     );
     if (workUrl && source) {
-      const histPath = historyDestFullPath(workUrl);
+      const histPath = historyDestFullPathFromUrl(workUrl);
       const workContents = distnet.cache[source.id].contents;
       if (workContents == null) {
         setDiffError('There are no file contents to compare.');
