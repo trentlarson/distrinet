@@ -267,21 +267,6 @@ export default function Distnet(options: AppInfo) {
                     <td>
                       <span title={needsReviewTitle}>{needsReviewStr}</span>
                       &nbsp;
-                      {!needsReview || R.isNil(uriSource.dateReviewed) ? (
-                        ''
-                      ) : (
-                        <Link
-                          to={{
-                            pathname: routes.FILE_DIFF,
-                            search: new URLSearchParams({
-                              workUrl: uriSource.workUrl,
-                            }).toString(),
-                          }}
-                        >
-                          <i title="See Diffs" className="fas fa-align-left" />
-                        </Link>
-                      )}
-                      &nbsp;
                       {/* eslint-disable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
                       {!needsReview ? (
                         ''
@@ -306,6 +291,21 @@ export default function Distnet(options: AppInfo) {
                         />
                       )}
                       {/* eslint-enable jsx-a11y/anchor-is-valid,jsx-a11y/control-has-associated-label,jsx-a11y/anchor-has-content */}
+                      &nbsp;
+                      {!needsReview || R.isNil(uriSource.dateReviewed) ? (
+                        ''
+                      ) : (
+                        <Link
+                          to={{
+                            pathname: routes.FILE_DIFF,
+                            search: new URLSearchParams({
+                              workUrl: uriSource.workUrl,
+                            }).toString(),
+                          }}
+                        >
+                          <i title="See Diffs" className="fas fa-align-left" />
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 );
@@ -352,6 +352,9 @@ export default function Distnet(options: AppInfo) {
           >
             load from file
           </button>
+          &nbsp;
+          &nbsp;
+          &nbsp;
           <button
             className={styles.btn}
             onClick={() => {
@@ -368,6 +371,9 @@ export default function Distnet(options: AppInfo) {
             <br />
             &nbsp;
           </button>
+          &nbsp;
+          &nbsp;
+          &nbsp;
           <button
             className={styles.btn}
             onClick={() => {
@@ -418,7 +424,7 @@ export default function Distnet(options: AppInfo) {
               }
             }}
           >
-            Reset to Test Settings
+            Replace with Test Settings
           </button>
           <br />
           <br />
@@ -466,7 +472,7 @@ export default function Distnet(options: AppInfo) {
           </button>
           &nbsp;
           <input
-            size={13}
+            size={17}
             type="text"
             value={keyPassword}
             onChange={(e) => setKeyPassword(e.target.value)}

@@ -25,8 +25,9 @@ To test:
 - Start from a known state:
   - Go to "genealogy" and "Genealogy Settings" and click the "clear" button.
 
-- Then use test settings:
-  - gedcomx:my-local-test:test-sample-norman#KWHH-HSW
+- Click on edit icon and use test settings: `gedcomx:my-local-test:test-sample-norman#KWHH-HSW`
+  - See that the focus and copy links work.
+  - See that Norman has two external links. One goes to the public page, and one works after getting a session ID (acquired on the "Genealogy Settings" page, after which you can browse with pictures.
 
 - UI Genealogy Samples (from our programmers' private data):
   - Get `fssessionid` and start with `FSSESSIONID=... yarn dev` or fill in on page.

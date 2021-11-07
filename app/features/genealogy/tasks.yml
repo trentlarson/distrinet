@@ -3,7 +3,7 @@
   - 1 put a button on individuals in genealogy tree to jump to search with that URL id:history-search ref:taskyaml:trentlarson.com,2020/distrinet/histories#external-search
 
   - 0 type:bug start with test data, go to genealogy, click on the "api" URL for Norman, see that it doesn't show any link back to the original local data set
-  - 0 type:bug get test data to show children after focus on Sample Genealogy (and on Elinora); it should because Jed is a child as you can see when editing URL to gedcomx:my-local-test:test-sample-norman#jed
+  - 0 type:bug get test data to show children after focus on Sample Genealogy (and on Elinora); it should because Jed is a child as you can see when editing URL to gedcomx:my-local-test:test-sample-norman#jed (... and note that it doesn't show Jed's name when you paste in Norman's URL)
 
   - 0 otherLocations is currently inside 'links' (at top level of person) but those are all this format - https://www.familysearch.org/developers/docs/api/types/json_HypermediaEnabledData ... so change to a Link type or use 'identifiers' instead - https://www.familysearch.org/developers/docs/api/types/json_Subject id:other-locations
 

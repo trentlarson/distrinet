@@ -1,11 +1,23 @@
 
 # Distributed Projects
 
-- Simply add [TaskYaml](https://taskyaml.org) files with a URI prefixed with "taskyaml:" into the "distrinet settings", then you'll go to the "projects" part of this app and see project activity lists.
 
-For schedule forecasting:
+Add [TaskYaml](https://taskyaml.org) files with a URI prefixed with "taskyaml:" into the "distrinet settings", then you'll go to the "projects" part of this app and see project activity lists.
 
-Download and run the [Schedule-Forecast service](https://github.com/trentlarson/Schedule-Forecast).
+For schedule forecasting locally:
+
+- Download and run the [Schedule-Forecast service](https://github.com/trentlarson/Schedule-Forecast).
+
+
+## Test
+
+- Optional: use the "Test Settings" on the test page.
+
+- Show tasks, expand subtasks and dependant tasks, and show labels. Show the top 3 and biggest 5 of each list.
+
+- Ensure you've generated a key in settings and they're saved. Click to show a set of tasks and find one with an ID in it, then click Sign Log. See a failure with a missing or incorrect password. Then fill in the correct password and see a success and check the .log.yml file next to the tasks.yml file and see that it has a log message with a new timestamp.
+
+
 
 
 ## Features
