@@ -347,186 +347,206 @@ export default function Distnet(options: AppInfo) {
         <div>
           <br />
           <br />
-          Note that this only keeps historical copies of files with these
+          Note that this only tracks changes to files with these
           extensions:&nbsp;
           {FILE_EXTENSIONS_FOR_HISTORY.join(' ')}
         </div>
         <div>
           <br />
-          <br />
-          <hr />
-          <h2>Advanced</h2>
-          <br />
-          <br />
-          Config file contents:
-          <br />
-          <textarea
-            rows={10}
-            cols={80}
-            value={distnet.settingsText || ''}
-            onChange={(event) => {
-              dispatch(dispatchSetSettingsText(event.target.value, true));
-            }}
-          />
-          <br />
-          Config file is located here:&nbsp;
-          <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
-            {SETTINGS_FILE}
-          </a>
-          <br />
-          <div>{settingsChangedMessage}</div>
-          <div>{settingsFullErrorMessage}</div>
-          <div>{settingsFullSaveErrorMessage}</div>
           <button
-            className={styles.btn}
-            onClick={() => {
-              dispatch(dispatchLoadSettingsFromFile());
-            }}
-            data-tclass="btn"
-            type="button"
-          >
-            load from file
-          </button>
-          &nbsp;&nbsp;&nbsp;
-          <button
-            className={styles.btn}
-            onClick={() => {
-              dispatch(
-                dispatchSetSettingsTextAndYaml(distnet.settingsText || '', true)
-              );
-            }}
-            data-tclass="btn"
-            type="button"
-          >
-            &nbsp;
-            <br />
-            apply
-            <br />
-            &nbsp;
-          </button>
-          &nbsp;&nbsp;&nbsp;
-          <button
-            className={styles.btn}
-            onClick={() => {
-              dispatch(dispatchSaveSettingsTextToFileAndResetObject());
-            }}
-            data-tclass="btn"
-            type="button"
-          >
-            apply
-            <br />
-            &
-            <br />
-            save
-          </button>
-        </div>
-        <div>
-          <button
-            type="button"
             style={{ borderRadius: '8px' }}
-            onClick={() => {
-              if (distnet.settingsChanged) {
-                alert(
-                  'You have changes in the current settings, so save or undo those first.'
-                );
-              } else {
-                dispatch(dispatchModifySettings(addDistrinetTaskSource));
-              }
-            }}
-          >
-            Add Distrinet Project Source
-          </button>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button
-            type="button"
-            style={{ borderRadius: '8px' }}
-            onClick={() => {
-              if (distnet.settingsChanged) {
-                alert(
-                  'You have changes in the current settings, so save or undo those first.'
-                );
-              } else {
-                dispatch(
-                  dispatchSetSettingsText(
-                    testSettingsYamlText(options.appPath),
-                    true
-                  )
-                );
-              }
-            }}
-          >
-            Replace with Test Settings
-          </button>
-          <br />
-          <br />
-          <button
-            className="generateKeyButton"
-            type="button"
-            onClick={async () => {
-              let proceed = false;
-              if (
-                distnet.settings.credentials &&
-                R.find(
-                  (x) => x.id === 'privateKey',
-                  distnet.settings.credentials
-                )
-              ) {
-                // there's already a privateKey credential
-
-                // We need to replace this with dialog.showMessageBox!
-                // eslint-disable-next-line no-restricted-globals
-                proceed = confirm(
-                  'This will overwrite the current private key.  Are you sure you want to proceed?'
-                );
-              } else {
-                proceed = true;
-              }
-              if (proceed) {
-                await dispatch(
-                  dispatchModifySettings(generateKeyAndSet(keyPassword))
-                );
-                if (keyPassword) {
-                  // eslint-disable-next-line no-new
-                  new Notification('Generated', {
-                    body: `Be sure to save your password so you can use this key.`,
-                    silent: true,
-                  });
-                } else {
-                  alert(
-                    'The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.' // eslint-disable-line max-len
-                  );
-                }
-              }
-            }}
-          >
-            Generate Key, encrypted with password:
-          </button>
-          &nbsp;
-          <input
-            size={17}
-            type="text"
-            value={keyPassword}
-            onChange={(e) => setKeyPassword(e.target.value)}
-          />
-        </div>
-        <div>
-          <ul>
-            <li>
-              {distnet.cache &&
-                _.sum(_.map(distnet.cache, (value) => value.contents?.length))}
-              &nbsp;characters in memory
-            </li>
-            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-            <li>{localStorageLength} characters of local storage data</li>
-          </ul>
-          <button
-            className={styles.btn}
             onClick={() => dispatch(dispatchReloadCacheForAll())}
             data-tclass="btn"
             type="button"
           >
-            reload mem
+            Reload From Disk
           </button>
+        </div>
+      </div>
+      <div className={styles.subsection}>
+        <div>
+          <hr />
+          <h2>Advanced</h2>
+        </div>
+        <div className={styles.subsection}>
+          Security
+          <div className={styles.subsection}>
+            <button
+              className="generateKeyButton"
+              type="button"
+              onClick={async () => {
+                let proceed = false;
+                if (
+                  distnet.settings.credentials &&
+                  R.find(
+                    (x) => x.id === 'privateKey',
+                    distnet.settings.credentials
+                  )
+                ) {
+                  // there's already a privateKey credential
+
+                  // We need to replace this with dialog.showMessageBox!
+                  // eslint-disable-next-line no-restricted-globals
+                  proceed = confirm(
+                    'This will overwrite the current private key.  Are you sure you want to proceed?'
+                  );
+                } else {
+                  proceed = true;
+                }
+                if (proceed) {
+                  await dispatch(
+                    dispatchModifySettings(generateKeyAndSet(keyPassword))
+                  );
+                  if (keyPassword) {
+                    // eslint-disable-next-line no-new
+                    new Notification('Generated', {
+                      body: `Be sure to save your password so you can use this key.`,
+                      silent: true,
+                    });
+                  } else {
+                    alert(
+                      'The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.' // eslint-disable-line max-len
+                    );
+                  }
+                }
+              }}
+            >
+              Generate Key, encrypted with password:
+            </button>
+            &nbsp;
+            <input
+              size={17}
+              type="text"
+              value={keyPassword}
+              onChange={(e) => setKeyPassword(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className={styles.subsection}>
+          Configuration
+          <div className={styles.subsection}>
+            Config file contents:
+            <br />
+            <textarea
+              rows={10}
+              cols={80}
+              value={distnet.settingsText || ''}
+              onChange={(event) => {
+                dispatch(dispatchSetSettingsText(event.target.value, true));
+              }}
+            />
+            <br />
+            Config file is located here:&nbsp;
+            <a href={url.pathToFileURL(SETTINGS_FILE).toString()}>
+              {SETTINGS_FILE}
+            </a>
+            <br />
+            <div>{settingsChangedMessage}</div>
+            <div>{settingsFullErrorMessage}</div>
+            <div>{settingsFullSaveErrorMessage}</div>
+            <button
+              className={styles.btn}
+              onClick={() => {
+                dispatch(dispatchLoadSettingsFromFile());
+              }}
+              data-tclass="btn"
+              type="button"
+            >
+              load from file
+            </button>
+            &nbsp;&nbsp;&nbsp;
+            <button
+              className={styles.btn}
+              onClick={() => {
+                dispatch(
+                  dispatchSetSettingsTextAndYaml(distnet.settingsText || '', true)
+                );
+              }}
+              data-tclass="btn"
+              type="button"
+            >
+              &nbsp;
+              <br />
+              apply
+              <br />
+              &nbsp;
+            </button>
+            &nbsp;&nbsp;&nbsp;
+            <button
+              className={styles.btn}
+              onClick={() => {
+                dispatch(dispatchSaveSettingsTextToFileAndResetObject());
+              }}
+              data-tclass="btn"
+              type="button"
+            >
+              apply
+              <br />
+              &
+              <br />
+              save
+            </button>
+            <br />
+            <br />
+            <button
+              type="button"
+              style={{ borderRadius: '8px' }}
+              onClick={() => {
+                if (distnet.settingsChanged) {
+                  alert(
+                    'You have changes in the current settings, so save or undo those first.'
+                  );
+                } else {
+                  dispatch(dispatchModifySettings(addDistrinetTaskSource));
+                }
+              }}
+            >
+              Add Distrinet Project Source
+            </button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button
+              type="button"
+              style={{ borderRadius: '8px' }}
+              onClick={() => {
+                if (distnet.settingsChanged) {
+                  alert(
+                    'You have changes in the current settings, so save or undo those first.'
+                  );
+                } else {
+                  dispatch(
+                    dispatchSetSettingsText(
+                      testSettingsYamlText(options.appPath),
+                      true
+                    )
+                  );
+                }
+              }}
+            >
+              Replace with Test Settings
+            </button>
+          </div>
+        </div>
+        <div className={styles.subsection}>
+          Memory Cache
+          <div className={styles.subsection}>
+            <ul>
+              <li>
+                {distnet.cache &&
+                  _.sum(_.map(distnet.cache, (value) => value.contents?.length))}
+                &nbsp;characters in memory
+              </li>
+              {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+              <li>{localStorageLength} characters of local storage data</li>
+            </ul>
+            <button
+              style={{ borderRadius: '8px' }}
+              onClick={() => dispatch(dispatchReloadCacheForAll())}
+              data-tclass="btn"
+              type="button"
+            >
+              Reload From Disk
+            </button>
+          </div>
         </div>
       </div>
     </div>
