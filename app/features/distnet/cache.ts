@@ -55,8 +55,9 @@ export function removeNulls<T>(array: Array<T | null>): Array<T> {
   return result;
 }
 
-// sourcePath is expected to be a directory
-// relative path is the path under sourceUrl to this place in the file tree
+// sourcePath is the source directory
+// historyPath is the history directory
+// relativePath is the path under sourcePath to this place in the file tree
 const loadSearchableChangedFilesPathed: (
   arg0: string,
   arg1: string,
@@ -108,7 +109,7 @@ const loadSearchableChangedFilesPathed: (
     return [null];
   });
   const mixedResult = await Promise.all(changedFiles);
-  return R.flatten(mixedResult);
+  return removeNulls(R.flatten(mixedResult));
 };
 
 // sourcePath is expected to be a directory
@@ -163,6 +164,7 @@ export const loadOneSourceContents: (
         } else if (stats.isDirectory()) { // eslint-disable-line no-else-return,prettier/prettier
           return loadSearchableChangedFiles(url.fileURLToPath(sourceUrl))
             .then((fullFileCache: Array<ChangedFile | null>) => {
+
               const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
               return {
                 sourceId: source.id,

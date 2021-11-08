@@ -73,7 +73,7 @@ const distnetSlice = createSlice({
     // settings
 
     // payload is the source ID on which changes were acked
-    setChangesAckedDate: (state, contents: Payload<string>) => {
+    setChangesAcked: (state, contents: Payload<string>) => {
       const source = R.find(
         (s) => s.id === contents.payload,
         state.settings.sources
@@ -114,10 +114,10 @@ const distnetSlice = createSlice({
       );
       if (source) {
         source.dateReviewed = contents.payload.dateReviewed;
-        source.notifyChanged = false;
-        // I considered setting changesAckedDate here but that should be done some level above because that setting needs to be persisted to disk.
-        state.cache[contents.payload.source.id].fileCache = [];
       }
+    },
+    setFileCacheEmpty: (state, contents: Payload<string>) => {
+      state.settings.cache[contents.payload].fileCache = [];
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
@@ -160,7 +160,7 @@ const {
   setCachedStateForAll,
   setCachedStateForOne,
   setCacheErrorMessage,
-  setChangesAckedDate,
+  setChangesAcked,
   setNotifySourceChanged,
   setSettingsChanged,
   setSettingsErrorMessage,
@@ -524,7 +524,7 @@ export const dispatchSaveSettingsTextToFileAndResetObject = (): AppThunk => asyn
 export const dispatchSetChangesAckedAndSave = (
   sourceId: string
 ): AppThunk => async (dispatch, getState) => {
-  await dispatch(setChangesAckedDate(sourceId));
+  await dispatch(setChangesAcked(sourceId));
 
   const settingsForStorage = convertSettingsToStorageFromInternal(
     getState().distnet.settings
@@ -998,13 +998,14 @@ export const dispatchAddReviewedDateToSettings = (
       .then(() => {
         return fs.promises.utimes(destPath, new Date(), new Date());
       })
-      .then(() => {
-        return dispatch(
+      .then(async () => {
+        await dispatch(
           setSettingsSourceReviewedDate({
             source,
             dateReviewed: new Date().toISOString(),
           })
         );
+        return dispatch(setChangesAcked(source.id));
       })
       .catch((e) => {
         console.log(
