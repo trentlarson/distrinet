@@ -116,8 +116,9 @@ const distnetSlice = createSlice({
         source.dateReviewed = contents.payload.dateReviewed;
       }
     },
+    // payload is the source ID for the CacheData in which to clear out fileCache
     setFileCacheEmpty: (state, contents: Payload<string>) => {
-      state.settings.cache[contents.payload].fileCache = [];
+      state.cache[contents.payload].fileCache = [];
     },
     setSettingsStateText: (state, contents: Payload<string>) => {
       state.settingsText = contents.payload;
@@ -161,6 +162,7 @@ const {
   setCachedStateForOne,
   setCacheErrorMessage,
   setChangesAcked,
+  setFileCacheEmpty,
   setNotifySourceChanged,
   setSettingsChanged,
   setSettingsErrorMessage,
@@ -1005,6 +1007,7 @@ export const dispatchAddReviewedDateToSettings = (
             dateReviewed: new Date().toISOString(),
           })
         );
+        await dispatch(setFileCacheEmpty(source.id));
         return dispatch(setChangesAcked(source.id));
       })
       .catch((e) => {

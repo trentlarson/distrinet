@@ -14,6 +14,7 @@ tasks :
       - only save copies of searchable files
       - change the FileDiffPage back button to go back in history (because it's annoying from the DirectoryDiffPage)
       - review all uses of historyDestFullPathFromUrl to ensure workUrl is appropriate
+      - test: if you import a new cache why does it reload notifications when you load again?
     - sharing-app-specific functions :
       - for Syncthing, don't copy but rather look into the .stfolder for history
       - for git, see `git status` for changed files
