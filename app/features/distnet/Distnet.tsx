@@ -178,7 +178,8 @@ export default function Distnet(options: AppInfo) {
                   ? 'Current Date for Source is Unknown'
                   : R.isNil(uriSource.dateReviewed)
                     ? 'Never Reviewed'
-                    : `Updated ${distnet.cache[uriSource.id].updatedDate.replace('T', ' ').replace('Z', ' UTC')}, Reviewed ${uriSource.dateReviewed.replace('T', ' ').replace('Z', ' UTC')}`;
+                    : `Updated ${distnet.cache[uriSource.id].updatedDate.replace('T', ' ').replace('Z', ' UTC')},` +
+                      ` Reviewed ${uriSource.dateReviewed.replace('T', ' ').replace('Z', ' UTC')}`;
                 /* eslint-enable no-nested-ternary,prettier/prettier */
 
                 return (

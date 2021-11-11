@@ -164,7 +164,6 @@ export const loadOneSourceContents: (
         } else if (stats.isDirectory()) { // eslint-disable-line no-else-return,prettier/prettier
           return loadSearchableChangedFiles(url.fileURLToPath(sourceUrl))
             .then((fullFileCache: Array<ChangedFile | null>) => {
-
               const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
               return {
                 sourceId: source.id,

@@ -1,18 +1,11 @@
 import fs from 'fs';
-import path from 'path';
-import * as R from 'ramda';
 import React, { useState } from 'react';
 import ReactHtmlParser from 'react-html-parser';
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import routes from '../../constants/routes.json';
-import { RootState } from '../../store';
 import styles from './Distnet.css';
-import {
-  historyDestFullPathFromPath,
-  historyDestFullPathFromUrl,
-} from './history';
+import { historyDestFullPathFromPath } from './history';
 
 const diff = require('./diff_match_patch.js');
 
@@ -29,8 +22,6 @@ function diffLineMode(dmp: DiffMergePatch, text1: string, text2: string) {
 }
 
 export default function FileDiffPage(props: Record<string, any>) {
-  const distnet = useSelector((state: RootState) => state.distnet);
-
   const [diffHtml, setDiffHtml] = useState('');
   const [diffError, setDiffError] = useState('');
 
@@ -88,7 +79,6 @@ export default function FileDiffPage(props: Record<string, any>) {
           console.log('Got an error reading the files', err);
           setDiffError('Got an error reading the files.');
         });
-
     }
   }
 

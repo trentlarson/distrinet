@@ -33,7 +33,7 @@ export default function DirectoryDiffPage(props: Record<string, any>) {
         console.log('Source not found with ID', sourceId);
       }
     }
-  }, [props]);
+  }, [props, distnet.cache, distnet.settings.sources]);
 
   return (
     <div>
