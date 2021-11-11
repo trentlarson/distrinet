@@ -62,7 +62,7 @@ const loadSearchableChangedFilesPathed: (
   arg0: string,
   arg1: string,
   arg2: string
-) => Promise<Array<ChangedFile | null>> = async (
+) => Promise<Array<ChangedFile>> = async (
   sourcePath: string,
   historyPath: string,
   relativePath: string
@@ -115,7 +115,7 @@ const loadSearchableChangedFilesPathed: (
 // sourcePath is expected to be a directory
 const loadSearchableChangedFiles: (
   arg: string
-) => Promise<Array<ChangedFile | null>> = async (sourcePath: string) => {
+) => Promise<Array<ChangedFile>> = async (sourcePath: string) => {
   // eslint-disable-next-line prettier/prettier
   return loadSearchableChangedFilesPathed(
     sourcePath,
@@ -163,8 +163,7 @@ export const loadOneSourceContents: (
           );
         } else if (stats.isDirectory()) { // eslint-disable-line no-else-return,prettier/prettier
           return loadSearchableChangedFiles(url.fileURLToPath(sourceUrl))
-            .then((fullFileCache: Array<ChangedFile | null>) => {
-              const fileCache: Array<ChangedFile> = removeNulls(fullFileCache);
+            .then((fileCache: Array<ChangedFile>) => {
               return {
                 sourceId: source.id,
                 sourceUrl: sourceUrl.toString(),
