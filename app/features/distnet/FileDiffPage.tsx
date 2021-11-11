@@ -10,7 +10,7 @@ import routes from '../../constants/routes.json';
 import { RootState } from '../../store';
 import styles from './Distnet.css';
 import {
-  historyDestFullPathFromPaths,
+  historyDestFullPathFromPath,
   historyDestFullPathFromUrl,
 } from './history';
 
@@ -37,44 +37,20 @@ export default function FileDiffPage(props: Record<string, any>) {
   const { location } = props;
   if (location && location.search) {
     const params: URLSearchParams = new URLSearchParams(location.search);
-    const workUrl = params.get('workUrl');
     const workPath = params.get('workPath');
-    const relativePath = params.get('relativePath');
 
-    const source = R.find(
-      (s) => s.workUrl === workUrl,
-      distnet.settings.sources
-    );
-    let workConProm: Promise<string | null> | null = null;
-    let histPath: string;
-    if (workUrl != null && source != null) {
-      histPath = historyDestFullPathFromUrl(workUrl);
-      workConProm = new Promise((resolve) =>
-        resolve(distnet.cache[source.id].contents)
-      );
-    }
-    if (workPath != null && relativePath != null) {
-      histPath = historyDestFullPathFromPaths(workPath, relativePath);
-      const workFile = path.join(workPath, relativePath);
-      workConProm = fsPromises
-        .readFile(workFile, { encoding: 'UTF-8' })
+    if (workPath != null) {
+      fsPromises
+        .readFile(workPath, { encoding: 'UTF-8' })
         .then((workContentsBuf) => {
           return workContentsBuf.toString();
         })
-        .catch((e) => {
-          console.log('Got an error reading or diffing the files', e);
-          setDiffError('Got an error reading or diffing the files.');
-          return null;
-        });
-    }
-
-    if (workConProm) {
-      workConProm
         .then((workContents) => {
           if (workContents == null) {
             setDiffError('There are no file contents to compare.');
             return null;
           }
+          const histPath = historyDestFullPathFromPath(workPath);
           return fsPromises
             .readFile(histPath, { encoding: 'UTF-8' })
             .then((histContentsBuf) => {
@@ -112,6 +88,7 @@ export default function FileDiffPage(props: Record<string, any>) {
           console.log('Got an error reading the files', err);
           setDiffError('Got an error reading the files.');
         });
+
     }
   }
 

@@ -1,3 +1,4 @@
+import path from 'path';
 import * as R from 'ramda';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -56,8 +57,7 @@ export default function DirectoryDiffPage(props: Record<string, any>) {
                 to={{
                   pathname: routes.FILE_DIFF,
                   search: new URLSearchParams({
-                    workPath: sourceWorkPath,
-                    relativePath: chFile.file,
+                    workPath: path.join(sourceWorkPath, chFile.file),
                   }).toString(),
                 }}
               >

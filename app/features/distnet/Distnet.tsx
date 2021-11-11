@@ -129,7 +129,7 @@ export default function Distnet(options: AppInfo) {
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   {/* It's stupid how styles conflict. Try fix this, I dare you. */}
                   {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                  Remote
+                  Remote?
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Actions
@@ -145,7 +145,7 @@ export default function Distnet(options: AppInfo) {
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Needs
                   <br />
-                  Review
+                  Review?
                 </th>
               </tr>
             </thead>
@@ -324,7 +324,7 @@ export default function Distnet(options: AppInfo) {
                               to={{
                                 pathname: routes.FILE_DIFF,
                                 search: new URLSearchParams({
-                                  workUrl: uriSource.workUrl,
+                                  workPath: url.fileURLToPath(uriSource.workUrl),
                                 }).toString(),
                               }}
                             >

@@ -9,16 +9,8 @@ const fsPromises = fs.promises;
 const paths = envPaths(APP_NAME);
 const DEFAULT_HISTORY_DIR = path.join(paths.config, 'history');
 
-export const historyDestFullPathFromPaths = (
-  workPath: string,
-  relativePath: string
-) => {
-  return path.join(DEFAULT_HISTORY_DIR, workPath, relativePath);
-};
-
 export const historyDestFullPathFromPath = (workPath: string) => {
-  const pathParsed = path.parse(workPath);
-  return historyDestFullPathFromPaths(pathParsed.dir, pathParsed.base);
+  return path.join(DEFAULT_HISTORY_DIR, workPath);
 };
 
 export const historyDestFullPathFromUrl = (workUrl: string) => {
