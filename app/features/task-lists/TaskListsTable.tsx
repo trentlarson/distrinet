@@ -464,7 +464,7 @@ function sourceActions(
       &nbsp;after unlocking with password:
       <input
         size={10}
-        type="text"
+        type="password"
         value={keyPassword}
         onChange={(e) => setKeyPassword(e.target.value)}
       />

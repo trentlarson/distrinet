@@ -13,7 +13,7 @@ export const historyDestFullPathFromPath = (workPath: string) => {
   return path.join(DEFAULT_HISTORY_DIR, workPath);
 };
 
-export const historyDestFullPathFromUrl = (workUrl: string) => {
+const historyDestFullPathFromUrl = (workUrl: string) => {
   return historyDestFullPathFromPath(url.fileURLToPath(workUrl));
 };
 
