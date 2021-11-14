@@ -15,10 +15,11 @@ For schedule forecasting locally:
 
 - Show tasks, expand subtasks and dependant tasks, and show labels. Show the top 3 and biggest 5 of each list.
 
-- Click 'Forecast' for Distrinet Project.
+- Click 'Forecast' for Distrinet Project and see a time graph.
+
+- Click to show "Sample Camping Project", click 'ref' label, and click "(visit)" on the second task and see it show the "Sample Workweek Project".
 
 - Ensure you've generated a key in settings and they're saved. Click to show a set of tasks and find one with an ID in it, then click Sign Log. See a failure with a missing or incorrect password. Then fill in the correct password and see a success and check the .log.yml file next to the tasks.yml file and see that it has a log message with a new timestamp.
-
 
 
 

@@ -1,4 +1,4 @@
-- everyone gets off work ref:taskyaml:taskyaml.org,2020:sample/work-week#leave-work mustStartOnDate:2020-10-09T16:00:00+0600:
+- everyone gets off work ref:taskyaml:local-workweek-test-project#leave-work mustStartOnDate:2020-10-09T16:00:00+0600:
   blocks:
     - ref:drive
     - ref:safe-firepit
