@@ -207,10 +207,7 @@ export function labelValueInSummary(
 /**
  * return true if the given label is in the summary; otherwise, false
  */
-export function hasLabelInSummary(
-  label: string,
-  summary: string
-): boolean {
+export function hasLabelInSummary(label: string, summary: string): boolean {
   return summary.startsWith(`${label}:`) || summary.indexOf(` ${label}:`) > -1;
 }
 

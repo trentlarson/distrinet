@@ -508,8 +508,9 @@ function bigListTable(
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
-
-  const onlyWithDueLabel = (task) => hasLabelInSummary('due', task.summary);
+  // eslint-disable-next-line prettier/prettier
+  const onlyWithDueLabel: (arg0: Array<YamlTask>) => Array<YamlTask> =
+    R.filter((task: YamlTask) => hasLabelInSummary('due', task.summary));
 
   return R.keys(showLists).length === 0 ? (
     <span />
@@ -573,7 +574,7 @@ function bigListTable(
           // selectively apply these functions to the list
           (showOnlyBiggest5 ? onlyBiggest5 : sameArray)(
             (showOnlyTop3 ? R.take(3) : sameArray)(
-              (showOnlyDue ? R.filter(onlyWithDueLabel) : sameArray)(
+              (showOnlyDue ? onlyWithDueLabel : sameArray)(
                 showLists[sourceId] // eslint-disable-line prettier/prettier
               )
             )
