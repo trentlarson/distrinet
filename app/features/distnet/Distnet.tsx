@@ -127,11 +127,6 @@ export default function Distnet(options: AppInfo) {
                   IRI
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-                  {/* It's stupid how styles conflict. Try fix this, I dare you. */}
-                  {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
-                  Remote?
-                </th>
-                <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                   Actions
                 </th>
                 <th style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
@@ -218,9 +213,6 @@ export default function Distnet(options: AppInfo) {
                       {uriTools.globalUriScheme(uriSource.id)}
                     </td>
                     <td>
-                      {uriTools.isUriLocalhost(uriSource.workUrl) ? '' : 'Y'}
-                    </td>
-                    <td>
                       {R.prepend(
                         { url: uriSource.workUrl },
                         uriSource.urls || []
@@ -301,7 +293,7 @@ export default function Distnet(options: AppInfo) {
                       ) : (
                         R.isNil(uriSource.dateReviewed) ? (
                           <i
-                            title="There is no history for comparison."
+                            title="There are differences but there is no history for comparison."
                             className="fa fa-minus"
                           />
                         ) : (
