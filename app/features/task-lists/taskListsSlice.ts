@@ -204,6 +204,16 @@ export function labelValueInSummary(
   return pair ? R.splitAt(pair.indexOf(':') + 1, pair)[1] : null;
 }
 
+/**
+ * return true if the given label is in the summary; otherwise, false
+ */
+export function hasLabelInSummary(
+  label: string,
+  summary: string
+): boolean {
+  return summary.startsWith(`${label}:`) || summary.indexOf(` ${label}:`) > -1;
+}
+
 // return values for all instances of that label; always some array, even if empty
 function getLabelValues(label: string, summary: string): Array<string> {
   let result: Array<string> = [];

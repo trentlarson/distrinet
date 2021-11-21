@@ -1,7 +1,7 @@
 tasks :
 
-  - 1 backup settings.yml
-  - -3 change estimates to hours
+  - -3 backup settings.yml
+  - -2 change estimates to hours
     - change forecast equation
   - -2 move genealogy/history/task-list-specific code out of distnet
   - sharing-app-specific functions :
@@ -13,6 +13,7 @@ tasks :
   - 0 ensure IRIs are robust
     - when parsing, ensure IRIs are unique
     - when a *.iri diff is detected, make sure there are big warnings
+    - type:bug when a new one is created, don't create with taskyaml:project.yml as default IRI
   - improve diff :
     - cut many lines of same text
     - add a legend (green=insert, red=delete)
@@ -42,10 +43,7 @@ tasks :
     - if we ever edit local copy :
       - we retrieve latest from remote & compare to remote
 
-  - 0 totally remove references to any .well-known / wellKnown directory (or allow in advanced settings)
-
   - -1 distrinet write tests for many setting new settings (to ensure we don't erase settings)
-  - 0 encrypt private key
   - 90 1 create list-source directory file that points at other lists of sources
   - 1 button to show memory used by copies (and sources)
   - '90 0 show cached time, both file & memory'

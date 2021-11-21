@@ -31,6 +31,7 @@ import {
   dispatchToggleDependentExpansionUi,
   dispatchToggleSubtaskExpansionUi,
   getIdValues,
+  hasLabelInSummary,
   isTaskyamlUriScheme,
   labelValueInSummary,
   REF_LABEL_KEY,
@@ -69,8 +70,10 @@ export default function TaskListsTable() {
   );
   const [keyPassword, setKeyPassword] = useState('');
   const [labelsToShow, setLabelsToShow] = useState([] as Array<string>);
-  const [showOnlyTop3, setShowOnlyTop3] = useState(false);
   const [showOnlyBiggest5, setShowOnlyBiggest5] = useState(false);
+  const [showOnlyDue, setShowOnlyDue] = useState(false);
+  const [showOnlyTop3, setShowOnlyTop3] = useState(false);
+
   const [calculatingLinkedTasks, setCalculatingLinkedTasks] = useState(false);
 
   let allLabels: Array<string> = [];
@@ -262,10 +265,12 @@ export default function TaskListsTable() {
         setListSourceIdsToShow,
         labelsToShow,
         setLabelsToShow,
-        showOnlyTop3,
-        setShowOnlyTop3,
         showOnlyBiggest5,
         setShowOnlyBiggest5,
+        showOnlyDue,
+        setShowOnlyDue,
+        showOnlyTop3,
+        setShowOnlyTop3,
         taskLists.display,
         showLists,
         allLabels
@@ -493,20 +498,34 @@ function bigListTable(
   setListSourceIdsToShow: (arg0: Array<string>) => void,
   labelsToShow: Array<string>,
   setLabelsToShow: (arg0: Array<string>) => void,
-  showOnlyTop3: boolean,
-  setShowOnlyTop3: (arg0: boolean) => void,
   showOnlyBiggest5: boolean,
   setShowOnlyBiggest5: (arg0: boolean) => void,
+  showOnlyDue: boolean,
+  setShowOnlyDue: (arg0: boolean) => void,
+  showOnlyTop3: boolean,
+  setShowOnlyTop3: (arg0: boolean) => void,
   allUiTrees: Record<string, Array<UiTree>>,
   showLists: Record<string, Array<YamlTask>>,
   allLabels: Array<string>
 ) {
+
+  const onlyWithDueLabel = (task) => hasLabelInSummary('due', task.summary);
+
   return R.keys(showLists).length === 0 ? (
     <span />
   ) : (
     <div>
       <hr />
       <h4>All Activities</h4>
+      <input
+        type="checkbox"
+        checked={showOnlyDue}
+        onChange={() => {
+          setShowOnlyDue(!showOnlyDue);
+        }}
+      />
+      Show only the ones that are due.
+      <br />
       <input
         type="checkbox"
         checked={showOnlyTop3}
@@ -554,7 +573,9 @@ function bigListTable(
           // selectively apply these functions to the list
           (showOnlyBiggest5 ? onlyBiggest5 : sameArray)(
             (showOnlyTop3 ? R.take(3) : sameArray)(
-              showLists[sourceId] // eslint-disable-line prettier/prettier
+              (showOnlyDue ? R.filter(onlyWithDueLabel) : sameArray)(
+                showLists[sourceId] // eslint-disable-line prettier/prettier
+              )
             )
           )
         ),

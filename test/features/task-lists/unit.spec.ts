@@ -3,6 +3,8 @@ import * as R from 'ramda';
 import {
   aggregateReferencedTaskCounts,
   getRefValues,
+  hasLabelInSummary,
+  labelValueInSummary,
   sortedReferencedTasks,
   taskFromString,
   toggleProperty
@@ -19,6 +21,20 @@ import {
 export const toggleSubtaskExpanded = toggleProperty(
   UiTreeProperty.SUBTASKS_EXP
 );
+
+describe('label functions', () => {
+  it('should detect label', () => {
+    expect(hasLabelInSummary('due', 'something is due')).toBeFalsy();
+    expect(hasLabelInSummary('due', 'due:2021-11-21 something')).toBeTruthy();
+    expect(hasLabelInSummary('due', 'something is to do due:2021-11-21')).toBeTruthy();
+  });
+
+  it('should find label value', () => {
+    expect(labelValueInSummary('due', 'something is due')).toBeNull();
+    expect(labelValueInSummary('due', 'due:2021-11-21')).toBe('2021-11-21');
+    expect(labelValueInSummary('due', 'something is to do due:2021-12-21')).toBe('2021-12-21');
+  });
+});
 
 describe('position in array with smaller estimate', () => {
   it('should be 0 in empty array', () => {
