@@ -329,7 +329,6 @@ function sourceActions(
             const localFileSource = isFileUrl(source.workUrl)
               ? source.workUrl
               : '';
-            const localCopy = localFileSource || cache[source.id]?.localFile;
             const dragMessage = `Drag ${
               localFileSource ? '' : ' Local Copy of'
             } File`;
@@ -393,7 +392,7 @@ function sourceActions(
                     type="button"
                     onClick={() => {
                       Electron.shell.openExternal(
-                        URL.pathToFileURL(localCopy).toString()
+                        URL.pathToFileURL(localFileSource).toString()
                       );
                     }}
                   >
@@ -405,7 +404,7 @@ function sourceActions(
                   {execPath ? (
                     <button
                       type="button"
-                      onClick={() => execProtocolApp(execPath, [localCopy])}
+                      onClick={() => execProtocolApp(execPath, [localFileSource])}
                     >
                       <i
                         title={`Open with ${execPath.split(path.sep).pop()}`}
@@ -416,7 +415,7 @@ function sourceActions(
                     <span />
                   )}
                   &nbsp;
-                  <a href={localCopy}>
+                  <a href={localFileSource}>
                     <i title={dragMessage} className="fa fa-hand-rock" />
                   </a>
                 </td>
@@ -697,11 +696,25 @@ function oneTaskRow(
   );
   const taskSource = sourceMap[task.sourceId];
   const taskSourceName = taskSource ? taskSource.name : '';
+  const taskWorkUrl = taskSource ? taskSource.workUrl : '';
+  const dragMessage = `Drag File`;
 
   // eslint-disable-next-line react/no-array-index-key
   return (
     <tr key={`${task.sourceId}/${index}`}>
-      <td>{index > 0 ? '' : taskSourceName}</td>
+      <td>
+        {index > 0 ? (
+          ''
+        ) : (
+          <span>
+            {taskSourceName}
+            &nbsp;
+            <a href={taskWorkUrl}>
+              <i title={dragMessage} className="fa fa-hand-rock" />
+            </a>
+          </span>
+        )}
+      </td>
       <td>{Number.isFinite(task.priority) ? task.priority : '-'}</td>
       <td>{Number.isFinite(task.estimate) ? task.estimate : '-'}</td>
       {labelsToShow.map((label) => {
