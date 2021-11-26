@@ -591,7 +591,7 @@ Uncaught (in promise) TypeError: semver__WEBPACK_IMPORTED_MODULE_3__.gte is not 
  *
  * https://identity.foundation/peer-did-method-spec/index.html#method-specific-identifier
  */
-function peerDidFromPublicKey(publicKey: KeyObject) {
+function peerDidFromPublicKey(publicKey: KeyObject): string {
   const multicodecBuf: Buffer = Buffer.from([0x12, 0x20]);
 
   const basisBuf: Buffer = publicKey.export({
@@ -609,7 +609,7 @@ function peerDidFromPublicKey(publicKey: KeyObject) {
   return peerDid;
 }
 
-function sha1(input: Buffer) {
+function sha1(input: Buffer): Buffer {
   return nodeCrypto.createHash('sha1').update(input).digest();
 }
 
@@ -618,7 +618,7 @@ function passwordDeriveBytes(
   salt: string,
   iterations: number,
   len: number
-) {
+): Buffer {
   let key = Buffer.from(password + salt);
   for (let i = 0; i < iterations; i += 1) {
     key = sha1(key);
@@ -640,7 +640,7 @@ function encrypt(
   password: string,
   salt: string,
   ivBase64: string
-) {
+): string {
   const ivBuf = Buffer.from(ivBase64, 'base64');
   const key = passwordDeriveBytes(password, salt, 100, 32);
   const cipher = nodeCrypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf)); // eslint-disable-line max-len,prettier/prettier
@@ -655,12 +655,12 @@ export function decrypt(
   password: string,
   salt: string,
   ivBase64: string
-) {
+): string {
   const ivBuf = Buffer.from(ivBase64, 'base64');
   const key = passwordDeriveBytes(password, salt, 100, 32);
   const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf)); // eslint-disable-line max-len,prettier/prettier
   let decrypted = decipher.update(encrypted, 'base64', 'utf8');
-  decrypted += decipher.final();
+  decrypted += decipher.final('utf8');
   return decrypted;
 }
 

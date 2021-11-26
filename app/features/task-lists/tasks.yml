@@ -1,6 +1,5 @@
 
   - 0 filter for all items by due date, recursively
-  - -2 Talk with Canada D & R about wish-lists due:2021-11-23
   - 1 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people :
     - type:bug entering a focus on one of the test workweek tasks doesn't highlight the task (another example: link from All My Personal to task-lists#markdown)
     - should clear the filters

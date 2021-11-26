@@ -401,6 +401,7 @@ function sourceActions(
                       className="fas fa-external-link-alt"
                     />
                   </button>
+                  {/* eslint-disable prettier/prettier */}
                   {execPath ? (
                     <button
                       type="button"
@@ -414,6 +415,7 @@ function sourceActions(
                   ) : (
                     <span />
                   )}
+                  {/* eslint-enable prettier/prettier */}
                   &nbsp;
                   <a href={localFileSource}>
                     <i title={dragMessage} className="fa fa-hand-rock" />

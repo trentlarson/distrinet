@@ -817,6 +817,7 @@ export const dispatchLogMessage = (
             appendToFile(logFilename, logText)
               // eslint-disable-next-line promise/always-return
               .then(() => {
+                console.log('Successfully saved message to', logFilename);
                 // eslint-disable-next-line no-new
                 new Notification('Saved', {
                   body: `Successfully saved message to ${logFilename}`,

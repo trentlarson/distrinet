@@ -393,12 +393,12 @@ export default function Distnet(options: AppInfo) {
                   if (keyPassword) {
                     // eslint-disable-next-line no-new
                     new Notification('Generated', {
-                      body: `Be sure to save your password so you can use this key.`,
+                      body: `Be sure to save your password so that you will never lose access to this key.`,
                       silent: true,
                     });
                   } else {
                     alert(
-                      'The private key has been generated. Note that it is encrypted with a blank password. Recommend you create a different one, protected by a password.' // eslint-disable-line max-len
+                      'The private key has been generated. Note that it is encrypted with a blank password. It is better to create a different one that is protected by a password.' // eslint-disable-line max-len
                     );
                   }
                 }
