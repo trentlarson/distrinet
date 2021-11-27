@@ -27,7 +27,10 @@ import {
   YamlTask,
 } from './util';
 // eslint-disable-next-line import/no-cycle
-import { decrypt, dispatchReloadCacheForFile } from '../distnet/distnetSlice';
+import {
+  decryptFromBase64,
+  dispatchReloadCacheForFile,
+} from '../distnet/distnetSlice';
 
 const DEFAULT_FORECAST_SERVER =
   'http://ec2-3-86-70-139.compute-1.amazonaws.com:8090';
@@ -783,7 +786,7 @@ export const dispatchLogMessage = (
             }
             sign.write(JSON.stringify(messageForSigning));
             sign.end();
-            const keyPem: string = decrypt(
+            const keyPem: string = decryptFromBase64(
               keyContents.encryptedPkcs8PemPrivateKey,
               keyPassword,
               keyContents.salt || '',

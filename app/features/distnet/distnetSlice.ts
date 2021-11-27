@@ -635,7 +635,7 @@ function passwordDeriveBytes(
   return Buffer.alloc(len, key);
 }
 
-function encrypt(
+function encryptAndBase64(
   plainText: string,
   password: string,
   salt: string,
@@ -650,8 +650,8 @@ function encrypt(
   return encrypted;
 }
 
-export function decrypt(
-  encrypted: string,
+export function decryptFromBase64(
+  encryptedBase64: string,
   password: string,
   salt: string,
   ivBase64: string
@@ -659,7 +659,7 @@ export function decrypt(
   const ivBuf = Buffer.from(ivBase64, 'base64');
   const key = passwordDeriveBytes(password, salt, 100, 32);
   const decipher = nodeCrypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf)); // eslint-disable-line max-len,prettier/prettier
-  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  let decrypted = decipher.update(encryptedBase64, 'base64', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
 }
@@ -686,7 +686,7 @@ export const generateKeyAndSet = (password: string) => (settings: SettingsIntern
     const salt = nodeCrypto.randomBytes(6).toString('base64');
     // encoding of a specific number of bytes
     const ivBase64 = nodeCrypto.randomBytes(16).toString('base64');
-    const keyEncrypted = encrypt(keyPkcs8Pem.toString(), password, salt, ivBase64); // eslint-disable-line max-len,prettier/prettier
+    const keyEncrypted = encryptAndBase64(keyPkcs8Pem.toString(), password, salt, ivBase64); // eslint-disable-line max-len,prettier/prettier
 
     if (_.isNil(newSettings.credentials)) {
       newSettings.credentials = [];
