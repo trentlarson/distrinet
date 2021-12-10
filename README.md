@@ -1,23 +1,14 @@
 
 # Distrinet
 
-Code for [Distrinet](https://trentlarson.gitlab.io/distrinet-doc)
+Code to manage local-first files and the links between them, as described [here](https://trentlarson.gitlab.io/distrinet-doc).
 
-Here's what this does:
-
-- Given a URI, provide the content (and/or a URL).
-  - This is currently code inside the app; we could also make this a local HTTP server that gives up the content (and/or a URL).
-
-This also currently contains these sample applications:
-
-- [Distributed Task Lists](app/features/task-lists/README.md)
-- [Distributed Histories](app/features/histories/README.md)
-- [Distributed Genealogy](app/features/genealogy/README.md)
+To get started quickly, see the "Help" page (inside the app) for hints. (The [source is here](app/features/distnet/HelpPage.tsx) if you like that kind of thing.)
 
 
 
 
-## Plans
+## Next Plans
 
 See [tasks.yml](tasks.yml)
 
@@ -67,6 +58,7 @@ When developing:
   - Go to "distrinet settings" and click on "Use Test Settings" and save that.
   - Go to "genealogy" and "Genealogy Settings" and click the "clear" button.
   - If you've made code changes, go to the main screen and refresh (eg. CTRL-R).  The auto-load works pretty well but not always well.
+
 
 Development tips:
 

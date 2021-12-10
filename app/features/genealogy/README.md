@@ -2,21 +2,34 @@
 
 Keep your own private trees, and point to public trees and browse seamlessly between the two.
 
-The goal, of course, is to read many genealogy formats, but the first examples are GEDCOM X.
+To get started quickly, see the main [README](../../../README.md).
 
-- Simply add GEDCOM X files with a URI prefixed with "gedcomx:" into the "distrinet settings", then you'll go to the "genealogy" part of this app and enter URIs and see people.
-
-- Note that this work may extend the GEDCOM X spec: local data will often point to the same person with other IDs in remote data sets.  In the current version we use "otherLocations" inside "link" (but that format looks wrong and there's a task logged to change it id:other-locations).
 
 ## User Stories
 
 - I can show my own ancestry, where it links to public data, where my sister and I share data, and where there are holes in my view (eg. her husband's family) which she can see.
+
+
+## Next Plans
+
+See [tasks.yml](tasks.yml)
+
+
+## Technicalities
+
+The goal is to read many genealogy formats, but the first examples are GEDCOM X.
+
+- Add GEDCOM X files with a URI prefixed with "gedcomx:" into the "distrinet settings", then you'll go to the "genealogy" part of this app and enter URIs and see people.
+
+- Note that this work may extend the GEDCOM X spec: local data will often point to the same person with other IDs in remote data sets.  In the current version we use "otherLocations" inside "link" (but that format looks wrong and there's a task logged to change it id:other-locations).
+
 
 ## Design
 
 - Add a property "otherLocations" inside "persons[].links" any time you want to link an existing person to the same person in another data set.  It should be a URI.
 - For IDs within the same resource: use fragments (eg. #ABCD-EFG)
   Using fragments since that's [used by GEDCOM X as well](https://github.com/FamilySearch/gedcomx/blob/master/specifications/json-format-specification.md#fragment-ids).
+
 
 ## Development
 
@@ -46,6 +59,7 @@ To test:
     - See two parents.
   - gedcomx:trentlarson.com,2020:Norman-Sharon-Larson-for-kids#norman
     - See 3 external links: api has pics, copy from Matt has 2 parents, ancestors opens window
+
 
 ## Kudos
 

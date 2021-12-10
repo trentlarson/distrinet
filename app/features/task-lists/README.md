@@ -1,6 +1,17 @@
 
 # Distributed Projects
 
+Easily create and browse projects, then share and link to others as you wish.
+
+To get started quickly, see the main [README](../../../README.md).
+
+
+## Next Plans
+
+See [tasks.yml](tasks.yml)
+
+
+## Technicalities
 
 Add [TaskYaml](https://taskyaml.org) files with a URI prefixed with "taskyaml:" into the "distrinet settings", then you'll go to the "projects" part of this app and see project activity lists.
 
