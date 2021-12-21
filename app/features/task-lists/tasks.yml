@@ -1,5 +1,7 @@
 
+  - -1 allow selection of units for estimates (eg. 2^x, hours, days) id:select-estimate-units
   - 0 filter for all items by due date, recursively
+  - 0 type:bug drag a file but release in screen and it complains infinitely
   - 1 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people :
     - type:bug entering a focus on one of the test workweek tasks doesn't highlight the task (another example: link from All My Personal to task-lists#markdown)
     - should clear the filters
@@ -7,7 +9,6 @@
     - stand up public page that inputs settings and renders project exploration screen
       ... write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects id:public-task-page
 
-  - -1 allow selection of units for estimates (eg. 2^x, hours, days) id:select-estimate-units
   - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
   - 1 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
   - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
