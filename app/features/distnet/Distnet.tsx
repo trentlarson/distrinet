@@ -507,7 +507,7 @@ export default function Distnet(options: AppInfo) {
                   );
                 } else {
                   dispatch(
-                    dispatchSetSettingsText(
+                    dispatchSetSettingsTextAndYaml(
                       testSettingsYamlText(options.appPath),
                       true
                     )

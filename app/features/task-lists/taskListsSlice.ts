@@ -497,7 +497,7 @@ function createForecastTasksRaw(
       key: id,
       summary: t.summary,
       priority: Number.isNaN(t.priority) ? 0 : t.priority,
-      issueEstSecondsRaw: Math.round(t.estimate * 60 * 60),
+      issueEstSecondsRaw: t.estimate && Math.round(t.estimate * 60 * 60),
       dueDate: labelValueInSummary('due', t.summary),
       mustStartOnDate: labelValueInSummary('mustStartOnDate', t.summary),
       dependents: createForecastTasksRaw(t.dependents, `${prefix + id}_d-`),

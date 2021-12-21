@@ -16,6 +16,12 @@ export interface DistnetState {
   cacheErrorMessage: string | null;
 }
 
+export const EMPTY_STORAGE_SETTINGS = {
+  sources: [],
+  resourceTypes: [],
+  credentials: [],
+};
+
 // Settings saved to disk, eg. without an ID
 export interface SettingsForStorage {
   sources: Array<SourceForStorage>;

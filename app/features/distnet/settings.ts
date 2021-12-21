@@ -1,10 +1,11 @@
 import envPaths from 'env-paths';
 import fs from 'fs';
+import yaml from 'js-yaml';
 import path from 'path';
 import url from 'url';
 
 // eslint-disable-next-line import/no-cycle
-import { APP_NAME } from './distnetClasses';
+import { APP_NAME, EMPTY_STORAGE_SETTINGS } from './distnetClasses';
 
 const paths = envPaths(APP_NAME);
 export const SETTINGS_FILE = path.join(paths.config, 'settings.yml');
@@ -18,6 +19,10 @@ export function loadSettingsFromFile(): Promise<string | { error: string }> {
     .readFile(SETTINGS_FILE)
     .then((resp) => resp.toString())
     .catch((err) => {
+      if (err.message && err.message.startsWith('ENOENT')) {
+        // it doesn't exist
+        return yaml.safeDump(EMPTY_STORAGE_SETTINGS);
+      }
       console.error('Error retrieving settings:', err);
       return { error: `Error retrieving settings: ${err}` };
     });

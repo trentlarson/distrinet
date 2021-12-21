@@ -25,6 +25,7 @@ import {
   CacheData,
   CredentialType,
   DistnetState,
+  EMPTY_STORAGE_SETTINGS,
   keepHistoryWhileCopying,
   Payload,
   ResourceType,
@@ -61,7 +62,7 @@ interface SourceAndReviewedDate {
 const distnetSlice = createSlice({
   name: 'distnet',
   initialState: {
-    settings: { sources: [], resourceTypes: [], credentials: [] },
+    settings: EMPTY_STORAGE_SETTINGS,
     settingsChanged: false,
     settingsErrorMessage: null,
     settingsText: null,
@@ -767,12 +768,11 @@ export const addDistrinetTaskSource: SettingsEditor = (
   return newSettings;
 };
 
+/**
+ return settings in YAML format
+ */
 export const testSettingsYamlText = (appPath: string): string => {
-  const testSettings: SettingsForStorage = {
-    sources: [],
-    resourceTypes: [],
-    credentials: [],
-  };
+  const testSettings: SettingsForStorage = _.cloneDeep(EMPTY_STORAGE_SETTINGS);
 
   /* eslint-disable prettier/prettier */
   /* eslint-disable prefer-template */
