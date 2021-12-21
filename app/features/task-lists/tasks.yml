@@ -1,5 +1,4 @@
 
-  - .5 allow selection of units for estimates (eg. 2^x, hours, days) id:select-estimate-units
   - 01 filter for all items by due date, recursively
   - 01 type:bug drag a file but release in screen and it complains infinitely
   - 02 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people :
