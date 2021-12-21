@@ -9,13 +9,14 @@ import url from 'url';
 
 // imports in this app
 import Counter from '../../../app/features/counter/Counter';
+import { EMPTY_STORAGE_SETTINGS } from '../../../app/features/distnet/distnetClasses';
 import * as distnetSlice from '../../../app/features/distnet/distnetSlice';
 import * as settings from '../../../app/features/distnet/settings';
 
 function setup() {
   const store = configureStore({
     reducer: { distnet: distnetSlice.default },
-    preloadedState: { settings: { sources: [], resourceTypes: [], credentials: []} },
+    preloadedState: { settings: EMPTY_STORAGE_SETTINGS },
   });
 
   const getWrapper = () =>

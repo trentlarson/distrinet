@@ -50,8 +50,8 @@ import {
 import uriTools from './uriTools';
 
 interface SettingsEditor {
-  // should clone the settings and return a new one (or null on error)
-  (settings: SettingsInternal): SettingsInternal | null;
+  // should clone the settings and return a new one (or return null on error)
+  (settings: SettingsInternal): Promise<SettingsInternal | null>;
 }
 
 interface SourceAndReviewedDate {
@@ -547,7 +547,7 @@ export const dispatchSetChangesAckedAndSave = (
 const addSourceInternalToSettingsObject = (
   newSource: SourceInternal
 ): SettingsEditor => {
-  return (settings: SettingsInternal): SettingsInternal => {
+  return async (settings: SettingsInternal): Promise<SettingsInternal> => {
     const newSettings: SettingsInternal = R.clone(settings);
     newSettings.sources = R.append(newSource, newSettings.sources);
     return newSettings;
@@ -669,9 +669,9 @@ export function decryptFromBase64(
  Function to take settings and return new copy with private key credentials.
  @return null if there was an error
  */
-export const generateKeyAndSet = (password: string) => (settings: SettingsInternal) => { // eslint-disable-line max-len,prettier/prettier
+export const generateKeyAndSet = (password: string) => async (settings: SettingsInternal): Promise<SettingsInternal | null> => { // eslint-disable-line max-len,prettier/prettier
   try {
-    const newSettings = _.cloneDeep(settings);
+    const newSettings = R.clone(settings);
 
     // generate the key
     const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ec', {
@@ -719,7 +719,7 @@ export const generateKeyAndSet = (password: string) => (settings: SettingsIntern
 export const dispatchModifySettings = (
   settingsEditor: SettingsEditor
 ): AppThunk => async (dispatch, getState) => {
-  const newSettings = settingsEditor(getState().distnet.settings);
+  const newSettings = await settingsEditor(getState().distnet.settings);
   if (newSettings != null) {
     const settingsForStorage = convertSettingsToStorageFromInternal(newSettings); // eslint-disable-line max-len,prettier/prettier
     const settingsYaml: string = yaml.safeDump(settingsForStorage);
@@ -731,23 +731,16 @@ export const dispatchModifySettings = (
   }
 };
 
-export const addDistrinetTaskSource: SettingsEditor = (
+export const addDistrinetTaskSource: SettingsEditor = async (
   settings: SettingsInternal
-): SettingsInternal => {
-  const newSettings = _.cloneDeep(settings);
+): Promise<SettingsInternal> => {
+  const newSettings = R.clone(settings);
   const baseTasksPath: string = path.join(
     electron.remote.app.getAppPath(),
     '..',
     'tasks.yml'
   );
-  const iriPath: string = path.join(
-    electron.remote.app.getAppPath(),
-    '..',
-    '.tasks.yml.iri'
-  );
-  const newSource: SourceInternal = {
-    id: 'taskyaml:trentlarson.com,2020:distrinet/tasks',
-    idFile: iriPath,
+  const newSource: SourceForStorage = {
     name: 'Distrinet Project',
     workUrl: url.pathToFileURL(baseTasksPath).toString(),
     urls: [
@@ -757,11 +750,10 @@ export const addDistrinetTaskSource: SettingsEditor = (
       },
     ],
     changesAckedDate: new Date().toISOString(),
-    notifyChanged: true,
-    dateReviewed: null,
   };
+  const newInternalSource = await convertSourceToInternalFromStorage(newSource);
   newSettings.sources = _.unionWith(
-    [newSource],
+    [newInternalSource],
     newSettings.sources,
     (c1, c2) => c1.id === c2.id
   );
@@ -772,7 +764,7 @@ export const addDistrinetTaskSource: SettingsEditor = (
  return settings in YAML format
  */
 export const testSettingsYamlText = (appPath: string): string => {
-  const testSettings: SettingsForStorage = _.cloneDeep(EMPTY_STORAGE_SETTINGS);
+  const testSettings: SettingsForStorage = R.clone(EMPTY_STORAGE_SETTINGS);
 
   /* eslint-disable prettier/prettier */
   /* eslint-disable prefer-template */

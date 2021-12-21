@@ -13,14 +13,16 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+
 import Distnet from '../../../app/features/distnet/Distnet';
+import { EMPTY_STORAGE_SETTINGS } from '../../../app/features/distnet/distnetClasses';
 import * as distnetSlice from '../../../app/features/distnet/distnetSlice';
 
 Enzyme.configure({ adapter: new Adapter() });
 jest.useFakeTimers();
 
 function setup(
-  preloadedState: { distnet: { settings: { sources: Array<Source> } } } = { distnet: { settings: { sources: [] } } }
+  preloadedState: { distnet: { settings: { sources: Array<Source> } } } = { distnet: { settings: EMPTY_STORAGE_SETTINGS } }
 ) {
   const store = configureStore({
     reducer: { distnet: distnetSlice.default },
@@ -67,7 +69,7 @@ describe('settings async actions', () => {
 
     const keySpy = jest.spyOn(distnetSlice, 'generateKeyAndSet');
     
-    generateKeyButton.simulate('click');
+    await generateKeyButton.simulate('click');
     expect(keySpy).toBeCalled();
     expect(settingsInput.text()).toMatch(/^sources:/);
     keySpy.mockRestore();
