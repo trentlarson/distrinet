@@ -735,14 +735,15 @@ export const addDistrinetTaskSource: SettingsEditor = async (
   settings: SettingsInternal
 ): Promise<SettingsInternal> => {
   const newSettings = R.clone(settings);
-  const baseTasksPath: string = path.join(
+
+  const tasksPath: string = path.join(
     electron.remote.app.getAppPath(),
     '..',
     'tasks.yml'
   );
-  const newSource: SourceForStorage = {
+  const newDistrinetSource: SourceForStorage = {
     name: 'Distrinet Project',
-    workUrl: url.pathToFileURL(baseTasksPath).toString(),
+    workUrl: url.pathToFileURL(tasksPath).toString(),
     urls: [
       {
         url:
@@ -751,9 +752,62 @@ export const addDistrinetTaskSource: SettingsEditor = async (
     ],
     changesAckedDate: new Date().toISOString(),
   };
-  const newInternalSource = await convertSourceToInternalFromStorage(newSource);
+  const newDistrinetInternalSource = await convertSourceToInternalFromStorage(
+    newDistrinetSource
+  );
+
+  const genealogyTasksPath: string = path.join(
+    electron.remote.app.getAppPath(),
+    'features',
+    'genealogy',
+    'tasks.yml'
+  );
+  const newGenealogySource: SourceForStorage = {
+    name: 'Distrinet Genealogy Project',
+    workUrl: url.pathToFileURL(genealogyTasksPath).toString(),
+    changesAckedDate: new Date().toISOString(),
+  };
+  const newGenealogyInternalSource = await convertSourceToInternalFromStorage(
+    newGenealogySource
+  );
+
+  const historiesTasksPath: string = path.join(
+    electron.remote.app.getAppPath(),
+    'features',
+    'histories',
+    'tasks.yml'
+  );
+  const newHistoriesSource: SourceForStorage = {
+    name: 'Distrinet Histories Project',
+    workUrl: url.pathToFileURL(historiesTasksPath).toString(),
+    changesAckedDate: new Date().toISOString(),
+  };
+  const newHistoriesInternalSource = await convertSourceToInternalFromStorage(
+    newHistoriesSource
+  );
+
+  const taskListsTasksPath: string = path.join(
+    electron.remote.app.getAppPath(),
+    'features',
+    'task-lists',
+    'tasks.yml'
+  );
+  const newTaskListsSource: SourceForStorage = {
+    name: 'Distrinet Task Lists Project',
+    workUrl: url.pathToFileURL(taskListsTasksPath).toString(),
+    changesAckedDate: new Date().toISOString(),
+  };
+  const newTaskListsInternalSource = await convertSourceToInternalFromStorage(
+    newTaskListsSource
+  );
+
   newSettings.sources = _.unionWith(
-    [newInternalSource],
+    [
+      newDistrinetInternalSource,
+      newGenealogyInternalSource,
+      newHistoriesInternalSource,
+      newTaskListsInternalSource,
+    ],
     newSettings.sources,
     (c1, c2) => c1.id === c2.id
   );
