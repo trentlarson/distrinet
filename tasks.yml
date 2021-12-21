@@ -1,16 +1,16 @@
 tasks :
 
-  - -3 backup settings.yml
-  - -2 change estimates to hours
+  - .1 backup settings.yml
+  - .2 change estimates to hours
     - change forecast equation
-  - -2 move genealogy/history/task-list-specific code out of distnet
+  - .2 move genealogy/history/task-list-specific code out of distnet
   - sharing-app-specific functions :
     - for Syncthing, don't copy but rather look into the .stfolder for history
     - for git, see `git status` for changed files
     - for git, see `git status` for differences from origin
     - for git - look at the origin(s?)
 
-  - 0 ensure IRIs are robust
+  - 01 ensure IRIs are robust
     - when parsing, ensure IRIs are unique
     - when a *.iri diff is detected, make sure there are big warnings
     - type:bug when a new one is created, don't create with taskyaml:project.yml as default IRI
@@ -19,99 +19,99 @@ tasks :
     - add a legend (green=insert, red=delete)
   - change the FileDiffPage back button to go back in history (because it's annoying from the DirectoryDiffPage)
 
-  - 1 rename the "urls" arrays to "moreUrls" type:tech-cleanup :
+  - 02 rename the "urls" arrays to "moreUrls" type:tech-cleanup :
     - migrate existing settings for current users - Mom, Janell, Matt?
-  - 0 add option for a single notification for all sources (instead of one for each)
-  - -1 make so the IRI column in settings shows (none) & doesn't allow copy when it's blank
+  - 01 add option for a single notification for all sources (instead of one for each)
+  - .5 make so the IRI column in settings shows (none) & doesn't allow copy when it's blank
 
-  - 2 rename the internal variables type:tech-cleanup
+  - 04 rename the internal variables type:tech-cleanup
     - id -> iri, idFile -> iriFile, cache sourceId -> sourceIri
     - rename Source "type" to transfer/storage/sharing-type
-  - 0 don't make dispatchSetSettingsTextAndYaml reload everything (especially inside 'modify')
+  - 01 don't make dispatchSetSettingsTextAndYaml reload everything (especially inside 'modify')
 
-  - 0 get version call that works for packaged app (important for data migrations)
+  - 01 get version call that works for packaged app (important for data migrations)
     (Retrieval from asar?) (Not app.getVersion() - gives electron version)
 
-  - -1 documentation - Google Drive vs Backup
+  - .5 documentation - Google Drive vs Backup
 
-  - 1 make some activities advanced (eg. caching, ID map) and allow disabling at start
+  - 02 make some activities advanced (eg. caching, ID map) and allow disabling at start
 
-  - 0 add dark & light mode for the History page
+  - 01 add dark & light mode for the History page
 
-  - 1 save the local copy (for a given remote URL); only... on setting? :
+  - 02 save the local copy (for a given remote URL); only... on setting? :
     - show if there's a difference in the local copy
     - if we ever edit local copy :
       - we retrieve latest from remote & compare to remote
 
-  - -1 distrinet write tests for many setting new settings (to ensure we don't erase settings)
-  - 90 1 create list-source directory file that points at other lists of sources
-  - 1 button to show memory used by copies (and sources)
-  - '90 0 show cached time, both file & memory'
+  - .5 distrinet write tests for many setting new settings (to ensure we don't erase settings)
+  - 90 01 create list-source directory file that points at other lists of sources
+  - 02 button to show memory used by copies (and sources)
+  - '90 01 show cached time, both file & memory'
   - >-
-    90 0 write version of reloadOneSourceIntoCache that only loads local files
+    90 01 write version of reloadOneSourceIntoCache that only loads local files
     if the timestamp has changed
-  - 1 show tasks as bubbles to visualize the biggest
-  - 80 2 change internal settings format = sources & credentials into objects
-  - '80 -1 more settings sanity-checking, eg. no duplicate IDs, valid URLs'
-  - 80 -2 warn when settings are changed and unsaved
+  - 02 show tasks as bubbles to visualize the biggest
+  - 80 04 change internal settings format = sources & credentials into objects
+  - '80 .5 more settings sanity-checking, eg. no duplicate IDs, valid URLs'
+  - 80 .3 warn when settings are changed and unsaved
   - >-
-    80 0 add warnings for settings, eg. when the ID isn't a global URI (not an
+    80 01 add warnings for settings, eg. when the ID isn't a global URI (not an
     error)
-  - 80 1 package YAML task parsing for npm
-  - 80 0 save URI for current task list inside tasks.yml (good for referencing)
-  - 80 -1 allow loading of sources automatically (then remove bottom "back" button):
+  - 80 02 package YAML task parsing for npm
+  - 80 01 save URI for current task list inside tasks.yml (good for referencing)
+  - 80 .5 allow loading of sources automatically (then remove bottom "back" button):
       - add an indicator on the front page that it's loading
       - allow for deselection of files that might be too big
-  - -1 type:bug fix where there is still data in the cache after all sources are removed
-  - 80 2 mark myself & save my URIs and build functions to relate-to-me
-  - 80 0 add the otherLocations to children (so they can show links in the UI)
-  - 80 0 avoid 'remote' in multiple files:
+  - .5 type:bug fix where there is still data in the cache after all sources are removed
+  - 80 04 mark myself & save my URIs and build functions to relate-to-me
+  - 80 01 add the otherLocations to children (so they can show links in the UI)
+  - 80 01 avoid 'remote' in multiple files:
     - fix the getStatic to work correctly with the 'app' (via ipcRenderer?) and avoid 'remote'
-  - '80 1 tests - missing settings dir & file, empty settings, missing cache dir, missing URLs, multiple OK files':
-      - 90 1 handle when load success after save failure or vice versa
-  - 80 0 load only smaller (eg. < 5 MB) local files into cache
-  - 80 1 save file - find next cache name
+  - '80 02 tests - missing settings dir & file, empty settings, missing cache dir, missing URLs, multiple OK files':
+      - 90 02 handle when load success after save failure or vice versa
+  - 80 01 load only smaller (eg. < 5 MB) local files into cache
+  - 80 02 save file - find next cache name
   - >-
-    80 0 add spinner for the remote file loading (both cache refresh & local
+    80 02 add spinner for the remote file loading (both cache refresh & local
     config)
   - >-
-    80 1 allow drag-and-drop to pull a new local file/folder into distnet
+    80 02 allow drag-and-drop to pull a new local file/folder into distnet
     settings
-  - 80 1 move feature-specific styling out of app/app.global.css
-  - '80 0 on startup, check for files already cached in files and show that date'
-  - 80 -1 make some text into static strings (eg "Generate Key" multiple places)
-  - '80 -1 in settings, rename source.id to source.uri'
-  - 80 1 change most alerts into on-page errors
-  - 80 1 upgrade electron version
+  - 80 02 move feature-specific styling out of app/app.global.css
+  - '80 01 on startup, check for files already cached in files and show that date'
+  - 80 .5 make some text into static strings (eg "Generate Key" multiple places)
+  - '80 .5 in settings, rename source.id to source.uri'
+  - 80 02 change most alerts into on-page errors
+  - 80 02 upgrade electron version
   - >-
-    75 2 start an HTTP server for file access (rather than direct library
+    75 04 start an HTTP server for file access (rather than direct library
     access)
-  - 75 0 use logger instead of console.log
-  - '75 1 handle YAML TAGs id:yaml-tags'
+  - 75 01 use logger instead of console.log
+  - '75 02 handle YAML TAGs id:yaml-tags'
   - >-
-    70 0 use paths.cache instead of paths.config in settings.ts (including path
+    70 01 use paths.cache instead of paths.config in settings.ts (including path
     check)
-  - '70 0 show if cached file already exists, and allow redownload'
-  - 70 1 handle timeout failures (tried node-fetch with abort-controller)
-  - 70 2 save a preference for loading cache on app start
-  - 65 3 package for mobile
+  - '70 01 show if cached file already exists, and allow redownload'
+  - 70 02 handle timeout failures (tried node-fetch with abort-controller)
+  - 70 04 save a preference for loading cache on app start
+  - 65 08 package for mobile
   - >-
-    65 0 add format (mime type?) info to the sources (for a more accurate
+    65 01 add format (mime type?) info to the sources (for a more accurate
     indicator than just the URI "scheme:") id:source-with-format
   - >-
-    60 1 read large files, ie. stream into the cache file & don't load into
+    60 02 read large files, ie. stream into the cache file & don't load into
     cache if it's too big
   - >-
-    50 0 bug - note that the settingsSlice.ts has a bunch of
+    50 01 bug - note that the settingsSlice.ts has a bunch of
     eslint-disable-next-line commands that indicate bad practice
   - >-
-    50 0 allow blank settings files (which will still allow us to set top-level
+    50 01 allow blank settings files (which will still allow us to set top-level
     keys if missing) id:set-settings-keys
-  - 1 debounce when there are multiple redux 'dispatch' calls at a time (for better performance), eg in dispatchSetSettingsTextAndYaml.
+  - 02 debounce when there are multiple redux 'dispatch' calls at a time (for better performance), eg in dispatchSetSettingsTextAndYaml.
     One approach is https://medium.com/unsplash/react-redux-performance-considerations-when-dispatching-multiple-actions-5162047bf8a6
     ... or create one dispatch method combining multiple.
-  - '20 0 read binary files id:read-binary'
-  - 20 4 stop requiring semicolons in the code
+  - '20 01 read binary files id:read-binary'
+  - 20 16 stop requiring semicolons in the code
 log:
   - id: 24721ab5-e0c1-4ca9-a5e9-1f49ce3d7bb6
     taskId: source-with-format

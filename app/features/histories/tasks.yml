@@ -1,13 +1,13 @@
-  - -1 type:bug when looking at a file, rename a file, then collapse the enclosing folder and expand it again and it does not pick up the new name of the file
-  - 90 0 test Google Drive share from Mom works on my computer, get instructions for Google Drive
+  - .5 type:bug when looking at a file, rename a file, then collapse the enclosing folder and expand it again and it does not pick up the new name of the file
+  - 90 01 test Google Drive share from Mom works on my computer, get instructions for Google Drive
     - detect .lnk file
-  - 90 -1 show an error to user, eg. when "open" is clicked on a file without an application (eg. ".DS_Store")
-  - 80 0 take a search term as a parameter when loading a page id:external-search ref:taskyaml:trentlarson.com,2020/distrinet/genealogy#history-search
-  - 60 1 find a way on Windows to pull a file into Notepad (or any semantic editor)
-  - 50 0 show number of results
-  - -1 fix multiple alerts when multiple searches don't find results
-  - 0 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
+  - 90 .5 show an error to user, eg. when "open" is clicked on a file without an application (eg. ".DS_Store")
+  - 80 01 take a search term as a parameter when loading a page id:external-search ref:taskyaml:trentlarson.com,2020/distrinet/genealogy#history-search
+  - 60 02 find a way on Windows to pull a file into Notepad (or any semantic editor)
+  - 50 01 show number of results
+  - .5 fix multiple alerts when multiple searches don't find results
+  - 01 search .docx files properly, eg. https://github.com/dkiyatkin/node-office
     - be sure not to lock the main thread (useEffect?)
-  - -1 automatically focus on the search input box
-  - 0 log search errors somewhere in app, available to user id:log-errors
-  - 0 pass the search term from the histories onto a history page for quicker finding
+  - .5 automatically focus on the search input box
+  - 01 log search errors somewhere in app, available to user id:log-errors
+  - 01 pass the search term from the histories onto a history page for quicker finding

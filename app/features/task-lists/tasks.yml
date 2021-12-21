@@ -1,46 +1,46 @@
 
-  - -1 allow selection of units for estimates (eg. 2^x, hours, days) id:select-estimate-units
-  - 0 filter for all items by due date, recursively
-  - 0 type:bug drag a file but release in screen and it complains infinitely
-  - 1 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people :
+  - .5 allow selection of units for estimates (eg. 2^x, hours, days) id:select-estimate-units
+  - 01 filter for all items by due date, recursively
+  - 01 type:bug drag a file but release in screen and it complains infinitely
+  - 02 Determine a workflow for seeing priorities and interest - maybe it's just looking at the priority order and blocked tasks in all projects shared by other people :
     - type:bug entering a focus on one of the test workweek tasks doesn't highlight the task (another example: link from All My Personal to task-lists#markdown)
     - should clear the filters
     - plan how to see people
     - stand up public page that inputs settings and renders project exploration screen
       ... write public page to show task priorities +collaborate +collaborate-genealogy +collaborate-projects id:public-task-page
 
-  - -1 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
-  - 1 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
-  - -1 test for suffixes of 'yaml' or 'yml' on drag-drop import
-  - 70 1 add markdown parsing id:markdown :
+  - .5 when showing a project, put 'reload' and 'forecast' (and others?) next to that project title (and not in a column)
+  - 02 Add parsing of a global tag for the list, eg "--- !<tag:trentlarson.com,2020:/distrinet/tasks>". See the first line of the invoice example here - https://yaml.org/spec/1.2/spec.html#id2761803
+  - .5 test for suffixes of 'yaml' or 'yml' on drag-drop import
+  - 70 02 add markdown parsing id:markdown :
     blocks: [ ref:joplin ]
-  - 70 1 test with Joplin id:joplin
-  - 70 0 expand dependents in top list (and avoid "Empty or mismatched" error)
-  - 70 -1 look into subtasks for labels to make available
-  - 70 0 show something different than ID for dependent tasks
-  - 65 0 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
-  - 60 1 when browsing external lists, detect internal task URLs
-  - 60 0 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
-  - 60 0 make forecast load async (and see why it reloads on project screen exit and reentry)
-  - 60 0 show where a task fits in with the rest (ie. focus on it in the forecast)
-  - 60 0 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
-  - 60 0 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
-  - 1 show items with the biggest estimates that include subtask estimates
+  - 70 02 test with Joplin id:joplin
+  - 70 01 expand dependents in top list (and avoid "Empty or mismatched" error)
+  - 70 .5 look into subtasks for labels to make available
+  - 70 01 show something different than ID for dependent tasks
+  - 65 01 parse subtasks-colon and blocks-colon as multiple label values, and make additive eg with "subtasks:a-task"
+  - 60 02 when browsing external lists, detect internal task URLs
+  - 60 01 handle forecasting errors more gracefully (endorser.ch empty, Distrinet integer, Histories summary)
+  - 60 01 make forecast load async (and see why it reloads on project screen exit and reentry)
+  - 60 01 show where a task fits in with the rest (ie. focus on it in the forecast)
+  - 60 01 add project/epic/awaits parsing plus-supertasks or supertasks-key id:supertasks
+  - 60 01 add ID to YamlTask and allow it to be null? (Controversial because it's not part of the original data, and IDs should probably be generated for each use case.)
+  - 02 show items with the biggest estimates that include subtask estimates
   - domains - Project Search, Forecast Generation
-  - 55 1 handle when subtasks/dependents are missing
-  - 55 -1 change well-known "key:value" keys to constants
-  - 55 0 move 'ref' processing to parse YAML?
-  - 55 0 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
-  - 2 ask if they'd like to share on a search service :
+  - 55 02 handle when subtasks/dependents are missing
+  - 55 .5 change well-known "key:value" keys to constants
+  - 55 01 move 'ref' processing to parse YAML?
+  - 55 01 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
+  - 04 ask if they'd like to share on a search service :
     - Kibana? Solr?
     - server that only accepts IDs & public URLs, then loads that into file for search (check for yaml? size?)
     - modal upon drag-drop to send data to server
-  - -1 refactor retrieveAllTasks to return Records instead of one large list
-  - 50 -1 automatically create supertask if it doesn't exist
-  - 50 1 fix the definition to have blocks/awaits/subtasks/supertasks be keys (not nested lists), with tests
-  - 50 1 Define a master project file that contains pointers to all task repos.
-  - 45 0 fix jsx-ally ignores (for accessibility)
-  - 45 0 handle more task YAML variations (eg. blocked & child issues)
-  - 45 1 work off SQLite
+  - .5 refactor retrieveAllTasks to return Records instead of one large list
+  - 50 .5 automatically create supertask if it doesn't exist
+  - 50 02 fix the definition to have blocks/awaits/subtasks/supertasks be keys (not nested lists), with tests
+  - 50 02 Define a master project file that contains pointers to all task repos.
+  - 45 01 fix jsx-ally ignores (for accessibility)
+  - 45 01 handle more task YAML variations (eg. blocked & child issues)
+  - 45 02 work off SQLite
 
-  - 1 parse Orlin's project supertasks:supertasks
+  - 02 parse Orlin's project supertasks:supertasks
