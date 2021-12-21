@@ -80,6 +80,7 @@ Development tips:
   - [Solid](https://solidproject.org) pods
   - [cephora](https://github.com/HR/ciphora) secure messaging
   - Briar?
+  - [PushPin](https://github.com/automerge/pushpin) is an Electron app with robust P2P foundations for any data.
 
 - For storage:
   - file system
@@ -91,7 +92,8 @@ Development tips:
   - [git](git-scm.com) excels at tracking the histories of file changes, including the actors and the differences.
   - [Danube Tech](https://danubetech.com/) works on foundational pieces of self-sovereign infrastructure with DID resolvers
   - [Solid](https://solidproject.org) aims at personal pods, and includes many [tools](https://solidproject.org/for-developers/apps/tools).
-  - [Picos](https://www.windley.com/archives/2015/05/picos_persistent_compute_objects.shtml) (still being developed at BYU)
+  - [Picos](https://www.windley.com/archives/2015/05/picos_persistent_compute_objects.shtml) are self-contained "computational"objects" along with the ecosystem for interactions.
+  - [Fission][https://fission.codes/] is offline-first, with versioning, with IPFS integration
   - [unhosted](https://unhosted.org/tools/)
   - not a fit
     - [noBackend](http://nobackend.org/) and [Hoodie](http://hood.ie) built on the [standard]() are nice for front-end apps but I don't think they fit the model of data-first.  Looking deeper, you'll find [the Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) and [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) standards.
