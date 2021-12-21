@@ -494,7 +494,7 @@ export default function Distnet(options: AppInfo) {
                 }
               }}
             >
-              Add Distrinet Project Source
+              Add Distrinet Project Sources
             </button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button
