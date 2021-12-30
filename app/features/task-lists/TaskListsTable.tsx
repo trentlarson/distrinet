@@ -704,6 +704,20 @@ function oneTaskRow(
           <span>
             {taskSourceName}
             &nbsp;
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            <a
+              href=""
+              role="button"
+              onClick={
+                () => dispatch(dispatchLoadOneSourceIntoTasks(task.sourceId))
+                // This is soooo stupid that there's an error-level lint rule about this!
+                // ... and that it gives you an error if you put it on the previous line.
+                // eslint-disable-next-line react/jsx-curly-newline
+              }
+            >
+              <i title="Reload Data" className="fa fa-sync" />
+            </a>
+            &nbsp;
             <a href={taskWorkUrl}>
               <i title={dragMessage} className="fa fa-hand-rock" />
             </a>

@@ -1,8 +1,6 @@
 tasks :
 
   - .1 backup settings.yml
-  - .2 change estimates to hours
-    - change forecast equation
   - .2 move genealogy/history/task-list-specific code out of distnet
   - sharing-app-specific functions :
     - for Syncthing, don't copy but rather look into the .stfolder for history
