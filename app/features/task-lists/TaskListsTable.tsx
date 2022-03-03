@@ -704,10 +704,10 @@ function oneTaskRow(
           <span>
             {taskSourceName}
             &nbsp;
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a
-              href=""
-              role="button"
+            <br/>
+            {/* href anchor here (instead of button) will cause a page reload on click */}
+            <button
+              type="button"
               onClick={
                 () => dispatch(dispatchLoadOneSourceIntoTasks(task.sourceId))
                 // This is soooo stupid that there's an error-level lint rule about this!
@@ -716,7 +716,7 @@ function oneTaskRow(
               }
             >
               <i title="Reload Data" className="fa fa-sync" />
-            </a>
+            </button>
             &nbsp;
             <a href={taskWorkUrl}>
               <i title={dragMessage} className="fa fa-hand-rock" />
