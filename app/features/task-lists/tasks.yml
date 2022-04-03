@@ -30,6 +30,7 @@
   - 55 .5 change well-known "key:value" keys to constants
   - 55 01 move 'ref' processing to parse YAML?
   - 55 01 figure out why trying to show taskyaml.org/tasks.yml on 2020-11-26 fails on null uiTree in areLinkedTasksExpanded
+  - type:bug after running a long time, the grab-to-drag didn't drag & open in an editor
   - 04 ask if they'd like to share on a search service :
     - Kibana? Solr?
     - server that only accepts IDs & public URLs, then loads that into file for search (check for yaml? size?)
