@@ -75,24 +75,23 @@ export default function HistoryPage(props: Record<string, any>) {
 
   const switchBackgroundColor = () => {
     let newBackgroundColor = '#ffffff'
-    console.log('backgroundColor',backgroundColor)
     if (backgroundColor === '#ffffff') {
       newBackgroundColor = '#000000'
     }
     setBackgroundColor(newBackgroundColor)
 
-    let embeddedElem = document.getElementById('embeddedContent')
+    const embeddedElem = document.getElementById('embeddedContent')
 
     // try the background for that div
     embeddedElem.style.backgroundColor = newBackgroundColor
 
-    // try the child elements inside there
+    // try the direct child elements inside there
     const children = embeddedElem.children
     for (let i = 0; i < children.length; i++) {
       children[i].style.backgroundColor = newBackgroundColor
     }
 
-    // try the body elements inside there
+    // try the 'body' elements inside there
     const bodies = embeddedElem.getElementsByTagName('body')
     for (let i = 0; i < bodies.length; i++) {
       bodies[i].style.backgroundColor = newBackgroundColor
@@ -162,7 +161,7 @@ export default function HistoryPage(props: Record<string, any>) {
           <div />
         )
       }
-      <div id="embeddedContent">
+      <div id="embeddedContent" style={{ overflow: 'scroll' }}>
         {ReactHtmlParser(contents.toString())}
       </div>
     </div>
