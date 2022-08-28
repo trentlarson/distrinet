@@ -38,7 +38,7 @@ export const retrieveHistoryReviewedDate = async (workUrl: string) => {
     if (err.message && err.message.startsWith('ENOENT')) {
       // We expect that no history exists at first.
     } else {
-      console.log('Failed to determine mtime for file', historyPath, err);
+      console.error('Failed to determine mtime for file', historyPath, err);
     }
     return null;
   });

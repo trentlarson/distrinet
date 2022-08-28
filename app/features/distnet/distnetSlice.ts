@@ -365,12 +365,25 @@ export const dispatchSetSettingsText = (
 const convertSourceToInternalFromStorage = async (
   storSource: SourceForStorage
 ): Promise<SourceInternal> => {
-  const { iri, iriFile } = await readIriFromWellKnownDir(storSource.workUrl);
+
+  const { iri, iriFile } =
+    await readIriFromWellKnownDir(storSource.workUrl)
+    .catch((err) => {
+      console.error('Got error reading IRI file for', storSource.workUrl, ' Will continue and use the workUrl.', err)
+      return { iri: storSource.workUrl, iriFile: storSource.workUrl}
+    });
   const finalIri = iri || storSource.workUrl;
-  const mtime = await retrieveFileMtime(url.fileURLToPath(storSource.workUrl));
+
+  const mtime =
+    await retrieveFileMtime(url.fileURLToPath(storSource.workUrl))
+    .catch((err) => {
+      console.error('Got error reading workUrl time for', storSource.workUrl, ' Will continue and use current time.', err)
+      return new Date().toISOString();
+    });
   const notifyChanged =
     !storSource.changesAckedDate ||
     DateTime.fromISO(mtime) > DateTime.fromISO(storSource.changesAckedDate);
+
   const dateReviewed = await retrieveHistoryReviewedDate(storSource.workUrl);
   const sourceInt: SourceInternal = {
     ...storSource,
@@ -438,7 +451,7 @@ const dispatchSetSettingsYamlFromText = (contents: string): AppThunk => async (
   } catch (error) {
     // probably a YAMLException https://github.com/nodeca/js-yaml/blob/master/lib/js-yaml/exception.js
     console.error(
-      'Inside TextAndYaml, got error:',
+      'Inside dispatchSetSettingsYamlFromText, got error:',
       error,
       ' ... trying to parse and set from contents:',
       loadedSettings
@@ -710,7 +723,7 @@ export const generateKeyAndSet = (password: string) => async (settings: Settings
 
     return newSettings;
   } catch (e) {
-    console.log('Got an error while generating a key pair:', e);
+    console.error('Got an error while generating a key pair:', e);
     alert('Ack! There was an error. See the dev console log for more info.');
     return null;
   }
@@ -938,7 +951,7 @@ const setupLocalIri = async (
   if (!iri) {
     await saveIriToWellKnownDir(workUrl, suggestedId).catch((err) => {
       // Not aborting because I'm unsure that this is catastrophic, and we'll flag cases of missing IRI files in their settings.
-      console.log(
+      console.error(
         `Got a problem saving the ID ${suggestedId} to the file: ${workUrl}`,
         err
       );
@@ -1057,7 +1070,7 @@ export const dispatchAddReviewedDateToSettings = (
         return dispatch(setChangesAcked(source.id));
       })
       .catch((e) => {
-        console.log(
+        console.error(
           `Got an error copying ${source.workUrl} to ${destPath} because`,
           e
         );
