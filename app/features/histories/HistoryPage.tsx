@@ -82,19 +82,24 @@ export default function HistoryPage(props: Record<string, any>) {
 
     const embeddedElem = document.getElementById('embeddedContent')
 
-    // try the background for that div
-    embeddedElem.style.backgroundColor = newBackgroundColor
+    if (embeddedElem) {
+      // try the background for that div
+      embeddedElem.style.backgroundColor = newBackgroundColor
 
-    // try the direct child elements inside there
-    const children = embeddedElem.children
-    for (let i = 0; i < children.length; i++) {
-      children[i].style.backgroundColor = newBackgroundColor
-    }
+      // try the direct child elements inside there
+      const children = embeddedElem.children
+      for (let i = 0; i < children.length; i++) {
+        const htmlChild = children.item(i) as HTMLElement
+        if (htmlChild && htmlChild.style) {
+          htmlChild.style.backgroundColor = newBackgroundColor
+        }
+      }
 
-    // try the 'body' elements inside there
-    const bodies = embeddedElem.getElementsByTagName('body')
-    for (let i = 0; i < bodies.length; i++) {
-      bodies[i].style.backgroundColor = newBackgroundColor
+      // try the 'body' elements inside there
+      const bodies = embeddedElem.getElementsByTagName('body')
+      for (let i = 0; i < bodies.length; i++) {
+        bodies[i].style.backgroundColor = newBackgroundColor
+      }
     }
   }
 
