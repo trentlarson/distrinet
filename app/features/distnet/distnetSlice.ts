@@ -365,19 +365,26 @@ export const dispatchSetSettingsText = (
 const convertSourceToInternalFromStorage = async (
   storSource: SourceForStorage
 ): Promise<SourceInternal> => {
-
-  const { iri, iriFile } =
-    await readIriFromWellKnownDir(storSource.workUrl)
+  const { iri, iriFile } = await readIriFromWellKnownDir(storSource.workUrl) // eslint-disable-line prettier/prettier
     .catch((err) => {
-      console.error('Got error reading IRI file for', storSource.workUrl, ' Will continue and use the workUrl.', err)
-      return { iri: storSource.workUrl, iriFile: storSource.workUrl}
+      console.error(
+        'Got error reading IRI file for',
+        storSource.workUrl,
+        ' Will continue and use the workUrl.',
+        err
+      );
+      return { iri: storSource.workUrl, iriFile: storSource.workUrl };
     });
   const finalIri = iri || storSource.workUrl;
 
-  const mtime =
-    await retrieveFileMtime(url.fileURLToPath(storSource.workUrl))
+  const mtime = await retrieveFileMtime(url.fileURLToPath(storSource.workUrl)) // eslint-disable-line prettier/prettier
     .catch((err) => {
-      console.error('Got error reading workUrl time for', storSource.workUrl, ' Will continue and use current time.', err)
+      console.error(
+        'Got error reading workUrl time for',
+        storSource.workUrl,
+        ' Will continue and use current time.',
+        err
+      );
       return new Date().toISOString();
     });
   const notifyChanged =

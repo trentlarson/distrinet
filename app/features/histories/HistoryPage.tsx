@@ -14,7 +14,7 @@ const { BrowserWindow } = electron.remote;
 export default function HistoryPage(props: Record<string, any>) {
   const win = BrowserWindow.getFocusedWindow();
 
-  const [backgroundColor, setBackgroundColor] = useState<string>()
+  const [backgroundColor, setBackgroundColor] = useState<string>();
 
   useEffect(() => {
     // add listener for search results
@@ -74,34 +74,34 @@ export default function HistoryPage(props: Record<string, any>) {
   }, []);
 
   const switchBackgroundColor = () => {
-    let newBackgroundColor = '#ffffff'
+    let newBackgroundColor = '#ffffff';
     if (backgroundColor === '#ffffff') {
-      newBackgroundColor = '#000000'
+      newBackgroundColor = '#000000';
     }
-    setBackgroundColor(newBackgroundColor)
+    setBackgroundColor(newBackgroundColor);
 
-    const embeddedElem = document.getElementById('embeddedContent')
+    const embeddedElem = document.getElementById('embeddedContent');
 
     if (embeddedElem) {
       // try the background for that div
-      embeddedElem.style.backgroundColor = newBackgroundColor
+      embeddedElem.style.backgroundColor = newBackgroundColor;
 
       // try the direct child elements inside there
-      const children = embeddedElem.children
-      for (let i = 0; i < children.length; i++) {
-        const htmlChild = children.item(i) as HTMLElement
+      const { children } = embeddedElem;
+      for (let i = 0; i < children.length; i += 1) {
+        const htmlChild = children.item(i) as HTMLElement;
         if (htmlChild && htmlChild.style) {
-          htmlChild.style.backgroundColor = newBackgroundColor
+          htmlChild.style.backgroundColor = newBackgroundColor;
         }
       }
 
       // try the 'body' elements inside there
-      const bodies = embeddedElem.getElementsByTagName('body')
-      for (let i = 0; i < bodies.length; i++) {
-        bodies[i].style.backgroundColor = newBackgroundColor
+      const bodies = embeddedElem.getElementsByTagName('body');
+      for (let i = 0; i < bodies.length; i += 1) {
+        bodies[i].style.backgroundColor = newBackgroundColor;
       }
     }
-  }
+  };
 
   const history = useHistory();
   const { location } = props;
@@ -147,25 +147,18 @@ export default function HistoryPage(props: Record<string, any>) {
           <br />
           (Hit Enter, then scroll to see matches)
         </div>
-
       </div>
       <br />
       <br />
-      {
-        fullPath
-        ? (
-          <div style={{ textAlign: 'right' }}>
-            <button
-              type="button"
-              onClick={() => switchBackgroundColor()}
-            >
-              Swap Background Color
-            </button>
-          </div>
-        ) : (
-          <div />
-        )
-      }
+      {fullPath ? (
+        <div style={{ textAlign: 'right' }}>
+          <button type="button" onClick={() => switchBackgroundColor()}>
+            Swap Background Color
+          </button>
+        </div>
+      ) : (
+        <div />
+      )}
       <div id="embeddedContent" style={{ overflow: 'scroll' }}>
         {ReactHtmlParser(contents.toString())}
       </div>

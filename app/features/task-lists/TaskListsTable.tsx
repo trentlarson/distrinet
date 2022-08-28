@@ -704,7 +704,7 @@ function oneTaskRow(
           <span>
             {taskSourceName}
             &nbsp;
-            <br/>
+            <br />
             {/* href anchor here (instead of button) will cause a page reload on click */}
             <button
               type="button"
