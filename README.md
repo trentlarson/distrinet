@@ -21,6 +21,7 @@ See [tasks.yml](tasks.yml)
 To run:
 
 - `yarn`
+  - maybe `CXXFLAGS="--std=c++14" yarn` (if you encounter `error: no template named 'remove_cv_t' in namespace 'std'`)
 - `yarn dev`
 
 

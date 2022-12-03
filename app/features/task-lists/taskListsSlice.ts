@@ -195,6 +195,11 @@ export function isTaskyamlUriScheme(sourceId: string) {
   return isGlobalUri(sourceId) && globalUriScheme(sourceId) === TASKYAML_SCHEME;
 }
 
+export function labelsAndValuesObject(summary: string) {
+  const pairs = R.filter(R.test(/\S:\S/), R.split(' ', summary));
+  return R.fromPairs(R.map(R.split(':'), pairs));
+}
+
 /**
  * return the value for the given label if in the summary; otherwise, null
  */
@@ -288,6 +293,18 @@ export function taskFromString(
     dependents,
     subtasks,
   };
+}
+
+export function taskWithLabelsFromString(
+  sourceId: string,
+  fullText: string,
+  dependents: Array<YamlTask>,
+  subtasks: Array<YamlTask>
+) {
+  const withPriEst = taskFromString(sourceId, fullText, dependents, subtasks)
+  const moreObj = labelsAndValuesObject(withPriEst.summary)
+  const result = R.mergeRight(withPriEst, moreObj)
+  return result
 }
 
 type YamlInputIssues =

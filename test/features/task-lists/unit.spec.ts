@@ -4,9 +4,11 @@ import {
   aggregateReferencedTaskCounts,
   getRefValues,
   hasLabelInSummary,
+  labelsAndValuesObject,
   labelValueInSummary,
   sortedReferencedTasks,
   taskFromString,
+  taskWithLabelsFromString,
   toggleProperty
 } from '../../../app/features/task-lists/taskListsSlice';
 import {
@@ -23,6 +25,11 @@ export const toggleSubtaskExpanded = toggleProperty(
 );
 
 describe('label functions', () => {
+  it('should parse labels', () => {
+    expect(labelsAndValuesObject('')).toEqual({});
+    expect(labelsAndValuesObject('something')).toEqual({});
+    expect(labelsAndValuesObject('something else id:else date:2022-12-03 due:tomorrow')).toEqual({id:'else', date:'2022-12-03', due:'tomorrow'});
+  });
   it('should detect label', () => {
     expect(hasLabelInSummary('due', 'something is due')).toBeFalsy();
     expect(hasLabelInSummary('due', 'due:2021-11-21 something')).toBeTruthy();
@@ -169,6 +176,11 @@ describe('taskFromString', () => {
     expect(taskFromString('', '').summary).toBe('');
     expect(taskFromString('', '    ').summary).toBe('');
     expect(taskFromString('', ' test me silly').summary).toBe('test me silly');
+  });
+  it('should parse with no priority', () => {
+    expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').summary).toBe('some task id:some due:tomorrow');
+    expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').id).toBe('some');
+    expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').due).toBe('tomorrow');
   });
 });
 
