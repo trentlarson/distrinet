@@ -7,6 +7,7 @@ import {
   labelsAndValuesObject,
   labelValueInSummary,
   sortedReferencedTasks,
+  summaryWithoutLabels,
   taskFromString,
   taskWithLabelsFromString,
   toggleProperty
@@ -181,6 +182,12 @@ describe('taskFromString', () => {
     expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').summary).toBe('some task id:some due:tomorrow');
     expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').id).toBe('some');
     expect(taskWithLabelsFromString('', 'some task id:some due:tomorrow').due).toBe('tomorrow');
+  });
+  it('should parse without labels', () => {
+    expect(summaryWithoutLabels('some task')).toBe('some task');
+    expect(summaryWithoutLabels('some task id:some due:tomorrow')).toBe('some task');
+    expect(summaryWithoutLabels('(*%)_:@#%J#^K$J& some id:some due:tomorrow task')).toMatch(/^some \s*task$/);
+    expect(summaryWithoutLabels('some some:some is has due:tomorrow other labels')).toMatch(/some \s*is has \s+other labels/);
   });
 });
 

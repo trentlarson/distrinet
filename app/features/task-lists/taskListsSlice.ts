@@ -237,6 +237,12 @@ function getLabelValues(label: string, summary: string): Array<string> {
   return result;
 }
 
+export function summaryWithoutLabels(summary: string): string {
+  const withoutLabels = summary.replace(new RegExp(/[^\s]+:[^\s]+/, 'g'), '');
+  // Note that this may leave 2+ spaces in between words, which were around label:value pairs. That's not worth solving (and potentially removing too many).
+  return withoutLabels.trim();
+}
+
 export const getIdValues = R.curry(getLabelValues)(ID_LABEL_KEY);
 export const getRefValues = R.curry(getLabelValues)(REF_LABEL_KEY);
 
