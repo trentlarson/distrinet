@@ -326,7 +326,7 @@ const parseYamlIssues = (
     return issueList.map((issue) => parseYamlIssues(sourceId, issue)).flat();
   }
   if (typeof issueList === 'string') {
-    return taskFromString(sourceId, issueList, [], []);
+    return taskWithLabelsFromString(sourceId, issueList, [], []);
   }
   if (typeof issueList === 'object') {
     // If null, I don't know what that means.
@@ -394,7 +394,7 @@ const parseYamlIssues = (
       /* eslint-enable @typescript-eslint/dot-notation */
     }
 
-    return taskFromString(sourceId, summary, dependents, subtasks);
+    return taskWithLabelsFromString(sourceId, summary, dependents, subtasks);
   }
   return {
     sourceId,
