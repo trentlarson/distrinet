@@ -318,6 +318,10 @@ type YamlInputIssues =
   | { [key: string]: YamlInputIssues }
   | Array<YamlInputIssues>;
 
+const isCanonicalArrayKey = (key: string): boolean => {
+  return ['awaits', 'blocks', 'subtasks', 'supertasks'].includes(key)
+}
+
 /**
  * @param sourceId the source ID, an integral datum in every task
  * @param issueList is some part of the recursive task string or list
@@ -341,6 +345,7 @@ const parseYamlIssues = (
         sourceId,
         priority: null,
         estimate: null,
+        // should do an ID for all, and allow a blank summary
         summary: `(null)`,
         dependents: [],
         subtasks: [],
@@ -367,9 +372,11 @@ const parseYamlIssues = (
       }
     } else {
       /* eslint-disable @typescript-eslint/dot-notation */
-      // There are many keys.  Assume any with value of null is the summary
+      // There are many keys. Assume any unknown key with value of null or value of array is the summary.
       for (let i = 0; !summary && i < keys.length; i += 1) {
-        if (issueObj[keys[i]] === null) {
+        if (!isCanonicalArrayKey(keys[i])
+            && (issueObj[keys[i]] === null)
+                || Array.isArray(issueObj[keys[i]])) {
           summary = keys[i];
         }
       }
@@ -378,6 +385,7 @@ const parseYamlIssues = (
         summary = issueObj['summary'].toString();
       }
       // doing this because our YamlTask interface doesn't include an ID, so it'll be parsed out later
+      // should make this a different ID, or at least url-encode rather than use '_'
       if (issueObj['id']) {
         summary += ` id:${issueObj['id'].toString().replace(/\s/g, '_')}`;
       }
@@ -400,7 +408,21 @@ const parseYamlIssues = (
       /* eslint-enable @typescript-eslint/dot-notation */
     }
 
-    return taskWithLabelsFromString(sourceId, summary, dependents, subtasks);
+    let result = taskWithLabelsFromString(sourceId, summary, dependents, subtasks);
+
+    if (issueObj['awaits']) {
+      const supertasks = parseYamlIssues(sourceId, issueObj['awaits'])
+      if (Array.isArray(supertasks)) {
+        for (const task of supertasks) {
+          task.dependents = task.dependents.concat([result])
+        }
+      } else {
+        supertasks.dependents = supertasks.dependents.concat([result])
+      }
+      result = supertasks
+    }
+
+    return result;
   }
   return {
     sourceId,
